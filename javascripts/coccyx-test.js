@@ -318,8 +318,6 @@
         genTotalsFromQueue();
         //Show queue totals while tests are running.
         showTotalsToBeRun();
-        //Apply configuration options.
-        configure();
         //Timeout to allow user to see total to be run message.
         setTimeout(function(){
             //Run the tests in the queue.
@@ -329,6 +327,9 @@
             reporter();
         }, 2000);
     }
+
+    //Apply configuration options.
+    configure();
 
     //A small set of window globals to make writing test scripts easier. If
     //the windowGlabals config option is false then window globals will not
