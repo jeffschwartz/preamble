@@ -2,7 +2,9 @@
     'use strict';
 
     //Default configuration options.
-    var defaultConfig = {shortCircuit: false};
+    //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
+    //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
+    var defaultConfig = {shortCircuit: false, windowGlobals: true};
     //Merged configuration options.
     var config = {};
     var isConfigured = false;
@@ -11,8 +13,9 @@
     var notedGroup;
     var notedTest;
     var assert;
-    var queueCount;
-    var interval;
+    var queueCount = 0;
+    var queStableCount = 0;
+    var queStableInterval = 500;
     var intervalId;
     var totGroups = 0;
     var totGroupsPassed = 0;
@@ -24,6 +27,14 @@
     var totAssertionsPassed = 0;
     var totAssertionsFailed = 0;
 
+    //Display caught errors to the browser.
+    function reportCatch(e){
+        var html = '<p>An error occurred,  "' + e  + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+        var $domTarget = $('#header');
+        $domTarget.html(html);
+    }
+
+    //Makes words plural if their counts are 0 or greater than 1.
     function pluralize(word, count){
         var pluralizer = arguments === 2 ? arguments[1] : 's';
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
@@ -252,14 +263,16 @@
         pushOntoQue(notedGroup, notedTest, assertNotEqual, label, value, expectation);
     }
 
-    //Passed to test's callbacks. Not the real ones, instead the ones that will further update their quue entries.
-    assert = {
+    //Passed to test's callbacks. Not the real ones, instead
+    //the ones that will further update their quue entries.
+    assert = assert = {
         equal: noteEqualAssertion,
         notEqual: noteNotEqualAssertion
     };
 
     //A label for a group of tests.
-    window.group = function group(label, callback){
+    //Available in the global name space.
+    var group = function group(label, callback){
         // debugger;
         notedGroup = label;
         callback();
@@ -267,7 +280,8 @@
     };
 
     //Adds tests to the queue to be run once the queue is filled.
-    window.test = function test(label, callback){
+    //Available in the global name space.
+    var test = function test(label, callback){
         // debugger;
         notedTest = label;
         callback(assert);
@@ -316,21 +330,44 @@
         }, 2000);
     }
 
-    //Show the start message.
-    showStartMessage();
+    //A small set of window globals to make writing test scripts easier. If
+    //the windowGlabals config option is false then window globals will not
+    //be used.
+    if(config.windowGlobals){
+        window.group = group;
+        window.test = test;
+        window.equal = noteEqualAssertion;
+        window.notEqual = noteNotEqualAssertion;
+    }
 
-    //Keep checking the queue until it is 'stabe'. Once stable, run the tests.
-    // debugger;
-    queueCount = 0;
-    interval = 1000;
-    intervalId = setInterval(function(){
-        if(queue.length === queueCount){
-            clearInterval(intervalId);
-            runner();
-        }else{
-            queueCount = queue.length;
-        }
-    }, interval);
+    //Catch errors.
+    try{
 
+        /**
+         * Everything starts here!!!
+         */
 
+        //Show the start message.
+        showStartMessage();
+        //Build the queue as user calls group or test.
+        //Keep checking the queue until it is 'stable'. Stable
+        //is defined by a time interval during which the length
+        //of the queue remains constant, indicating that all tests
+        //have been loaded. Once stable, run the tests.
+        // debugger;
+        intervalId = setInterval(function(){
+            if(queue.length === queueCount){
+                if(queStableCount > 1){
+                    clearInterval(intervalId);
+                    runner();
+                }else{
+                    queStableCount++;
+                }
+            }else{
+                queueCount = queue.length;
+            }
+        }, queStableInterval);
+    } catch(e) {
+        reportCatch(e);
+    }
 }(window));
