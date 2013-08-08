@@ -100,7 +100,7 @@
         results.forEach(function(result){
             var html;
             if(!result.result){
-                html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected "<em>' + result.value + '</em>" ' + assertionPrettifier(result.assertion)  + '"<em>' + result.expectation +  '</em>".</div>';
+                html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected "<em>' + (typeof result.value === 'object' ? JSON.stringify(result.value) : result.value) + '</em>" ' + assertionPrettifier(result.assertion)  + '"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.value) : result.value) +  '</em>".</div>';
             }
             $domTarget.append(html);
         });
