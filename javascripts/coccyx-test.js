@@ -136,7 +136,7 @@
             }
             for(i = 0, len = a.length; i < len; i++){
                 if(typeof a[i] === 'object' && typeof b[i] === 'object'){
-                    if(!compareObjects(a[i], b[i])){
+                    if(!compare(a[i], b[i])){
                         return false;
                     }
                     continue;
@@ -188,12 +188,18 @@
         return true;
     }
 
+    function compare(a, b){
+        return compareObjects(a, b) && compareObjects(b, a);
+    }
+
     //Assertions
 
     function a_equals_b(a, b){
         if(typeof a ==='object' && typeof b === 'object'){
             //Both are object so compare their properties.
-            if(compareObjects(a,b) && compareObjects(b,a)) {return true;}
+            if(compare(a,b)){
+                return true;
+            }
         }
         if(typeof a === 'object'|| typeof b === 'object'){
             //One is an object and the other isn't.
@@ -237,7 +243,7 @@
         //Synchronously iterate over the queue, running each item's callback.
         for (i = 0, len = queue.length; i < len; i++) {
             item = queue[i];
-            console.log('Running asserted defined by: ', item);
+            // console.log('Running asserted defined by: ', item);
             item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
             if(item.result){
                 totAssertionsPassed++;
@@ -322,7 +328,7 @@
         setTimeout(function(){
             //Run the tests in the queue.
             run();
-            console.log(results);
+            // console.log(results);
             //Report the results.
             reporter();
         }, 2000);
