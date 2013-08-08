@@ -26,11 +26,21 @@
     var totAssertions = 0;
     var totAssertionsPassed = 0;
     var totAssertionsFailed = 0;
+    var isProcessAborted = false;
 
     //Display caught errors to the browser.
-    function reportCatch(e){
-        var html = '<p>An error occurred,  "' + e  + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+    function errorHandler(){
+        var html;
         var $domTarget = $('#header');
+        isProcessAborted = true;
+        if(arguments.length === 3){
+            //window.onerror
+            html = '<p>' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
+        }else{
+            //catch(e)
+            html = '<p>An error occurred,  "' + arguments[0]  + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+        }
+        $domTarget = $('#header');
         $domTarget.html(html);
     }
 
@@ -124,7 +134,9 @@
 
     function reporter(){
         genTotalsFromResults();
-        showResults();
+        if(!isProcessAborted){
+            showResults();
+        }
     }
 
     function compareArrays(a, b){
@@ -323,7 +335,9 @@
         //Queue totals.
         genTotalsFromQueue();
         //Show queue totals while tests are running.
-        showTotalsToBeRun();
+        if(!isProcessAborted){
+            showTotalsToBeRun();
+        }
         //Timeout to allow user to see total to be run message.
         setTimeout(function(){
             //Run the tests in the queue.
@@ -333,6 +347,13 @@
             reporter();
         }, 2000);
     }
+
+    /**
+     * It all starts here!!!
+     */
+
+    //Global error handler
+    window.onerror = errorHandler;
 
     //Apply configuration options.
     configure();
@@ -349,10 +370,6 @@
 
     //Catch errors.
     try{
-
-        /**
-         * Everything starts here!!!
-         */
 
         //Show the start message.
         showStartMessage();
@@ -375,6 +392,6 @@
             }
         }, queStableInterval);
     } catch(e) {
-        reportCatch(e);
+        errorHandler(e);
     }
 }(window));
