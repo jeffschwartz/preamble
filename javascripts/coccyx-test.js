@@ -56,26 +56,26 @@
         $domTarget.html(html);
     }
 
-    //Configuration
-    function configure(){
-        // var prop;
-        // for(prop in defaultConfig){
-        //     if(defaultConfig.hasOwnProperty(prop)){
-        //         config[prop] = userConfig.hasOwnProperty(prop) ? userConfig[prop] : defaultConfig[prop];
-        //     }
-        // }
-        config = defaultConfig;
-        isConfigured = true;
+    function merge(){
+        var result = {};
+        var target = arguments[0];
+        var sources = [].slice.call(arguments, 1);
+        sources.forEach(function(source){
+            var prop;
+            for(prop in target){
+                if(target.hasOwnProperty(prop)){
+                    result[prop] = source.hasOwnProperty(prop) ? source[prop] : target[prop];
+                }
+            }
+        });
+        return result;
     }
 
-    function assertionPrettifier(assertion){
-        var assertName = assertion.name;
-        switch(assertName){
-            case 'assertEqual' :
-                return ' === ';
-            case 'assertNotEqual' :
-                return ' !== ';
-        }
+    //Configuration
+    function configure(){
+        /* global userConfig */
+        config = window.userConfig ? merge(defaultConfig, userConfig) : defaultConfig;
+        isConfigured = true;
     }
 
     function showResultsSummary(){
@@ -100,7 +100,7 @@
         results.forEach(function(result){
             var html;
             if(!result.result){
-                html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected "<em>' + (typeof result.value === 'object' ? JSON.stringify(result.value) : result.value) + '</em>" ' + assertionPrettifier(result.assertion)  + '"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) +  '</em>".</div>';
+                html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected assertion to retun"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
             }
             $domTarget.append(html);
         });
@@ -225,17 +225,15 @@
         return !a_equals_b(a, b);
     }
 
-    // function a_lessthan_b(a, b){
-    //     return a < b;
-    // }
+    //Simple boolean test.
+    function a_equals_true(a){
+        return a === true;
+    }
 
-    // function a_greaterthan_b(a, b){
-    //     return a > b;
-    // }
-
-    // function a_greaterthan_b_lessthan_c(a, b, c){
-    //     return b < a && c > a;
-    // }
+    //Simple boolean test.
+    function a_equals_false(a){
+        return !a_equals_true(a);
+    }
 
     //assertion runner
 
@@ -244,8 +242,19 @@
         return a_equals_b(a, b);
     }
 
+    // a === true, simple boolean test
+    function assertIsTrue(a){
+        return a_equals_true(a);
+    }
+
+    // a !== b
     function assertNotEqual(a, b){
         return a_notequals_b(a, b);
+    }
+
+    // a === false, simple boolean test
+    function assertIsFalse(a){
+        return a_equals_false(a);
     }
 
     function run(){
@@ -273,20 +282,37 @@
         queue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation});
     }
 
+    function throwMissingArgumentsException(errMessage){
+        throw new Error(errMessage);
+    }
+
     function noteEqualAssertion(value, expectation, label){
+        if(arguments.length !== 3){
+            throwMissingArgumentsException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
         pushOntoQue(notedGroup, notedTest, assertEqual, label, value, expectation);
     }
 
+    function noteIsTrueAssertion(value, label){
+        if(arguments.length !== 2){
+            throwMissingArgumentsException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
+        }
+        pushOntoQue(notedGroup, notedTest, assertIsTrue, label, value, true);
+    }
+
     function noteNotEqualAssertion(value, expectation, label){
+        if(arguments.length !== 3){
+            throwMissingArgumentsException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
+        }
         pushOntoQue(notedGroup, notedTest, assertNotEqual, label, value, expectation);
     }
 
-    //Passed to test's callbacks. Not the real ones, instead
-    //the ones that will further update their quue entries.
-    assert = assert = {
-        equal: noteEqualAssertion,
-        notEqual: noteNotEqualAssertion
-    };
+    function noteIsFalseAssertion(value, label){
+        if(arguments.length !== 2){
+            throwMissingArgumentsException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
+        }
+        pushOntoQue(notedGroup, notedTest, assertIsFalse, label, value, true);
+    }
 
     //A label for a group of tests.
     //Available in the global name space.
@@ -360,12 +386,28 @@
 
     //A small set of window globals to make writing test scripts easier. If
     //the windowGlabals config option is false then window globals will not
-    //be used.
+    //be used except for the the one CoccyxTest name space which is used
+    //to define group and test.
     if(config.windowGlobals){
         window.group = group;
         window.test = test;
         window.equal = noteEqualAssertion;
         window.notEqual = noteNotEqualAssertion;
+        window.isTrue = noteIsTrueAssertion;
+        window.isFalse = noteIsFalseAssertion;
+    }else{
+        window.CoccyxTest = {
+            group: group,
+            test: test
+        };
+        //Passed to test's callbacks. Not the real ones, instead
+        //the ones that will further update their quue entries.
+        assert = {
+            equal: noteEqualAssertion,
+            notEqual: noteNotEqualAssertion,
+            isTrue: noteIsTrueAssertion,
+            isFalse: noteIsFalseAssertion
+        };
     }
 
     //Catch errors.
