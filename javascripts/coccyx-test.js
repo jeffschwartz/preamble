@@ -8,13 +8,15 @@
     //Merged configuration options.
     var config = {};
     var isConfigured = false;
-    var queue = [];//Array of callbacks. Calls are sequential. TODO support async.
+    var currentTestHash;
+    var assertionsQueue = [];//Array of assertions. Calls are sequential. TODO support async.
+    var testsQueue = [];//Array of test to be run. It is the first queue to be built!
     var results = [];//Array of results.
-    var notedGroup;
-    var notedTest;
+    // var notedGroup;
+    // var notedTest;
     var asyncCount = 0;
     var assert;
-    var queueCount = 0;
+    var testsQueueCount = 0;
     var queStableCount = 0;
     var queStableInterval = 500;
     var intervalId;
@@ -24,7 +26,7 @@
     var totTests = 0;
     var totTestsPassed = 0;
     var totTestsFailed = 0;
-    var totAssertions = 0;
+    // var totAssertions = 0;
     var totAssertionsPassed = 0;
     var totAssertionsFailed = 0;
     var isProcessAborted = false;
@@ -52,9 +54,23 @@
     }
 
     function showTotalsToBeRun(){
-        var html = '<p>Queue built.</p><p>Running ' + totAssertions + pluralize(' assertion', totAssertions) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
+        var html = '<p>Queue built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
         var $domTarget = $('#header');
-        $domTarget.html(html);
+        $domTarget.append(html);
+    }
+
+    function combine(){
+        var result = {};
+        var sources = [].slice.call(arguments, 0);
+        sources.forEach(function(source){
+            var prop;
+            for(prop in source){
+                if(source.hasOwnProperty(prop)){
+                    result[prop] = source[prop];
+                }
+            }
+        });
+        return result;
     }
 
     function merge(){
@@ -85,13 +101,13 @@
         var pre = '<p>Testing has completed.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html = '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertions) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html = '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
         }else if(totAssertionsPassed === 0){
             html = '<p> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
         }else{
             html = '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
-        $domTarget.html(pre + html);
+        $domTarget.append(pre + html);
     }
 
     function showAssertionFailures(){
@@ -258,29 +274,38 @@
         return a_equals_false(a);
     }
 
-    function run(){
+    //Loops through the assertionsQueue, running each assertion and records the results.
+    function runAssertions(){
         var i,
             len,
             item;
-        //Synchronously iterate over the queue, running each item's callback.
-        for (i = 0, len = queue.length; i < len; i++) {
-            item = queue[i];
-            // console.log('Running asserted defined by: ', item);
-            item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-            if(item.result){
-                totAssertionsPassed++;
-            }else{
-                totAssertionsFailed++;
+        //Show totals for groups, test, assertions before running the tests.
+        showTotalsToBeRun();
+        //A slight delay so user can see the totals and they don't flash.
+        setTimeout(function(){
+            //Synchronously iterate over the assertionsQueue, running each item's assertion.
+            for (i = 0, len = assertionsQueue.length; i < len; i++) {
+                item = assertionsQueue[i];
+                // console.log('Running asserted defined by: ', item);
+                item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+                if(item.result){
+                    totAssertionsPassed++;
+                }else{
+                    totAssertionsFailed++;
+                }
+                results.push(item);
+                if(config.shortCircuit && totAssertionsFailed){
+                    reporter();
+                    return;
+                }
             }
-            results.push(item);
-            if(config.shortCircuit && totAssertionsFailed){
-                return;
-            }
-        }
+            //Report the results.
+            reporter();
+        }, 2000);
     }
 
-    function pushOntoQue(groupLabel, testLabel, assertion, assertionLabel, value, expectation){
-        queue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation});
+    function pushOntoQue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
+        assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, isAsync: isAsync});
     }
 
     function throwMissingArgumentsException(errMessage){
@@ -291,53 +316,67 @@
         if(arguments.length !== 3){
             throwMissingArgumentsException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
         }
-        pushOntoQue(notedGroup, notedTest, assertEqual, label, value, expectation);
+        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsTrueAssertion(value, label){
         if(arguments.length !== 2){
             throwMissingArgumentsException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
         }
-        pushOntoQue(notedGroup, notedTest, assertIsTrue, label, value, true);
+        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
     }
 
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
             throwMissingArgumentsException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
         }
-        pushOntoQue(notedGroup, notedTest, assertNotEqual, label, value, expectation);
+        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsFalseAssertion(value, label){
         if(arguments.length !== 2){
             throwMissingArgumentsException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
         }
-        pushOntoQue(notedGroup, notedTest, assertIsFalse, label, value, true);
+        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
+    }
+
+    //Runs each test in testsQueue to build assertionsQueue
+    function runTests(){
+        testsQueue.forEach(function(test){
+            currentTestHash = test;
+            test.testCallback(assert);
+        });
     }
 
     //A label for a group of tests.
     //Available in the global name space.
     var group = function group(label, callback){
+        currentTestHash = {groupLabel: label};
         // debugger;
-        notedGroup = label;
+        // notedGroup = label;
+        // notedGroup = '';
+        totGroups++;
         callback();
-        notedGroup = '';
     };
 
     //Adds tests to the queue to be run once the queue is filled.
     //Available in the global name space.
     var test = function test(label, callback){
+        testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
+        totTests++;
         // debugger;
-        notedTest = label;
-        callback(assert);
+        // notedTest = label;
+        // callback(assert);
     };
 
     //Called when an asyncTest starts. The queue loading loop
     //enqueue on this until asyncCount is 0.
     var asyncTest = function asyncTest(label, callback){
+        testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: true}));
+        totTests++;
         //increment async counter
-        asyncCount++;
-        test(label, callback);
+        // asyncCount++;
+        // test(label, callback);
     };
 
     //Called when an asyncTest is finished to subtract 1
@@ -351,42 +390,42 @@
     //groups, total tests and total assertions. Totals
     //for passed and failed assertions are generated
     //when later in the process when they are run.
-    function genTotalsFromQueue(){
-        var prevGroupLabel,
-            prevTestLabel;
-        queue.forEach(function(item){
-            if(item.groupLabel !== prevGroupLabel){
-                totGroups++;
-                prevGroupLabel = item.groupLabel;
-            }
-            if(item.testLabel !== prevTestLabel){
-                totTests++;
-                prevTestLabel = item.testLabel;
-            }
-            totAssertions++;
-        });
-    }
+    // function genTotalsFromQueue(){
+    //     var prevGroupLabel,
+    //         prevTestLabel;
+    //     queue.forEach(function(item){
+    //         if(item.groupLabel !== prevGroupLabel){
+    //             totGroups++;
+    //             prevGroupLabel = item.groupLabel;
+    //         }
+    //         if(item.testLabel !== prevTestLabel){
+    //             totTests++;
+    //             prevTestLabel = item.testLabel;
+    //         }
+    //         totAssertions++;
+    //     });
+    // }
 
     function showStartMessage(){
         var $domTarget = $('#header');
         $domTarget.html('<p>Building queue. Please wait...</p>');
     }
 
-    //Called to begin running the tests in the queue.
+    //Called after the testsQueue has been generate.
     function runner(){
         //Queue totals.
-        genTotalsFromQueue();
+        // genTotalsFromQueue();
         //Show queue totals while tests are running.
-        if(!isProcessAborted){
-            showTotalsToBeRun();
-        }
+        // if(!isProcessAborted){
+        //     showTotalsToBeRun();
+        // }
         //Timeout to allow user to see total to be run message.
         setTimeout(function(){
-            //Run the tests in the queue.
-            run();
+            //Build assertionQueue.
+            runTests();
+            //Run the assertions in the assertionsQueue.
+            runAssertions();
             // console.log(results);
-            //Report the results.
-            reporter();
         }, 2000);
     }
 
@@ -443,7 +482,7 @@
         //loaded. Once stable, run the tests.
         // debugger;
         intervalId = setInterval(function(){
-            if(queue.length === queueCount && !asyncCount){
+            if(testsQueue.length === testsQueueCount && !asyncCount){
                 if(queStableCount > 1){
                     clearInterval(intervalId);
                     runner();
@@ -452,7 +491,7 @@
                 }
             }else{
                 queStableCount = 0;
-                queueCount = queue.length;
+                testsQueueCount = testsQueue.length;
             }
         }, queStableInterval);
     } catch(e) {
