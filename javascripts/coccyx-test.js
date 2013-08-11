@@ -1,4 +1,7 @@
 /*global userConfig*/
+// Coccyx-Test 1.0.0
+// (c) 2013 Jeffrey Schwartz
+// Coccyx-Test may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
