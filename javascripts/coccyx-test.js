@@ -12,6 +12,7 @@
     var results = [];//Array of results.
     var notedGroup;
     var notedTest;
+    var asyncCount = 0;
     var assert;
     var queueCount = 0;
     var queStableCount = 0;
@@ -331,6 +332,21 @@
         callback(assert);
     };
 
+    //Called when an asyncTest starts. The queue loading loop
+    //enqueue on this until asyncCount is 0.
+    var asyncTest = function asyncTest(label, callback){
+        //increment async counter
+        asyncCount++;
+        test(label, callback);
+    };
+
+    //Called when an asyncTest is finished to subtract 1
+    //from the asyncCount, which is being watched by the
+    //queue loading loop.
+    var asyncStop = function(){
+        asyncCount--;
+    };
+
     //Generate totals from items in the queue for total
     //groups, total tests and total assertions. Totals
     //for passed and failed assertions are generated
@@ -391,6 +407,8 @@
     if(config.windowGlobals){
         window.group = group;
         window.test = test;
+        window.asyncTest = asyncTest;
+        window.asyncStop = asyncStop;
         window.equal = noteEqualAssertion;
         window.notEqual = noteNotEqualAssertion;
         window.isTrue = noteIsTrueAssertion;
@@ -398,7 +416,9 @@
     }else{
         window.CoccyxTest = {
             group: group,
-            test: test
+            test: test,
+            asyncTest: asyncTest,
+            asyncStop: asyncStop
         };
         //Passed to test's callbacks. Not the real ones, instead
         //the ones that will further update their quue entries.
@@ -418,11 +438,12 @@
         //Build the queue as user calls group or test.
         //Keep checking the queue until it is 'stable'. Stable
         //is defined by a time interval during which the length
-        //of the queue remains constant, indicating that all tests
-        //have been loaded. Once stable, run the tests.
+        //of the queue remains constant and there are no asynchronous
+        //tests running, indicating that all tests have been
+        //loaded. Once stable, run the tests.
         // debugger;
         intervalId = setInterval(function(){
-            if(queue.length === queueCount){
+            if(queue.length === queueCount && !asyncCount){
                 if(queStableCount > 1){
                     clearInterval(intervalId);
                     runner();
@@ -430,6 +451,7 @@
                     queStableCount++;
                 }
             }else{
+                queStableCount = 0;
                 queueCount = queue.length;
             }
         }, queStableInterval);
