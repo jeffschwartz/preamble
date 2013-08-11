@@ -1,3 +1,4 @@
+/*global userConfig*/
 (function(window, undefined){
     'use strict';
 
@@ -12,9 +13,6 @@
     var assertionsQueue = [];//Array of assertions. Calls are sequential. TODO support async.
     var testsQueue = [];//Array of test to be run. It is the first queue to be built!
     var results = [];//Array of results.
-    // var notedGroup;
-    // var notedTest;
-    var asyncCount = 0;
     var assert;
     var testsQueueCount = 0;
     var queStableCount = 0;
@@ -26,10 +24,11 @@
     var totTests = 0;
     var totTestsPassed = 0;
     var totTestsFailed = 0;
-    // var totAssertions = 0;
     var totAssertionsPassed = 0;
     var totAssertionsFailed = 0;
     var isProcessAborted = false;
+    var testsQueuIndex = 0;
+    var asyncTestRunning = false;
 
     //Display caught errors to the browser.
     function errorHandler(){
@@ -90,7 +89,6 @@
 
     //Configuration
     function configure(){
-        /* global userConfig */
         config = window.userConfig ? merge(defaultConfig, userConfig) : defaultConfig;
         isConfigured = true;
     }
@@ -340,71 +338,70 @@
         pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
     }
 
-    //Runs each test in testsQueue to build assertionsQueue
+    //Called by an asynchronous test to signal that it is done.
+    var asyncStop = function(){
+        asyncTestRunning = false;
+    };
+
+    //Runs an asynchronous test and 'waits' for it to signal that it
+    //is done by calling asyncStop. When the test signals it is done
+    //runTests will be called to pick up from where it left off.
+    function runAsyncTest(test){
+        var timerId;
+        asyncTestRunning = true;
+        test.testCallback(assert);
+        timerId = setInterval(function(){
+            if(!asyncTestRunning){
+                clearInterval(timerId);
+                runTests();
+            }
+        }, 10);
+    }
+
+    //Runs each test in testsQueue to build assertionsQueue. When a test
+    //is run asynchronously (asyncTest) runTests terminates to prevent
+    //further processing of tests in the testsQueue until after the
+    //asynchronous test has completed. When the asynchronous test signals
+    //that it is done by calling asyncStop, the asyncTestRunning flag is
+    //set to false and runTests is called again, picking up at the next
+    //test in the testsQueue.
     function runTests(){
-        testsQueue.forEach(function(test){
+        var len = testsQueue.length;
+        while(testsQueuIndex < len && !asyncTestRunning){
+            var test = testsQueue[testsQueuIndex];
             currentTestHash = test;
-            test.testCallback(assert);
-        });
+            if(test.isAsync){
+                runAsyncTest(test);
+            }else{
+                test.testCallback(assert);
+            }
+            testsQueuIndex++;
+        }
+        if(testsQueuIndex === len){
+            //Run the assertions in the assertionsQueue.
+            runAssertions();
+        }
     }
 
     //A label for a group of tests.
     //Available in the global name space.
     var group = function group(label, callback){
         currentTestHash = {groupLabel: label};
-        // debugger;
-        // notedGroup = label;
-        // notedGroup = '';
         totGroups++;
         callback();
     };
 
     //Adds tests to the queue to be run once the queue is filled.
-    //Available in the global name space.
     var test = function test(label, callback){
         testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
         totTests++;
-        // debugger;
-        // notedTest = label;
-        // callback(assert);
     };
 
-    //Called when an asyncTest starts. The queue loading loop
-    //enqueue on this until asyncCount is 0.
+    //Adds asynchronous tests to the queue like test except it marks the hash param 'isAsync' as true.
     var asyncTest = function asyncTest(label, callback){
         testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: true}));
         totTests++;
-        //increment async counter
-        // asyncCount++;
-        // test(label, callback);
     };
-
-    //Called when an asyncTest is finished to subtract 1
-    //from the asyncCount, which is being watched by the
-    //queue loading loop.
-    var asyncStop = function(){
-        asyncCount--;
-    };
-
-    //Generate totals from items in the queue for total
-    //groups, total tests and total assertions. Totals
-    //for passed and failed assertions are generated
-    //when later in the process when they are run.
-    // function genTotalsFromQueue(){
-    //     var prevGroupLabel,
-    //         prevTestLabel;
-    //     queue.forEach(function(item){
-    //         if(item.groupLabel !== prevGroupLabel){
-    //             totGroups++;
-    //             prevGroupLabel = item.groupLabel;
-    //         }
-    //         if(item.testLabel !== prevTestLabel){
-    //             totTests++;
-    //             prevTestLabel = item.testLabel;
-    //         }
-    //         totAssertions++;
-    //     });
-    // }
 
     function showStartMessage(){
         var $domTarget = $('#header');
@@ -413,19 +410,10 @@
 
     //Called after the testsQueue has been generate.
     function runner(){
-        //Queue totals.
-        // genTotalsFromQueue();
-        //Show queue totals while tests are running.
-        // if(!isProcessAborted){
-        //     showTotalsToBeRun();
-        // }
         //Timeout to allow user to see total to be run message.
         setTimeout(function(){
             //Build assertionQueue.
             runTests();
-            //Run the assertions in the assertionsQueue.
-            runAssertions();
-            // console.log(results);
         }, 2000);
     }
 
@@ -482,7 +470,7 @@
         //loaded. Once stable, run the tests.
         // debugger;
         intervalId = setInterval(function(){
-            if(testsQueue.length === testsQueueCount && !asyncCount){
+            if(testsQueue.length === testsQueueCount){
                 if(queStableCount > 1){
                     clearInterval(intervalId);
                     runner();
