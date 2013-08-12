@@ -356,6 +356,7 @@
         timerId = setInterval(function(){
             if(!asyncTestRunning){
                 clearInterval(timerId);
+                testsQueuIndex++;
                 runTests();
             }
         }, 10);
@@ -377,8 +378,8 @@
                 runAsyncTest(test);
             }else{
                 test.testCallback(assert);
+                testsQueuIndex++;
             }
-            testsQueuIndex++;
         }
         if(testsQueuIndex === len){
             //Run the assertions in the assertionsQueue.
