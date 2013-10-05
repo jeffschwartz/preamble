@@ -126,9 +126,9 @@
             var html;
             if(!result.result){
                 html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
+                // $domTarget.append(html);
+                elResults.insertAdjacentHTML('beforeend', html);
             }
-            // $domTarget.append(html);
-            elResults.insertAdjacentHTML('beforeend', html);
         });
     }
 
