@@ -36,7 +36,6 @@
     //Display caught errors to the browser.
     function errorHandler(){
         var html;
-        // var $domTarget = $('#header');
         var elHeader = document.getElementById('header');
         isProcessAborted = true;
         if(arguments.length === 3){
@@ -46,7 +45,6 @@
             //catch(e)
             html = '<p>An error occurred,  "' + arguments[0]  + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
         }
-        // $domTarget.html(html);
         elHeader.innerHTML = html;
     }
 
@@ -57,10 +55,8 @@
     }
 
     function showTotalsToBeRun(){
-        var html = '<p>Queue built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
-        // var $domTarget = $('#header');
+        var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
         var elHeader = document.getElementById('header');
-        // $domTarget.append(html);
         elHeader.insertAdjacentHTML('beforeend', html);
     }
 
@@ -101,9 +97,7 @@
 
     function showResultsSummary(){
         var html;
-        // var $domTarget = $('#header');
         var elHeader = document.getElementById('header');
-        // var pre = '<p>Testing has completed.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
             html = '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
@@ -112,21 +106,17 @@
         }else{
             html = '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
-        // $domTarget.append(pre + html);
         elHeader.insertAdjacentHTML('beforeend', html);
     }
 
     function showAssertionFailures(){
         //Show failures in the results as a default.
-        // var $domTarget = $('#results');
         var elResults = document.getElementById('results');
-        // $domTarget.show();
         elResults.style.display = 'block';
         results.forEach(function(result){
             var html;
             if(!result.result){
                 html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
-                // $domTarget.append(html);
                 elResults.insertAdjacentHTML('beforeend', html);
             }
         });
@@ -416,10 +406,8 @@
     };
 
     function showStartMessage(){
-        // var $domTarget = $('#header');
         var elHeader = document.getElementById('header');
-        // $domTarget.html('<p>Building queue. Please wait...</p>');
-        elHeader.innerHTML = '<p>Building queue. Please wait...</p>';
+        elHeader.innerHTML = '<p>Building queues. Please wait...</p>';
     }
 
     //Called after the testsQueue has been generate.
