@@ -8,7 +8,8 @@
     //Default configuration options.
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
-    var defaultConfig = {shortCircuit: false, windowGlobals: true};
+    //asyncDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncDelay: 500};
     //Merged configuration options.
     var config = {};
     var isConfigured = false;
@@ -18,8 +19,8 @@
     var results = [];//Array of results.
     var assert;
     var testsQueueCount = 0;
-    var queStableCount = 0;
-    var queStableInterval = 500;
+    var testsQueueStableCount = 0;
+    var testsQueueStableInterval = 500;
     var intervalId;
     var totGroups = 0;
     var totGroupsPassed = 0;
@@ -30,8 +31,10 @@
     var totAssertionsPassed = 0;
     var totAssertionsFailed = 0;
     var isProcessAborted = false;
-    var testsQueuIndex = 0;
+    var testsQueueIndex = 0;
     var asyncTestRunning = false;
+    var timerStart;
+    var timerEnd;
 
     //Display caught errors to the browser.
     function errorHandler(){
@@ -98,13 +101,15 @@
     function showResultsSummary(){
         var html;
         var elHeader = document.getElementById('header');
+        //Show elapsed time.
+        html = '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html = '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html += '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html = '<p> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html += '<p> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
         }else{
-            html = '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html += '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
         elHeader.insertAdjacentHTML('beforeend', html);
     }
@@ -298,12 +303,14 @@
                     return;
                 }
             }
+            //Record the end time.
+            timerEnd = Date.now();
             //Report the results.
             reporter();
         }, 2000);
     }
 
-    function pushOntoQue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
+    function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
         assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, isAsync: isAsync});
     }
 
@@ -315,34 +322,39 @@
         if(arguments.length !== 3){
             throwMissingArgumentsException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsTrueAssertion(value, label){
         if(arguments.length !== 2){
             throwMissingArgumentsException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
     }
 
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
             throwMissingArgumentsException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsFalseAssertion(value, label){
         if(arguments.length !== 2){
             throwMissingArgumentsException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
     }
 
-    //Called by an asynchronous test to signal that it is done.
-    var asyncStop = function(){
-        asyncTestRunning = false;
-    };
+    //Waits intervalArg || confing.asyncDelay milliseconds before calling
+    //the callback to build the assertion queue and then signal that the
+    //async test has completed by setting asyncTestRunning to false.
+    function asyncStop(callback, intervalArg){
+        setTimeout(function(){
+            callback(assert);
+            asyncTestRunning = false;
+        }, intervalArg || config.asyncDelay);
+    }
 
     //Runs an asynchronous test and 'waits' for it to signal that it
     //is done by calling asyncStop. When the test signals it is done
@@ -350,14 +362,14 @@
     function runAsyncTest(test){
         var timerId;
         asyncTestRunning = true;
-        test.testCallback(assert);
+        test.testCallback();
         timerId = setInterval(function(){
             if(!asyncTestRunning){
                 clearInterval(timerId);
-                testsQueuIndex++;
+                testsQueueIndex++;
                 runTests();
             }
-        }, 10);
+        }, 1);
     }
 
     //Runs each test in testsQueue to build assertionsQueue. When a test
@@ -369,17 +381,17 @@
     //test in the testsQueue.
     function runTests(){
         var len = testsQueue.length;
-        while(testsQueuIndex < len && !asyncTestRunning){
-            var test = testsQueue[testsQueuIndex];
+        while(testsQueueIndex < len && !asyncTestRunning){
+            var test = testsQueue[testsQueueIndex];
             currentTestHash = test;
             if(test.isAsync){
                 runAsyncTest(test);
             }else{
                 test.testCallback(assert);
-                testsQueuIndex++;
+                testsQueueIndex++;
             }
         }
-        if(testsQueuIndex === len){
+        if(testsQueueIndex === len){
             //Run the assertions in the assertionsQueue.
             runAssertions();
         }
@@ -461,7 +473,8 @@
 
     //Catch errors.
     try{
-
+        //Record the start time.
+        timerStart = Date.now();
         //Show the start message.
         showStartMessage();
         //Build the queue as user calls group or test.
@@ -473,17 +486,17 @@
         // debugger;
         intervalId = setInterval(function(){
             if(testsQueue.length === testsQueueCount){
-                if(queStableCount > 1){
+                if(testsQueueStableCount > 1){
                     clearInterval(intervalId);
                     runner();
                 }else{
-                    queStableCount++;
+                    testsQueueStableCount++;
                 }
             }else{
-                queStableCount = 0;
+                testsQueueStableCount = 0;
                 testsQueueCount = testsQueue.length;
             }
-        }, queStableInterval);
+        }, testsQueueStableInterval);
     } catch(e) {
         errorHandler(e);
     }
