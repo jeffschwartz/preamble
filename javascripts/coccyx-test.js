@@ -9,7 +9,7 @@
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
     //asyncDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asynDelay: 500};
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncDelay: 500};
     //Merged configuration options.
     var config = {};
     var isConfigured = false;
@@ -340,10 +340,9 @@
         pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
     }
 
-    //Waits intervalArg || confing.asyncDelay milliseconds before
-    //calling the callback to build the assertion queue and then
-    //signal that the async test has completed by setting
-    //asyncTestRunning to false.
+    //Waits intervalArg || confing.asyncDelay milliseconds before calling
+    //the callback to build the assertion queue and then signal that the
+    //async test has completed by setting asyncTestRunning to false.
     function asyncStop(callback, intervalArg){
         setTimeout(function(){
             callback(assert);
@@ -357,7 +356,7 @@
     function runAsyncTest(test){
         var timerId;
         asyncTestRunning = true;
-        test.testCallback(assert);
+        test.testCallback();
         timerId = setInterval(function(){
             if(!asyncTestRunning){
                 clearInterval(timerId);
