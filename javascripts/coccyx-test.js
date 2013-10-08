@@ -19,8 +19,8 @@
     var results = [];//Array of results.
     var assert;
     var testsQueueCount = 0;
-    var queStableCount = 0;
-    var queStableInterval = 500;
+    var testsQueueStableCount = 0;
+    var testsQueueStableInterval = 500;
     var intervalId;
     var totGroups = 0;
     var totGroupsPassed = 0;
@@ -31,7 +31,7 @@
     var totAssertionsPassed = 0;
     var totAssertionsFailed = 0;
     var isProcessAborted = false;
-    var testsQueuIndex = 0;
+    var testsQueueIndex = 0;
     var asyncTestRunning = false;
     var timerStart;
     var timerEnd;
@@ -366,7 +366,7 @@
         timerId = setInterval(function(){
             if(!asyncTestRunning){
                 clearInterval(timerId);
-                testsQueuIndex++;
+                testsQueueIndex++;
                 runTests();
             }
         }, 1);
@@ -381,17 +381,17 @@
     //test in the testsQueue.
     function runTests(){
         var len = testsQueue.length;
-        while(testsQueuIndex < len && !asyncTestRunning){
-            var test = testsQueue[testsQueuIndex];
+        while(testsQueueIndex < len && !asyncTestRunning){
+            var test = testsQueue[testsQueueIndex];
             currentTestHash = test;
             if(test.isAsync){
                 runAsyncTest(test);
             }else{
                 test.testCallback(assert);
-                testsQueuIndex++;
+                testsQueueIndex++;
             }
         }
-        if(testsQueuIndex === len){
+        if(testsQueueIndex === len){
             //Run the assertions in the assertionsQueue.
             runAssertions();
         }
@@ -486,17 +486,17 @@
         // debugger;
         intervalId = setInterval(function(){
             if(testsQueue.length === testsQueueCount){
-                if(queStableCount > 1){
+                if(testsQueueStableCount > 1){
                     clearInterval(intervalId);
                     runner();
                 }else{
-                    queStableCount++;
+                    testsQueueStableCount++;
                 }
             }else{
-                queStableCount = 0;
+                testsQueueStableCount = 0;
                 testsQueueCount = testsQueue.length;
             }
-        }, queStableInterval);
+        }, testsQueueStableInterval);
     } catch(e) {
         errorHandler(e);
     }
