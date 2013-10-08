@@ -304,7 +304,7 @@
         }, 2000);
     }
 
-    function pushOntoQue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
+    function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
         assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, isAsync: isAsync});
     }
 
@@ -316,28 +316,28 @@
         if(arguments.length !== 3){
             throwMissingArgumentsException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsTrueAssertion(value, label){
         if(arguments.length !== 2){
             throwMissingArgumentsException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
     }
 
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
             throwMissingArgumentsException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsFalseAssertion(value, label){
         if(arguments.length !== 2){
             throwMissingArgumentsException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
         }
-        pushOntoQue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
+        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
     }
 
     //Waits intervalArg || confing.asyncDelay milliseconds before calling
