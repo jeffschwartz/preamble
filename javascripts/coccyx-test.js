@@ -33,6 +33,8 @@
     var isProcessAborted = false;
     var testsQueuIndex = 0;
     var asyncTestRunning = false;
+    var timerStart;
+    var timerEnd;
 
     //Display caught errors to the browser.
     function errorHandler(){
@@ -99,13 +101,15 @@
     function showResultsSummary(){
         var html;
         var elHeader = document.getElementById('header');
+        //Show elapsed time.
+        html = '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html = '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html += '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html = '<p> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html += '<p> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
         }else{
-            html = '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html += '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
         elHeader.insertAdjacentHTML('beforeend', html);
     }
@@ -299,6 +303,8 @@
                     return;
                 }
             }
+            //Record the end time.
+            timerEnd = Date.now();
             //Report the results.
             reporter();
         }, 2000);
@@ -467,7 +473,8 @@
 
     //Catch errors.
     try{
-
+        //Record the start time.
+        timerStart = Date.now();
         //Show the start message.
         showStartMessage();
         //Build the queue as user calls group or test.
