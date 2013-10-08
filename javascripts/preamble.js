@@ -1,7 +1,7 @@
-/*global userConfig*/
-// Coccyx-Test 1.0.0
-// (c) 2013 Jeffrey Schwartz
-// Coccyx-Test may be freely distributed under the MIT license.
+/*global preambleConfig*/
+//Preamble 1.0.0
+//(c) 2013 Jeffrey Schwartz
+//Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
@@ -94,7 +94,7 @@
 
     //Configuration
     function configure(){
-        config = window.userConfig ? merge(defaultConfig, userConfig) : defaultConfig;
+        config = window.preambleConfig ? merge(defaultConfig, preambleConfig) : defaultConfig;
         isConfigured = true;
     }
 
@@ -443,7 +443,7 @@
 
     //A small set of window globals to make writing test scripts easier. If
     //the windowGlabals config option is false then window globals will not
-    //be used except for the the one CoccyxTest name space which is used
+    //be used except for the the one Preamble name space which is used
     //to define group and test.
     if(config.windowGlobals){
         window.group = group;
@@ -455,7 +455,7 @@
         window.isTrue = noteIsTrueAssertion;
         window.isFalse = noteIsFalseAssertion;
     }else{
-        window.CoccyxTest = {
+        window.Preamble = {
             group: group,
             test: test,
             asyncTest: asyncTest,
