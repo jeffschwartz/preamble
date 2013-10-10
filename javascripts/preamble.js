@@ -5,6 +5,9 @@
 (function(window, undefined){
     'use strict';
 
+    //Targeted DOM elements.
+    var elHeader = document.getElementById('header');
+    var elResults = document.getElementById('results');
     //Default configuration options.
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
@@ -39,7 +42,6 @@
     //Display caught errors to the browser.
     function errorHandler(){
         var html;
-        var elHeader = document.getElementById('header');
         isProcessAborted = true;
         if(arguments.length === 3){
             //window.onerror
@@ -59,7 +61,6 @@
 
     function showTotalsToBeRun(){
         var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
-        var elHeader = document.getElementById('header');
         elHeader.insertAdjacentHTML('beforeend', html);
     }
 
@@ -100,7 +101,6 @@
 
     function showResultsSummary(){
         var html;
-        var elHeader = document.getElementById('header');
         //Show elapsed time.
         html = '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
@@ -116,7 +116,6 @@
 
     function showAssertionFailures(){
         //Show failures in the results as a default.
-        var elResults = document.getElementById('results');
         elResults.style.display = 'block';
         results.forEach(function(result){
             var html;
@@ -418,7 +417,6 @@
     };
 
     function showStartMessage(){
-        var elHeader = document.getElementById('header');
         elHeader.innerHTML = '<p>Building queues. Please wait...</p>';
     }
 
