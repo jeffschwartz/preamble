@@ -5,24 +5,37 @@
     <link rel="stylesheet" href="stylesheets/preamble.css">
 </head>
 <body>
-    <div id="bannercontainer">
-        <h1>Preamble</h1>
-    </div>
     <div id="preamble-container">
-        <section id="hero">
-            <header id="header">
-            </header>
-        </section>
-        <section id="content">
-            <article id="results">
-            </article>
+        <div class="banner-container">
+            <h1>Preamble</h1>
+        </div>
+        <div class="body-container">
+            <section class="hero">
+                <header id="header"></header>
+            </section>
+            <section class="results-container">
+                <article id="results"></article>
+            </section>
+        </div>
+        <section class="footer-container">
+            <footer>Preamble &copy;2013 All Rigths Reserved</footer>
         </section>
     </div>
-    <section id="footer">
-        <footer>Preamble &copy;2013 All Rigths Reserved</footer>
-    </section>
+    <div id="preamble-dom-test-container"></div>
 
-    <script src="javascripts/preamble.js"></script>
-    <!-- Your JavaScripts Go Here-->
+    <!-- JavaScripts Go Here -->
+
+    <!-- code and libraries needed to run tests go here -->
+
+    <!-- preamble-config.js file has to be loaded before preamble.js is loaded!!! -->
+    <!--
+    <script src="javascripts/preamble-config.js"></script>
+    -->
+
+    <!-- preamble.js -->
+    <script src="javascripts/libs/preamble.js"></script>
+
+    <!-- test scripts follow preamble.js -->
+
 </body>
 </html>
