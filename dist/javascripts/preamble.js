@@ -376,9 +376,9 @@
     }
 
     //Starts the timer for an async test. When the timeout is triggered it calls
-    //callback allowing client to run their assertions. When the callback returns
-    //the processing of the next test is set by incrementing testQueueIndex and
-    //runTests is called to continue processing the testsQueue.
+    //callback allowing the client to run its assertions. When the callback returns
+    //the processing of the next test in testsQueue is setup by incrementing
+    //testQueueIndex and runTests is called to continue processing the testsQueue.
     function whenAsyncStopped(callback){
         // currentTestHash.whenAsyncStopped = callback;
         setTimeout(function(){
@@ -389,7 +389,8 @@
         }, currentTestHash.asyncInterval || config.asyncDelay);
     }
 
-    //Halts the processing of the testsQueue and call the current test's callback.
+    //Runs the current test asynchronously. Halts the processing
+    //of the testsQueue and calls the current test's callback.
     //See whenAsyncStopped.
     function runAsyncTest(){
         asyncRunning = true;
@@ -402,13 +403,9 @@
         testsQueueIndex++;
     }
 
-    //Runs each test in testsQueue to build assertionsQueue. When a test
-    //is run asynchronously (asyncTest) runTests terminates to prevent
-    //further processing of tests in the testsQueue until after the
-    //asynchronous test has completed. When the asynchronous test signals
-    //that it is done by calling asyncStop, the asyncRunning flag is
-    //set to false and runTests is called again, picking up at the next
-    //test in the testsQueue.
+    //Runs each test in testsQueue to build the assertionsQueue. When
+    //a test is run asynchronously the iteration over testsQueue is
+    //halted via asyncRunning === true (see runAsyncTest).runTests.
     function runTests(){
         var len = testsQueue.length;
         while(testsQueueIndex < len && !asyncRunning){
