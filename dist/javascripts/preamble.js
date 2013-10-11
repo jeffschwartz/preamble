@@ -34,7 +34,7 @@
     var totAssertionsFailed = 0;
     var isProcessAborted = false;
     var testsQueueIndex = 0;
-    var asyncTestRunning = false;
+    var asyncRunning = false;
     var timerStart;
     var timerEnd;
 
@@ -315,81 +315,108 @@
         assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, isAsync: isAsync});
     }
 
-    function throwMissingArgumentsException(errMessage){
+    function throwException(errMessage){
         throw new Error(errMessage);
     }
 
     function noteEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
-            throwMissingArgumentsException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
         }
         pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsTrueAssertion(value, label){
         if(arguments.length !== 2){
-            throwMissingArgumentsException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
+            throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
         }
         pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
     }
 
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
-            throwMissingArgumentsException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
+            throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
         }
         pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsFalseAssertion(value, label){
         if(arguments.length !== 2){
-            throwMissingArgumentsException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
+            throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
         }
         pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
     }
 
-    //Waits intervalArg || confing.asyncDelay milliseconds before calling
-    //the callback to build the assertion queue and then signal that the
-    //async test has completed by setting asyncTestRunning to false.
-    function asyncStop(callback, intervalArg){
-        setTimeout(function(){
-            callback(assert);
-            asyncTestRunning = false;
-        }, intervalArg || config.asyncDelay);
+    //Stops the processing of the testsQueue by setting asyncRunning to
+    //true and then 'waits' for asyncRunning to be set to false at which
+    //time it will restart the processing of the testsQueue.
+    function asyncStart(interval){
+        var timerId;
+        var asyncMax = interval || config.asyncDelay;
+        var startTime = Date.now();
+        asyncRunning = true;
+        timerId = setInterval(function(){
+            //If the async process is exceeding asyncMac then throw exception.
+            if(asyncRunning && (Date.now - startTime) > asyncMax){
+                clearInterval(timerId);
+                //TODO a better message for this exception?
+                throwException('Async process for test "' + currentTestHash.testLabel + '" has timed out');
+            }
+            if(currentTestHash.whenAsyncStopped){
+                currentTestHash.whenAsyncStopped();
+            }
+            testsQueueIndex++;
+            runTests();
+        }, 1);
     }
 
-    //Runs an asynchronous test and 'waits' for it to signal that it
-    //is done by calling asyncStop. When the test signals it is done
-    //runTests will be called to pick up from where it left off.
-    function runAsyncTest(test){
-        var timerId;
-        asyncTestRunning = true;
-        test.testCallback();
-        timerId = setInterval(function(){
-            if(!asyncTestRunning){
-                clearInterval(timerId);
-                testsQueueIndex++;
-                runTests();
-            }
-        }, 1);
+    //Sets asyncRunning to false.
+    function asyncStop(){
+        asyncRunning = false;
+    }
+
+    //Starts the timer for an async test. When the timeout is triggered it calls
+    //callback allowing client to run their assertions. When the callback returns
+    //the processing of the next test is set by incrementing testQueueIndex and
+    //runTests is called to continue processing the testsQueue.
+    function whenAsyncStopped(callback){
+        // currentTestHash.whenAsyncStopped = callback;
+        setTimeout(function(){
+            callback();
+            asyncRunning = false;
+            testsQueueIndex++;
+            runTests();
+        }, currentTestHash.asyncInterval || config.asyncDelay);
+    }
+
+    //Halts the processing of the testsQueue and call the current test's callback.
+    //See whenAsyncStopped.
+    function runAsyncTest(){
+        asyncRunning = true;
+        currentTestHash.testCallback(assert);
+    }
+
+    //Runs the current test synchronously.
+    function runSyncTest(){
+        currentTestHash.testCallback(assert);
+        testsQueueIndex++;
     }
 
     //Runs each test in testsQueue to build assertionsQueue. When a test
     //is run asynchronously (asyncTest) runTests terminates to prevent
     //further processing of tests in the testsQueue until after the
     //asynchronous test has completed. When the asynchronous test signals
-    //that it is done by calling asyncStop, the asyncTestRunning flag is
+    //that it is done by calling asyncStop, the asyncRunning flag is
     //set to false and runTests is called again, picking up at the next
     //test in the testsQueue.
     function runTests(){
         var len = testsQueue.length;
-        while(testsQueueIndex < len && !asyncTestRunning){
-            var test = testsQueue[testsQueueIndex];
-            currentTestHash = test;
-            if(test.isAsync){
-                runAsyncTest(test);
+        while(testsQueueIndex < len && !asyncRunning){
+            currentTestHash  = testsQueue[testsQueueIndex];
+            if(currentTestHash.isAsync){
+                runAsyncTest();
             }else{
-                test.testCallback(assert);
-                testsQueueIndex++;
+                runSyncTest();
             }
         }
         if(testsQueueIndex === len){
@@ -413,8 +440,9 @@
     };
 
     //Adds asynchronous tests to the queue like test except it marks the hash param 'isAsync' as true.
-    var asyncTest = function asyncTest(label, callback){
-        testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: true}));
+    //Forms: asyncTest(label[, interval], callback).
+    var asyncTest = function asyncTest(label){
+        testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncDelay}));
         totTests++;
     };
 
@@ -449,7 +477,9 @@
         window.group = group;
         window.test = test;
         window.asyncTest = asyncTest;
+        window.asyncStart = asyncStart;
         window.asyncStop = asyncStop;
+        window.whenAsyncStopped = whenAsyncStopped;
         window.equal = noteEqualAssertion;
         window.notEqual = noteNotEqualAssertion;
         window.isTrue = noteIsTrueAssertion;
@@ -459,7 +489,9 @@
             group: group,
             test: test,
             asyncTest: asyncTest,
-            asyncStop: asyncStop
+            asyncStart: asyncStart,
+            asyncStop: asyncStop,
+            whenAsyncStopped: whenAsyncStopped,
         };
         //Passed to test's callbacks. Not the real ones, instead
         //the ones that will further update their quue entries.
