@@ -11,8 +11,8 @@
     //Default configuration options.
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
-    //asyncDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncDelay: 500, noDom: false};
+    //asyncTestDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncPreTestDelay: 500, asyncTestDelay: 500, asyncPostTestDelay: 500, noDom: false};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -37,6 +37,7 @@
     var asyncRunning = false;
     var timerStart;
     var timerEnd;
+    var currentTestStep;
 
     //Display caught errors to the browser.
     function errorHandler(){
@@ -347,34 +348,6 @@
         pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
     }
 
-    //Stops the processing of the testsQueue by setting asyncRunning to
-    //true and then 'waits' for asyncRunning to be set to false at which
-    //time it will restart the processing of the testsQueue.
-    function asyncStart(interval){
-        var timerId;
-        var asyncMax = interval || config.asyncDelay;
-        var startTime = Date.now();
-        asyncRunning = true;
-        timerId = setInterval(function(){
-            //If the async process is exceeding asyncMac then throw exception.
-            if(asyncRunning && (Date.now - startTime) > asyncMax){
-                clearInterval(timerId);
-                //TODO a better message for this exception?
-                throwException('Async process for test "' + currentTestHash.testLabel + '" has timed out');
-            }
-            if(currentTestHash.whenAsyncStopped){
-                currentTestHash.whenAsyncStopped();
-            }
-            testsQueueIndex++;
-            runTests();
-        }, 1);
-    }
-
-    //Sets asyncRunning to false.
-    function asyncStop(){
-        asyncRunning = false;
-    }
-
     //Starts the timer for an async test. When the timeout is triggered it calls
     //callback allowing client to run their assertions. When the callback returns
     //the processing of the next test is set by incrementing testQueueIndex and
@@ -386,7 +359,7 @@
             asyncRunning = false;
             testsQueueIndex++;
             runTests();
-        }, currentTestHash.asyncInterval || config.asyncDelay);
+        }, currentTestHash.asyncInterval || config.asyncTestDelay);
     }
 
     //Halts the processing of the testsQueue and call the current test's callback.
@@ -402,6 +375,68 @@
         testsQueueIndex++;
     }
 
+    //Runs setup synchronously for each test.
+    function runBeforeEachSync(){
+        currentTestHash.beforeEach();
+        currentTestStep++;
+        runTest();
+    }
+
+    //Runs setup asynchronously for each test.
+    function runBeforeEachAsync(){
+        currentTestHash.runBeforeEachAsync();
+        setTimeout(function(){
+            currentTestStep++;
+            runTest();
+        }, currentTestHash.asyncInterval || config.asyncTestDelay);
+    }
+
+    //Runs tear down synchronously for each test.
+    function runAfterEachSync(){
+        currentTestHash.afterEach();
+        currentTestStep++;
+        runTest();
+    }
+
+    //Runs tear down asynchronously for each test.
+    function runAfterEachAsync(){
+        currentTestHash.runAfterEachAsync();
+        setTimeout(function(){
+            currentTestStep++;
+            runTest();
+        }, currentTestHash.asyncInterval || config.asyncTestDelay);
+    }
+
+    function runTest(){
+        setTimeout(function(){
+            switch(currentTestStep){
+                case 0:
+                    if(currentTestHash.beforeEachTest){
+                        runBeforeEachSync();
+                    }else if(currentTestHash.beforeEachTestAsync){
+                        runBeforeEachAsync();
+                    }
+                    break;
+                case 1:
+                    if(currentTestHash.isAsync){
+                        runAsyncTest();
+                    }else{
+                        runSyncTest();
+                    }
+                    break;
+                case 2:
+                    if(currentTestHash.afterEachTest){
+                        runAfterEachSync();
+                    }else if(currentTestHash.afterEachTestAsync){
+                        runAfterEachAsync();
+                    }
+                    break;
+                case 3:
+                    break;
+            }
+        }, 1);
+    }
+
     //Runs each test in testsQueue to build assertionsQueue. When a test
     //is run asynchronously (asyncTest) runTests terminates to prevent
     //further processing of tests in the testsQueue until after the
@@ -413,6 +448,7 @@
         var len = testsQueue.length;
         while(testsQueueIndex < len && !asyncRunning){
             currentTestHash  = testsQueue[testsQueueIndex];
+            currentTestStep = 0;
             if(currentTestHash.isAsync){
                 runAsyncTest();
             }else{
@@ -442,7 +478,7 @@
     //Adds asynchronous tests to the queue like test except it marks the hash param 'isAsync' as true.
     //Forms: asyncTest(label[, interval], callback).
     var asyncTest = function asyncTest(label){
-        testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncDelay}));
+        testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
         totTests++;
     };
 
@@ -450,7 +486,7 @@
         elHeader.innerHTML = '<p>Building queues. Please wait...</p>';
     }
 
-    //Called after the testsQueue has been generate.
+    //Called after the testsQueue has been generated.
     function runner(){
         //Timeout to allow user to see total to be run message.
         setTimeout(function(){
@@ -477,8 +513,6 @@
         window.group = group;
         window.test = test;
         window.asyncTest = asyncTest;
-        window.asyncStart = asyncStart;
-        window.asyncStop = asyncStop;
         window.whenAsyncStopped = whenAsyncStopped;
         window.equal = noteEqualAssertion;
         window.notEqual = noteNotEqualAssertion;
@@ -489,8 +523,6 @@
             group: group,
             test: test,
             asyncTest: asyncTest,
-            asyncStart: asyncStart,
-            asyncStop: asyncStop,
             whenAsyncStopped: whenAsyncStopped,
         };
         //Passed to test's callbacks. Not the real ones, instead
