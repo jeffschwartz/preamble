@@ -36,7 +36,6 @@
     var isProcessAborted = false;
     var testsQueueIndex = 0;
     var testIsRunning = false;
-    // var asyncRunning = false;
     var timerStart;
     var timerEnd;
     var currentTestStep;
@@ -296,7 +295,6 @@
             //Synchronously iterate over the assertionsQueue, running each item's assertion.
             for (i = 0, len = assertionsQueue.length; i < len; i++) {
                 item = assertionsQueue[i];
-                // console.log('Running asserted defined by: ', item);
                 item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
                 if(item.result){
                     totAssertionsPassed++;
@@ -360,9 +358,6 @@
         // currentTestHash.whenAsyncStopped = callback;
         setTimeout(function(){
             callback();
-            // asyncRunning = false;
-            // testsQueueIndex++;
-            // runTests();
             currentTestStep++;
             runTest();
         }, currentTestHash.asyncInterval || config.asyncTestDelay);
@@ -371,7 +366,6 @@
     //Halts the processing of the testsQueue and call the current test's callback.
     //See whenAsyncStopped.
     function runAsyncTest(){
-        // asyncRunning = true;
         if(currentTestHash.beforeTestVal){
             currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
         }else{
@@ -386,7 +380,6 @@
         }else{
             currentTestHash.testCallback(assert);
         }
-        // testsQueueIndex++;
         currentTestStep++;
         runTest();
     }
@@ -474,15 +467,9 @@
     //test in the testsQueue.
     function runTests(){
         var len = testsQueue.length;
-        // while(testsQueueIndex < len && !asyncRunning){
         while(testsQueueIndex < len && !testIsRunning){
             currentTestHash  = testsQueue[testsQueueIndex];
             currentTestStep = 0;
-            // if(currentTestHash.isAsync){
-            //     runAsyncTest();
-            // }else{
-            //     runSyncTest();
-            // }
             testIsRunning = true;
             runTest();
         }
@@ -594,7 +581,7 @@
             whenAsyncStopped: whenAsyncStopped,
         };
         //Passed to test's callbacks. Not the real ones, instead
-        //the ones that will further update their quue entries.
+        //the ones that will further update their queue entries.
         assert = {
             equal: noteEqualAssertion,
             notEqual: noteNotEqualAssertion,
