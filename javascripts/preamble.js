@@ -12,7 +12,8 @@
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
     //asyncTestDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncPreTestDelay: 500, asyncTestDelay: 500, asyncPostTestDelay: 500, noDom: false};
+    //asyncBeforeAfterTestDelay: {default 500 milliseconds} - set to some other number of milliseconds used to wait for asynchronous before and after tests to complete.
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500, noDom: false};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -35,7 +36,7 @@
     var isProcessAborted = false;
     var testsQueueIndex = 0;
     var testIsRunning = false;
-    var asyncRunning = false;
+    // var asyncRunning = false;
     var timerStart;
     var timerEnd;
     var currentTestStep;
@@ -61,8 +62,10 @@
     }
 
     function showTotalsToBeRun(){
-        var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
-        elHeader.insertAdjacentHTML('beforeend', html);
+        setTimeout(function(){
+            var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
+            elHeader.insertAdjacentHTML('beforeend', html);
+        }, 1);
     }
 
     function combine(){
@@ -357,55 +360,67 @@
         // currentTestHash.whenAsyncStopped = callback;
         setTimeout(function(){
             callback();
-            asyncRunning = false;
-            testsQueueIndex++;
-            runTests();
+            // asyncRunning = false;
+            // testsQueueIndex++;
+            // runTests();
+            currentTestStep++;
+            runTest();
         }, currentTestHash.asyncInterval || config.asyncTestDelay);
     }
 
     //Halts the processing of the testsQueue and call the current test's callback.
     //See whenAsyncStopped.
     function runAsyncTest(){
-        asyncRunning = true;
-        currentTestHash.testCallback(assert);
+        // asyncRunning = true;
+        if(currentTestHash.beforeTestVal){
+            currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
+        }else{
+            currentTestHash.testCallback(assert);
+        }
     }
 
     //Runs the current test synchronously.
     function runSyncTest(){
-        currentTestHash.testCallback(assert);
-        testsQueueIndex++;
+        if(currentTestHash.beforeTestVal){
+            currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
+        }else{
+            currentTestHash.testCallback(assert);
+        }
+        // testsQueueIndex++;
+        currentTestStep++;
+        runTest();
     }
 
     //Runs setup synchronously for each test.
     function runBeforeEachSync(){
-        currentTestHash.beforeEach();
+        currentTestHash.beforeTestVal = currentTestHash.beforeEachTest();
         currentTestStep++;
         runTest();
     }
 
     //Runs setup asynchronously for each test.
     function runBeforeEachAsync(){
-        currentTestHash.runBeforeEachAsync();
+        currentTestHash.beforeTestVal = currentTestHash.asyncBeforeEachTest();
         setTimeout(function(){
             currentTestStep++;
             runTest();
-        }, currentTestHash.asyncInterval || config.asyncTestDelay);
+        }, currentTestHash.asyncBeforeTestInterval || config.asyncBeforeAfterTestDelay);
     }
 
     //Runs tear down synchronously for each test.
     function runAfterEachSync(){
-        currentTestHash.afterEach();
+        currentTestHash.afterEachTest();
         currentTestStep++;
         runTest();
     }
 
     //Runs tear down asynchronously for each test.
     function runAfterEachAsync(){
-        currentTestHash.runAfterEachAsync();
+        currentTestHash.asyncAfterEachTest();
         setTimeout(function(){
             currentTestStep++;
             runTest();
-        }, currentTestHash.asyncInterval || config.asyncTestDelay);
+        }, currentTestHash.asyncAfterTestInterval || config.asyncBeforeAfterTestDelay);
     }
 
     //Runs the 4 steps of a test's life cycle - before each test, test, after each
@@ -415,11 +430,13 @@
         setTimeout(function(){
             switch(currentTestStep){
                 case 0: //Runs beforeEach.
-                    testIsRunning = true;
                     if(currentTestHash.beforeEachTest){
                         runBeforeEachSync();
-                    }else if(currentTestHash.beforeEachTestAsync){
+                    }else if(currentTestHash.asyncBeforeEachTest){
                         runBeforeEachAsync();
+                    }else{
+                        currentTestStep++;
+                        runTest();
                     }
                     break;
                 case 1: //Runs the test.
@@ -432,8 +449,11 @@
                 case 2: //Runs afterEach.
                     if(currentTestHash.afterEachTest){
                         runAfterEachSync();
-                    }else if(currentTestHash.afterEachTestAsync){
+                    }else if(currentTestHash.asyncAfterEachTest){
                         runAfterEachAsync();
+                    }else{
+                        currentTestStep++;
+                        runTest();
                     }
                     break;
                 case 3: //Sets up the processing of the next test to be run.
@@ -458,16 +478,47 @@
         while(testsQueueIndex < len && !testIsRunning){
             currentTestHash  = testsQueue[testsQueueIndex];
             currentTestStep = 0;
-            if(currentTestHash.isAsync){
-                runAsyncTest();
-            }else{
-                runSyncTest();
-            }
+            // if(currentTestHash.isAsync){
+            //     runAsyncTest();
+            // }else{
+            //     runSyncTest();
+            // }
+            testIsRunning = true;
+            runTest();
         }
         if(testsQueueIndex === len){
             //Run the assertions in the assertionsQueue.
             runAssertions();
         }
+    }
+
+    //Note runBeforeEach.
+    function beforeEachTest(callback){
+        currentTestHash.beforeEachTest = callback;
+    }
+
+    //Note asyncRunBeforeEach.
+    function asyncBeforeEachTest(callback){
+        if(arguments.length === 2){
+            currentTestHash.asyncBeforeTestInterval = arguments[0];
+            currentTestHash.asyncBeforeEachTest = arguments[1];
+        }else{
+            currentTestHash.asyncBeforeEachTest = callback;
+        }
+    }
+
+    //Note runAfterEach.
+    function afterEachTest(callback){
+        currentTestHash.afterEachTest = callback;
+    }
+
+    //Note asyncRunAfterEach.
+    function asyncAfterEachTest(callback){
+        if(arguments.length === 2){
+            currentTestHash.asyncAfterTestInterval = arguments[0];
+            currentTestHash.asyncAfterEachTest = arguments[1];
+        }
+        currentTestHash.asyncAfterEachTest = callback;
     }
 
     //A label for a group of tests.
@@ -520,6 +571,10 @@
     //to define group and test.
     if(config.windowGlobals){
         window.group = group;
+        window.beforeEachTest = beforeEachTest;
+        window.asyncBeforeEachTest = asyncBeforeEachTest;
+        window.afterEachTest = afterEachTest;
+        window.asyncAfterEachTest = asyncAfterEachTest;
         window.test = test;
         window.asyncTest = asyncTest;
         window.whenAsyncStopped = whenAsyncStopped;
@@ -530,6 +585,10 @@
     }else{
         window.Preamble = {
             group: group,
+            beforeEachTest: beforeEachTest,
+            asyncBeforeEachTest: asyncBeforeEachTest,
+            afterEachTest: afterEachTest,
+            asyncAfterEachTest: asyncAfterEachTest,
             test: test,
             asyncTest: asyncTest,
             whenAsyncStopped: whenAsyncStopped,
