@@ -34,6 +34,7 @@
     var totAssertionsFailed = 0;
     var isProcessAborted = false;
     var testsQueueIndex = 0;
+    var testIsRunning = false;
     var asyncRunning = false;
     var timerStart;
     var timerEnd;
@@ -407,31 +408,38 @@
         }, currentTestHash.asyncInterval || config.asyncTestDelay);
     }
 
+    //Runs the 4 steps of a test's life cycle - before each test, test, after each
+    //test, and post test. The current test is the one pointed to by currentTestHash.
     function runTest(){
+        //Run the test life cycle asynchronously so the Browser remains responsive.
         setTimeout(function(){
             switch(currentTestStep){
-                case 0:
+                case 0: //Runs beforeEach.
+                    testIsRunning = true;
                     if(currentTestHash.beforeEachTest){
                         runBeforeEachSync();
                     }else if(currentTestHash.beforeEachTestAsync){
                         runBeforeEachAsync();
                     }
                     break;
-                case 1:
+                case 1: //Runs the test.
                     if(currentTestHash.isAsync){
                         runAsyncTest();
                     }else{
                         runSyncTest();
                     }
                     break;
-                case 2:
+                case 2: //Runs afterEach.
                     if(currentTestHash.afterEachTest){
                         runAfterEachSync();
                     }else if(currentTestHash.afterEachTestAsync){
                         runAfterEachAsync();
                     }
                     break;
-                case 3:
+                case 3: //Sets up the processing of the next test to be run.
+                    testsQueueIndex++;
+                    testIsRunning = false;
+                    runTests();
                     break;
             }
         }, 1);
@@ -446,7 +454,8 @@
     //test in the testsQueue.
     function runTests(){
         var len = testsQueue.length;
-        while(testsQueueIndex < len && !asyncRunning){
+        // while(testsQueueIndex < len && !asyncRunning){
+        while(testsQueueIndex < len && !testIsRunning){
             currentTestHash  = testsQueue[testsQueueIndex];
             currentTestStep = 0;
             if(currentTestHash.isAsync){
