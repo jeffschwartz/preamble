@@ -311,7 +311,7 @@
             timerEnd = Date.now();
             //Report the results.
             reporter();
-        }, 2000);
+        }, 1);
     }
 
     function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
@@ -363,8 +363,7 @@
         }, currentTestHash.asyncInterval || config.asyncTestDelay);
     }
 
-    //Halts the processing of the testsQueue and call the current test's callback.
-    //See whenAsyncStopped.
+    //Runs the current test asynchronously which will call whenAsyncStopped (see above).
     function runAsyncTest(){
         if(currentTestHash.beforeTestVal){
             currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
@@ -373,7 +372,9 @@
         }
     }
 
-    //Runs the current test synchronously.
+    //Runs the current test synchronously. When the callback returns the
+    //processing of the next test is set by incrementing testQueueIndex and
+    //runTests is called to continue processing the testsQueue.
     function runSyncTest(){
         if(currentTestHash.beforeTestVal){
             currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
@@ -416,8 +417,8 @@
         }, currentTestHash.asyncAfterTestInterval || config.asyncBeforeAfterTestDelay);
     }
 
-    //Runs the 4 steps of a test's life cycle - before each test, test, after each
-    //test, and post test. The current test is the one pointed to by currentTestHash.
+    //Runs the 4 steps of a test's life cycle - before each test, test, after each test,
+    //and setup next test. The current test is the one pointed to by currentTestHash.
     function runTest(){
         //Run the test life cycle asynchronously so the Browser remains responsive.
         setTimeout(function(){
@@ -516,19 +517,20 @@
         callback();
     };
 
-    //Adds tests to the queue to be run once the queue is filled.
+    //Adds a synchronous test to the testsQueue.
     var test = function test(label, callback){
         testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
         totTests++;
     };
 
-    //Adds asynchronous tests to the queue like test except it marks the hash param 'isAsync' as true.
+    //Adds an asynchronous to the testsQueue.
     //Forms: asyncTest(label[, interval], callback).
     var asyncTest = function asyncTest(label){
         testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
         totTests++;
     };
 
+    //Shown while the testsQueue is being loaded.
     function showStartMessage(){
         elHeader.innerHTML = '<p>Building queues. Please wait...</p>';
     }
@@ -536,10 +538,13 @@
     //Called after the testsQueue has been generated.
     function runner(){
         //Timeout to allow user to see total to be run message.
-        setTimeout(function(){
-            //Build assertionQueue.
-            runTests();
-        }, 2000);
+        // setTimeout(function(){
+        //     //Build assertionQueue.
+        //     runTests();
+        // }, 2000);
+        //Record the start time.
+        timerStart = Date.now();
+        runTests();
     }
 
     /**
@@ -549,13 +554,11 @@
     //Configure the runtime environment.
     configure();
 
-    //Global error handler
+    //Handle global errors.
     window.onerror = errorHandler;
 
-    //A small set of window globals to make writing test scripts easier. If
-    //the windowGlabals config option is false then window globals will not
-    //be used except for the the one Preamble name space which is used
-    //to define group and test.
+    //If the windowGlabals config option is false then window globals will
+    //not //be used and the one Preamble name space will be used instead.
     if(config.windowGlobals){
         window.group = group;
         window.beforeEachTest = beforeEachTest;
@@ -580,8 +583,8 @@
             asyncTest: asyncTest,
             whenAsyncStopped: whenAsyncStopped,
         };
-        //Passed to test's callbacks. Not the real ones, instead
-        //the ones that will further update their queue entries.
+        //Functions to "note" assertions are passed as the
+        //1st parameter to each test's callback function.
         assert = {
             equal: noteEqualAssertion,
             notEqual: noteNotEqualAssertion,
@@ -590,10 +593,12 @@
         };
     }
 
+    /**
+     * Wait while the testsQueue is loaded.
+     */
+
     //Catch errors.
     try{
-        //Record the start time.
-        timerStart = Date.now();
         //Show the start message.
         showStartMessage();
         //Build the queue as user calls group or test.
