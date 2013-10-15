@@ -311,7 +311,7 @@
             timerEnd = Date.now();
             //Report the results.
             reporter();
-        }, 2000);
+        }, 1);
     }
 
     function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
@@ -538,10 +538,13 @@
     //Called after the testsQueue has been generated.
     function runner(){
         //Timeout to allow user to see total to be run message.
-        setTimeout(function(){
-            //Build assertionQueue.
-            runTests();
-        }, 2000);
+        // setTimeout(function(){
+        //     //Build assertionQueue.
+        //     runTests();
+        // }, 2000);
+        //Record the start time.
+        timerStart = Date.now();
+        runTests();
     }
 
     /**
@@ -596,8 +599,6 @@
 
     //Catch errors.
     try{
-        //Record the start time.
-        timerStart = Date.now();
         //Show the start message.
         showStartMessage();
         //Build the queue as user calls group or test.
