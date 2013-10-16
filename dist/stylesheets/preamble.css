@@ -10,6 +10,12 @@ h1{
     font-size: 2.5rem;
     color: #888;
 }
+h1 small{
+    font-style: italic;
+    margin-left: 10px;
+    font-size: 1.5rem;
+    color: #AAA;
+}
 header{
     background-color: #FFF;
     position: fixed;

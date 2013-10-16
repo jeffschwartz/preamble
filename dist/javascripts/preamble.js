@@ -5,7 +5,10 @@
 (function(window, undefined){
     'use strict';
 
+    //Version
+    var version = 'v1.0.0';
     //Targeted DOM elements.
+    var elHeader = document.getElementById('header');
     var elStatusContainer = document.getElementById('status-container');
     var elResults = document.getElementById('results-container');
     //Default configuration options.
@@ -39,6 +42,9 @@
     var timerStart;
     var timerEnd;
     var currentTestStep;
+
+    //Display the version.
+    elHeader.insertAdjacentHTML('beforeend', '<small>' + version + '</small>');
 
     //Display caught errors to the browser.
     function errorHandler(){
@@ -107,16 +113,16 @@
 
     function showResultsSummary(){
         var html;
+        //Show elapsed time.
+        html = '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html = '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html += '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html = '<p class="summary failed"> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html += '<p class="summary failed"> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
         }else{
-            html = '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html += '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
-        //Show elapsed time.
-        html += '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
