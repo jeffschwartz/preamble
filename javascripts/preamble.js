@@ -5,9 +5,12 @@
 (function(window, undefined){
     'use strict';
 
+    //Version
+    var version = 'v1.0.0';
     //Targeted DOM elements.
     var elHeader = document.getElementById('header');
-    var elResults = document.getElementById('results');
+    var elStatusContainer = document.getElementById('status-container');
+    var elResults = document.getElementById('results-container');
     //Default configuration options.
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
@@ -40,6 +43,9 @@
     var timerEnd;
     var currentTestStep;
 
+    //Display the version.
+    elHeader.insertAdjacentHTML('beforeend', '<small>' + version + '</small>');
+
     //Display caught errors to the browser.
     function errorHandler(){
         var html;
@@ -51,7 +57,7 @@
             //catch(e)
             html = '<p>An error occurred,  "' + arguments[0]  + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
         }
-        elHeader.innerHTML = html;
+        elStatusContainer.innerHTML = html;
     }
 
     //Makes words plural if their counts are 0 or greater than 1.
@@ -63,7 +69,7 @@
     function showTotalsToBeRun(){
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
-            elHeader.insertAdjacentHTML('beforeend', html);
+            elStatusContainer.insertAdjacentHTML('beforeend', html);
         }, 1);
     }
 
@@ -111,32 +117,67 @@
         html = '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html += '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html += '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html += '<p class="summary failed"> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
         }else{
-            html += '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html += '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
-        elHeader.insertAdjacentHTML('beforeend', html);
+        elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    function showAssertionFailures(){
-        //Show failures in the results as a default.
+    // function showAssertionFailures(){
+    //     //Show failures in the results as a default.
+    //     elResults.style.display = 'block';
+    //     results.forEach(function(result){
+    //         var html;
+    //         if(!result.result){
+    //             html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
+    //             elResults.insertAdjacentHTML('beforeend', html);
+    //         }
+    //     });
+    // }
+
+    function showAllResults(){
+        var groupLabel = '';
+        var testLabel = '';
+        var html = '';
         elResults.style.display = 'block';
         results.forEach(function(result){
-            var html;
+            if(result.testLabel !== testLabel){
+                if(html.length){
+                    html += '</div>';
+                }
+            }
+            if(result.groupLabel !== groupLabel){
+                if(html.length){
+                    html += '</div>';
+                }
+            }
+            if(result.groupLabel !== groupLabel){
+                html += '<div class="group">' + result.groupLabel;
+                groupLabel = result.groupLabel;
+            }
+            if(result.testLabel !== testLabel){
+                html += '<div class="test">' + result.testLabel;
+                testLabel = result.testLabel;
+            }
             if(!result.result){
-                html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
-                elResults.insertAdjacentHTML('beforeend', html);
+                html += '<div class="assertion failed">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
+            }else{
+                html += '<div class="assertion passed">"' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
             }
         });
+        html += '</div></div>';
+        elResults.innerHTML = html;
     }
 
     function showResults(){
         showResultsSummary();
-        if(totAssertionsFailed){
-            showAssertionFailures();
-        }
+        // if(totAssertionsFailed){
+        //     showAssertionFailures();
+        // }
+        showAllResults();
     }
 
     function genTotalsFromResults(){
@@ -532,7 +573,7 @@
 
     //Shown while the testsQueue is being loaded.
     function showStartMessage(){
-        elHeader.innerHTML = '<p>Building queues. Please wait...</p>';
+        elStatusContainer.innerHTML = '<p>Building queues. Please wait...</p>';
     }
 
     //Called after the testsQueue has been generated.

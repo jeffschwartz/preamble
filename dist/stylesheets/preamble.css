@@ -1,97 +1,77 @@
-body {
-    font-size: 62.5%;
+html, body{
+    font-family: 'Lora', serif;
+    font-size: 11px;
     margin: 0;
-    background-color: #004E00;
-    box-sizing: border-box;
+    color: #aaa;
 }
-.banner-container{
-    max-width: 50%;
-    margin: 50px auto 0 auto;
-    color: #fff;
-    box-sizing: border-box;
-    padding: 0 20px;
-}
-.banner-container h1{
+h1{
+    font-style: italic;
+    margin: 0;
     font-size: 2.5rem;
-    margin: 0;
+    color: #888;
 }
-.body-container {
-    border: solid 1px #fff;
-    max-width: 50%;
-    margin: 0 auto;
-    border-radius: 20px;
+h1 small{
+    font-style: italic;
+    margin-left: 10px;
+    font-size: 1.5rem;
+    color: #AAA;
 }
-section {
-    max-width: 100%;
-    margin: 0 auto;
-    text-align: left;
-    box-sizing: border-box;
-}
-.hero {
-    background-color: #008000;
-    font-size: 1.3rem;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    padding: 25px;
-    color: #fff;
-    font-weight: 400;
-}
-header {
-    max-width: 100%;
-    text-align: left;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-header p{
-    margin: 0;
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: #fff;
-}
-h1 {
-    font-size: 2rem;
-    margin: 0;
-}
-h2 {
-    font-size: 1.2rem;
-    margin: 0;
-}
-h3 {
-    font-size: 1.1rem;
-    margin: 0;
-}
-.results-container {
+header{
+    background-color: #FFF;
+    position: fixed;
+    top: 0;
+    z-index: 10000;
     width: 100%;
-    padding: 0 15px;
-    border-right: solid 3px #0A8A0A;
-    border-bottom: solid 3px #0A8A0A;
-    border-left: solid 3px #0A8A0A;
-    background-color: #fff;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-}
-.results-container article {
-    max-width: 100%;
-    font-size: .9rem;
-    font-weight: bold;
-    color: #4F0000;
-    margin: 0 auto;
-    text-align: left;
+    padding: 10px 0 10px 20px;
+    opacity: 1;
+    border-bottom: solid 1px #CCC;
     box-sizing: border-box;
-    padding: 10px 0;
 }
-.failed-result {
-    color: #f00;
-    padding: 5px 0;
+.container{
+    margin: 41px 0 0 0;
+    width: 100%;
+    box-sizing: border-box;
 }
-.footer-container {
-    text-align: center;
-    margin-top: 50px;
-    background-color: transparent;
-    font-size: .8rem;
-    color: #fff;
+p:last-child{
+    margin-bottom: 0;
 }
-#preamble-dom-test-container {
+#results-container{
+    font-size: 1rem;
+    display: none;
+}
+section, footer{
+    padding: 10px 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+section{
+    border-bottom: solid 1px #CCC;
+    font-size: 1rem;
+}
+.group {
+    padding-top: 15px;
+    color: #888;
+}
+.group:first-child {
+    padding-top: 0;
+}
+.test, .assertion{
+    color: #888;
+    padding: 5px 20px 0 20px;
+}
+.passed {
+    color: #008400;
+}
+.failed {
+    color: #f40000;
+    font-weight: bold;
+}
+footer{
+    border: none;
+    font-size: 1rem;
+    margin: 20px 0;
+}
+.test-container{
     position: absolute;
     top: -10000px;
     left: -10000px;
