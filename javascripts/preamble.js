@@ -107,16 +107,16 @@
 
     function showResultsSummary(){
         var html;
-        //Show elapsed time.
-        html = '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html += '<p>' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html = '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html = '<p class="summary failed"> 0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
         }else{
-            html += '<p>' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html = '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
+        //Show elapsed time.
+        html += '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
@@ -135,35 +135,35 @@
     function showAllResults(){
         var groupLabel = '';
         var testLabel = '';
-        var html1 = '';
+        var html = '';
         elResults.style.display = 'block';
         results.forEach(function(result){
             if(result.testLabel !== testLabel){
-                if(html1.length){
-                    html1 += '</div>';
+                if(html.length){
+                    html += '</div>';
                 }
             }
             if(result.groupLabel !== groupLabel){
-                if(html1.length){
-                    html1 += '</div>';
+                if(html.length){
+                    html += '</div>';
                 }
             }
             if(result.groupLabel !== groupLabel){
-                html1 += '<div class="group">' + result.groupLabel;
+                html += '<div class="group">' + result.groupLabel;
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
-                html1 += '<div class="test">' + result.testLabel;
+                html += '<div class="test">' + result.testLabel;
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html1 += '<div class="assertion assertion-failed">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
+                html += '<div class="assertion failed">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
             }else{
-                html1 += '<div class="assertion assertion-passed">"' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
+                html += '<div class="assertion passed">"' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
             }
         });
-        html1 += '</div></div>';
-        elResults.insertAdjacentHTML('beforeend', html1);
+        html += '</div></div>';
+        elResults.innerHTML = html;
     }
 
     function showResults(){

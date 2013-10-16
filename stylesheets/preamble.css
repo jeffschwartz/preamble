@@ -1,6 +1,6 @@
 html, body{
     font-family: 'Lora', serif;
-    font-size: 10px;
+    font-size: 11px;
     margin: 0;
     color: #aaa;
 }
@@ -10,20 +10,37 @@ h1{
     font-size: 2.5rem;
     color: #888;
 }
+header{
+    background-color: #FFF;
+    position: fixed;
+    top: 0;
+    z-index: 10000;
+    width: 100%;
+    padding: 10px 0 10px 20px;
+    opacity: 1;
+    border-bottom: solid 1px #CCC;
+    box-sizing: border-box;
+}
 .container{
-    margin: 0;
+    margin: 41px 0 0 0;
     width: 100%;
     box-sizing: border-box;
+}
+p:last-child{
+    margin-bottom: 0;
 }
 #results-container{
     font-size: 1rem;
+    display: none;
 }
 section, footer{
     padding: 10px 20px;
-    border-bottom: solid 1px #CCC;
     width: 100%;
-    font-size: 1.5rem;
     box-sizing: border-box;
+}
+section{
+    border-bottom: solid 1px #CCC;
+    font-size: 1rem;
 }
 .group {
     padding-top: 15px;
@@ -36,11 +53,12 @@ section, footer{
     color: #888;
     padding: 5px 20px 0 20px;
 }
-.assertion-passed {
+.passed {
     color: #008400;
 }
-.assertion-failed {
-    color: #840000;
+.failed {
+    color: #f40000;
+    font-weight: bold;
 }
 footer{
     border: none;
