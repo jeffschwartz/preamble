@@ -30,7 +30,7 @@ module.exports = function ( grunt ) {
         },
         watch  : {
             scripts : {
-                files   : ['javascripts/preamble.js'],
+                files   : ['javascripts/preamble.js', 'stylesheets/preamble.css'],
                 tasks   : ['dist'],
                 options : {
                     interrupt : true
