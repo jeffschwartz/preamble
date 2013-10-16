@@ -151,21 +151,21 @@
             }
             if(result.groupLabel !== groupLabel){
                 if(html.length){
-                    html += '</div>';
+                    html += '</div></a>';
                 }
             }
             if(result.groupLabel !== groupLabel){
-                html += '<div class="group">' + result.groupLabel;
+                html += '<div class="group-container"><a class="group" href="?group=' + encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
-                html += '<div class="test">' + result.testLabel;
+                html += '<div class="tests-container"><a class="test" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html += '<div class="assertion failed">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
+                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
             }else{
-                html += '<div class="assertion passed">"' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
+                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">""' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
             }
         });
         html += '</div></div>';
