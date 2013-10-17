@@ -1,6 +1,6 @@
 module.exports = function ( grunt ) {
 
-    // Project configuration.
+    //Project configuration.
     grunt.initConfig( {
         pkg    : grunt.file.readJSON( 'package.json' ),
         uglify: {
@@ -8,16 +8,6 @@ module.exports = function ( grunt ) {
                 files: {
                     'dist/javascripts/preamble.min.js': ['dist/javascripts/preamble.js']
                 }
-            }
-        },
-        compress: {
-            main: {
-                options: {
-                  mode: 'gzip'
-                },
-                expand: true,
-                src: ['dist/javascripts/preamble.min.js'],
-                ext: '.gz.js'
             }
         },
         copy: {
@@ -39,16 +29,15 @@ module.exports = function ( grunt ) {
         }
     } );
 
-    // Load the plugins
+    //Load the plugins.
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks( 'grunt-contrib-watch' );
     grunt.loadNpmTasks( 'grunt-contrib-copy' );
 
-    // Default task(s).
+    //Default task(s).
     grunt.registerTask( 'default', ['watch'] );
 
-    // Alias Tasks
-    grunt.registerTask( 'dist', 'Running Grunt prod dist', ['copy:todist', 'uglify', 'compress'] );
+    //Alias Tasks.
+    grunt.registerTask( 'dist', 'Running Grunt prod dist', ['copy:todist', 'uglify'] );
 
 };
