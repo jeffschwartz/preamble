@@ -11,12 +11,12 @@
     var elHeader = document.getElementById('header');
     var elStatusContainer = document.getElementById('status-container');
     var elResults = document.getElementById('results-container');
-    //Default configuration options.
+    //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asynTestDelay: 20}).
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
     //asyncTestDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
     //asyncBeforeAfterTestDelay: {default 500 milliseconds} - set to some other number of milliseconds used to wait for asynchronous before and after tests to complete.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500, noDom: false};
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -41,6 +41,7 @@
     var testIsRunning = false;
     var timerStart;
     var timerEnd;
+    //Filters.
     var currentTestStep;
     var groupFilter;
     var testFilter;
@@ -110,10 +111,6 @@
     //Configuration
     function configure(){
         config = window.preambleConfig ? merge(defaultConfig, preambleConfig) : defaultConfig;
-        //Check the DoM for a div with an id of 'preamble-container'.
-        if(!document.getElementById('preamble-container')){
-            config.noDom = true;
-        }
     }
 
     function showResultsSummary(){
@@ -131,18 +128,6 @@
         html += '<a href="./">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
-
-    // function showAssertionFailures(){
-    //     //Show failures in the results as a default.
-    //     elResults.style.display = 'block';
-    //     results.forEach(function(result){
-    //         var html;
-    //         if(!result.result){
-    //             html = '<div class="failed-result">Assertion "' + result.assertionLabel + '" (' + result.assertion.name + ') in test "' + result.testLabel + '", group "' + result.groupLabel + '" failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
-    //             elResults.insertAdjacentHTML('beforeend', html);
-    //         }
-    //     });
-    // }
 
     function showAllResults(){
         var groupLabel = '';
@@ -180,9 +165,6 @@
 
     function showResults(){
         showResultsSummary();
-        // if(totAssertionsFailed){
-        //     showAssertionFailures();
-        // }
         showAllResults();
     }
 
@@ -277,7 +259,7 @@
         return compareObjects(a, b) && compareObjects(b, a);
     }
 
-    //Assertions
+    //Assertions.
 
     function a_equals_b(a, b){
         if(typeof a ==='object' && typeof b === 'object'){
@@ -308,7 +290,7 @@
         return !a_equals_true(a);
     }
 
-    //assertion runner
+    //Assertion runners.
 
     // a === b
     function assertEqual(a, b){
@@ -410,7 +392,6 @@
     //the processing of the next test is set by incrementing testQueueIndex and
     //runTests is called to continue processing the testsQueue.
     function whenAsyncStopped(callback){
-        // currentTestHash.whenAsyncStopped = callback;
         setTimeout(function(){
             callback();
             currentTestStep++;
@@ -514,13 +495,7 @@
         }, 1);
     }
 
-    //Runs each test in testsQueue to build assertionsQueue. When a test
-    //is run asynchronously (asyncTest) runTests terminates to prevent
-    //further processing of tests in the testsQueue until after the
-    //asynchronous test has completed. When the asynchronous test signals
-    //that it is done by calling asyncStop, the asyncRunning flag is
-    //set to false and runTests is called again, picking up at the next
-    //test in the testsQueue.
+    //Runs each test in testsQueue to build assertionsQueue.
     function runTests(){
         var len = testsQueue.length;
         while(testsQueueIndex < len && !testIsRunning){
@@ -564,8 +539,7 @@
         currentTestHash.asyncAfterEachTest = callback;
     }
 
-    //A label for a group of tests.
-    //Available in the global name space.
+    //Provides closure and a label to a group of tests.
     var group = function group(label, callback){
         if(groupFilter === label || groupFilter === ''){
             currentTestHash = {groupLabel: label};
@@ -574,7 +548,8 @@
         }
     };
 
-    //Adds a synchronous test to the testsQueue.
+    //Provides closure and a label to a synchronous test
+    //and registers its callback in its testsQueue item.
     var test = function test(label, callback){
         if(testFilter === label || testFilter === ''){
             testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
@@ -582,8 +557,9 @@
         }
     };
 
-    //Adds an asynchronous to the testsQueue.
-    //Forms: asyncTest(label[, interval], callback).
+    //Provides closure and a label to an asynchronous test
+    //and registers its callback in its testsQueue item.
+    //Form: asyncTest(label[, interval], callback).
     var asyncTest = function asyncTest(label){
         if(testFilter === label || testFilter === ''){
             testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
@@ -598,13 +574,9 @@
 
     //Called after the testsQueue has been generated.
     function runner(){
-        //Timeout to allow user to see total to be run message.
-        // setTimeout(function(){
-        //     //Build assertionQueue.
-        //     runTests();
-        // }, 2000);
         //Record the start time.
         timerStart = Date.now();
+        //Run each test in the testsQueue.
         runTests();
     }
 
@@ -670,13 +642,11 @@
     try{
         //Show the start message.
         showStartMessage();
-        //Build the queue as user calls group or test.
-        //Keep checking the queue until it is 'stable'. Stable
-        //is defined by a time interval during which the length
-        //of the queue remains constant and there are no asynchronous
-        //tests running, indicating that all tests have been
-        //loaded. Once stable, run the tests.
-        // debugger;
+        //Build the testsQueue as user calls group, test or asyncTest.
+        //Keep checking the testsQueue's length until it is 'stable'.
+        //Stable is defined by a time interval during which the length
+        //of the testsQueue remains constant, indicating that all tests
+        //have been loaded. Once stable, run the tests.
         intervalId = setInterval(function(){
             if(testsQueue.length === testsQueueCount){
                 if(testsQueueStableCount > 1){
