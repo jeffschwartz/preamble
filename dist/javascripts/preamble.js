@@ -42,9 +42,14 @@
     var timerStart;
     var timerEnd;
     var currentTestStep;
+    var groupFilter;
+    var testFilter;
+    var assertionFilter;
 
-    //Display the version.
-    elHeader.insertAdjacentHTML('beforeend', '<small>' + version + '</small>');
+    //Get URL query string param...thanks MDN.
+    function loadPageVar (sVar) {
+      return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') + '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
+    }
 
     //Display caught errors to the browser.
     function errorHandler(){
@@ -151,21 +156,21 @@
             }
             if(result.groupLabel !== groupLabel){
                 if(html.length){
-                    html += '</div>';
+                    html += '</div></a>';
                 }
             }
             if(result.groupLabel !== groupLabel){
-                html += '<div class="group">' + result.groupLabel;
+                html += '<div class="group-container"><a class="group" href="?group=' + encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
-                html += '<div class="test">' + result.testLabel;
+                html += '<div class="tests-container"><a class="test" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html += '<div class="assertion failed">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
+                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
             }else{
-                html += '<div class="assertion passed">"' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
+                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">""' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
             }
         });
         html += '</div></div>';
@@ -364,31 +369,39 @@
     }
 
     function noteEqualAssertion(value, expectation, label){
-        if(arguments.length !== 3){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        if(assertionFilter === label || assertionFilter === ''){
+            if(arguments.length !== 3){
+                throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
         }
-        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsTrueAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
+        if(assertionFilter === label || assertionFilter === ''){
+            if(arguments.length !== 2){
+                throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
+            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
         }
-        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
     }
 
     function noteNotEqualAssertion(value, expectation, label){
-        if(arguments.length !== 3){
-            throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
+        if(assertionFilter === label || assertionFilter === ''){
+            if(arguments.length !== 3){
+                throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
+            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
         }
-        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
     }
 
     function noteIsFalseAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
+        if(assertionFilter === label || assertionFilter === ''){
+            if(arguments.length !== 2){
+                throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
+            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
         }
-        pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
     }
 
     //Starts the timer for an async test. When the timeout is triggered it calls
@@ -553,22 +566,28 @@
     //A label for a group of tests.
     //Available in the global name space.
     var group = function group(label, callback){
-        currentTestHash = {groupLabel: label};
-        totGroups++;
-        callback();
+        if(groupFilter === label || groupFilter === ''){
+            currentTestHash = {groupLabel: label};
+            totGroups++;
+            callback();
+        }
     };
 
     //Adds a synchronous test to the testsQueue.
     var test = function test(label, callback){
-        testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
-        totTests++;
+        if(testFilter === label || testFilter === ''){
+            testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
+            totTests++;
+        }
     };
 
     //Adds an asynchronous to the testsQueue.
     //Forms: asyncTest(label[, interval], callback).
     var asyncTest = function asyncTest(label){
-        testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
-        totTests++;
+        if(testFilter === label || testFilter === ''){
+            testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
+            totTests++;
+        }
     };
 
     //Shown while the testsQueue is being loaded.
@@ -591,6 +610,14 @@
     /**
      * It all starts here!!!
      */
+
+    //Display the version.
+    elHeader.insertAdjacentHTML('beforeend', '<small>' + version + '</small>');
+
+    //Capture filters if any.
+    groupFilter = loadPageVar('group');
+    testFilter = loadPageVar('test');
+    assertionFilter = loadPageVar('assertion');
 
     //Configure the runtime environment.
     configure();
