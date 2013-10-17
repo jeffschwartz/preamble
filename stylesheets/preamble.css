@@ -5,15 +5,12 @@ html, body{
     color: #aaa;
 }
 h1{
-    font-style: italic;
     margin: 0;
     font-size: 2.5rem;
     color: #888;
 }
-h1 small{
-    font-style: italic;
-    margin-left: 10px;
-    font-size: 1.5rem;
+h1 + small{
+    font-size: 1rem;
     color: #AAA;
 }
 header{
@@ -28,7 +25,7 @@ header{
     box-sizing: border-box;
 }
 .container{
-    margin: 41px 0 0 0;
+    margin: 61px 0 0 0;
     width: 100%;
     box-sizing: border-box;
 }
@@ -39,7 +36,7 @@ p:last-child{
     font-size: 1rem;
     display: none;
 }
-section, footer{
+section{
     padding: 10px 20px;
     width: 100%;
     box-sizing: border-box;

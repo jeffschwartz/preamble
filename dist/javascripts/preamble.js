@@ -613,7 +613,7 @@
      */
 
     //Display the version.
-    elHeader.insertAdjacentHTML('beforeend', '<small>' + version + '</small>');
+    elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
 
     //Capture filters if any.
     groupFilter = loadPageVar('group');
