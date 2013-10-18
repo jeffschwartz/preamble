@@ -8,9 +8,10 @@
     //Version
     var version = 'v1.0.0';
     //Targeted DOM elements.
-    var elHeader = document.getElementById('header');
-    var elStatusContainer = document.getElementById('status-container');
-    var elResults = document.getElementById('results-container');
+    var elPreambleContainer = document.getElementById('preamble-container');
+    var elHeader;
+    var elStatusContainer;
+    var elResults;
     //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asynTestDelay: 20}).
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
@@ -595,6 +596,14 @@
 
     //Handle global errors.
     window.onerror = errorHandler;
+
+    //Add markup structure to the DOM.
+    elPreambleContainer.innerHTML = '<header><h1 id="header"></h1></header><div class="container"><section id="status-container"></section><section id="results-container"></section></div>';
+
+    //Capture DOM elements for later use.
+    elHeader = document.getElementById('header');
+    elStatusContainer = document.getElementById('status-container');
+    elResults = document.getElementById('results-container');
 
     //Display the name.
     elHeader.innerHTML = config.name;
