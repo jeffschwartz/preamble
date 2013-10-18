@@ -46,47 +46,21 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 
 <p>And writing asynchronous tests are just as easy as writing synchronous tests as the following example demonstrates:</p>
 
-<pre><code>    Preamble.group('collections - fetch', function(){
-
-        Preamble.asyncBeforeEachTest(function(){
-            v.ajax.ajaxPost({url: '/api/reset', dataType: 'json'});
-            return 25;
-        });
-
-        Preamble.asyncTest('sugar - collection fetch', 50, function(assert, val){
-            var fetchPromiseDoneCalled = false;
-            var fetchPromiseFailedCalled = false;
-            var failedJsonReturned;
-            //Reset the database.
-            var model = {
-                idPropertyName: 'id',
-                endPoint: '/api/cats'
-            };
-            var c = v.collections.extend({model: model});
-            var promise = c.fetch();
-            promise.done(function(collection){
-                fetchPromiseDoneCalled = true;
-                v.application.catsCollection = collection;
-            });
-            promise.fail(function(collection, json){
-                failedJsonReturned = json;
-                fetchPromiseFailedCalled = true;
-                v.application.catsCollection = collection;
-            });
-
-            assert.isTrue(val === 25, 'value === 25');
-
-            Preamble.whenAsyncStopped(function(){
-                assert.isTrue(fetchPromiseDoneCalled, 'done called after loading the collection with the data returned via ajax');
-                assert.isTrue(!fetchPromiseFailedCalled &amp;&amp; typeof failedJsonReturned === 'undefined', 'the fetch operation didn\'t fail');
-                assert.isTrue(typeof v.application.catsCollection !== 'undefined' &amp;&amp; v.application.catsCollection.length === 5,
-                    'the cat collection is now available on Coccyx.application and it contains 5 models of cat data');
-            });
-
-        });
-
-    });
-</code></pre>
+<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database asynchronously'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">,</span> <span class="nx">val</span><span class="p">){</span>
+            <span class="kd">var</span> <span class="nx">promiseDoneCalled</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+            <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
+                <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
+            <span class="p">});</span>      
+            <span class="nx">Preamble</span><span class="p">.</span><span class="nx">whenAsyncStopped</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+                <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDoneCalled</span><span class="p">,</span> <span class="s1">'promise.done was called'</span><span class="p">);</span>
+                <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'the cat collection was returned'</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+</pre></div>
 
 <h3>
 <a name="getting-started-with-preamble" class="anchor" href="#getting-started-with-preamble"><span class="octicon octicon-link"></span></a>Getting started with Preamble</h3>
