@@ -16,7 +16,8 @@
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
     //asyncTestDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
     //asyncBeforeAfterTestDelay: {default 500 milliseconds} - set to some other number of milliseconds used to wait for asynchronous before and after tests to complete.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500};
+    //name: (default 'Test') - set to a meaningful name.
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500, name: 'Test'};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -584,9 +585,6 @@
      * It all starts here!!!
      */
 
-    //Display the version.
-    elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
-
     //Capture filters if any.
     groupFilter = loadPageVar('group');
     testFilter = loadPageVar('test');
@@ -597,6 +595,12 @@
 
     //Handle global errors.
     window.onerror = errorHandler;
+
+    //Display the name.
+    elHeader.innerHTML = config.name;
+
+    //Display the version.
+    elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
 
     //If the windowGlabals config option is false then window globals will
     //not //be used and the one Preamble name space will be used instead.
