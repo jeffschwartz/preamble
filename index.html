@@ -121,6 +121,9 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 </pre></div>
 
 <h3>
+<a name="beforeeachtestcallback" class="anchor" href="#beforeeachtestcallback"><span class="octicon octicon-link"></span></a>beforeEachTest(callback)</h3>
+
+<h3>
 <a name="testlabel-callback" class="anchor" href="#testlabel-callback"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
 
 <p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group and <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope.</p>
@@ -138,9 +141,15 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 </pre></div>
 
 <h3>
+<a name="aftereachtestcallback" class="anchor" href="#aftereachtestcallback"><span class="octicon octicon-link"></span></a>afterEachTest(callback)</h3>
+
+<h3>
+<a name="asyncbeforeeachtestcallback" class="anchor" href="#asyncbeforeeachtestcallback"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest(callback)</h3>
+
+<h3>
 <a name="asynctestlabel-interval-callback" class="anchor" href="#asynctestlabel-interval-callback"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback)</h3>
 
-<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and is an integer value that can be used to override the default interval for asynchronous tests. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope.</p>
+<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and is an integer value that can be used to override the default interval for asynchronous tests. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncStopped</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
 
 <div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
         <span class="nx">Preamble</span><span class="p">.</span><span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
@@ -159,7 +168,10 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 <h3>
 <a name="whenasyncstoppedcallback" class="anchor" href="#whenasyncstoppedcallback"><span class="octicon octicon-link"></span></a>whenAsyncStopped(callback)</h3>
 
-<p>whenAsyncStopped is used to register a <strong>callback</strong> that wll be called to run one or more assertions when an asyncTest's interval has expired.</p>
+<p>whenAsyncStopped is used inside of an asyncTest to register a <strong>callback</strong> that wll be called to run one or more assertions when an asyncTest's interval has expired.</p>
+
+<h3>
+<a name="asyncaftereachtestcallback" class="anchor" href="#asyncaftereachtestcallback"><span class="octicon octicon-link"></span></a>asyncAfterEachTest(callback)</h3>
         </section>
 
         <footer>
