@@ -391,7 +391,7 @@
     //callback allowing client to run their assertions. When the callback returns
     //the processing of the next test is set by incrementing testQueueIndex and
     //runTests is called to continue processing the testsQueue.
-    function whenAsyncStopped(callback){
+    function whenAsyncDone(callback){
         setTimeout(function(){
             callback();
             currentTestStep++;
@@ -399,7 +399,7 @@
         }, currentTestHash.asyncInterval || config.asyncTestDelay);
     }
 
-    //Runs the current test asynchronously which will call whenAsyncStopped (see above).
+    //Runs the current test asynchronously which will call whenAsyncDone (see above).
     function runAsyncTest(){
         if(currentTestHash.beforeTestVal){
             currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
@@ -608,7 +608,7 @@
         window.asyncAfterEachTest = asyncAfterEachTest;
         window.test = test;
         window.asyncTest = asyncTest;
-        window.whenAsyncStopped = whenAsyncStopped;
+        window.whenAsyncDone = whenAsyncDone;
         window.equal = noteEqualAssertion;
         window.notEqual = noteNotEqualAssertion;
         window.isTrue = noteIsTrueAssertion;
@@ -622,7 +622,7 @@
             asyncAfterEachTest: asyncAfterEachTest,
             test: test,
             asyncTest: asyncTest,
-            whenAsyncStopped: whenAsyncStopped,
+            whenAsyncDone: whenAsyncDone,
         };
         //Functions to "note" assertions are passed as the
         //1st parameter to each test's callback function.
