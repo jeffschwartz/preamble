@@ -3,74 +3,127 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
     <title>Preamble by jeffschwartz</title>
   </head>
 
   <body>
-    <div id="container">
+    <header>
       <div class="inner">
+        <h1>Preamble</h1>
+        <h2>A Powerful JavaScript Unit Testing Framework</h2>
+        <a href="https://github.com/jeffschwartz/preamble" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
 
-        <header>
-          <h1>Preamble</h1>
-          <h2>A JavaScript Unit Testing Framework</h2>
-        </header>
-
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/jeffschwartz/preamble/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/jeffschwartz/preamble/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/jeffschwartz/preamble" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
-
-        <hr>
-
-        <section id="main_content">
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
           <h3>
 <a name="introducing-preamble" class="anchor" href="#introducing-preamble"><span class="octicon octicon-link"></span></a>Introducing Preamble</h3>
 
-<p>Preamble is a powerful JavaScript unit testing framework that runs in any modern HTML5 compliant browser. Getting started with Preamble is as easy as cloning the repo, changing to the directory in which the repo was cloned into, adding your test script or scripts to the index.html page and running index.html in your browser.</p>
+<p>Preamble is a powerful JavaScript unit testing framework that runs in any modern HTML5 compliant browser. Preamble is backed by a very powerful assertion engine that your tests interface with through a very simple to use but powerful API, which makes authoring tests very easy and intuitive.
+Here, for example, you can see how easy it is to write a synchronous test:</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="kc">true</span> <span class="o">===</span> <span class="kc">true</span><span class="p">,</span> <span class="s1">'true === true'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+</pre></div>
 
 <h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<a name="getting-started-with-preamble" class="anchor" href="#getting-started-with-preamble"><span class="octicon octicon-link"></span></a>Getting started with Preamble</h3>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>Getting started with Preamble is as easy as cloning the repo, changing to the directory in which the repo was cloned into, adding your test script or scripts to the index.html page and running index.html in your browser.</p>
+
+<div class="highlight highlight-html"><pre><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Preamble<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'http://fonts.googleapis.com/css?family=Lora'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'style/preamble.css'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;header&gt;</span>
+        <span class="nt">&lt;h1</span> <span class="na">id=</span><span class="s">"header"</span><span class="nt">&gt;</span>Name your tests here<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;/header&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;section</span> <span class="na">id=</span><span class="s">"status-container"</span><span class="nt">&gt;</span> <span class="nt">&lt;/section&gt;</span>
+        <span class="nt">&lt;section</span> <span class="na">id=</span><span class="s">"results-container"</span><span class="nt">&gt;&lt;/section&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"test-container"</span><span class="nt">&gt;&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- JavaScripts Go Here --&gt;</span>
+
+    <span class="c">&lt;!-- code and libraries needed to run tests go here --&gt;</span>
+
+    <span class="c">&lt;!-- preamble-config.js file has to be loaded before preamble.js is loaded!!! --&gt;</span>
+    <span class="c">&lt;!--</span>
+<span class="c">    &lt;script src="javascripts/preamble-config.js"&gt;&lt;/script&gt;</span>
+<span class="c">    --&gt;</span>
+
+    <span class="c">&lt;!-- preamble.js --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"javascripts/libs/preamble.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+    <span class="c">&lt;!-- test scripts follow preamble.js --&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</pre></div>
+
+<h1>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h1>
 
 <h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a name="grouplabel-callback" class="anchor" href="#grouplabel-callback"><span class="octicon octicon-link"></span></a>group(label, callback)</h3>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>A group is used to define a group of tests. <strong>label</strong> is a string used to uniquely identify the group and <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provides closure so any code or values that are defined within the callback function are all in the tests' scope.</p>
+
+<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'one, two, three'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">two</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="mi">2</span><span class="p">;};</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'one === 1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'one does equal 1'</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'two === 2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">two</span><span class="p">()</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'two() does equal 2'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+</pre></div>
 
 <h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<a name="testlabel-callback" class="anchor" href="#testlabel-callback"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p>A test is used to define one or more assertions. <strong>label</strong> is a string used to uniquely identify the test and <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> also provides closure so any code or values that are defined within the callback function are all in the assertions' scope.</p>
         </section>
 
-        <footer>
-          Preamble is maintained by <a href="https://github.com/jeffschwartz">jeffschwartz</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
+        <aside id="sidebar">
+          <a href="https://github.com/jeffschwartz/preamble/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/jeffschwartz/preamble/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
 
-        
+          <p class="repo-owner"><a href="https://github.com/jeffschwartz/preamble"></a> is maintained by <a href="https://github.com/jeffschwartz">jeffschwartz</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
       </div>
     </div>
+
+  
   </body>
 </html>
