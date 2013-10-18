@@ -36,27 +36,27 @@
 <p>Preamble is a powerful JavaScript unit testing framework that runs in any modern HTML5 compliant browser. Preamble is backed by a very powerful assertion engine that your tests interface with through a very simple to use but powerful API, which makes authoring tests very easy and intuitive.
 Here, for example, you can see how easy it is to write a synchronous test:</p>
 
-<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="kc">true</span> <span class="o">===</span> <span class="kc">true</span><span class="p">,</span> <span class="s1">'true === true'</span><span class="p">);</span>
-        <span class="p">});</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="kc">true</span> <span class="o">===</span> <span class="kc">true</span><span class="p">,</span> <span class="s1">'true === true'</span><span class="p">);</span>
     <span class="p">});</span>
+<span class="p">});</span>
 </pre></div>
 
 <p>And as the following example demonstrates, writing asynchronous tests is just as easy:</p>
 
-<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
-            <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
-            <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
-            <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
-                <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
-            <span class="p">});</span>      
-            <span class="nx">Preamble</span><span class="p">.</span><span class="nx">whenAsyncStopped</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-                <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'promise.done was called and the cat collection was fetched'</span><span class="p">);</span>
-            <span class="p">});</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
+            <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
+        <span class="p">});</span>      
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">whenAsyncStopped</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'promise.done was called and the cat collection was fetched'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
+<span class="p">});</span>
 </pre></div>
 
 <h1>
@@ -110,16 +110,16 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 
 <p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group and <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the tests' scope.</p>
 
-<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'A group providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-        <span class="kd">var</span> <span class="nx">two</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="mi">2</span><span class="p">;};</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'one does equal 1'</span><span class="p">);</span>
-        <span class="p">});</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">two</span><span class="p">()</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'two() does equal 2'</span><span class="p">);</span>
-        <span class="p">});</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'A group providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">two</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="mi">2</span><span class="p">;};</span>
+    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'one does equal 1'</span><span class="p">);</span>
     <span class="p">});</span>
+    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">two</span><span class="p">()</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'two() does equal 2'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
 </pre></div>
 
 <h2>
@@ -133,16 +133,16 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 
 <p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group and <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope.</p>
 
-<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'2 tests providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
-            <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>        
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'one does equal 1'</span><span class="p">);</span>
-        <span class="p">});</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
-            <span class="kd">var</span> <span class="nx">two</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="mi">2</span><span class="p">;};</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">two</span><span class="p">()</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'two() does equal 2'</span><span class="p">);</span>
-        <span class="p">});</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'2 tests providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>        
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'one does equal 1'</span><span class="p">);</span>
     <span class="p">});</span>
+    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">two</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="mi">2</span><span class="p">;};</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">two</span><span class="p">()</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'two() does equal 2'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
 </pre></div>
 
 <h3>
@@ -159,18 +159,18 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 
 <p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and is an integer value that can be used to override the default interval for asynchronous tests. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncStopped</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
 
-<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
-            <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
-            <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
-            <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
-                <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
-            <span class="p">});</span>      
-            <span class="nx">Preamble</span><span class="p">.</span><span class="nx">whenAsyncStopped</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-                <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'promise.done was called and the cat collection was fetched'</span><span class="p">);</span>
-            <span class="p">});</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
+            <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
+        <span class="p">});</span>      
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">whenAsyncStopped</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'promise.done was called and the cat collection was fetched'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
+<span class="p">});</span>
 </pre></div>
 
 <h3>
