@@ -21,7 +21,7 @@ module.exports = function ( grunt ) {
         },
         watch  : {
             scripts : {
-                files   : ['javascripts/preamble.js', 'stylesheets/preamble.css'],
+                files   : ['javascripts/preamble.js', 'javascripts/preamble-config.js', 'stylesheets/preamble.css'],
                 tasks   : ['dist'],
                 options : {
                     interrupt : true

@@ -5,9 +5,10 @@
 
 /*
 var preambleConfig = {
-    shortCircuit: default value = false,
-    windowGlobals: default value = true,
-    asyncTestDelay: default value = 500,
-    asyncBeforeAfterTestDelay: default value = 500
+    shortCircuit: Default value = false. Set to true to terminate upon first failure.
+    windowGlobals: Default value = true. Set to true if you don't want to pollute the global names space and instead use the one global var 'Preamble'.
+    asyncTestDelay: Default value = 500. Set the value used to wait before calling whenAsyncDone's callback.
+    asyncBeforeAfterTestDelay: Default value = 500. Set the value used to wait before calling asyncBeforeEachTest's and asyncAfterEachTest's callbacks.
+    name: Default value = 'Test'. Override this to display a meaningful name for your tests.
 };
 */
