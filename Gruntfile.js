@@ -14,6 +14,7 @@ module.exports = function ( grunt ) {
             todist: {
                 files: [
                     {src: ['javascripts/preamble.js'], dest: 'dist/'},
+                    {src: ['javascripts/preamble-config.js'], dest: 'dist/'},
                     {src: ['stylesheets/preamble.css'], dest: 'dist/'}
                 ]
             }
