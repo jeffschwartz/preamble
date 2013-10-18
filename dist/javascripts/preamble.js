@@ -83,6 +83,10 @@
         }, 1);
     }
 
+    function deepCopy(arg){
+        return JSON.parse(JSON.stringify(arg));
+    }
+
     function combine(){
         var result = {};
         var sources = [].slice.call(arguments, 0);
@@ -360,7 +364,9 @@
             if(arguments.length !== 3){
                 throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label, value, expectation, currentTestHash.isAsync);
+            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
+                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, currentTestHash.isAsync);
         }
     }
 
@@ -378,7 +384,9 @@
             if(arguments.length !== 3){
                 throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label, value, expectation, currentTestHash.isAsync);
+            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
+                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, currentTestHash.isAsync);
         }
     }
 
@@ -405,10 +413,18 @@
 
     //Runs the current test asynchronously which will call whenAsyncDone (see above).
     function runAsyncTest(){
-        if(currentTestHash.beforeTestVal){
-            currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
+        if(config.windowGlobals){
+            if(currentTestHash.beforeTestVal){
+                currentTestHash.testCallback(currentTestHash.beforeTestVal);
+            }else{
+                currentTestHash.testCallback();
+            }
         }else{
-            currentTestHash.testCallback(assert);
+            if(currentTestHash.beforeTestVal){
+                currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
+            }else{
+                currentTestHash.testCallback(assert);
+            }
         }
     }
 
@@ -416,10 +432,18 @@
     //processing of the next test is set by incrementing testQueueIndex and
     //runTests is called to continue processing the testsQueue.
     function runSyncTest(){
-        if(currentTestHash.beforeTestVal){
-            currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
+        if(config.windowGlobals){
+            if(currentTestHash.beforeTestVal){
+                currentTestHash.testCallback(currentTestHash.beforeTestVal);
+            }else{
+                currentTestHash.testCallback();
+            }
         }else{
-            currentTestHash.testCallback(assert);
+            if(currentTestHash.beforeTestVal){
+                currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
+            }else{
+                currentTestHash.testCallback(assert);
+            }
         }
         currentTestStep++;
         runTest();
@@ -613,7 +637,7 @@
     elPreambleContainer.innerHTML = '<header><h1 id="header"></h1></header><div class="container"><section id="status-container"></section><section id="results-container"></section></div>';
 
     //Append the ui test container.
-    elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '"></div>');
+    elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
 
     //Capture DOM elements for later use.
     elHeader = document.getElementById('header');

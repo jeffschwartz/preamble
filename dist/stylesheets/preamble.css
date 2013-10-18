@@ -1,7 +1,7 @@
 html, body{
     font-family: 'Lora', serif;
     font-size: 11px;
-    margin: 0;
+    margin: 0 0 300px 0;
     color: #aaa;
 }
 h1{
@@ -88,12 +88,7 @@ section{
     color: #f40000;
     font-weight: bold;
 }
-footer{
-    border: none;
-    font-size: 1rem;
-    margin: 20px 0;
-}
-.test-container{
+.ui-test-container{
     position: absolute;
     top: -10000px;
     left: -10000px;
