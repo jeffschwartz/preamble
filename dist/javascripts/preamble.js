@@ -12,13 +12,15 @@
     var elHeader;
     var elStatusContainer;
     var elResults;
+    var elUiTestContainer;
     //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asynTestDelay: 20}).
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
     //asyncTestDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
     //asyncBeforeAfterTestDelay: {default 500 milliseconds} - set to some other number of milliseconds used to wait for asynchronous before and after tests to complete.
     //name: (default 'Test') - set to a meaningful name.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500, name: 'Test'};
+    //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500, name: 'Test', uiTestContainerId: 'ui-test-container'};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -582,6 +584,16 @@
         runTests();
     }
 
+    //Returns the ui test container element.
+    function getUiTestContainerElement(){
+        return elUiTestContainer;
+    }
+
+    //Returns the id of the ui test container element.
+    function getUiTestContainerElementId(){
+        return config.uiTestContainerId;
+    }
+
     /**
      * It all starts here!!!
      */
@@ -600,10 +612,14 @@
     //Add markup structure to the DOM.
     elPreambleContainer.innerHTML = '<header><h1 id="header"></h1></header><div class="container"><section id="status-container"></section><section id="results-container"></section></div>';
 
+    //Append the ui test container.
+    elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '"></div>');
+
     //Capture DOM elements for later use.
     elHeader = document.getElementById('header');
     elStatusContainer = document.getElementById('status-container');
     elResults = document.getElementById('results-container');
+    elUiTestContainer = document.getElementById(config.uiTestContainerId);
 
     //Display the name.
     elHeader.innerHTML = config.name;
@@ -626,6 +642,8 @@
         window.notEqual = noteNotEqualAssertion;
         window.isTrue = noteIsTrueAssertion;
         window.isFalse = noteIsFalseAssertion;
+        window.getUiTestContainerElement = getUiTestContainerElement;
+        window.getUiTestContainerElementId = getUiTestContainerElementId;
     }else{
         window.Preamble = {
             group: group,
@@ -636,6 +654,8 @@
             test: test,
             asyncTest: asyncTest,
             whenAsyncDone: whenAsyncDone,
+            getUiTestContainerElement: getUiTestContainerElement,
+            getUiTestContainerElementId: getUiTestContainerElementId
         };
         //Functions to "note" assertions are passed as the
         //1st parameter to each test's callback function.
