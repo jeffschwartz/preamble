@@ -1,34 +1,37 @@
 <!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Preamble : A Powerful JavaScript Unit Testing Framework" />
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Preamble by jeffschwartz</title>
+    <title>Preamble</title>
   </head>
 
   <body>
-    <header>
-      <div class="inner">
-        <h1>Preamble</h1>
-        <h2>A Powerful JavaScript Unit Testing Framework</h2>
-        <a href="https://github.com/jeffschwartz/preamble" class="button"><small>View project on</small>GitHub</a>
-      </div>
-    </header>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h3>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/jeffschwartz/preamble">View on GitHub</a>
+
+          <h1 id="project_title">Preamble</h1>
+          <h2 id="project_tagline">A Powerful JavaScript Unit Testing Framework</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/jeffschwartz/preamble/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/jeffschwartz/preamble/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
 <a name="introducing-preamble" class="anchor" href="#introducing-preamble"><span class="octicon octicon-link"></span></a>Introducing Preamble</h3>
 
 <p>Preamble is a powerful JavaScript unit testing framework that runs in any modern HTML5 compliant browser. Preamble is backed by a very powerful assertion engine that your tests interface with through a very simple to use but powerful API, which makes authoring tests very easy and intuitive.
@@ -40,6 +43,50 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
         <span class="p">});</span>
     <span class="p">});</span>
 </pre></div>
+
+<p>And writing asynchronous tests are just as easy as writing synchronous tests as the following example demonstrates:</p>
+
+<pre><code>    Preamble.group('collections - fetch', function(){
+
+        Preamble.asyncBeforeEachTest(function(){
+            v.ajax.ajaxPost({url: '/api/reset', dataType: 'json'});
+            return 25;
+        });
+
+        Preamble.asyncTest('sugar - collection fetch', 50, function(assert, val){
+            var fetchPromiseDoneCalled = false;
+            var fetchPromiseFailedCalled = false;
+            var failedJsonReturned;
+            //Reset the database.
+            var model = {
+                idPropertyName: 'id',
+                endPoint: '/api/cats'
+            };
+            var c = v.collections.extend({model: model});
+            var promise = c.fetch();
+            promise.done(function(collection){
+                fetchPromiseDoneCalled = true;
+                v.application.catsCollection = collection;
+            });
+            promise.fail(function(collection, json){
+                failedJsonReturned = json;
+                fetchPromiseFailedCalled = true;
+                v.application.catsCollection = collection;
+            });
+
+            assert.isTrue(val === 25, 'value === 25');
+
+            Preamble.whenAsyncStopped(function(){
+                assert.isTrue(fetchPromiseDoneCalled, 'done called after loading the collection with the data returned via ajax');
+                assert.isTrue(!fetchPromiseFailedCalled &amp;&amp; typeof failedJsonReturned === 'undefined', 'the fetch operation didn\'t fail');
+                assert.isTrue(typeof v.application.catsCollection !== 'undefined' &amp;&amp; v.application.catsCollection.length === 5,
+                    'the cat collection is now available on Coccyx.application and it contains 5 models of cat data');
+            });
+
+        });
+
+    });
+</code></pre>
 
 <h3>
 <a name="getting-started-with-preamble" class="anchor" href="#getting-started-with-preamble"><span class="octicon octicon-link"></span></a>Getting started with Preamble</h3>
@@ -89,13 +136,13 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 
 <p>A group is used to define a group of tests. <strong>label</strong> is a string used to uniquely identify the group and <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provides closure so any code or values that are defined within the callback function are all in the tests' scope.</p>
 
-<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'one, two, three'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'A group providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
         <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
         <span class="kd">var</span> <span class="nx">two</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="mi">2</span><span class="p">;};</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'one === 1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
             <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'one does equal 1'</span><span class="p">);</span>
         <span class="p">});</span>
-        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'two === 2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
             <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">two</span><span class="p">()</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'two() does equal 2'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
@@ -104,26 +151,34 @@ Here, for example, you can see how easy it is to write a synchronous test:</p>
 <h3>
 <a name="testlabel-callback" class="anchor" href="#testlabel-callback"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
 
-<p>A test is used to define one or more assertions. <strong>label</strong> is a string used to uniquely identify the test and <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> also provides closure so any code or values that are defined within the callback function are all in the assertions' scope.</p>
-        </section>
+<p>A test is used to define one or more assertions. <strong>label</strong> is a string used to uniquely identify a test within a group and <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> also provides closure so any code or values that are defined within the callback function are all in the assertions' scope.</p>
 
-        <aside id="sidebar">
-          <a href="https://github.com/jeffschwartz/preamble/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/jeffschwartz/preamble/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
+<div class="highlight highlight-javascript"><pre>    <span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(</span><span class="s1">'2 tests providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+            <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>        
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'one does equal 1'</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'Test #2'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+            <span class="kd">var</span> <span class="nx">two</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="mi">2</span><span class="p">;};</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">two</span><span class="p">()</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'two() does equal 2'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+</pre></div>
 
-          <p class="repo-owner"><a href="https://github.com/jeffschwartz/preamble"></a> is maintained by <a href="https://github.com/jeffschwartz">jeffschwartz</a>.</p>
-
-          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
+<h3>
+<a name="asynctest" class="anchor" href="#asynctest"><span class="octicon octicon-link"></span></a>asyncTest</h3>
+      </section>
     </div>
 
-  
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Preamble maintained by <a href="https://github.com/jeffschwartz">jeffschwartz</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
   </body>
 </html>
