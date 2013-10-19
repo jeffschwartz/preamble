@@ -66,6 +66,20 @@ group('A simple asynchronous test', function(){
     });
 });
 
+//A simple asynchronous test that uses "proxy" to determine if its callback was called.
+group('A simple asynchronous test that uses "proxy" to determine if its callback was called.', function(){
+    asyncTest('Was callback called?', function(){
+        var prxy = proxy();
+        setTimeout(prxy(function(){
+        }), 10);
+        whenAsyncDone(function(){
+            isTrue(prxy.wasCalled(), 'Yest it was called!');
+            isFalse(prxy.wasCalled(2), 'And it was not called twice!');
+            isTrue(prxy.wasCalled(1), 'It was called once!');
+        });
+    });
+});
+
 //2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".
 group('2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".', function(){
     var count = 0;

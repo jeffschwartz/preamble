@@ -618,6 +618,29 @@
         return config.uiTestContainerId;
     }
 
+    //A factory that creates a proxy wrapper for any function. Use it to
+    //determine if the wrapped function was called and how many times
+    //it was called. Very useful for testing if asynchronous methods
+    //called their callbacks.
+    function proxy(){
+        var xCalled = 0;
+        var fn = function(callback){
+            var fnProxy = function(){
+                xCalled += 1;
+                var args = [].slice.call(arguments);
+                return callback.apply(this, args);
+            };
+            return fnProxy;
+        };
+        //If you just want to know if the callback was called then
+        //call wasCalled with no args. If you want to know if the
+        //callback was called n times, pass n as an argument.
+        fn.wasCalled = function(){
+            return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
+        };
+        return fn;
+    }
+
     /**
      * It all starts here!!!
      */
@@ -668,6 +691,7 @@
         window.isFalse = noteIsFalseAssertion;
         window.getUiTestContainerElement = getUiTestContainerElement;
         window.getUiTestContainerElementId = getUiTestContainerElementId;
+        window.proxy = proxy;
     }else{
         window.Preamble = {
             group: group,
@@ -679,7 +703,8 @@
             asyncTest: asyncTest,
             whenAsyncDone: whenAsyncDone,
             getUiTestContainerElement: getUiTestContainerElement,
-            getUiTestContainerElementId: getUiTestContainerElementId
+            getUiTestContainerElementId: getUiTestContainerElementId,
+            proxy: proxy
         };
         //Functions to "note" assertions are passed as the
         //1st parameter to each test's callback function.
