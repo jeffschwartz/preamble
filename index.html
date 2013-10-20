@@ -31,9 +31,9 @@
           <h1>
 <a name="introducing-preamble" class="anchor" href="#introducing-preamble"><span class="octicon octicon-link"></span></a>Introducing Preamble</h1>
 
-<p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser and has no dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
+<p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
 
-<p>Here, for example, you can see how easy it is to write a synchronous test:</p>
+<p>This is an example of a simple asynchronous test</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -42,7 +42,7 @@
 <span class="p">});</span>
 </pre></div>
 
-<p>And as the following example demonstrates, writing asynchronous tests is just as easy:</p>
+<p>and this is an example of a simple asynchronous test.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -63,7 +63,12 @@
 <h1>
 <a name="installing-preamble" class="anchor" href="#installing-preamble"><span class="octicon octicon-link"></span></a>Installing Preamble</h1>
 
-<p>Installing Preamble is as easy as cloning the repo into a folder, changing to the folder in which the repo was cloned into, adding your test script to the index.html page and running index.html in your browser.</p>
+<p>Clone the repo to a folder on your computer. That's it!</p>
+
+<h1>
+<a name="batteries-included" class="anchor" href="#batteries-included"><span class="octicon octicon-link"></span></a>Batteries Included</h1>
+
+<p>The repo already contains a test script which you can run right now by loading index.html, which is located in the repo's root folder, into your browser. That's it. To run the test srcipt again you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link which is located near the top of the page.</p>
 
 <div class="highlight highlight-html"><pre><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
