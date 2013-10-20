@@ -312,6 +312,8 @@
 <h2>
 <a name="ui-tests" class="anchor" href="#ui-tests"><span class="octicon octicon-link"></span></a>UI Tests</h2>
 
+<p>Preamble adds a div element, whose ID is <em>**ui-test-container</em>*, to the DOM which can be used to perform UI tests. </p>
+
 <h2>
 <a name="helpersconvenience-methods" class="anchor" href="#helpersconvenience-methods"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
 
@@ -337,8 +339,21 @@
 <h3>
 <a name="getuitestcontainerelement" class="anchor" href="#getuitestcontainerelement"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h3>
 
+<p>Returns the </p><div> element which can be used to do UI testing.
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">$uiTestContainerElement</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">getUiTestContainerElement</span><span class="p">());</span>
+</pre></div>
+
 <h3>
 <a name="getuitestcontainerelementid" class="anchor" href="#getuitestcontainerelementid"><span class="octicon octicon-link"></span></a>getUiTestContainerElementId()</h3>
+
+<p>Returns the id of the </p>
+<div> element which can be used when doing UI testing.
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">elUiTestContainerElement</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">getUiTestContainerElementId</span><span class="p">());</span>
+</pre></div>
+</div>
+</div>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
