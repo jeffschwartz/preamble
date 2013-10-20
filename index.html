@@ -349,11 +349,1010 @@
 
 <p>Returns the id of the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">elUiTestContainerElement</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">getUiTestContainerElementId</span><span class="p">());</span>
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">elUiTestContainerElement</span> <span class="o">=</span> 
+    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">getUiTestContainerElementId</span><span class="p">());</span>
 </pre></div>
 
 <h2>
 <a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>The following configuration options can be overridden in the preamble-config.js file located in the javascripts folder:</p>
+
+<h1>
+<a name="introducing-preamble-1" class="anchor" href="#introducing-preamble-1"><span class="octicon octicon-link"></span></a>Introducing Preamble</h1>
+
+<p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
+
+<p>This is an example of a simple asynchronous test</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="kc">true</span> <span class="o">===</span> <span class="kc">true</span><span class="p">,</span> <span class="s1">'true === true'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>and this is an example of a simple asynchronous test.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
+        <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
+            <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
+        <span class="p">}));</span>      
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'promise.done was called'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h1>
+<a name="installing-preamble-1" class="anchor" href="#installing-preamble-1"><span class="octicon octicon-link"></span></a>Installing Preamble</h1>
+
+<p>Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!</p>
+
+<h1>
+<a name="run-the-sample-test-1" class="anchor" href="#run-the-sample-test-1"><span class="octicon octicon-link"></span></a>Run The Sample Test</h1>
+
+<p>After you have cloned the repo you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. To repeat the test you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link located near the top of the page. After you have run the sample you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.</p>
+
+<h1>
+<a name="indexhtml-1" class="anchor" href="#indexhtml-1"><span class="octicon octicon-link"></span></a>index.html</h1>
+
+<p>The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, Google). If you don't like Lora (who doesn't like Lora?) feel free to remove the link tag or to use a different web font.</p>
+
+<div class="highlight highlight-html"><pre><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Preamble<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'http://fonts.googleapis.com/css?family=Lora'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'stylesheets/preamble.css'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    <span class="c">&lt;!-- This is required. Do not remove or rename the id --&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"preamble-container"</span><span class="nt">&gt;&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- JavaScripts Go Here --&gt;</span>
+
+    <span class="c">&lt;!-- Place script tags that your tests depend on here --&gt;</span>
+
+    <span class="c">&lt;!-- The preamble-config.js file has to be loaded before preamble.js is loaded!!! --&gt;</span>
+    <span class="c">&lt;!--</span>
+<span class="c">    &lt;script src="javascripts/preamble-config.js"&gt;&lt;/script&gt;</span>
+<span class="c">    --&gt;</span>
+
+    <span class="c">&lt;!-- preamble.js --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"javascripts/preamble.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+    <span class="c">&lt;!-- Place your test script(s) here, immediately following preamble.js --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"javascripts/sample-test.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</pre></div>
+
+<h1>
+<a name="api-1" class="anchor" href="#api-1"><span class="octicon octicon-link"></span></a>API</h1>
+
+<h2>
+<a name="grouping-tests-1" class="anchor" href="#grouping-tests-1"><span class="octicon octicon-link"></span></a>Grouping Tests</h2>
+
+<h3>
+<a name="grouplabel-callback-1" class="anchor" href="#grouplabel-callback-1"><span class="octicon octicon-link"></span></a>group(label, callback)</h3>
+
+<p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group. <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provide closure which you can use to make data and code accessible to the tests.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">})</span>
+</pre></div>
+
+<h3>
+<a name="beforeeachtestcallback-1" class="anchor" href="#beforeeachtestcallback-1"><span class="octicon octicon-link"></span></a>beforeEachTest(callback)</h3>
+
+<p>beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEachTest (please see asyncBeforeEachTest below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted synchronous test with "beforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">beforeEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count does equal 1'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">((</span><span class="nx">count</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'count now equals 2'</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count still 2?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'nope, it isn\'t still 2'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'now count equals 1'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="aftereachtestcallback-1" class="anchor" href="#aftereachtestcallback-1"><span class="octicon octicon-link"></span></a>afterEachTest(callback)</h3>
+
+<p>afterEachTest can be used to perform common initialization synchronously after each test is called.  If you need to do both synchronous and asynchronous initialization after each test then use asyncAfterEachTest (please see asyncAfterEachTest below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted synchronous test with "afterEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">afterEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count 0?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count does equal 0.'</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count still 0?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1.'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="asyncbeforeeachtestinterval-callback-1" class="anchor" href="#asyncbeforeeachtestinterval-callback-1"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest([interval,] callback)</h3>
+
+<p>asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">asyncBeforeEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count equals 1.'</span><span class="p">);</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'now count equals 10'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 10?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equals 10 anymore.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1 again.'</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">100</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 10 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'count now equals 100'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="asyncaftereachtestinterval-callback-1" class="anchor" href="#asyncaftereachtestinterval-callback-1"><span class="octicon octicon-link"></span></a>asyncAfterEachTest([interval,] callback)</h3>
+
+<p>asyncAfterEachTest can be used to perform common initialization asynchronously after each test is called. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. </p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted asynchronous tests with "asyncAfterEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">asyncAfterEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'now count equals 10'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count still 10?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equals 10 anymore.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1 again.'</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">100</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'count now equals 100'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="synchronous-tests-1" class="anchor" href="#synchronous-tests-1"><span class="octicon octicon-link"></span></a>Synchronous Tests</h2>
+
+<h3>
+<a name="testlabel-callback-1" class="anchor" href="#testlabel-callback-1"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
+
+<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="asynchronous-tests-1" class="anchor" href="#asynchronous-tests-1"><span class="octicon octicon-link"></span></a>Asynchronous Tests</h2>
+
+<h3>
+<a name="asynctestlabel-interval-callback-1" class="anchor" href="#asynctestlabel-interval-callback-1"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback)</h3>
+
+<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncDone</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">val</span><span class="p">;</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">val</span> <span class="o">=</span> <span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">val</span> <span class="o">===</span> <span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="s1">'Yest it is!'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="whenasyncstoppedcallback-1" class="anchor" href="#whenasyncstoppedcallback-1"><span class="octicon octicon-link"></span></a>whenAsyncStopped(callback)</h3>
+
+<p>whenAsynDone begins the timer for an asyncTest. When the timer expires then Preamble calls <strong>callback</strong> to run the assertions for the asyncTest. </p>
+
+<h2>
+<a name="assertions-1" class="anchor" href="#assertions-1"><span class="octicon octicon-link"></span></a>Assertions</h2>
+
+<h3>
+<a name="equalvalue-expectation-label-1" class="anchor" href="#equalvalue-expectation-label-1"><span class="octicon octicon-link"></span></a>equal(value, expectation, label)</h3>
+
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation &amp;&amp; expectation === value then the result will be true.</p>
+
+<h3>
+<a name="notequalvalue-expectation-label-1" class="anchor" href="#notequalvalue-expectation-label-1"><span class="octicon octicon-link"></span></a>notEqual(value, expectation, label)</h3>
+
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation &amp;&amp; expectation !== value then the result will be true.</p>
+
+<h3>
+<a name="istruevalue-label-1" class="anchor" href="#istruevalue-label-1"><span class="octicon octicon-link"></span></a>isTrue(value, label)</h3>
+
+<p>A boolean assertion comparing <strong>value</strong> to true. Result is true if <strong>value</strong> is truthy.</p>
+
+<h3>
+<a name="isfalsevalue-label-1" class="anchor" href="#isfalsevalue-label-1"><span class="octicon octicon-link"></span></a>isFalse(value, label)</h3>
+
+<p>A boolean assertion comparing <strong>value</strong> to false. Result is true if <strong>value</strong> is not truthy.</p>
+
+<h2>
+<a name="ui-tests-1" class="anchor" href="#ui-tests-1"><span class="octicon octicon-link"></span></a>UI Tests</h2>
+
+<p>Preamble adds a div element, whose ID is <em>**ui-test-container</em>*, to the DOM which can be used to perform UI tests. </p>
+
+<h2>
+<a name="helpersconvenience-methods-1" class="anchor" href="#helpersconvenience-methods-1"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
+
+<h3>
+<a name="proxy-1" class="anchor" href="#proxy-1"><span class="octicon octicon-link"></span></a>proxy()</h3>
+
+<p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the callback was actually called and if the callback was called n times.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test that uses "proxy" to determine if its callback was called.'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Was callback called?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="p">}),</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'Yest it was called!'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'And it was not called twice!'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'It was called once!'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="getuitestcontainerelement-1" class="anchor" href="#getuitestcontainerelement-1"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h3>
+
+<p>Returns the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">$uiTestContainerElement</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">getUiTestContainerElement</span><span class="p">());</span>
+</pre></div>
+
+<h3>
+<a name="getuitestcontainerelementid-1" class="anchor" href="#getuitestcontainerelementid-1"><span class="octicon octicon-link"></span></a>getUiTestContainerElementId()</h3>
+
+<p>Returns the id of the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">elUiTestContainerElement</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">getUiTestContainerElementId</span><span class="p">());</span>
+</pre></div>
+
+<h2>
+<a name="configuration-1" class="anchor" href="#configuration-1"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<pre><code>shortCircuit: Default value = false. Set to true to terminate upon first failure.
+# Introducing Preamble
+</code></pre>
+
+<p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
+
+<p>This is an example of a simple asynchronous test</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="kc">true</span> <span class="o">===</span> <span class="kc">true</span><span class="p">,</span> <span class="s1">'true === true'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>and this is an example of a simple asynchronous test.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
+        <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
+            <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
+        <span class="p">}));</span>      
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'promise.done was called'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h1>
+<a name="installing-preamble-2" class="anchor" href="#installing-preamble-2"><span class="octicon octicon-link"></span></a>Installing Preamble</h1>
+
+<p>Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!</p>
+
+<h1>
+<a name="run-the-sample-test-2" class="anchor" href="#run-the-sample-test-2"><span class="octicon octicon-link"></span></a>Run The Sample Test</h1>
+
+<p>After you have cloned the repo you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. To repeat the test you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link located near the top of the page. After you have run the sample you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.</p>
+
+<h1>
+<a name="indexhtml-2" class="anchor" href="#indexhtml-2"><span class="octicon octicon-link"></span></a>index.html</h1>
+
+<p>The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, Google). If you don't like Lora (who doesn't like Lora?) feel free to remove the link tag or to use a different web font.</p>
+
+<div class="highlight highlight-html"><pre><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Preamble<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'http://fonts.googleapis.com/css?family=Lora'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'stylesheets/preamble.css'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    <span class="c">&lt;!-- This is required. Do not remove or rename the id --&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"preamble-container"</span><span class="nt">&gt;&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- JavaScripts Go Here --&gt;</span>
+
+    <span class="c">&lt;!-- Place script tags that your tests depend on here --&gt;</span>
+
+    <span class="c">&lt;!-- The preamble-config.js file has to be loaded before preamble.js is loaded!!! --&gt;</span>
+    <span class="c">&lt;!--</span>
+<span class="c">    &lt;script src="javascripts/preamble-config.js"&gt;&lt;/script&gt;</span>
+<span class="c">    --&gt;</span>
+
+    <span class="c">&lt;!-- preamble.js --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"javascripts/preamble.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+    <span class="c">&lt;!-- Place your test script(s) here, immediately following preamble.js --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"javascripts/sample-test.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</pre></div>
+
+<h1>
+<a name="api-2" class="anchor" href="#api-2"><span class="octicon octicon-link"></span></a>API</h1>
+
+<h2>
+<a name="grouping-tests-2" class="anchor" href="#grouping-tests-2"><span class="octicon octicon-link"></span></a>Grouping Tests</h2>
+
+<h3>
+<a name="grouplabel-callback-2" class="anchor" href="#grouplabel-callback-2"><span class="octicon octicon-link"></span></a>group(label, callback)</h3>
+
+<p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group. <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provide closure which you can use to make data and code accessible to the tests.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">})</span>
+</pre></div>
+
+<h3>
+<a name="beforeeachtestcallback-2" class="anchor" href="#beforeeachtestcallback-2"><span class="octicon octicon-link"></span></a>beforeEachTest(callback)</h3>
+
+<p>beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEachTest (please see asyncBeforeEachTest below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted synchronous test with "beforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">beforeEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count does equal 1'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">((</span><span class="nx">count</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'count now equals 2'</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count still 2?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'nope, it isn\'t still 2'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'now count equals 1'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="aftereachtestcallback-2" class="anchor" href="#aftereachtestcallback-2"><span class="octicon octicon-link"></span></a>afterEachTest(callback)</h3>
+
+<p>afterEachTest can be used to perform common initialization synchronously after each test is called.  If you need to do both synchronous and asynchronous initialization after each test then use asyncAfterEachTest (please see asyncAfterEachTest below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted synchronous test with "afterEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">afterEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count 0?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count does equal 0.'</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count still 0?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1.'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="asyncbeforeeachtestinterval-callback-2" class="anchor" href="#asyncbeforeeachtestinterval-callback-2"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest([interval,] callback)</h3>
+
+<p>asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">asyncBeforeEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count equals 1.'</span><span class="p">);</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'now count equals 10'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 10?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equals 10 anymore.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1 again.'</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">100</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 10 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'count now equals 100'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="asyncaftereachtestinterval-callback-2" class="anchor" href="#asyncaftereachtestinterval-callback-2"><span class="octicon octicon-link"></span></a>asyncAfterEachTest([interval,] callback)</h3>
+
+<p>asyncAfterEachTest can be used to perform common initialization asynchronously after each test is called. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. </p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted asynchronous tests with "asyncAfterEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">asyncAfterEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'now count equals 10'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count still 10?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equals 10 anymore.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1 again.'</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">100</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'count now equals 100'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="synchronous-tests-2" class="anchor" href="#synchronous-tests-2"><span class="octicon octicon-link"></span></a>Synchronous Tests</h2>
+
+<h3>
+<a name="testlabel-callback-2" class="anchor" href="#testlabel-callback-2"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
+
+<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="asynchronous-tests-2" class="anchor" href="#asynchronous-tests-2"><span class="octicon octicon-link"></span></a>Asynchronous Tests</h2>
+
+<h3>
+<a name="asynctestlabel-interval-callback-2" class="anchor" href="#asynctestlabel-interval-callback-2"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback)</h3>
+
+<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncDone</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">val</span><span class="p">;</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">val</span> <span class="o">=</span> <span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">val</span> <span class="o">===</span> <span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="s1">'Yest it is!'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="whenasyncstoppedcallback-2" class="anchor" href="#whenasyncstoppedcallback-2"><span class="octicon octicon-link"></span></a>whenAsyncStopped(callback)</h3>
+
+<p>whenAsynDone begins the timer for an asyncTest. When the timer expires then Preamble calls <strong>callback</strong> to run the assertions for the asyncTest. </p>
+
+<h2>
+<a name="assertions-2" class="anchor" href="#assertions-2"><span class="octicon octicon-link"></span></a>Assertions</h2>
+
+<h3>
+<a name="equalvalue-expectation-label-2" class="anchor" href="#equalvalue-expectation-label-2"><span class="octicon octicon-link"></span></a>equal(value, expectation, label)</h3>
+
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation &amp;&amp; expectation === value then the result will be true.</p>
+
+<h3>
+<a name="notequalvalue-expectation-label-2" class="anchor" href="#notequalvalue-expectation-label-2"><span class="octicon octicon-link"></span></a>notEqual(value, expectation, label)</h3>
+
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation &amp;&amp; expectation !== value then the result will be true.</p>
+
+<h3>
+<a name="istruevalue-label-2" class="anchor" href="#istruevalue-label-2"><span class="octicon octicon-link"></span></a>isTrue(value, label)</h3>
+
+<p>A boolean assertion comparing <strong>value</strong> to true. Result is true if <strong>value</strong> is truthy.</p>
+
+<h3>
+<a name="isfalsevalue-label-2" class="anchor" href="#isfalsevalue-label-2"><span class="octicon octicon-link"></span></a>isFalse(value, label)</h3>
+
+<p>A boolean assertion comparing <strong>value</strong> to false. Result is true if <strong>value</strong> is not truthy.</p>
+
+<h2>
+<a name="ui-tests-2" class="anchor" href="#ui-tests-2"><span class="octicon octicon-link"></span></a>UI Tests</h2>
+
+<p>Preamble adds a div element, whose ID is <em>**ui-test-container</em>*, to the DOM which can be used to perform UI tests. </p>
+
+<h2>
+<a name="helpersconvenience-methods-2" class="anchor" href="#helpersconvenience-methods-2"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
+
+<h3>
+<a name="proxy-2" class="anchor" href="#proxy-2"><span class="octicon octicon-link"></span></a>proxy()</h3>
+
+<p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the callback was actually called and if the callback was called n times.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test that uses "proxy" to determine if its callback was called.'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Was callback called?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="p">}),</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'Yest it was called!'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'And it was not called twice!'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'It was called once!'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="getuitestcontainerelement-2" class="anchor" href="#getuitestcontainerelement-2"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h3>
+
+<p>Returns the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">$uiTestContainerElement</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">getUiTestContainerElement</span><span class="p">());</span>
+</pre></div>
+
+<h3>
+<a name="getuitestcontainerelementid-2" class="anchor" href="#getuitestcontainerelementid-2"><span class="octicon octicon-link"></span></a>getUiTestContainerElementId()</h3>
+
+<p>Returns the id of the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">elUiTestContainerElement</span> <span class="o">=</span> 
+    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">getUiTestContainerElementId</span><span class="p">());</span>
+</pre></div>
+
+<h2>
+<a name="configuration-2" class="anchor" href="#configuration-2"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<h1>
+<a name="introducing-preamble-2" class="anchor" href="#introducing-preamble-2"><span class="octicon octicon-link"></span></a>Introducing Preamble</h1>
+
+<p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
+
+<p>This is an example of a simple asynchronous test</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="kc">true</span> <span class="o">===</span> <span class="kc">true</span><span class="p">,</span> <span class="s1">'true === true'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>and this is an example of a simple asynchronous test.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
+        <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
+            <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
+        <span class="p">}));</span>      
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'promise.done was called'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h1>
+<a name="installing-preamble-3" class="anchor" href="#installing-preamble-3"><span class="octicon octicon-link"></span></a>Installing Preamble</h1>
+
+<p>Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!</p>
+
+<h1>
+<a name="run-the-sample-test-3" class="anchor" href="#run-the-sample-test-3"><span class="octicon octicon-link"></span></a>Run The Sample Test</h1>
+
+<p>After you have cloned the repo you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. To repeat the test you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link located near the top of the page. After you have run the sample you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.</p>
+
+<h1>
+<a name="indexhtml-3" class="anchor" href="#indexhtml-3"><span class="octicon octicon-link"></span></a>index.html</h1>
+
+<p>The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, Google). If you don't like Lora (who doesn't like Lora?) feel free to remove the link tag or to use a different web font.</p>
+
+<div class="highlight highlight-html"><pre><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Preamble<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'http://fonts.googleapis.com/css?family=Lora'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">'stylesheets/preamble.css'</span> <span class="na">rel=</span><span class="s">'stylesheet'</span> <span class="na">type=</span><span class="s">'text/css'</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    <span class="c">&lt;!-- This is required. Do not remove or rename the id --&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"preamble-container"</span><span class="nt">&gt;&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- JavaScripts Go Here --&gt;</span>
+
+    <span class="c">&lt;!-- Place script tags that your tests depend on here --&gt;</span>
+
+    <span class="c">&lt;!-- The preamble-config.js file has to be loaded before preamble.js is loaded!!! --&gt;</span>
+    <span class="c">&lt;!--</span>
+<span class="c">    &lt;script src="javascripts/preamble-config.js"&gt;&lt;/script&gt;</span>
+<span class="c">    --&gt;</span>
+
+    <span class="c">&lt;!-- preamble.js --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"javascripts/preamble.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+    <span class="c">&lt;!-- Place your test script(s) here, immediately following preamble.js --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"javascripts/sample-test.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</pre></div>
+
+<h1>
+<a name="api-3" class="anchor" href="#api-3"><span class="octicon octicon-link"></span></a>API</h1>
+
+<h2>
+<a name="grouping-tests-3" class="anchor" href="#grouping-tests-3"><span class="octicon octicon-link"></span></a>Grouping Tests</h2>
+
+<h3>
+<a name="grouplabel-callback-3" class="anchor" href="#grouplabel-callback-3"><span class="octicon octicon-link"></span></a>group(label, callback)</h3>
+
+<p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group. <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provide closure which you can use to make data and code accessible to the tests.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">})</span>
+</pre></div>
+
+<h3>
+<a name="beforeeachtestcallback-3" class="anchor" href="#beforeeachtestcallback-3"><span class="octicon octicon-link"></span></a>beforeEachTest(callback)</h3>
+
+<p>beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEachTest (please see asyncBeforeEachTest below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted synchronous test with "beforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">beforeEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count does equal 1'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">((</span><span class="nx">count</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'count now equals 2'</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count still 2?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'nope, it isn\'t still 2'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'now count equals 1'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="aftereachtestcallback-3" class="anchor" href="#aftereachtestcallback-3"><span class="octicon octicon-link"></span></a>afterEachTest(callback)</h3>
+
+<p>afterEachTest can be used to perform common initialization synchronously after each test is called.  If you need to do both synchronous and asynchronous initialization after each test then use asyncAfterEachTest (please see asyncAfterEachTest below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted synchronous test with "afterEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">afterEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count 0?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count does equal 0.'</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Is count still 0?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1.'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="asyncbeforeeachtestinterval-callback-3" class="anchor" href="#asyncbeforeeachtestinterval-callback-3"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest([interval,] callback)</h3>
+
+<p>asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">asyncBeforeEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count equals 1.'</span><span class="p">);</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'now count equals 10'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 10?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equals 10 anymore.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1 again.'</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">100</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 10 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'count now equals 100'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="asyncaftereachtestinterval-callback-3" class="anchor" href="#asyncaftereachtestinterval-callback-3"><span class="octicon octicon-link"></span></a>asyncAfterEachTest([interval,] callback)</h3>
+
+<p>asyncAfterEachTest can be used to perform common initialization asynchronously after each test is called. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. </p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted asynchronous tests with "asyncAfterEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">asyncAfterEachTest</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count 1?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 0 anymore'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count doesn\'t equal 1 anymore'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'now count equals 10'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Is count still 10?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">isFalse</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">'count doesn\'t equals 10 anymore.'</span><span class="p">);</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'count now equals 1 again.'</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">count</span> <span class="o">*=</span> <span class="mi">100</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">count</span> <span class="o">===</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'count now equals 100'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="synchronous-tests-3" class="anchor" href="#synchronous-tests-3"><span class="octicon octicon-link"></span></a>Synchronous Tests</h2>
+
+<h3>
+<a name="testlabel-callback-3" class="anchor" href="#testlabel-callback-3"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
+
+<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
+        <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="asynchronous-tests-3" class="anchor" href="#asynchronous-tests-3"><span class="octicon octicon-link"></span></a>Asynchronous Tests</h2>
+
+<h3>
+<a name="asynctestlabel-interval-callback-3" class="anchor" href="#asynctestlabel-interval-callback-3"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback)</h3>
+
+<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncDone</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">val</span><span class="p">;</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">val</span> <span class="o">=</span> <span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">;</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">val</span> <span class="o">===</span> <span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="s1">'Yest it is!'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="whenasyncstoppedcallback-3" class="anchor" href="#whenasyncstoppedcallback-3"><span class="octicon octicon-link"></span></a>whenAsyncStopped(callback)</h3>
+
+<p>whenAsynDone begins the timer for an asyncTest. When the timer expires then Preamble calls <strong>callback</strong> to run the assertions for the asyncTest. </p>
+
+<h2>
+<a name="assertions-3" class="anchor" href="#assertions-3"><span class="octicon octicon-link"></span></a>Assertions</h2>
+
+<h3>
+<a name="equalvalue-expectation-label-3" class="anchor" href="#equalvalue-expectation-label-3"><span class="octicon octicon-link"></span></a>equal(value, expectation, label)</h3>
+
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation &amp;&amp; expectation === value then the result will be true.</p>
+
+<h3>
+<a name="notequalvalue-expectation-label-3" class="anchor" href="#notequalvalue-expectation-label-3"><span class="octicon octicon-link"></span></a>notEqual(value, expectation, label)</h3>
+
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation &amp;&amp; expectation !== value then the result will be true.</p>
+
+<h3>
+<a name="istruevalue-label-3" class="anchor" href="#istruevalue-label-3"><span class="octicon octicon-link"></span></a>isTrue(value, label)</h3>
+
+<p>A boolean assertion comparing <strong>value</strong> to true. Result is true if <strong>value</strong> is truthy.</p>
+
+<h3>
+<a name="isfalsevalue-label-3" class="anchor" href="#isfalsevalue-label-3"><span class="octicon octicon-link"></span></a>isFalse(value, label)</h3>
+
+<p>A boolean assertion comparing <strong>value</strong> to false. Result is true if <strong>value</strong> is not truthy.</p>
+
+<h2>
+<a name="ui-tests-3" class="anchor" href="#ui-tests-3"><span class="octicon octicon-link"></span></a>UI Tests</h2>
+
+<p>Preamble adds a div element, whose ID is <em>**ui-test-container</em>*, to the DOM which can be used to perform UI tests. </p>
+
+<h2>
+<a name="helpersconvenience-methods-3" class="anchor" href="#helpersconvenience-methods-3"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
+
+<h3>
+<a name="proxy-3" class="anchor" href="#proxy-3"><span class="octicon octicon-link"></span></a>proxy()</h3>
+
+<p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the callback was actually called and if the callback was called n times.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test that uses "proxy" to determine if its callback was called.'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Was callback called?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="p">}),</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'Yest it was called!'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'And it was not called twice!'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'It was called once!'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="getuitestcontainerelement-3" class="anchor" href="#getuitestcontainerelement-3"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h3>
+
+<p>Returns the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">$uiTestContainerElement</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">getUiTestContainerElement</span><span class="p">());</span>
+</pre></div>
+
+<h3>
+<a name="getuitestcontainerelementid-3" class="anchor" href="#getuitestcontainerelementid-3"><span class="octicon octicon-link"></span></a>getUiTestContainerElementId()</h3>
+
+<p>Returns the id of the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">elUiTestContainerElement</span> <span class="o">=</span> 
+<span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">getUiTestContainerElementId</span><span class="p">());</span>
+</pre></div>
+
+<h2>
+<a name="configuration-3" class="anchor" href="#configuration-3"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<h3>
+<a name="shortcircuit-default-value--false-set-to-true-to-terminate-upon-first-failure" class="anchor" href="#shortcircuit-default-value--false-set-to-true-to-terminate-upon-first-failure"><span class="octicon octicon-link"></span></a>shortCircuit: Default value = false. Set to true to terminate upon first failure.</h3>
+
+<h3>
+<a name="windowglobals-default-value--true-set-to-false-if-you-dont-want-to-pollute-the-global-names-space-and-instead-use-the-one-global-var-preamble" class="anchor" href="#windowglobals-default-value--true-set-to-false-if-you-dont-want-to-pollute-the-global-names-space-and-instead-use-the-one-global-var-preamble"><span class="octicon octicon-link"></span></a>windowGlobals: Default value = true. Set to false if you don't want to pollute the global names space and instead use the one global var 'Preamble'.</h3>
+
+<h3>
+<a name="asynctestdelay-default-value--500-set-the-value-used-to-wait-before-calling-whenasyncdones-callback" class="anchor" href="#asynctestdelay-default-value--500-set-the-value-used-to-wait-before-calling-whenasyncdones-callback"><span class="octicon octicon-link"></span></a>asyncTestDelay: Default value = 500. Set the value used to wait before calling whenAsyncDone's callback.</h3>
+
+<h3>
+<a name="asyncbeforeaftertestdelay-default-value--500-set-the-value-used-to-wait-before-calling-asyncbeforeeachtests-and-asyncaftereachtests-callbacks" class="anchor" href="#asyncbeforeaftertestdelay-default-value--500-set-the-value-used-to-wait-before-calling-asyncbeforeeachtests-and-asyncaftereachtests-callbacks"><span class="octicon octicon-link"></span></a>asyncBeforeAfterTestDelay: Default value = 500. Set the value used to wait before calling asyncBeforeEachTest's and asyncAfterEachTest's callbacks.</h3>
+
+<h3>
+<a name="name-default-value--test-override-this-to-display-a-meaningful-name-for-your-tests" class="anchor" href="#name-default-value--test-override-this-to-display-a-meaningful-name-for-your-tests"><span class="octicon octicon-link"></span></a>name: Default value = 'Test'. Override this to display a meaningful name for your tests.</h3>
+
+<h3>
+<a name="uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id" class="anchor" href="#uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id"><span class="octicon octicon-link"></span></a>uiTestContainerId: Default value = 'ui-test-container'. Override this to use a different id.</h3>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
