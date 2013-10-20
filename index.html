@@ -292,14 +292,22 @@
 <h3>
 <a name="equalvalue-expectation-label" class="anchor" href="#equalvalue-expectation-label"><span class="octicon octicon-link"></span></a>equal(value, expectation, label)</h3>
 
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation &amp;&amp; expectation === value then the result will be true.</p>
+
 <h3>
 <a name="notequalvalue-expectation-label" class="anchor" href="#notequalvalue-expectation-label"><span class="octicon octicon-link"></span></a>notEqual(value, expectation, label)</h3>
+
+<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation &amp;&amp; expectation !== value then the result will be true.</p>
 
 <h3>
 <a name="istruevalue-label" class="anchor" href="#istruevalue-label"><span class="octicon octicon-link"></span></a>isTrue(value, label)</h3>
 
+<p>A boolean assertion comparing <strong>value</strong> to true. Result is true if <strong>value</strong> is truthy.</p>
+
 <h3>
 <a name="isfalsevalue-label" class="anchor" href="#isfalsevalue-label"><span class="octicon octicon-link"></span></a>isFalse(value, label)</h3>
+
+<p>A boolean assertion comparing <strong>value</strong> to false. Result is true if <strong>value</strong> is not truthy.</p>
 
 <h2>
 <a name="ui-tests" class="anchor" href="#ui-tests"><span class="octicon octicon-link"></span></a>UI Tests</h2>
@@ -309,6 +317,22 @@
 
 <h3>
 <a name="proxy" class="anchor" href="#proxy"><span class="octicon octicon-link"></span></a>proxy()</h3>
+
+<p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the callback was actually called and if the callback was called n times.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test that uses "proxy" to determine if its callback was called.'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Was callback called?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="p">}),</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'Yest it was called!'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'And it was not called twice!'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'It was called once!'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
 
 <h3>
 <a name="getuitestcontainerelement" class="anchor" href="#getuitestcontainerelement"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h3>
