@@ -65,12 +65,17 @@
 <h1>
 <a name="installing-preamble" class="anchor" href="#installing-preamble"><span class="octicon octicon-link"></span></a>Installing Preamble</h1>
 
-<p>Clone the repo to a folder on your computer. That's it!</p>
+<p>Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!</p>
 
 <h1>
-<a name="batteries-included" class="anchor" href="#batteries-included"><span class="octicon octicon-link"></span></a>Batteries Included</h1>
+<a name="run-the-sample-test" class="anchor" href="#run-the-sample-test"><span class="octicon octicon-link"></span></a>Run The Sample Test</h1>
 
-<p>The repo already contains a test script which you can run right now by loading index.html, which is located in the repo's root folder, into your browser. That's it. To run the test srcipt again you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link which is located near the top of the page.</p>
+<p>After you have cloned the repo you can run the sample test script javascripts/sample-test.js which is located in the repo's root folder. To run it just load it into your browser. To run the test again you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link which is located near the top of the page. After you have run the sample you can open up the script in your editor and spy the code which will give you a feel for how you can use Preamble's API to write your own scripts.</p>
+
+<h1>
+<a name="indexhtml" class="anchor" href="#indexhtml"><span class="octicon octicon-link"></span></a>index.html</h1>
+
+<p>The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, Google). If you don't like Lora (who doesn't like Lora?) feel free to remove the link tag or to replace the font with a different web font.</p>
 
 <div class="highlight highlight-html"><pre><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
@@ -112,7 +117,7 @@
 <h3>
 <a name="grouplabel-callback" class="anchor" href="#grouplabel-callback"><span class="octicon octicon-link"></span></a>group(label, callback)</h3>
 
-<p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group and <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the tests' scope.</p>
+<p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group. <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provide closure which you can use to make data and code accessible to the tests.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A group providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="kd">var</span> <span class="nx">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -126,16 +131,33 @@
 <span class="p">});</span>
 </pre></div>
 
+<h3>
+<a name="beforeeachtestinterval-callback" class="anchor" href="#beforeeachtestinterval-callback"><span class="octicon octicon-link"></span></a>beforeEachTest([interval,] callback)</h3>
+
+<p>beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEacTest (please see asyncBeforeEachTest below).</p>
+
+<h3>
+<a name="aftereachtestcallback" class="anchor" href="#aftereachtestcallback"><span class="octicon octicon-link"></span></a>afterEachTest(callback)</h3>
+
+<p>afterEachTest can be used to perform common initialization synchronously after each test is called.  If you need to do both synchronous and asynchronous initialization after each test then use asyncAfterEachTest (please see asyncAfterEachTest below).</p>
+
+<h3>
+<a name="asyncbeforeeachtestinterval-callback" class="anchor" href="#asyncbeforeeachtestinterval-callback"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest([interval,] callback)</h3>
+
+<p>asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+
+<h3>
+<a name="asyncaftereachtestinterval-callback" class="anchor" href="#asyncaftereachtestinterval-callback"><span class="octicon octicon-link"></span></a>asyncAfterEachTest([interval,] callback)</h3>
+
+<p>asyncAfterEachTest can be used to perform common initialization asynchronously after each test is called. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. </p>
+
 <h2>
 <a name="synchronous-tests" class="anchor" href="#synchronous-tests"><span class="octicon octicon-link"></span></a>Synchronous Tests</h2>
 
 <h3>
-<a name="beforeeachtestcallback" class="anchor" href="#beforeeachtestcallback"><span class="octicon octicon-link"></span></a>beforeEachTest(callback)</h3>
-
-<h3>
 <a name="testlabel-callback" class="anchor" href="#testlabel-callback"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
 
-<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group and <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope.</p>
+<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 tests providing closure'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">test</span><span class="p">(</span><span class="s1">'Test #1'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -149,19 +171,13 @@
 <span class="p">});</span>
 </pre></div>
 
-<h3>
-<a name="aftereachtestcallback" class="anchor" href="#aftereachtestcallback"><span class="octicon octicon-link"></span></a>afterEachTest(callback)</h3>
-
 <h2>
 <a name="asynchronous-tests" class="anchor" href="#asynchronous-tests"><span class="octicon octicon-link"></span></a>Asynchronous Tests</h2>
 
 <h3>
-<a name="asyncbeforeeachtestcallback" class="anchor" href="#asyncbeforeeachtestcallback"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest(callback)</h3>
-
-<h3>
 <a name="asynctestlabel-interval-callback" class="anchor" href="#asynctestlabel-interval-callback"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback)</h3>
 
-<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and is an integer value that can be used to override the default interval for asynchronous tests. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncStopped</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
+<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncDone</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -180,10 +196,7 @@
 <h3>
 <a name="whenasyncstoppedcallback" class="anchor" href="#whenasyncstoppedcallback"><span class="octicon octicon-link"></span></a>whenAsyncStopped(callback)</h3>
 
-<p>whenAsyncStopped is used inside of an asyncTest to register a <strong>callback</strong> that wll be called to run one or more assertions when an asyncTest's interval has expired.</p>
-
-<h3>
-<a name="asyncaftereachtestcallback" class="anchor" href="#asyncaftereachtestcallback"><span class="octicon octicon-link"></span></a>asyncAfterEachTest(callback)</h3>
+<p>whenAsynDone begins the timer for an asyncTest. When the timer expires then Preamble calls <strong>callback</strong> to run the assertions for the asyncTest. </p>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
