@@ -1,6 +1,6 @@
 **A JavaScript Testing Framework**
 
-Preamble is a Test Driven Development framework for JavaScript that runs in the browser. It has no dependencies on any addition libraries or frameworks.
+Preamble is a Test Driven Development framework for JavaScript that runs in the browser. It has no dependencies on any additional libraries or frameworks.
 
 Documentation lives here: http://jeffschwartz.github.io/preamble/
 
