@@ -120,8 +120,8 @@
 <p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group. <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provide closure which you can use to make data and code accessible to the tests.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
     <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
         <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
     <span class="p">});</span>
 <span class="p">})</span>
