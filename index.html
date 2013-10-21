@@ -70,12 +70,12 @@
 <h1>
 <a name="run-the-sample-test" class="anchor" href="#run-the-sample-test"><span class="octicon octicon-link"></span></a>Run The Sample Test</h1>
 
-<p>After you have cloned the repo you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. All groups, tests and assertions are links and if you click on them Preamble will "drill down" and display details for each, respectively. To repeat the test you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link located near the top of the page. After you have run the sample and  you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.</p>
+<p>After you have cloned the repo you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. All groups, tests and assertions are links and if you click on them Preamble will "drill down" and display details for each, respectively. To repeat the test you can either refresh the browser or click on the <strong>Rerun All Tests</strong> link located near the top of the page. After you have run the sample you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.</p>
 
 <h1>
 <a name="indexhtml" class="anchor" href="#indexhtml"><span class="octicon octicon-link"></span></a>index.html</h1>
 
-<p>The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, Google). If you don't like Lora (who doesn't like Lora?) feel free to remove the link tag or to use a different web font.</p>
+<p>The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, <a href="http://www.cyreal.org">Cyreal</a> and Google). If you don't like Lora (but who doesn't like Lora?) feel free to remove the link tag or to use a different web font.</p>
 
 <div class="highlight highlight-html"><pre><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
@@ -376,7 +376,7 @@
 <a name="asynctestdelay-default-value--500-set-the-value-used-to-wait-before-calling-whenasyncdones-callback" class="anchor" href="#asynctestdelay-default-value--500-set-the-value-used-to-wait-before-calling-whenasyncdones-callback"><span class="octicon octicon-link"></span></a>asyncTestDelay: Default value = 500. Set the value used to wait before calling whenAsyncDone's callback.</h3>
 
 <h3>
-<a name="asyncbeforeaftertestdelay-default-value--500-set-the-value-used-to-wait-before-calling-asyncbeforeeachtests-and-asyncaftereachtests-callbacks" class="anchor" href="#asyncbeforeaftertestdelay-default-value--500-set-the-value-used-to-wait-before-calling-asyncbeforeeachtests-and-asyncaftereachtests-callbacks"><span class="octicon octicon-link"></span></a>asyncBeforeAfterTestDelay: Default value = 500. Set the value used to wait before calling asyncBeforeEachTest's and asyncAfterEachTest's callbacks.</h3>
+<a name="asyncbeforeaftertestdelay-default-value--500-set-the-value-used-to-wait-before-calling-the-tests-callback-asyncbeforeeachtest-and-when-calling-the-next-tests-callback-asyncaftereachtest" class="anchor" href="#asyncbeforeaftertestdelay-default-value--500-set-the-value-used-to-wait-before-calling-the-tests-callback-asyncbeforeeachtest-and-when-calling-the-next-tests-callback-asyncaftereachtest"><span class="octicon octicon-link"></span></a>asyncBeforeAfterTestDelay: Default value = 500. Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest).</h3>
 
 <h3>
 <a name="name-default-value--test-override-this-to-display-a-meaningful-name-for-your-tests" class="anchor" href="#name-default-value--test-override-this-to-display-a-meaningful-name-for-your-tests"><span class="octicon octicon-link"></span></a>name: Default value = 'Test'. Override this to display a meaningful name for your tests.</h3>
