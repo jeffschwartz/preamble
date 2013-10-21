@@ -111,15 +111,17 @@
 <h1>
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h1>
 
-<h2>
-<a name="grouping-tests" class="anchor" href="#grouping-tests"><span class="octicon octicon-link"></span></a>Grouping Tests</h2>
+<p>Please note that when windowGlobals is set to false you must preface each API method list below with Preamble (please see <strong>Configuration</strong> below).</p>
 
-<h3>
-<a name="grouplabel-callback" class="anchor" href="#grouplabel-callback"><span class="octicon octicon-link"></span></a>group(label, callback)</h3>
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(...)</span>
 
-<p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group. <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provide closure which you can use to make data and code accessible to the tests.</p>
+<span class="err">##</span> <span class="nx">Grouping</span> <span class="nx">Tests</span>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+<span class="err">###</span> <span class="nx">group</span><span class="p">(</span><span class="nx">label</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span>
+<span class="nx">group</span> <span class="nx">is</span> <span class="nx">used</span> <span class="nx">to</span> <span class="nx">group</span> <span class="nx">together</span> <span class="nx">one</span> <span class="nx">or</span> <span class="nx">more</span> <span class="nx">tests</span><span class="p">.</span> <span class="o">**</span><span class="nx">label</span><span class="o">**</span> <span class="nx">is</span> <span class="nx">a</span> <span class="nx">string</span> <span class="nx">used</span> <span class="nx">to</span> <span class="nx">uniquely</span> <span class="nx">identify</span> <span class="nx">the</span> <span class="nx">group</span><span class="p">.</span> <span class="o">**</span><span class="nx">callback</span><span class="o">**</span> <span class="nx">is</span> <span class="nx">a</span> <span class="kd">function</span> <span class="nx">which</span> <span class="nx">contains</span> <span class="nx">one</span> <span class="nx">or</span> <span class="nx">more</span> <span class="nx">tests</span><span class="p">.</span> <span class="nx">Besides</span> <span class="nx">containing</span> <span class="nx">tests</span><span class="p">,</span> <span class="o">**</span><span class="nx">callback</span><span class="o">**</span> <span class="nx">also</span> <span class="nx">provide</span> <span class="nx">closure</span> <span class="nx">which</span> <span class="nx">you</span> <span class="nx">can</span> <span class="nx">use</span> <span class="nx">to</span> <span class="nx">make</span> <span class="nx">data</span> <span class="nx">and</span> <span class="nx">code</span> <span class="nx">accessible</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">tests</span><span class="p">.</span>
+
+<span class="err">```</span><span class="nx">javascript</span>
+<span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="kd">var</span> <span class="nx">hw</span> <span class="o">=</span> <span class="s1">'Hello World!'</span><span class="p">;</span>
     <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
         <span class="nx">isTrue</span><span class="p">(</span><span class="nx">hw</span> <span class="o">===</span> <span class="s1">'Hello World!'</span><span class="p">,</span> <span class="s1">'Yes, it works!'</span><span class="p">);</span>
@@ -130,7 +132,7 @@
 <h3>
 <a name="beforeeachtestcallback" class="anchor" href="#beforeeachtestcallback"><span class="octicon octicon-link"></span></a>beforeEachTest(callback)</h3>
 
-<p>beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEachTest (please see asyncBeforeEachTest below).</p>
+<p>beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>Configuration</strong> below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEachTest (please see asyncBeforeEachTest below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted synchronous test with "beforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -172,7 +174,7 @@
 <h3>
 <a name="asyncbeforeeachtestinterval-callback" class="anchor" href="#asyncbeforeeachtestinterval-callback"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest([interval,] callback)</h3>
 
-<p>asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+<p>asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>Configuration</strong> below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -250,7 +252,7 @@
 <h3>
 <a name="testlabel-callbackbeforetestvalue--callbackassert-beforetestvalue" class="anchor" href="#testlabel-callbackbeforetestvalue--callbackassert-beforetestvalue"><span class="octicon octicon-link"></span></a>test(label, callback([beforeTestValue]) || callback(assert[, beforeTestValue]))</h3>
 
-<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
+<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>Configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -266,7 +268,7 @@
 <h3>
 <a name="asynctestlabel-interval-callbackbeforetestvalue--callbackassert-beforetestvalue" class="anchor" href="#asynctestlabel-interval-callbackbeforetestvalue--callbackassert-beforetestvalue"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback([beforeTestValue]) || callback(assert[, beforeTestValue]))</h3>
 
-<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
+<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>Configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -282,7 +284,7 @@
 </pre></div>
 
 <h3>
-<a name="whenasyncstoppedcallback" class="anchor" href="#whenasyncstoppedcallback"><span class="octicon octicon-link"></span></a>whenAsyncStopped(callback)</h3>
+<a name="whenasyncdonecallback" class="anchor" href="#whenasyncdonecallback"><span class="octicon octicon-link"></span></a>whenAsyncDone(callback)</h3>
 
 <p>whenAsynDone starts the timer for an asyncTest. When the timer expires Preamble will then call <strong>callback</strong> to run the assertions for the asyncTest. </p>
 
