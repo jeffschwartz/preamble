@@ -1,0 +1,25 @@
+{
+  "name": "preamble",
+  "version": "0.1.0",
+  "description": "JavaScript testing framework",
+  "main": "preamble.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://jeffschwartz:pchIst1!@bitbucket.org/jeffschwartz/preamble.git"
+  },
+  "keywords": [
+    "preamble"
+  ],
+  "author": "Jeffrey Schwartz",
+  "license": "MIT",
+  "gitHead": "e9264619e12a464baf69db08cc88214ed539a617",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-copy": "~0.4.1"
+  }
+}
