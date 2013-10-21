@@ -248,9 +248,9 @@
 <a name="synchronous-tests" class="anchor" href="#synchronous-tests"><span class="octicon octicon-link"></span></a>Synchronous Tests</h2>
 
 <h3>
-<a name="testlabel-callback" class="anchor" href="#testlabel-callback"><span class="octicon octicon-link"></span></a>test(label, callback)</h3>
+<a name="testlabel-callbackbeforetestvalue--callbackassert-beforetestvalue" class="anchor" href="#testlabel-callbackbeforetestvalue--callbackassert-beforetestvalue"><span class="octicon octicon-link"></span></a>test(label, callback([beforeTestValue]) || callback(assert[, beforeTestValue]))</h3>
 
-<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st or 2nd parameter (for more information please see <strong>configuration</strong> below).</p>
+<p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Does it work?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">test</span><span class="p">(</span><span class="s1">'Hello World!'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -264,9 +264,9 @@
 <a name="asynchronous-tests" class="anchor" href="#asynchronous-tests"><span class="octicon octicon-link"></span></a>Asynchronous Tests</h2>
 
 <h3>
-<a name="asynctestlabel-interval-callback" class="anchor" href="#asynctestlabel-interval-callback"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback)</h3>
+<a name="asynctestlabel-interval-callbackbeforetestvalue--callbackassert-beforetestvalue" class="anchor" href="#asynctestlabel-interval-callbackbeforetestvalue--callbackassert-beforetestvalue"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback([beforeTestValue]) || callback(assert[, beforeTestValue]))</h3>
 
-<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure so that any code or values that are defined within the callback function are also in the assertions' scope. You must call <strong>whenAsyncDone</strong> (see immediately below) to register a callback that is to be called when the asyncTest's interval has expired. </p>
+<p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Isn\'t JavaScript amazing?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -284,7 +284,7 @@
 <h3>
 <a name="whenasyncstoppedcallback" class="anchor" href="#whenasyncstoppedcallback"><span class="octicon octicon-link"></span></a>whenAsyncStopped(callback)</h3>
 
-<p>whenAsynDone begins the timer for an asyncTest. When the timer expires then Preamble calls <strong>callback</strong> to run the assertions for the asyncTest. </p>
+<p>whenAsynDone starts the timer for an asyncTest. When the timer expires Preamble will then call <strong>callback</strong> to run the assertions for the asyncTest. </p>
 
 <h2>
 <a name="assertions" class="anchor" href="#assertions"><span class="octicon octicon-link"></span></a>Assertions</h2>
@@ -322,7 +322,7 @@
 
 <p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the callback was actually called and if the callback was called n times.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'A simple asynchronous test that uses "proxy" to determine if its callback was called.'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Using "proxy" to determine if its callback was called.'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Was callback called?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
         <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
         <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
@@ -366,6 +366,8 @@
 
 <h3>
 <a name="windowglobals-default-value--true-set-to-false-if-you-dont-want-to-pollute-the-global-names-space-and-instead-use-the-one-global-var-preamble" class="anchor" href="#windowglobals-default-value--true-set-to-false-if-you-dont-want-to-pollute-the-global-names-space-and-instead-use-the-one-global-var-preamble"><span class="octicon octicon-link"></span></a>windowGlobals: Default value = true. Set to false if you don't want to pollute the global names space and instead use the one global var 'Preamble'.</h3>
+
+<p>When set to false, all methods except assertions are accessible through the one global variable, <strong>Preamble</strong></p>
 
 <h3>
 <a name="asynctestdelay-default-value--500-set-the-value-used-to-wait-before-calling-whenasyncdones-callback" class="anchor" href="#asynctestdelay-default-value--500-set-the-value-used-to-wait-before-calling-whenasyncdones-callback"><span class="octicon octicon-link"></span></a>asyncTestDelay: Default value = 500. Set the value used to wait before calling whenAsyncDone's callback.</h3>
