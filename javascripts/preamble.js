@@ -76,6 +76,10 @@
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
 
+    function stringify(varArg){
+        return typeof varArg === 'object' ? JSON.stringify(varArg) : varArg;
+    }
+
     function showTotalsToBeRun(){
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
@@ -162,9 +166,9 @@
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.assertion.name + ')' + ' failed! Expected assertion to return"<em>' + (typeof result.expectation === 'object' ? JSON.stringify(result.expectation) : result.expectation) + '</em>" but it returned "' +  (typeof result.result === 'object' ? JSON.stringify(result.result) : result.result) +  '</em>".</div>';
+                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  failed!"</div>';
             }else{
-                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">""' + result.assertionLabel + '" (' + result.assertion.name + ')  passed!"</div>';
+                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  passed!"</div>';
             }
         });
         html += '</div></div>';
@@ -337,6 +341,20 @@
                     totAssertionsPassed++;
                 }else{
                     totAssertionsFailed++;
+                }
+                switch(item.assertion.name){
+                    case 'assertIsTrue':
+                        item.displayAssertionName = 'isTrue';
+                        break;
+                    case 'assertIsFalse':
+                        item.displayAssertionName = 'isFalse';
+                        break;
+                    case 'assertEqual':
+                        item.displayAssertionName = 'equal';
+                        break;
+                    case 'assertNotEqual':
+                        item.displayAssertionName = 'notEqual';
+                        break;
                 }
                 results.push(item);
                 if(config.shortCircuit && totAssertionsFailed){
