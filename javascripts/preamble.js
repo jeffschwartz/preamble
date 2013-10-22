@@ -1,12 +1,12 @@
 /*global preambleConfig*/
-//Preamble 1.0.4
+//Preamble 1.0.5
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v1.0.4';
+    var version = 'v1.0.5';
     //Targeted DOM elements.
     var elPreambleContainer = document.getElementById('preamble-container');
     var elHeader;
