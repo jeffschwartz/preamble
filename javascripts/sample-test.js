@@ -1,3 +1,17 @@
+group('A test for Eric', function(){
+    test('Really 2 objects are not equal', function(){
+        equal({}, {different: 'different'}, 'Obviously not equal and should fail');
+    });
+    test('Really 2 objects are equal', function(){
+        notEqual({}, {}, 'Obviously equal and should fail');
+    });
+    test('Really is not true', function(){
+        isTrue(false, 'Obviously false and should fail');
+    });
+    test('Really is true', function(){
+        isFalse(true, 'Obviously false and should fail');
+    });
+});
 //A simple synchronous test just to make sure that everything is honky dory!
 group('Does it work?', function(){
     test('Hello World!', function(){
