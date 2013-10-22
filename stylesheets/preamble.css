@@ -86,7 +86,6 @@ section{
 }
 .failed {
     color: #f40000;
-    font-weight: bold;
 }
 .ui-test-container{
     position: absolute;
