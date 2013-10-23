@@ -1,4 +1,4 @@
-group('A test for Eric', function(){
+group('Tests intentionally meant to fail', function(){
     test('Really 2 objects are not equal', function(){
         equal({}, {different: 'different'}, 'Obviously not equal and should fail');
     });

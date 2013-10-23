@@ -76,10 +76,6 @@
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
 
-    function stringify(varArg){
-        return typeof varArg === 'object' ? JSON.stringify(varArg) : varArg;
-    }
-
     function showTotalsToBeRun(){
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
