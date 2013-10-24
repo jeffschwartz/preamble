@@ -1,18 +1,3 @@
-group('Tests intentionally meant to fail', function(){
-    test('Really 2 objects are not equal', function(){
-        equal({}, {different: 'different'}, 'Obviously not equal and should fail');
-    });
-    test('Really 2 objects are equal', function(){
-        notEqual({}, {}, 'Obviously equal and should fail');
-    });
-    test('Really is not true', function(){
-        isTrue(false, 'Obviously false and should fail');
-    });
-    test('Really is true', function(){
-        isFalse(true, 'Obviously false and should fail');
-    });
-});
-//A simple synchronous test just to make sure that everything is honky dory!
 group('Does it work?', function(){
     test('Hello World!', function(){
         var hw = 'Hello World!';
@@ -20,7 +5,6 @@ group('Does it work?', function(){
     });
 });
 
-//2 slightly convoluted synchronous tests with "beforeEachTest".
 group('2 slightly convoluted synchronous test with "beforeEachTest".', function(){
     var count = 0;
     beforeEachTest(function(){
@@ -37,7 +21,6 @@ group('2 slightly convoluted synchronous test with "beforeEachTest".', function(
     });
 });
 
-//2 slightly convoluted synchronous tests with afterEachTest.
 group('2 slightly convoluted synchronous test with "afterEachTest".', function(){
     var count = 0;
     afterEachTest(function(){
@@ -52,7 +35,6 @@ group('2 slightly convoluted synchronous test with "afterEachTest".', function()
     });
 });
 
-//Comparing objects and primitives for equality using equal and notEual.
 group('Comparing objects for equality using equal and notEual.', function(){
     test('Does a equal b', function(){
         var char = 'b';
@@ -67,7 +49,6 @@ group('Comparing objects for equality using equal and notEual.', function(){
     });
 });
 
-//A simple asynchronous test.
 group('A simple asynchronous test', function(){
     asyncTest('Isn\'t JavaScript amazing?', function(){
         var val;
@@ -80,7 +61,6 @@ group('A simple asynchronous test', function(){
     });
 });
 
-//A simple asynchronous test that uses "proxy" to determine if its callback was called.
 group('A simple asynchronous test that uses "proxy" to determine if its callback was called.', function(){
     asyncTest('Was callback called?', function(){
         var prxy = proxy();
@@ -94,7 +74,6 @@ group('A simple asynchronous test that uses "proxy" to determine if its callback
     });
 });
 
-//2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".
 group('2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".', function(){
     var count = 0;
     asyncBeforeEachTest(function(){
@@ -129,7 +108,6 @@ group('2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".', fu
     });
 });
 
-//2 slightly convoluted asynchronous tests with "asyncAfterEachTest".
 group('2 slightly convoluted asynchronous tests with "asyncAfterEachTest".', function(){
     var count = 0;
     asyncAfterEachTest(function(){
@@ -159,7 +137,6 @@ group('2 slightly convoluted asynchronous tests with "asyncAfterEachTest".', fun
     });
 });
 
-//asyncBeforeEachTest can pass a value to asyncTest
 group('asyncBeforeEachTest can pass a value to asyncTest', function(){
     asyncBeforeEachTest(function(){
         return {num: 1};
