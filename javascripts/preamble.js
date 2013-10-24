@@ -689,7 +689,7 @@
     elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
 
     //If the windowGlabals config option is false then window globals will
-    //not //be used and the one Preamble name space will be used instead.
+    //not be used and the one Preamble name space will be used instead.
     if(config.windowGlobals){
         window.group = group;
         window.beforeEachTest = beforeEachTest;
