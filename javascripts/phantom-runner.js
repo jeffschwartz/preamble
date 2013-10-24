@@ -56,8 +56,9 @@
         } else {
             waitFor(function(){
                 return page.evaluate(function(){
-                    var el = document.getElementById('preamble-results-summary-passed');
-                    if (el /*&& el.innerText.match('completed')*/) {
+                    var el = document.getElementById('preamble-results-summary-passed') ||
+                        document.getElementById('preamble-results-summary-failed');
+                    if (el) {
                         return true;
                     }
                     return false;
@@ -73,12 +74,7 @@
                     if(elFailed){
                         console.log(elFailed.innerText);
                     }
-                    // try {
-                    //     return el.getElementsByClassName('failed')[0].innerHTML;
-                    // } catch (e) { }
-                    // return 10000;
                 });
-                // phantom.exit((parseInt(failedNum, 10) > 0) ? 1 : 0);
                 phantom.exit(elFailed ? 1 : 0);
             });
         }
