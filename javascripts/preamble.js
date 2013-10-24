@@ -1,12 +1,12 @@
 /*global preambleConfig*/
-//Preamble 1.0.5
+//Preamble 1.0.6
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v1.0.5';
+    var version = 'v1.0.6';
     //Targeted DOM elements.
     var elPreambleContainer = document.getElementById('preamble-container');
     var elHeader;
@@ -76,10 +76,6 @@
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
 
-    function stringify(varArg){
-        return typeof varArg === 'object' ? JSON.stringify(varArg) : varArg;
-    }
-
     function showTotalsToBeRun(){
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
@@ -128,14 +124,14 @@
     function showResultsSummary(){
         var html;
         //Show elapsed time.
-        html = '<p>Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
+        html = '<p id="preamble-elapsed-time">Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html += '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p class="summary failed">0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html += '<p id="preamble-results-summary-failed" class="summary failed">0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
         }else{
-            html += '<p class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
         }
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
@@ -166,9 +162,9 @@
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  failed!"</div>';
+                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  failed"</div>';
             }else{
-                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  passed!"</div>';
+                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</div>';
             }
         });
         html += '</div></div>';
@@ -675,15 +671,15 @@
     window.onerror = errorHandler;
 
     //Add markup structure to the DOM.
-    elPreambleContainer.innerHTML = '<header><h1 id="header"></h1></header><div class="container"><section id="status-container"></section><section id="results-container"></section></div>';
+    elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"></section><section id="preamble-results-container"></section></div>';
 
     //Append the ui test container.
     elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
 
     //Capture DOM elements for later use.
-    elHeader = document.getElementById('header');
-    elStatusContainer = document.getElementById('status-container');
-    elResults = document.getElementById('results-container');
+    elHeader = document.getElementById('preamble-header');
+    elStatusContainer = document.getElementById('preamble-status-container');
+    elResults = document.getElementById('preamble-results-container');
     elUiTestContainer = document.getElementById(config.uiTestContainerId);
 
     //Display the name.
@@ -693,7 +689,7 @@
     elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
 
     //If the windowGlabals config option is false then window globals will
-    //not //be used and the one Preamble name space will be used instead.
+    //not be used and the one Preamble name space will be used instead.
     if(config.windowGlobals){
         window.group = group;
         window.beforeEachTest = beforeEachTest;
