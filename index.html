@@ -33,7 +33,7 @@
         <h1>
 <a name="introducing-preamble" class="anchor" href="#introducing-preamble"><span class="octicon octicon-link"></span></a>Introducing Preamble</h1>
 
-<p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
+<p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
 
 <p>This is an example of a simple asynchronous test</p>
 
@@ -383,6 +383,16 @@
 
 <h3>
 <a name="uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id" class="anchor" href="#uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id"><span class="octicon octicon-link"></span></a>uiTestContainerId: Default value = 'ui-test-container'. Override this to use a different id.</h3>
+
+<h2>
+<a name="running-headless" class="anchor" href="#running-headless"><span class="octicon octicon-link"></span></a>Running Headless</h2>
+
+<p>You can run tests with Preamble headless using <a href="http://phantomjs.org">PhantomJS</a>. The following example assumes that you already have PhantomJS installed and that it can be found on the path.</p>
+
+<ol>
+<li>Open up a terminal and change to your test's root folder.</li>
+<li>From the command line type phantomjs javascripts/phantom-runner.js index.html </li>
+</ol>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
