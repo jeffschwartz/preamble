@@ -123,7 +123,10 @@
 <a name="grouping-tests" class="anchor" href="#grouping-tests"><span class="octicon octicon-link"></span></a>Grouping Tests</h2>
 
 <h3>
-<a name="grouplabel-callback" class="anchor" href="#grouplabel-callback"><span class="octicon octicon-link"></span></a>group(label, callback)</h3>
+<a name="grouplabel-callback" class="anchor" href="#grouplabel-callback"><span class="octicon octicon-link"></span></a>group(label, callback(){...})</h3>
+
+<h3>
+<a name="preamblegrouplabel-callbackassert" class="anchor" href="#preamblegrouplabel-callbackassert"><span class="octicon octicon-link"></span></a>Preamble.group(label, callback(assert){...})</h3>
 
 <p>group is used to group together one or more tests. <strong>label</strong> is a string used to uniquely identify the group. <strong>callback</strong> is a function which contains one or more tests. Besides containing tests, <strong>callback</strong> also provide closure which you can use to make data and code accessible to the tests.</p>
 
@@ -136,7 +139,10 @@
 </pre></div>
 
 <h3>
-<a name="beforeeachtestcallback" class="anchor" href="#beforeeachtestcallback"><span class="octicon octicon-link"></span></a>beforeEachTest(callback)</h3>
+<a name="beforeeachtestcallback" class="anchor" href="#beforeeachtestcallback"><span class="octicon octicon-link"></span></a>beforeEachTest(callback(){...})</h3>
+
+<h3>
+<a name="preamblebeforeeachtestcallback" class="anchor" href="#preamblebeforeeachtestcallback"><span class="octicon octicon-link"></span></a>Preamble.beforeEachTest(callback(){...})</h3>
 
 <p>beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>Configuration</strong> below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEachTest (please see asyncBeforeEachTest below).</p>
 
@@ -158,7 +164,10 @@
 </pre></div>
 
 <h3>
-<a name="aftereachtestcallback" class="anchor" href="#aftereachtestcallback"><span class="octicon octicon-link"></span></a>afterEachTest(callback)</h3>
+<a name="aftereachtestcallback" class="anchor" href="#aftereachtestcallback"><span class="octicon octicon-link"></span></a>afterEachTest(callback(){...})</h3>
+
+<h3>
+<a name="preambleaftereachtestcallback" class="anchor" href="#preambleaftereachtestcallback"><span class="octicon octicon-link"></span></a>Preamble.afterEachTest(callback(){...})</h3>
 
 <p>afterEachTest can be used to perform common initialization synchronously after each test is called.  If you need to do both synchronous and asynchronous initialization after each test then use asyncAfterEachTest (please see asyncAfterEachTest below).</p>
 
@@ -178,7 +187,10 @@
 </pre></div>
 
 <h3>
-<a name="asyncbeforeeachtestinterval-callback" class="anchor" href="#asyncbeforeeachtestinterval-callback"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest([interval,] callback)</h3>
+<a name="asyncbeforeeachtestinterval-callback" class="anchor" href="#asyncbeforeeachtestinterval-callback"><span class="octicon octicon-link"></span></a>asyncBeforeEachTest([interval,] callback(){...})</h3>
+
+<h3>
+<a name="preambleasyncbeforeeachtestinterval-callback" class="anchor" href="#preambleasyncbeforeeachtestinterval-callback"><span class="octicon octicon-link"></span></a>Preamble.asyncBeforeEachTest([interval,] callback(){...})</h3>
 
 <p>asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If <strong>calback</strong> returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see <strong>Configuration</strong> below).</p>
 
@@ -218,7 +230,10 @@
 </pre></div>
 
 <h3>
-<a name="asyncaftereachtestinterval-callback" class="anchor" href="#asyncaftereachtestinterval-callback"><span class="octicon octicon-link"></span></a>asyncAfterEachTest([interval,] callback)</h3>
+<a name="asyncaftereachtestinterval-callback" class="anchor" href="#asyncaftereachtestinterval-callback"><span class="octicon octicon-link"></span></a>asyncAfterEachTest([interval,] callback(){...})</h3>
+
+<h3>
+<a name="preambleasyncaftereachtestinterval-callback" class="anchor" href="#preambleasyncaftereachtestinterval-callback"><span class="octicon octicon-link"></span></a>Preamble.asyncAfterEachTest([interval,] callback(){...})</h3>
 
 <p>asyncAfterEachTest can be used to perform common initialization asynchronously after each test is called. <strong>interval</strong> is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group. </p>
 
@@ -256,7 +271,10 @@
 <a name="synchronous-tests" class="anchor" href="#synchronous-tests"><span class="octicon octicon-link"></span></a>Synchronous Tests</h2>
 
 <h3>
-<a name="testlabel-callbackbeforetestvalue--callbackassert-beforetestvalue" class="anchor" href="#testlabel-callbackbeforetestvalue--callbackassert-beforetestvalue"><span class="octicon octicon-link"></span></a>test(label, callback([beforeTestValue]) || callback(assert[, beforeTestValue]))</h3>
+<a name="testlabel-callbackbeforetestvalue" class="anchor" href="#testlabel-callbackbeforetestvalue"><span class="octicon octicon-link"></span></a>test(label, callback([beforeTestValue]){...})</h3>
+
+<h3>
+<a name="preambletestlabel-callbackassertbeforetestvalue" class="anchor" href="#preambletestlabel-callbackassertbeforetestvalue"><span class="octicon octicon-link"></span></a>Preamble.test(label, callback(assert[,beforeTestValue]){...})</h3>
 
 <p>test is used to group together one or more assertions that are to be run synchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>Configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
 
@@ -272,7 +290,10 @@
 <a name="asynchronous-tests" class="anchor" href="#asynchronous-tests"><span class="octicon octicon-link"></span></a>Asynchronous Tests</h2>
 
 <h3>
-<a name="asynctestlabel-interval-callbackbeforetestvalue--callbackassert-beforetestvalue" class="anchor" href="#asynctestlabel-interval-callbackbeforetestvalue--callbackassert-beforetestvalue"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback([beforeTestValue]) || callback(assert[, beforeTestValue]))</h3>
+<a name="asynctestlabel-interval-callbackbeforetestvalue" class="anchor" href="#asynctestlabel-interval-callbackbeforetestvalue"><span class="octicon octicon-link"></span></a>asyncTest(label, [interval,] callback([beforeTestValue]){...})</h3>
+
+<h3>
+<a name="preambleasynctestlabel-interval-callbackassert-beforetestvalue" class="anchor" href="#preambleasynctestlabel-interval-callbackassert-beforetestvalue"><span class="octicon octicon-link"></span></a>Preamble.asyncTest(label, [interval,] callback(assert[, beforeTestValue]){...})</h3>
 
 <p>asyncTest is used to group together one or more assertions that are to be run asynchronously. <strong>label</strong> is a string used to uniquely identify a test within a group. <strong>callback</strong> is a function which contains one or more assertions. Besides containing assertions, <strong>callback</strong> can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to <strong>callback</strong> either as the 1st parameter if <strong>windowGlobals</strong> is set to true or as the 2nd parameter if <strong>windowGlobals</strong> is set to false (for more information please see <strong>Configuration</strong> below). <strong>assert</strong> is an object whose properties are the assertion methods (please see Assertions below).</p>
 
@@ -290,7 +311,10 @@
 </pre></div>
 
 <h3>
-<a name="whenasyncdonecallback" class="anchor" href="#whenasyncdonecallback"><span class="octicon octicon-link"></span></a>whenAsyncDone(callback)</h3>
+<a name="whenasyncdonecallback" class="anchor" href="#whenasyncdonecallback"><span class="octicon octicon-link"></span></a>whenAsyncDone(callback(){...})</h3>
+
+<h3>
+<a name="preamblewhenasyncdonecallback" class="anchor" href="#preamblewhenasyncdonecallback"><span class="octicon octicon-link"></span></a>Preamble.whenAsyncDone(callback(){...})</h3>
 
 <p>whenAsynDone starts the timer for an asyncTest. When the timer expires Preamble will then call <strong>callback</strong> to run the assertions for the asyncTest. </p>
 
@@ -300,27 +324,37 @@
 <h3>
 <a name="equalvalue-expectation-label" class="anchor" href="#equalvalue-expectation-label"><span class="octicon octicon-link"></span></a>equal(value, expectation, label)</h3>
 
-<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation &amp;&amp; expectation === value then the result will be true. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
+<p>A strict deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation &amp;&amp; expectation === value then the result will be true. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
 
 <h3>
 <a name="notequalvalue-expectation-label" class="anchor" href="#notequalvalue-expectation-label"><span class="octicon octicon-link"></span></a>notEqual(value, expectation, label)</h3>
 
-<p>A deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation &amp;&amp; expectation !== value then the result will be true. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
+<p>A strict deep recursive comparison of <strong>value</strong> and <strong>expection</strong>. <strong>value</strong> and <strong>expectation</strong> can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation &amp;&amp; expectation !== value then the result will be true. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
 
 <h3>
 <a name="istruevalue-label" class="anchor" href="#istruevalue-label"><span class="octicon octicon-link"></span></a>isTrue(value, label)</h3>
 
-<p>A boolean assertion comparing <strong>value</strong> to true. Result is true if <strong>value</strong> is truthy. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
+<p>A strict boolean assertion. Result is true if <strong>value</strong> is true. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
 
 <h3>
-<a name="isfalsevalue-label" class="anchor" href="#isfalsevalue-label"><span class="octicon octicon-link"></span></a>isFalse(value, label)</h3>
+<a name="isfalsevalue-label---added-v107" class="anchor" href="#isfalsevalue-label---added-v107"><span class="octicon octicon-link"></span></a>isFalse(value, label) - added v1.0.7</h3>
 
-<p>A boolean assertion comparing <strong>value</strong> to false. Result is true if <strong>value</strong> is not truthy. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
+<p>A strict boolean assertion. Result is true if <strong>value</strong> is false. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
+
+<h3>
+<a name="istruthyvalue-label---added-v107" class="anchor" href="#istruthyvalue-label---added-v107"><span class="octicon octicon-link"></span></a>isTruthy(value, label) - added v1.0.7</h3>
+
+<p>A non strict boolean assertion. Result is true if <strong>value</strong> is truthy. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
+
+<h3>
+<a name="isnottruthyvalue-label" class="anchor" href="#isnottruthyvalue-label"><span class="octicon octicon-link"></span></a>isNotTruthy(value, label)</h3>
+
+<p>A non strict boolean assertion. Result is true if <strong>value</strong> is not truthy. <strong>label</strong> is a string used to uniquely identify the assertion.</p>
 
 <h2>
 <a name="ui-tests" class="anchor" href="#ui-tests"><span class="octicon octicon-link"></span></a>UI Tests</h2>
 
-<p>Preamble adds a div element, whose ID is <em>**ui-test-container</em>*, to the DOM which can be used to perform UI tests. </p>
+<p>Preamble adds a div element to the DOM which can be used for UI tests. This element's ID defaults to <strong>ui-test-container</strong> but can be overridden (please see Configuration below). </p>
 
 <h2>
 <a name="helpersconvenience-methods" class="anchor" href="#helpersconvenience-methods"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
@@ -339,6 +373,7 @@
             <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'Yest it was called!'</span><span class="p">);</span>
             <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'And it was not called twice!'</span><span class="p">);</span>
             <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'It was called once!'</span><span class="p">);</span>
+            <span class="nx">equal</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">getCalledCount</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'proxy.getCalledCount() returned 1'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
 <span class="p">});</span>
@@ -347,7 +382,7 @@
 <h3>
 <a name="getuitestcontainerelement" class="anchor" href="#getuitestcontainerelement"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h3>
 
-<p>Returns the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+<p>Returns the UI test container DOM element. This element's ID defaults to <strong>ui-test-container</strong> but can be overridden (please see UI Tests above and Configuration below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">$uiTestContainerElement</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">getUiTestContainerElement</span><span class="p">());</span>
 </pre></div>
@@ -355,7 +390,7 @@
 <h3>
 <a name="getuitestcontainerelementid" class="anchor" href="#getuitestcontainerelementid"><span class="octicon octicon-link"></span></a>getUiTestContainerElementId()</h3>
 
-<p>Returns the id of the &lt;div id="ui-test-container"&gt; element which can be used to do UI testing (please see UI Tests abouve).</p>
+<p>Returns the id of the UI test container DOM element. This element's ID defaults to <strong>ui-test-container</strong> but can be overridden (please see UI Tests above and Configuration below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">elUiTestContainerElement</span> <span class="o">=</span> 
     <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">getUiTestContainerElementId</span><span class="p">());</span>
@@ -382,7 +417,7 @@
 <a name="name-default-value--test-override-this-to-display-a-meaningful-name-for-your-tests" class="anchor" href="#name-default-value--test-override-this-to-display-a-meaningful-name-for-your-tests"><span class="octicon octicon-link"></span></a>name: Default value = 'Test'. Override this to display a meaningful name for your tests.</h3>
 
 <h3>
-<a name="uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id" class="anchor" href="#uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id"><span class="octicon octicon-link"></span></a>uiTestContainerId: Default value = 'ui-test-container'. Override this to use a different id.</h3>
+<a name="uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id-for-the-ui-test-container-dom-element" class="anchor" href="#uitestcontainerid-default-value--ui-test-container-override-this-to-use-a-different-id-for-the-ui-test-container-dom-element"><span class="octicon octicon-link"></span></a>uiTestContainerId: Default value = 'ui-test-container'. Override this to use a different ID for the UI test container DOM element.</h3>
 
 <h2>
 <a name="running-headless" class="anchor" href="#running-headless"><span class="octicon octicon-link"></span></a>Running Headless</h2>
