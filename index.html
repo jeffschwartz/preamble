@@ -111,12 +111,11 @@
 <h1>
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h1>
 
-<p>Please note that when <strong>windowGlobals</strong> is set to false you must preface each API method listed below with either "Preamble." or with "assert." (please see <strong>Configuration</strong> below).</p>
+<p>Please note that when <strong>windowGlobals</strong> configuration option is set to false you must preface each API method listed below with "Preamble." and each assertion with "assert." (please see <strong>Configuration</strong> below).</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">group</span><span class="p">(...)</span>
-</pre></div>
-
-<div class="highlight highlight-javascript"><pre><span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(...)</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'this is a test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(...);</span>
+<span class="p">});</span>
 </pre></div>
 
 <h2>
