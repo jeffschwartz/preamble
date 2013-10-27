@@ -295,29 +295,49 @@
 
     //Simple boolean test.
     function a_equals_false(a){
-        return !a_equals_true(a);
+        return a === false;
+    }
+
+    //Simple boolean test.
+    function a_is_truthy(a){
+        return (a);
+    }
+
+    //Simple boolean test.
+    function a_is_not_truthy(a){
+        return (!a);
     }
 
     //Assertion runners.
 
-    // a === b
+    // "strict" a === b
     function assertEqual(a, b){
         return a_equals_b(a, b);
     }
 
-    // a === true, simple boolean test
+    // "strict" a === true, simple boolean test
     function assertIsTrue(a){
         return a_equals_true(a);
     }
 
-    // a !== b
+    // "non strict" a == true, simple boolean test
+    function assertIsTruthy(a){
+        return a_is_truthy(a);
+    }
+
+    // "strict" a !== b
     function assertNotEqual(a, b){
         return a_notequals_b(a, b);
     }
 
-    // a === false, simple boolean test
+    // "strict" a === false, simple boolean test
     function assertIsFalse(a){
         return a_equals_false(a);
+    }
+
+    // "non strict" a == true, simple boolean test
+    function assertIsNotTruthy(a){
+        return a_is_not_truthy(a);
     }
 
     //Loops through the assertionsQueue, running each assertion and records the results.
@@ -342,8 +362,14 @@
                     case 'assertIsTrue':
                         item.displayAssertionName = 'isTrue';
                         break;
+                    case 'assertIsTruthy':
+                        item.displayAssertionName = 'isTruthy';
+                        break;
                     case 'assertIsFalse':
                         item.displayAssertionName = 'isFalse';
+                        break;
+                    case 'assertIsNotTruthy':
+                        item.displayAssertionName = 'isNotTruthy';
                         break;
                     case 'assertEqual':
                         item.displayAssertionName = 'equal';
@@ -393,6 +419,15 @@
         }
     }
 
+    function noteIsTruthyAssertion(value, label){
+        if(assertionFilter === label || assertionFilter === ''){
+            if(arguments.length !== 2){
+                throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
+            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, value, true, currentTestHash.isAsync);
+        }
+    }
+
     function noteNotEqualAssertion(value, expectation, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 3){
@@ -410,6 +445,15 @@
                 throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
             }
             pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
+        }
+    }
+
+    function noteIsNotTruthyAssertion(value, label){
+        if(assertionFilter === label || assertionFilter === ''){
+            if(arguments.length !== 2){
+                throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
+            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, value, true, currentTestHash.isAsync);
         }
     }
 
@@ -646,11 +690,15 @@
             };
             return fnProxy;
         };
-        //If you just want to know if the callback was called then
-        //call wasCalled with no args. If you want to know if the
-        //callback was called n times, pass n as an argument.
+        //If you just want to know if the callback was called then call
+        //wasCalled with no args. If you want to know if the callback
+        //was called n times, pass n as an argument.
         fn.wasCalled = function(){
             return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
+        };
+        //Returns the number of times that the callback was called.
+        fn.getCalledCount = function(){
+            return xCalled;
         };
         return fn;
     }
@@ -703,6 +751,8 @@
         window.notEqual = noteNotEqualAssertion;
         window.isTrue = noteIsTrueAssertion;
         window.isFalse = noteIsFalseAssertion;
+        window.isTruthy = noteIsTruthyAssertion;
+        window.isNotTruthy = noteIsNotTruthyAssertion;
         window.getUiTestContainerElement = getUiTestContainerElement;
         window.getUiTestContainerElementId = getUiTestContainerElementId;
         window.proxy = proxy;
@@ -726,7 +776,9 @@
             equal: noteEqualAssertion,
             notEqual: noteNotEqualAssertion,
             isTrue: noteIsTrueAssertion,
-            isFalse: noteIsFalseAssertion
+            isFalse: noteIsFalseAssertion,
+            isTruthy: noteIsTruthyAssertion,
+            isNotTruthy: noteIsNotTruthyAssertion
         };
     }
 
