@@ -5,6 +5,52 @@ group('Does it work?', function(){
     });
 });
 
+group('Truthy versus strict boolean evaluation', function(){
+    var undef;
+    var def = {};
+    var one = 1;
+    var fls = false;
+    var tru = true;
+    test('When using truthy boolean evaluation', function(){
+        isNotTruthy(undef, 'undefined');
+        isTruthy(undef, 'undefinded');
+        isNotTruthy(def, 'a valid reference');
+        isTruthy(def, 'a valid reference');
+        isNotTruthy(one, '1');
+        isTruthy(one, '1');
+        isNotTruthy(fls, 'false');
+        isTruthy(fls, 'false');
+        isNotTruthy(tru, 'true');
+        isTruthy(tru, 'true');
+    });
+    test('When using strict boolean evaluation', function(){
+        isFalse(undef, 'undefinded');
+        isTrue(undef, 'undefinded');
+        isFalse(def, 'a valid reference');
+        isTrue(def, 'a valid reference');
+        isFalse(one, '1');
+        isTrue(one, '1');
+        isFalse(fls, 'false');
+        isTrue(fls, 'false');
+        isFalse(tru, 'true');
+        isTrue(tru, 'true');
+    });
+});
+
+group('Assertions', function(){
+    test('Does a equal b', function(){
+        var char = 'b';
+        var a = {a: 'a', b: 'b'};
+        var b = {a: 'a', b: b};
+        var c = {a: 'a', b: 'b'};
+        var three = 3;
+        notEqual(a, b, 'No way these are equal.');
+        equal(a, c, 'But these are equal.');
+        equal(char, 'b', 'Yup, these are equal too.');
+        equal(3, three, 'And so are these.');
+    });
+});
+
 group('2 slightly convoluted synchronous test with "beforeEachTest".', function(){
     var count = 0;
     beforeEachTest(function(){
@@ -35,20 +81,6 @@ group('2 slightly convoluted synchronous test with "afterEachTest".', function()
     });
 });
 
-group('Comparing objects for equality using equal and notEual.', function(){
-    test('Does a equal b', function(){
-        var char = 'b';
-        var a = {a: 'a', b: 'b'};
-        var b = {a: 'a', b: b};
-        var c = {a: 'a', b: 'b'};
-        var three = 3;
-        notEqual(a, b, 'No way these are equal.');
-        equal(a, c, 'But these are equal.');
-        equal(char, 'b', 'Yup, these are equal too.');
-        equal(3, three, 'And so are these.');
-    });
-});
-
 group('A simple asynchronous test', function(){
     asyncTest('Isn\'t JavaScript amazing?', function(){
         var val;
@@ -67,9 +99,10 @@ group('A simple asynchronous test that uses "proxy" to determine if its callback
         setTimeout(prxy(function(){
         }), 10);
         whenAsyncDone(function(){
-            isTrue(prxy.wasCalled(), 'Yest it was called!');
-            isFalse(prxy.wasCalled(2), 'And it was not called twice!');
-            isTrue(prxy.wasCalled(1), 'It was called once!');
+            equal(prxy.getCalledCount(), 1, 'getCalledCount() returned 1')
+            isTrue(prxy.wasCalled(), 'Yes it was called');
+            isFalse(prxy.wasCalled(2), 'And it was not called twice');
+            isTrue(prxy.wasCalled(1), 'It was called once');
         });
     });
 });
