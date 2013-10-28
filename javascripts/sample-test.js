@@ -5,35 +5,18 @@ group('Does it work?', function(){
     });
 });
 
-group('Truthy versus strict boolean evaluation', function(){
+group('Truthy boolean evaluation', function(){
     var undef;
     var def = {};
     var one = 1;
     var fls = false;
     var tru = true;
     test('When using truthy boolean evaluation', function(){
-        isNotTruthy(undef, 'undefined');
-        isTruthy(undef, 'undefinded');
-        isNotTruthy(def, 'a valid reference');
-        isTruthy(def, 'a valid reference');
-        isNotTruthy(one, '1');
-        isTruthy(one, '1');
-        isNotTruthy(fls, 'false');
-        isTruthy(fls, 'false');
-        isNotTruthy(tru, 'true');
-        isTruthy(tru, 'true');
-    });
-    test('When using strict boolean evaluation', function(){
-        isFalse(undef, 'undefinded');
-        isTrue(undef, 'undefinded');
-        isFalse(def, 'a valid reference');
-        isTrue(def, 'a valid reference');
-        isFalse(one, '1');
-        isTrue(one, '1');
-        isFalse(fls, 'false');
-        isTrue(fls, 'false');
-        isFalse(tru, 'true');
-        isTrue(tru, 'true');
+        isNotTruthy(undef, 'undefined is false');
+        isTruthy(def, 'a valid reference is true');
+        isTruthy(one, '1 is true');
+        isNotTruthy(fls, 'false is false');
+        isTruthy(tru, 'true is true');
     });
 });
 
@@ -51,7 +34,7 @@ group('Assertions', function(){
     });
 });
 
-group('2 slightly convoluted synchronous test with "beforeEachTest".', function(){
+group('2 synchronous test with "beforeEachTest"', function(){
     var count = 0;
     beforeEachTest(function(){
         count = 1;
@@ -67,7 +50,7 @@ group('2 slightly convoluted synchronous test with "beforeEachTest".', function(
     });
 });
 
-group('2 slightly convoluted synchronous test with "afterEachTest".', function(){
+group('2 synchronous test with "afterEachTest"', function(){
     var count = 0;
     afterEachTest(function(){
         count = 1;
@@ -81,7 +64,7 @@ group('2 slightly convoluted synchronous test with "afterEachTest".', function()
     });
 });
 
-group('A simple asynchronous test', function(){
+group('An asynchronous test with no before/after eachTest', function(){
     asyncTest('Isn\'t JavaScript amazing?', function(){
         var val;
         setTimeout(function(){
@@ -93,21 +76,23 @@ group('A simple asynchronous test', function(){
     });
 });
 
-group('A simple asynchronous test that uses "proxy" to determine if its callback was called.', function(){
-    asyncTest('Was callback called?', function(){
+group('An asynchronous test that demonstrates using "proxy"', function(){
+    asyncTest('proxy() can tell you a lot abut a callback', function(){
         var prxy = proxy();
         setTimeout(prxy(function(){
+            return 1000;
         }), 10);
         whenAsyncDone(function(){
-            equal(prxy.getCalledCount(), 1, 'getCalledCount() returned 1')
-            isTrue(prxy.wasCalled(), 'Yes it was called');
-            isFalse(prxy.wasCalled(2), 'And it was not called twice');
-            isTrue(prxy.wasCalled(1), 'It was called once');
+            equal(prxy.getCalledCount(), 1, 'How many times it was called - getCalledCount() returned 1')
+            isTrue(prxy.wasCalled(), 'If it was called - yes it was called');
+            isFalse(prxy.wasCalled(2), 'If it was called n times - it was not not called twice');
+            isTrue(prxy.wasCalled(1), 'If it was called n times - it was called only once');
+            isTrue(prxy.getReturned() === 1000, 'It can even tell you what it returned - it return 1000');
         });
     });
 });
 
-group('2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".', function(){
+group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
     var count = 0;
     asyncBeforeEachTest(function(){
         count = 1;
@@ -141,7 +126,7 @@ group('2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".', fu
     });
 });
 
-group('2 slightly convoluted asynchronous tests with "asyncAfterEachTest".', function(){
+group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     var count = 0;
     asyncAfterEachTest(function(){
         count = 1;
@@ -170,7 +155,7 @@ group('2 slightly convoluted asynchronous tests with "asyncAfterEachTest".', fun
     });
 });
 
-group('asyncBeforeEachTest can pass a value to asyncTest', function(){
+group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
     asyncBeforeEachTest(function(){
         return {num: 1};
     });

@@ -677,16 +677,20 @@
     }
 
     //A factory that creates a proxy wrapper for any function. Use it to
-    //determine if the wrapped function was called and how many times
-    //it was called. Very useful for testing if asynchronous methods
-    //called their callbacks.
+    //determine if the wrapped function was called, how many times it was
+    //called, the arguments that were passed to it and what it returned.
+    //Very useful for testing if asynchronous methods called their callbacks.
     function proxy(){
         var xCalled = 0;
+        var argsPassed;
+        var returned;
         var fn = function(callback){
             var fnProxy = function(){
                 xCalled += 1;
+                argsPassed = arguments.length ? [].slice.call(arguments) : undefined;
                 var args = [].slice.call(arguments);
-                return callback.apply(this, args);
+                returned = callback.apply(this, args);
+                return returned;
             };
             return fnProxy;
         };
@@ -699,6 +703,24 @@
         //Returns the number of times that the callback was called.
         fn.getCalledCount = function(){
             return xCalled;
+        };
+        //Returns argsPassed[n] if called with n. Returns argsPassed if
+        //called without arguments.
+        fn.getArgsPassed = function(){
+            if(arguments.length === 1){
+                if(argsPassed.length && argsPassed.length >= arguments[0]){
+                    return argsPassed[arguments[0]];
+                }else{
+                    return undefined;
+                }
+            }else{
+                return argsPassed;
+            }
+        };
+        //Returns what the callback returned which could be undefined
+        //if it didn't return anything.
+        fn.getReturned = function(){
+            return returned;
         };
         return fn;
     }
