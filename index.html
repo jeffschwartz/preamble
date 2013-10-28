@@ -111,10 +111,15 @@
 <h1>
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h1>
 
-<p>Please note that when the <strong>windowGlobals</strong> configuration option is set to false you must preface each API method listed below with "Preamble." and each assertion with "assert." (please see <strong>Configuration</strong> below).</p>
+<p>Please note that when the <strong>windowGlobals</strong> configuration option is set to false you must preface each API method listed below with "Preamble." (please see <strong>Configuration</strong> below). In addition, test callback functions are passed a single argument, a hash, which you must use to call assertions (please see <strong>Assertions</strong> below). </p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'this is a test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">notEqual</span><span class="p">(...);</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isFalse</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isTruthy</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isNotTruthy</span><span class="p">(...);</span>
 <span class="p">});</span>
 </pre></div>
 
@@ -320,6 +325,18 @@
 <h2>
 <a name="assertions" class="anchor" href="#assertions"><span class="octicon octicon-link"></span></a>Assertions</h2>
 
+<p>Please note that when the <strong>windowGlobals</strong> configuration option is set to false test callback functions are passed a single argument, a hash, which you must use to call assertions (please see <strong>API</strong> above and <strong>Configuration</strong> below). </p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">Preamble</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="s1">'this is a test'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">){</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">notEqual</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isFalse</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isTruthy</span><span class="p">(...);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">isNotTruthy</span><span class="p">(...);</span>
+<span class="p">});</span>
+</pre></div>
+
 <h3>
 <a name="equalvalue-expectation-label" class="anchor" href="#equalvalue-expectation-label"><span class="octicon octicon-link"></span></a>equal(value, expectation, label)</h3>
 
@@ -361,18 +378,20 @@
 <h3>
 <a name="proxy" class="anchor" href="#proxy"><span class="octicon octicon-link"></span></a>proxy()</h3>
 
-<p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the callback was actually called and if the callback was called n times.</p>
+<p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the wrapped function was called, how many times it was called, the arguments that were passed to it and what it returned. Very useful for testing asynchronous methods.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Using "proxy" to determine if its callback was called.'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'Was callback called?'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'An asynchronous test that demonstrates using "proxy"'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy() can tell you a lot abut a callback'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
         <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
         <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="k">return</span> <span class="mi">1000</span><span class="p">;</span>
         <span class="p">}),</span> <span class="mi">10</span><span class="p">);</span>
         <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'Yest it was called!'</span><span class="p">);</span>
-            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'And it was not called twice!'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'It was called once!'</span><span class="p">);</span>
-            <span class="nx">equal</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">getCalledCount</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'proxy.getCalledCount() returned 1'</span><span class="p">);</span>
+            <span class="nx">equal</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">getCalledCount</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'How many times it was called - getCalledCount() returned 1'</span><span class="p">)</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'If it was called - yes it was called'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'If it was called n times - it was not not called twice'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'If it was called n times - it was called only once'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">getReturned</span><span class="p">()</span> <span class="o">===</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It can even tell you what it returned - it return 1000'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
 <span class="p">});</span>
