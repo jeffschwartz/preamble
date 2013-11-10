@@ -77,17 +77,17 @@ group('An asynchronous test with no before/after eachTest', function(){
 });
 
 group('An asynchronous test that demonstrates using "proxy"', function(){
-    asyncTest('proxy() can tell you a lot abut a callback', function(){
-        var prxy = proxy();
-        setTimeout(prxy(function(){
+    asyncTest('proxy(callback) can tell you a lot abut a callback', function(){
+        var callback = proxy(function(){
             return 1000;
-        }), 10);
+        });
+        setTimeout(callback, 10);
         whenAsyncDone(function(){
-            equal(prxy.getCalledCount(), 1, 'How many times it was called - getCalledCount() returned 1')
-            isTrue(prxy.wasCalled(), 'If it was called - yes it was called');
-            isFalse(prxy.wasCalled(2), 'If it was called n times - it was not not called twice');
-            isTrue(prxy.wasCalled(1), 'If it was called n times - it was called only once');
-            isTrue(prxy.getReturned() === 1000, 'It can even tell you what it returned - it return 1000');
+            equal(callback.getCalledCount(), 1, 'How many times it was called - getCalledCount() returned 1');
+            isTrue(callback.wasCalled(), 'If it was called - yes it was called');
+            isFalse(callback.wasCalled(2), 'If it was called n times - it was not not called twice');
+            isTrue(callback.wasCalled(1), 'If it was called n times - it was called only once');
+            isTrue(callback.getReturned() === 1000, 'It can even tell you what it returned - it return 1000');
         });
     });
 });
