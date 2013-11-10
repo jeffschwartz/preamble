@@ -34,7 +34,7 @@
 <a name="introducing-preamble" class="anchor" href="#introducing-preamble"><span class="octicon octicon-link"></span></a>Introducing Preamble</h1>
 
 <h6>
-<a name="v108" class="anchor" href="#v108"><span class="octicon octicon-link"></span></a>v1.0.8</h6>
+<a name="v110" class="anchor" href="#v110"><span class="octicon octicon-link"></span></a>v1.1.0</h6>
 
 <p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
 
@@ -51,15 +51,12 @@
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="kd">var</span> <span class="nx">catsCollection</span><span class="p">;</span>
-        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
-        <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catscollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
-        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">collection</span><span class="p">){</span>
-            <span class="nx">catsCollection</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">;</span>
-        <span class="p">}));</span>      
+        <span class="kd">var</span> <span class="nx">promiseDone</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){});</span>
+        <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catsCollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">);</span>      
         <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'promise.done was called'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">catsCollection</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'promiseDone was called'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">.</span><span class="nx">getArgsPassed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
 <span class="p">});</span>
@@ -379,22 +376,22 @@
 <a name="helpersconvenience-methods" class="anchor" href="#helpersconvenience-methods"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
 
 <h3>
-<a name="proxy" class="anchor" href="#proxy"><span class="octicon octicon-link"></span></a>proxy()</h3>
+<a name="proxysomefunction" class="anchor" href="#proxysomefunction"><span class="octicon octicon-link"></span></a>proxy(someFunction)</h3>
 
-<p>proxy is a factory method that returns a function that can wrap a callback and which can be used to determine if the wrapped function was called, how many times it was called, the arguments that were passed to it and what it returned. Very useful for testing asynchronous methods.</p>
+<p>proxy returns a function that proxies all calls to <strong>someFunction</strong>. The function that proxy returns can be used to determine if <strong>someFunction</strong> was called, how many times it was called, the arguments that were passed to it and what it returned. Extremely useful for testing asynchronous methods.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'An asynchronous test that demonstrates using "proxy"'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy() can tell you a lot abut a callback'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="kd">var</span> <span class="nx">prxy</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">();</span>
-        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">prxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy(callback) can tell you a lot abut a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">callback</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
             <span class="k">return</span> <span class="mi">1000</span><span class="p">;</span>
-        <span class="p">}),</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">callback</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
         <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-            <span class="nx">equal</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">getCalledCount</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'How many times it was called - getCalledCount() returned 1'</span><span class="p">)</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'If it was called - yes it was called'</span><span class="p">);</span>
-            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'If it was called n times - it was not not called twice'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'If it was called n times - it was called only once'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">prxy</span><span class="p">.</span><span class="nx">getReturned</span><span class="p">()</span> <span class="o">===</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It can even tell you what it returned - it return 1000'</span><span class="p">);</span>
+            <span class="nx">equal</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">getCalledCount</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'How many times it was called - getCalledCount() returned 1'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'If it was called - yes it was called'</span><span class="p">);</span>
+            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'If it was called n times - it was not not called twice'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'If it was called n times - it was called only once'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">getReturned</span><span class="p">()</span> <span class="o">===</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It can even tell you what it returned - it return 1000'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
 <span class="p">});</span>
@@ -448,7 +445,13 @@
 <ol>
 <li>Open up a terminal and change to your test's root folder.</li>
 <li>From the command line enter "phantomjs javascripts/phantom-runner.js index.html".</li>
-</ol>
+</ol><h2>
+<a name="changes" class="anchor" href="#changes"><span class="octicon octicon-link"></span></a>Changes</h2>
+
+<p>v1.1.0 - introduces a simpler calling converntion for proxy, removing one level of indirection. Please note that this is a breaking change. To upgrade your tests please modify your calls to proxy as follows:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">proxy</span><span class="p">(</span><span class="nx">functionToBeProxied</span><span class="p">);</span>
+</pre></div>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
