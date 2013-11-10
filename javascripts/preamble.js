@@ -679,20 +679,18 @@
     //A factory that creates a proxy wrapper for any function. Use it to
     //determine if the wrapped function was called, how many times it was
     //called, the arguments that were passed to it and what it returned.
-    //Very useful for testing if asynchronous methods called their callbacks.
-    function proxy(){
+    //Extemely useful for testing if asynchronous methods called their callbacks.
+    //v1.1.0 - totally rewritten and breaks use case from v1.0.8.
+    function proxy(callback){
         var xCalled = 0;
         var argsPassed;
         var returned;
-        var fn = function(callback){
-            var fnProxy = function(){
-                xCalled += 1;
-                argsPassed = arguments.length ? [].slice.call(arguments) : undefined;
-                var args = [].slice.call(arguments);
-                returned = callback.apply(this, args);
-                return returned;
-            };
-            return fnProxy;
+        var fn = function(){
+            xCalled += 1;
+            argsPassed = arguments.length ? [].slice.call(arguments) : undefined;
+            var args = [].slice.call(arguments);
+            returned = callback.apply(this, args);
+            return returned;
         };
         //If you just want to know if the callback was called then call
         //wasCalled with no args. If you want to know if the callback
