@@ -705,14 +705,16 @@
         //Returns argsPassed[n] if called with n. Returns argsPassed if
         //called without arguments.
         fn.getArgsPassed = function(){
-            if(arguments.length === 1){
-                if(argsPassed.length && argsPassed.length >= arguments[0]){
-                    return argsPassed[arguments[0]];
+            if(typeof argsPassed !== 'undefined'){
+                if(arguments.length === 1){
+                    if(argsPassed.length && argsPassed.length >= arguments[0]){
+                        return argsPassed[arguments[0]];
+                    }else{
+                        return undefined;
+                    }
                 }else{
-                    return undefined;
+                    return argsPassed;
                 }
-            }else{
-                return argsPassed;
             }
         };
         //Returns what the callback returned which could be undefined
