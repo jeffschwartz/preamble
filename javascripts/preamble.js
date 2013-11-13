@@ -1,12 +1,12 @@
 /*global preambleConfig*/
-//Preamble 1.1.0
+//Preamble 1.1.1
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v1.1.0';
+    var version = 'v1.1.1';
     //Targeted DOM elements.
     var elPreambleContainer = document.getElementById('preamble-container');
     var elHeader;
@@ -705,14 +705,16 @@
         //Returns argsPassed[n] if called with n. Returns argsPassed if
         //called without arguments.
         fn.getArgsPassed = function(){
-            if(arguments.length === 1){
-                if(argsPassed.length && argsPassed.length >= arguments[0]){
-                    return argsPassed[arguments[0]];
+            if(typeof argsPassed !== 'undefined'){
+                if(arguments.length === 1){
+                    if(argsPassed.length && argsPassed.length >= arguments[0]){
+                        return argsPassed[arguments[0]];
+                    }else{
+                        return undefined;
+                    }
                 }else{
-                    return undefined;
+                    return argsPassed;
                 }
-            }else{
-                return argsPassed;
             }
         };
         //Returns what the callback returned which could be undefined
