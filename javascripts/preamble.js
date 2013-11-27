@@ -681,12 +681,15 @@
     //called, the arguments that were passed to it and what it returned.
     //Extemely useful for testing if asynchronous methods called their callbacks.
     //v1.1.0 - totally rewritten and breaks use case from v1.0.8.
+    //v1.2.0 - added contexts and fn.getContexts().
     function proxy(callback){
         var xCalled = 0;
         var argsPassed;
         var returned;
+        var contexts = [];
         var fn = function(){
             xCalled += 1;
+            contexts.push(this);
             argsPassed = arguments.length ? [].slice.call(arguments) : undefined;
             var args = [].slice.call(arguments);
             returned = callback.apply(this, args);
@@ -697,6 +700,17 @@
         //was called n times, pass n as an argument.
         fn.wasCalled = function(){
             return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
+        };
+        //Returns contexts[n] if called with n and n >= 0 and n <= xCalled - 1.
+        //Returns contexts if called without arguments and contexts.length > 0.
+        //Returns undefined if neither of the previous conditions were met.
+        fn.getContexts = function(){
+            var index = arguments.length === 1 ? arguments[0] : -1;
+            if(xCalled && (index >= 0) && (index <= xCalled - 1)){
+                return contexts[arguments[0]];
+            }else if(contexts.length){
+                return contexts;
+            }
         };
         //Returns the number of times that the callback was called.
         fn.getCalledCount = function(){
