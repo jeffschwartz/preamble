@@ -53,7 +53,7 @@
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
         <span class="kd">var</span> <span class="nx">promiseDone</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){});</span>
         <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catsCollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
-        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">);</span>      
+        <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">);</span>
         <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
             <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'promiseDone was called'</span><span class="p">);</span>
             <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">.</span><span class="nx">getArgsPassed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
@@ -376,9 +376,9 @@
 <a name="helpersconvenience-methods" class="anchor" href="#helpersconvenience-methods"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
 
 <h3>
-<a name="proxysomefunction" class="anchor" href="#proxysomefunction"><span class="octicon octicon-link"></span></a>proxy(someFunction)</h3>
+<a name="var-pfn--proxysomefunction" class="anchor" href="#var-pfn--proxysomefunction"><span class="octicon octicon-link"></span></a>var pfn = proxy(someFunction)</h3>
 
-<p>proxy returns a function that proxies all calls to <strong>someFunction</strong>. The function that proxy returns can be used to determine if <strong>someFunction</strong> was called, how many times it was called, the arguments that were passed to it and what it returned. Extremely useful for testing asynchronous methods.</p>
+<p>proxy returns a function that proxies all calls to <strong>someFunction</strong>. The function that proxy returns can be used to determine if <strong>someFunction</strong> was called <code>pfn.wasCalled()</code>, how many times it was called <code>pfn.getCalledCount()</code>, if it was called <i>n</i> times <code>pfn.wasCalled(3)</code>, the arguments that were passed to it <code>pfn.getArgsPassed()</code>, the <i>nth</i> argument that was passed to it <code>pfn.getArgsPassed(2)</code> and what it returned <code>pfn.getReturned():</code>. Extremely useful for testing both synchronous and asynchronous functions.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'An asynchronous test that demonstrates using "proxy"'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy(callback) can tell you a lot abut a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -456,7 +456,7 @@
 <p>v1.1.1 - bug fix for proxy.getArgsPassed(index) which would throw an exception if argsPassed was undefined. Added check for undefined.</p>
       </section>
       <footer>
-        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
       </footer>
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
