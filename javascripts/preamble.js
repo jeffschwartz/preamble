@@ -682,16 +682,17 @@
     //Extemely useful for testing if asynchronous methods called their callbacks.
     //v1.1.0 - totally rewritten and breaks use case from v1.0.8.
     //v1.2.0 - added contexts and fn.getContexts().
+    //v1.2.0 - changed argsPassed to an array of arrays.
     function proxy(callback){
         var xCalled = 0;
-        var argsPassed;
+        var argsPassed = [];
         var returned;
         var contexts = [];
         var fn = function(){
             xCalled += 1;
             contexts.push(this);
-            argsPassed = arguments.length ? [].slice.call(arguments) : undefined;
             var args = [].slice.call(arguments);
+            argsPassed.push(args.length ? args : []);
             returned = callback.apply(this, args);
             return returned;
         };
@@ -719,16 +720,14 @@
         //Returns argsPassed[n] if called with n. Returns argsPassed if
         //called without arguments.
         fn.getArgsPassed = function(){
-            if(typeof argsPassed !== 'undefined'){
-                if(arguments.length === 1){
-                    if(argsPassed.length && argsPassed.length >= arguments[0]){
-                        return argsPassed[arguments[0]];
-                    }else{
-                        return undefined;
-                    }
+            if(arguments.length === 1){
+                if(argsPassed.length && argsPassed.length >= arguments[0]){
+                    return argsPassed[arguments[0]];
                 }else{
-                    return argsPassed;
+                    return undefined;
                 }
+            }else{
+                return argsPassed;
             }
         };
         //Returns what the callback returned which could be undefined
