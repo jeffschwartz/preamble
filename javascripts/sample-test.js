@@ -81,13 +81,18 @@ group('An asynchronous test that demonstrates using "proxy"', function(){
         var callback = proxy(function(){
             return 1000;
         });
-        setTimeout(callback, 10);
+        setTimeout(function(){
+            callback(10);
+            callback(20);
+        }, 10);
         whenAsyncDone(function(){
-            equal(callback.getCalledCount(), 1, 'How many times it was called - getCalledCount() returned 1');
+            equal(callback.getCalledCount(), 2, 'How many times it was called - getCalledCount() returned 1');
             isTrue(callback.wasCalled(), 'If it was called - yes it was called');
-            isFalse(callback.wasCalled(2), 'If it was called n times - it was not not called twice');
-            isTrue(callback.wasCalled(1), 'If it was called n times - it was called only once');
-            isTrue(callback.getReturned() === 1000, 'It can even tell you what it returned - it return 1000');
+            isFalse(callback.wasCalled(1), 'If it was called n times - it was not not called once');
+            isTrue(callback.wasCalled(2), 'If it was called n times - it was called twice');
+            isTrue(callback.getArgsPassed(0)[0] === 10, 'The 1st time it was called it was passed an argument whose value was 10');
+            isTrue(callback.getArgsPassed(1)[0] === 20, 'The 2nd time it was called it was passed an argument whose value was 20');
+            isTrue(callback.getReturned(0) === 1000 && callback.getReturned(1) === 1000, 'It can even tell you what it returned - it return 1000');
         });
     });
 });
