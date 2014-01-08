@@ -378,7 +378,7 @@
 <h3>
 <a name="var-pfn--proxysomefunction" class="anchor" href="#var-pfn--proxysomefunction"><span class="octicon octicon-link"></span></a>var pfn = proxy(someFunction)</h3>
 
-<p>proxy returns a function that proxies all calls to <strong>someFunction</strong>. The function that proxy returns can be used to determine if <strong>someFunction</strong> was called <code>pfn.wasCalled()</code>, how many times it was called <code>pfn.getCalledCount()</code>, if it was called <i>n</i> times <code>pfn.wasCalled(3)</code>, the arguments that were passed to it <code>pfn.getArgsPassed()</code>, the <i>nth</i> argument that was passed to it <code>pfn.getArgsPassed(2)</code> and what it returned <code>pfn.getReturned()</code>. Extremely useful for testing both synchronous and asynchronous functions.</p>
+<p>proxy returns a function that proxies all calls to <strong>someFunction</strong>. The function that proxy returns can be used to determine if <strong>someFunction</strong> was called <code>pfn.wasCalled()</code>, how many times it was called <code>pfn.getCalledCount()</code>, if it was called <i>n</i> times <code>pfn.wasCalled(3)</code> and what it returned <code>pfn.getReturned()</code>. Extremely useful for testing both synchronous and asynchronous functions.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'An asynchronous test that demonstrates using "proxy"'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy(callback) can tell you a lot abut a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
