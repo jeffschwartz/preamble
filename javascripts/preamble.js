@@ -683,18 +683,20 @@
     //v1.1.0 - totally rewritten and breaks use case from v1.0.8.
     //v1.2.0 - added contexts and fn.getContexts().
     //v1.2.0 - changed argsPassed to an array of arrays.
+    //v1.2.0 - changed returned to an array.
     function proxy(callback){
         var xCalled = 0;
         var argsPassed = [];
-        var returned;
+        var returned = [];
         var contexts = [];
         var fn = function(){
             xCalled += 1;
             contexts.push(this);
             var args = [].slice.call(arguments);
             argsPassed.push(args.length ? args : []);
-            returned = callback.apply(this, args);
-            return returned;
+            var ret = callback.apply(this, args);
+            returned.push(ret);
+            return ret;
         };
         //If you just want to know if the callback was called then call
         //wasCalled with no args. If you want to know if the callback
@@ -730,10 +732,18 @@
                 return argsPassed;
             }
         };
-        //Returns what the callback returned which could be undefined
-        //if it didn't return anything.
+        //Returns returned[n] if called with n. Returns returned 
+        //if called without arguments.
         fn.getReturned = function(){
-            return returned;
+            if(arguments.length === 1){
+                if(returned.length && returned.length >= arguments[0]){
+                    return returned[arguments[0]];
+                }else{
+                    return undefined;
+                }
+            }else{
+                return returned;
+            }
         };
         return fn;
     }
