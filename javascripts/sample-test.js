@@ -90,8 +90,8 @@ group('An asynchronous test that demonstrates using "proxy"', function(){
             isTrue(callback.wasCalled(), 'If it was called - yes it was called');
             isFalse(callback.wasCalled(1), 'If it was called n times - it was not not called once');
             isTrue(callback.wasCalled(2), 'If it was called n times - it was called twice');
-            isTrue(callback.getArgsPassed(0)[0] === 10, 'The 1st time it was called it was passed an argument whose value was 10');
-            isTrue(callback.getArgsPassed(1)[0] === 20, 'The 2nd time it was called it was passed an argument whose value was 20');
+            isTrue(callback.getArgsPassed(0, 0) === 10, 'The 1st time it was called it was passed an argument whose value was 10');
+            isTrue(callback.getArgsPassed(1, 0) === 20, 'The 2nd time it was called it was passed an argument whose value was 20');
             isTrue(callback.getReturned(0) === 1000 && callback.getReturned(1) === 1000, 'It can even tell you what it returned - it return 1000');
         });
     });
