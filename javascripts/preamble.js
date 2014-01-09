@@ -719,21 +719,30 @@
         fn.getCalledCount = function(){
             return xCalled;
         };
-        //Returns argsPassed[n] if called with n. Returns argsPassed if
-        //called without arguments.
+        //Returns argsPassed if called with 0 arguments.
+        //Returns argsPassed[n] if called with 1 argument.
+        //Returns argsPassed[n][n] if called with 2 arguments.
         fn.getArgsPassed = function(){
-            if(arguments.length === 1){
+            if(arguments.length === 0){
+                return argsPassed;
+            }else if(arguments.length >= 1){
                 if(argsPassed.length && argsPassed.length >= arguments[0]){
-                    return argsPassed[arguments[0]];
+                    if(arguments.length === 2){
+                        if(argsPassed[arguments[0]].length >= arguments[1]){
+                            return argsPassed[arguments[0]][arguments[1]];
+                        }else{
+                            return undefined;
+                        }
+                    }else{
+                        return argsPassed[arguments[0]];
+                    }
                 }else{
                     return undefined;
                 }
-            }else{
-                return argsPassed;
             }
         };
-        //Returns returned[n] if called with n. Returns returned 
-        //if called without arguments.
+        //Returns returned[n] if called with n. 
+        //Returns returns if called 0 arguments.
         fn.getReturned = function(){
             if(arguments.length === 1){
                 if(returned.length && returned.length >= arguments[0]){
