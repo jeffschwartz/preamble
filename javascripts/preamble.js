@@ -676,54 +676,234 @@
         return config.uiTestContainerId;
     }
 
-    //A factory that creates a proxy wrapper for any function. Use it to
-    //determine if the wrapped function was called, how many times it was
-    //called, the arguments that were passed to it and what it returned.
-    //Extemely useful for testing if asynchronous methods called their callbacks.
-    //v1.1.0 - totally rewritten and breaks use case from v1.0.8.
-    function proxy(callback){
-        var xCalled = 0;
-        var argsPassed;
-        var returned;
-        var fn = function(){
-            xCalled += 1;
-            argsPassed = arguments.length ? [].slice.call(arguments) : undefined;
-            var args = [].slice.call(arguments);
-            returned = callback.apply(this, args);
-            return returned;
-        };
-        //If you just want to know if the callback was called then call
-        //wasCalled with no args. If you want to know if the callback
-        //was called n times, pass n as an argument.
-        fn.wasCalled = function(){
-            return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
-        };
-        //Returns the number of times that the callback was called.
-        fn.getCalledCount = function(){
-            return xCalled;
-        };
-        //Returns argsPassed[n] if called with n. Returns argsPassed if
-        //called without arguments.
-        fn.getArgsPassed = function(){
-            if(typeof argsPassed !== 'undefined'){
-                if(arguments.length === 1){
-                    if(argsPassed.length && argsPassed.length >= arguments[0]){
-                        return argsPassed[arguments[0]];
-                    }else{
-                        return undefined;
-                    }
+    //Completely rewritten for v1.2.0.
+    //A factory that creates a proxy wrapper for any function or object method prperty. 
+    //Use it to determine if the wrapped function was called, how many times it was called, 
+    //the arguments that were passed to it, the contexts it was called with and what it 
+    //returned. Extemely useful for testing synchronous and asynchronous methods.  
+    function proxy(){
+
+        var proxyFactory = function(){
+
+            //The wrapped function to call.
+            var fnToCall = arguments.length === 2 ? arguments[0][arguments[1]] : arguments[0];
+
+            //A counter used to note how many times proxy has been called.
+            var xCalled = 0;
+
+            //An array whose elements note the context used to calll the wrapped function.
+            var contexts = [];
+
+            //An array of arrays used to note the arguments that were passed to proxy.
+            var argsPassed = [];
+
+            //An array whose elements note what the wrapped function returned.
+            var returned = [];
+
+            ///
+            ///Privileged functions used by API
+            ///
+
+            //Returns the number of times the wrapped function was called.
+            var getCalledCount = function(){
+                return xCalled;
+            };
+
+            //If n is within bound returns the context used on the nth 
+            //call to the wrapped function, otherwise returns undefined.
+            var getContext = function(n){
+                if(n >= 0 && n < xCalled){
+                    return contexts[n];
+                }
+            };
+
+            //If called with 'n' and 'n' is within bounds then returns the 
+            //array found at argsPassed[n], otherwise returns argsPassed.
+            var getArgsPassed = function(){
+                if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < argsPassed.length){
+                    return argsPassed[arguments[0]];
                 }else{
                     return argsPassed;
                 }
+            };
+
+            //If called with 'n' and 'n' is within bounds then returns 
+            //value found at returned[n], otherwise returns returned.
+            var getReturned = function(){
+                if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < returned.length){
+                    return returned[arguments[0]];
+                }else{
+                    return returned;
+                }
+            };
+
+            //If 'n' is within bounds then returns an 
+            //info object, otherwsie returns undefined.
+            var getData= function(n){
+                if(n >= 0 && n < xCalled){
+                    var args = getArgsPassed(n);
+                    var context = getContext(n);
+                    var ret = getReturned(n);
+                    var info = {
+                        count: n + 1,
+                        argsPassed: args,
+                        context: context,
+                        returned: ret
+                    };
+                    return info;
+                }
+            };
+
+            //If you just want to know if the wrapped function was called 
+            //then call wasCalled with no args. If you want to know if the 
+            //callback was called n times, pass n as an argument.
+            var wasCalled = function(){
+                return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
+            };
+
+            //A higher order function - iterates through the collected data and 
+            //returns the information collected for each invocation of proxy.
+            var dataIterator = function(callback){
+                for(var i = 0; i < xCalled; i++){
+                    callback(getData(i));
+                }
+            };
+
+            //The function that is returned to the caller.
+            var fn = function(){
+                //Note the context that the proxy was called with.
+                contexts.push(this);
+                //Note the arguments that were passed for this invocation.
+                var args = [].slice.call(arguments);
+                argsPassed.push(args.length ? args : []);
+                //Increment the called count for this invocation.
+                xCalled += 1;
+                //Call the wrapped function noting what it returns.
+                var ret = fnToCall.apply(this, args);
+                returned.push(ret);
+                //Return what the wrapped function returned to the caller.
+                return ret;
+            };
+
+            ///
+            ///Exposed Lovwer level API - see Privileged functions used by API above.
+            ///
+
+            fn.getCalledCount = getCalledCount;
+
+            fn.getContext = getContext;
+
+            fn.getArgsPassed = getArgsPassed;
+
+            fn.getReturned = getReturned;
+
+            fn.getData = getData;
+
+            ///
+            ///Exposed Higher Order API - see Privileged functions used by API above.
+            ///
+            
+            fn.wasCalled = wasCalled;
+
+            fn.dataIterator = dataIterator;
+
+            //Replaces object's method property with proxy's fn.
+            if(arguments.length === 2){
+                arguments[0][arguments[1]] = fn; 
             }
+
+            //Return fn to the caller.
+            return fn;
         };
-        //Returns what the callback returned which could be undefined
-        //if it didn't return anything.
-        fn.getReturned = function(){
-            return returned;
-        };
-        return fn;
+
+        //Convert arguments to an array, call factory and returns its value to the caller.
+        var args = [].slice.call(arguments);
+        return proxyFactory.apply(null, args);
+
     }
+
+    //function proxy(){
+    //    //A factory-module pattern that uses fn to wrap the original function. It also uses fn as an object, 
+    //    //adding supporting methods to it. fn and its supporting methods reference variables defined within 
+    //    //the scope of the factory which are therefore available to fn and its supporting methods through 
+    //    //closure after the factory method returns fn.
+    //    var proxyFactory = function(fnArg){
+    //        var xCalled = 0;
+    //        var contexts = [];
+    //        var argsPassed = [];
+    //        var returned = [];
+    //        var fnToCall = fnArg;
+    //        var fn = function(){
+    //            xCalled += 1;
+    //            contexts.push(this);
+    //            var args = [].slice.call(arguments);
+    //            argsPassed.push(args.length ? args : []);
+    //            var ret;
+    //            //1 argument was passed, the function to call.
+    //            ret = fnToCall.apply(this, args);
+    //            returned.push(ret);
+    //            return ret;
+    //        };
+    //        //If you just want to know if the callback was called then call
+    //        //wasCalled with no args. If you want to know if the callback
+    //        //was called n times, pass n as an argument.
+    //        fn.wasCalled = function(){
+    //            return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
+    //        };
+    //        //Returns contexts[n] if called with n and n >= 0 and n <= xCalled - 1.
+    //        //Returns contexts if called without arguments and contexts.length > 0.
+    //        //Returns undefined if neither of the previous conditions were met.
+    //        fn.getContexts = function(){
+    //            var index = arguments.length === 1 ? arguments[0] : -1;
+    //            if(xCalled && (index >= 0) && (index <= xCalled - 1)){
+    //                return contexts[arguments[0]];
+    //            }else if(contexts.length){
+    //                return contexts;
+    //            }
+    //        };
+    //        //Returns the number of times that the callback was called.
+    //        fn.getCalledCount = function(){
+    //            return xCalled;
+    //        };
+    //        //Returns argsPassed if called with 0 arguments.
+    //        //Returns argsPassed[n] if called with 1 argument.
+    //        //Returns argsPassed[n][n] if called with 2 arguments.
+    //        fn.getArgsPassed = function(){
+    //            if(arguments.length === 0){
+    //                return argsPassed;
+    //            }else if(arguments.length >= 1){
+    //                if(argsPassed.length && argsPassed.length >= arguments[0]){
+    //                    if(arguments.length === 2){
+    //                        if(argsPassed[arguments[0]].length >= arguments[1]){
+    //                            return argsPassed[arguments[0]][arguments[1]];
+    //                        }else{
+    //                            return undefined;
+    //                        }
+    //                    }else{
+    //                        return argsPassed[arguments[0]];
+    //                    }
+    //                }else{
+    //                    return undefined;
+    //                }
+    //            }
+    //        };
+    //        //Returns returned[n] if called with n. 
+    //        //Returns returns if called 0 arguments.
+    //        fn.getReturned = function(){
+    //            if(arguments.length === 1){
+    //                if(returned.length && returned.length >= arguments[0]){
+    //                    return returned[arguments[0]];
+    //                }else{
+    //                    return undefined;
+    //                }
+    //            }else{
+    //                return returned;
+    //            }
+    //        };
+    //        return fn;
+    //    };
+    //    return proxyFactory(arguments[0]);
+    //}
 
     /**
      * It all starts here!!!
