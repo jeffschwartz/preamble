@@ -76,78 +76,6 @@ group('An asynchronous test with no before/after eachTest', function(){
     });
 });
 
-group('An asynchronous test that demonstrates using "proxy" - 1', function(){
-    asyncTest('proxy(callback) can tell you a lot abut a callback', function(){
-        var callback = proxy(function(s){
-            return s;
-        });
-        setTimeout(function(){
-            callback('Somewhere over');
-            callback('the rainbow');
-        }, 10);
-        whenAsyncDone(function(){
-            isTrue(callback.wasCalled(), 'callback was called.');
-            equal(callback.getCalledCount(), 2, 'callback was called once.');
-            isTrue(callback.getArgsPassed(0, 0) === 'Somewhere over', 'callback was passed "Somewhere over"');
-            isTrue(callback.getArgsPassed(1, 0) === 'the rainbow', 'callback was passed "the rainbow"');
-            isTrue(callback.getReturned(0) === 'Somewhere over', 'callback returned "Somewhere over"');
-            isTrue(callback.getReturned(1) === 'the rainbow', 'callback returned "the rainbow"');
-            isTrue(callback.getContexts(0) === undefined, 'the 1st time callback was called with global context');
-            isTrue(callback.getContexts(1) === undefined, 'the 2nd time callback was called with global context');
-        });
-    });
-});
-
-group('An asynchronous test that demonstrates using "proxy" - 2', function(){
-    asyncTest('proxy(callback) can tell you a lot abut a callback', function(){
-        var callback1 = proxy(function(s){
-            return s;
-        });
-        var callback2 = proxy(function(s){
-            return s;
-        });
-        setTimeout(function(){
-            callback1('Somewhere over');
-            callback2('the rainbow');
-        }, 10);
-        whenAsyncDone(function(){
-            isTrue(callback1.wasCalled(), 'callback1 was called.');
-            equal(callback1.getCalledCount(), 1, 'callback1 was called once.');
-            isTrue(callback2.wasCalled(), 'callback2 was called.');
-            equal(callback2.getCalledCount(), 1, 'callback2 was called once.');
-            isTrue(callback1.getArgsPassed(0, 0) === 'Somewhere over', 'callback1 was passed "Somewhere over"');
-            isTrue(callback2.getArgsPassed(0, 0) === 'the rainbow', 'callback2 was passed "the rainbow"');
-            isTrue(callback1.getReturned(0) === 'Somewhere over', 'callback1 returned "Somewhere over"');
-            isTrue(callback2.getReturned(0) === 'the rainbow', 'callback2 returned "the rainbow"');
-        });
-    });
-});
-
-group('An asynchronous test that demonstrates using "proxy" - 3', function(){
-    asyncTest('proxy(callback) can tell you a lot abut a callback', function(){
-        var foo = {
-            title: '',
-            name: proxy(function(s){this.title += s; return s;})
-        };
-        var callback = proxy(foo, 'name');
-        setTimeout(function(){
-            foo.name('Somewhere over ');
-            foo.name('the rainbow');
-        }, 10);
-        whenAsyncDone(function(){
-            equal(foo.title, 'Somewhere over the rainbow', 'foo.title = "Somewhere over the rainbow"');
-            isTrue(foo.name.wasCalled(), 'callback was called.');
-            equal(foo.name.getCalledCount(), 2, 'callback was called once.');
-            isTrue(foo.name.getArgsPassed(0, 0) === 'Somewhere over ', 'callback was passed "Somewhere over"');
-            isTrue(foo.name.getArgsPassed(1, 0) === 'the rainbow', 'callback was passed "the rainbow"');
-            isTrue(foo.name.getReturned(0) === 'Somewhere over ', 'callback returned "Somewhere over "');
-            isTrue(foo.name.getReturned(1) === 'the rainbow', 'callback returned "the rainbow"');
-            isTrue(foo.name.getContexts(0) === foo, 'the 1st time callback was called with foo\'s context');
-            isTrue(foo.name.getContexts(1) === foo, 'the 2nd time callback was called with foo\'s context');
-        });
-    });
-});
-
 group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
     var count = 0;
     asyncBeforeEachTest(function(){
@@ -226,6 +154,80 @@ group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
 
         whenAsyncDone(function(){
             isTrue(obj.num === 100, 'now obj.num equals 100');
+        });
+    });
+});
+
+group('proxy captures calling information which can be tested against', function(){
+    asyncTest('proxy a function calling it twice', function(){
+        var fn = proxy(function(s){
+            return s;
+        });
+        setTimeout(function(){
+            fn('Somewhere over');
+            fn('the rainbow');
+        }, 10);
+        whenAsyncDone(function(){
+            isTrue(fn.wasCalled(2), 'fn was called twice.');
+            equal(fn.getCalledCount(), 2, 'fn was called twice.');
+            var info1 = fn.getData(0);
+            isTrue(info1.argsPassed[0] === 'Somewhere over', 'fn was passed "Somewhere over"');
+            isTrue(info1.returned === 'Somewhere over', 'fn returned "Somewhere over"');
+            isTrue(info1.context === undefined, 'the 1st time fn was called with global context');
+            var info2 = fn.getData(1);
+            isTrue(info2.argsPassed[0] === 'the rainbow', 'fn was passed "the rainbow"');
+            isTrue(info2.returned === 'the rainbow', 'fn returned "Somewhere over"');
+            isTrue(info2.context === undefined, 'the 2nd time fn was called with global context');
+        });
+    });
+    asyncTest('proxy two functions calling each once', function(){
+        var fn1 = proxy(function(s){
+            return s;
+        });
+        var fn2 = proxy(function(s){
+            return s;
+        });
+        setTimeout(function(){
+            fn1('Somewhere over ');
+            fn2('the rainbow');
+        }, 10);
+        whenAsyncDone(function(){
+            isTrue(fn1.wasCalled(1), 'fn1 was called once.');
+            equal(fn1.getCalledCount(), 1, 'fn1 was called once.');
+            isTrue(fn2.wasCalled(1), 'fn2 was called once.');
+            equal(fn2.getCalledCount(), 1, 'fn2 was called once.');
+            var fn1Info = fn1.getData(0);
+            isTrue(fn1Info.argsPassed[0] === 'Somewhere over ', 'fn1 was passed "Somewhere over "');
+            isTrue(fn1Info.returned === 'Somewhere over ', 'fn1 returned "Somewhere over "');
+            isTrue(fn1Info.context === undefined, 'fn1 was called with the global context');
+            var fn2Info = fn2.getData(0);
+            isTrue(fn2Info.argsPassed[0] === 'the rainbow', 'fn2 was passed "the rainbow"');
+            isTrue(fn2Info.returned === 'the rainbow', 'fn2 returned "the rainbow"');
+            isTrue(fn2Info.context === undefined, 'fn2 was called with the global context');
+        });
+    });
+    asyncTest('proxy a property method calling it twice', function(){
+        var foo = {
+            title: '',
+            name: proxy(function(s){this.title += s; return s;})
+        };
+        proxy(foo, 'name');
+        setTimeout(function(){
+            foo.name('Somewhere over ');
+            foo.name('the rainbow');
+        }, 10);
+        whenAsyncDone(function(){
+            equal(foo.title, 'Somewhere over the rainbow', 'foo.title = "Somewhere over the rainbow"');
+            isTrue(foo.name.wasCalled(2), 'callback was called twice.');
+            equal(foo.name.getCalledCount(), 2, 'callback was called twice.');
+            var info1 = foo.name.getData(0);
+            isTrue(info1.argsPassed[0] === 'Somewhere over ', 'callback was passed "Somewhere over"');
+            isTrue(info1.returned === 'Somewhere over ', 'callback returned "Somewhere over "');
+            isTrue(info1.context === foo, 'foo.name was called the 1st time with the foo context');
+            var info2 = foo.name.getData(1);
+            isTrue(info2.argsPassed[0] === 'the rainbow', 'callback was passed "the rainbow"');
+            isTrue(info2.returned === 'the rainbow', 'callback returned "the rainbow"');
+            isTrue(info2.context === foo, 'foo.name was called the 2nd time with the foo context');
         });
     });
 });
