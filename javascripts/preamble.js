@@ -1,5 +1,5 @@
 /*global preambleConfig*/
-//Preamble 1.1.1
+//Preamble 1.2.2
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
