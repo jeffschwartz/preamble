@@ -709,7 +709,7 @@
                 return xCalled;
             };
 
-            //If n is within bound returns the context used on the nth 
+            //If n is within bounds returns the context used on the nth 
             //call to the wrapped function, otherwise returns undefined.
             var getContext = function(n){
                 if(n >= 0 && n < xCalled){
@@ -738,7 +738,7 @@
             };
 
             //If 'n' is within bounds then returns an 
-            //info object, otherwsie returns undefined.
+            //info object, otherwise returns undefined.
             var getData= function(n){
                 if(n >= 0 && n < xCalled){
                     var args = getArgsPassed(n);
