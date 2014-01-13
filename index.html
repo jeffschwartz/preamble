@@ -34,7 +34,7 @@
 <a name="introducing-preamble" class="anchor" href="#introducing-preamble"><span class="octicon octicon-link"></span></a>Introducing Preamble</h1>
 
 <h6>
-<a name="v111" class="anchor" href="#v111"><span class="octicon octicon-link"></span></a>v1.1.1</h6>
+<a name="v120" class="anchor" href="#v120"><span class="octicon octicon-link"></span></a>v1.2.0</h6>
 
 <p>Preamble is a powerful unit testing framework for JavaScript that promotes Test Driven Development. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your unit tests interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy and intuitive.</p>
 
@@ -55,8 +55,9 @@
         <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">catsCollection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
         <span class="nx">promise</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">);</span>
         <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'promiseDone was called'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">.</span><span class="nx">getArgsPassed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">promiseDoneInfo</span> <span class="o">=</span> <span class="nx">promiseDone</span><span class="p">.</span><span class="nx">getData</span><span class="p">();</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDone</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'promiseDone was called once'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">promiseDoneInfo</span><span class="p">.</span><span class="nx">argsPassed</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">,</span> <span class="s1">'cat collection was fetched'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
 <span class="p">});</span>
@@ -373,40 +374,121 @@
 <p>Preamble adds a div element to the DOM which can be used for UI tests. This element's ID defaults to <strong>ui-test-container</strong> but can be overridden (please see <strong>Configuration</strong> below). </p>
 
 <h2>
-<a name="helpersconvenience-methods" class="anchor" href="#helpersconvenience-methods"><span class="octicon octicon-link"></span></a>Helpers/Convenience Methods</h2>
+<a name="var-pfn--proxysomefunction" class="anchor" href="#var-pfn--proxysomefunction"><span class="octicon octicon-link"></span></a>var pfn = proxy(someFunction)</h2>
 
-<h3>
-<a name="var-pfn--proxysomefunction" class="anchor" href="#var-pfn--proxysomefunction"><span class="octicon octicon-link"></span></a>var pfn = proxy(someFunction)</h3>
+<h2>
+<a name="var-pfn--proxysomeobject-propertyname" class="anchor" href="#var-pfn--proxysomeobject-propertyname"><span class="octicon octicon-link"></span></a>var pfn = proxy(someObject, propertyName)</h2>
 
-<p>proxy returns a function that proxies all calls to <strong>someFunction</strong>. The function that proxy returns can be used to determine if <strong>someFunction</strong> was called <code>pfn.wasCalled()</code>, how many times it was called <code>pfn.getCalledCount()</code>, if it was called <i>n</i> times <code>pfn.wasCalled(3)</code> and what it returned <code>pfn.getReturned()</code>. Extremely useful for testing both synchronous and asynchronous functions.</p>
+<h2>
+<a name="var-pfn--preambleproxysomefunction" class="anchor" href="#var-pfn--preambleproxysomefunction"><span class="octicon octicon-link"></span></a>var pfn = Preamble.proxy(someFunction)</h2>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'An asynchronous test that demonstrates using "proxy"'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy(callback) can tell you a lot abut a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="kd">var</span> <span class="nx">callback</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+<h2>
+<a name="var-pfn--preambleproxysomeobject-propertyname" class="anchor" href="#var-pfn--preambleproxysomeobject-propertyname"><span class="octicon octicon-link"></span></a>var pfn = Preamble.proxy(someObject, propertyName)</h2>
+
+<p>proxy is used to <strong>spy</strong> on calls to <strong>someFunction</strong> or to <strong>someObject[propertyName]</strong>, both of which are referred to as the <strong>wrapped function</strong>. proxy notes how many times the wrapped function has been called and for each call to the wrapped function proxy notes the context it was called with, the arguments that were passed to it and what it returns. proxy provides an API for retrieving the information that it has accumulated.</p>
+
+<p>Using proxy to spy on a function...</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Using proxy on a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy(function) can tell you a lot abut a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">fn</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
             <span class="k">return</span> <span class="mi">1000</span><span class="p">;</span>
         <span class="p">});</span>
-        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">callback</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">fn</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
         <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-            <span class="nx">equal</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">getCalledCount</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'How many times it was called - getCalledCount() returned 1'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(),</span> <span class="s1">'If it was called - yes it was called'</span><span class="p">);</span>
-            <span class="nx">isFalse</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'If it was called n times - it was not not called twice'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'If it was called n times - it was called only once'</span><span class="p">);</span>
-            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">getReturned</span><span class="p">()</span> <span class="o">===</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It can even tell you what it returned - it return 1000'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">fn</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'If it was called - yes it was called'</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">fnInfo</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="nx">equal</span><span class="p">(</span><span class="nx">fnInfo</span><span class="p">.</span><span class="nx">argsPassed</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It was passed 1000'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">finInfo</span><span class="p">.</span><span class="nx">context</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">,</span> <span class="s1">'Its context was undefined'</span><span class="p">);</span>
+            <span class="nx">equal</span><span class="p">(</span><span class="nx">fnInfo</span><span class="p">.</span><span class="nx">returned</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It returned 1000'</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>and to spy on a property method.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Using proxy on a property method'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy(someOjbect, propertyName) can tell you a lot abut a method'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">someObject</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">someMethod</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">amount</span><span class="p">){</span>
+                <span class="k">return</span> <span class="nx">amount</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="nx">proxy</span><span class="p">(</span><span class="nx">someOjbect</span><span class="p">,</span> <span class="s1">'someMethod'</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">someOjbect</span><span class="p">.</span><span class="nx">someMethod</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+        <span class="p">},</span> <span class="mi">10</span><span class="p">);</span>
+        <span class="nx">whenAsyncDone</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">someOjbect</span><span class="p">.</span><span class="nx">someMethod</span><span class="p">.</span><span class="nx">wasCalled</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">'If it was called - yes it was called'</span><span class="p">);</span>
+            <span class="kd">var</span> <span class="nx">fnInfo</span> <span class="o">=</span> <span class="nx">someOjbect</span><span class="p">.</span><span class="nx">someMethod</span><span class="p">.</span><span class="nx">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="nx">equal</span><span class="p">(</span><span class="nx">fnInfo</span><span class="p">.</span><span class="nx">argsPassed</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It was passed 1000'</span><span class="p">);</span>
+            <span class="nx">isTrue</span><span class="p">(</span><span class="nx">finInfo</span><span class="p">.</span><span class="nx">context</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">,</span> <span class="s1">'Its context was undefined'</span><span class="p">);</span>
+            <span class="nx">equal</span><span class="p">(</span><span class="nx">fnInfo</span><span class="p">.</span><span class="nx">returned</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">'It returned 1000'</span><span class="p">);</span>
         <span class="p">});</span>
     <span class="p">});</span>
 <span class="p">});</span>
 </pre></div>
 
 <h3>
-<a name="getuitestcontainerelement" class="anchor" href="#getuitestcontainerelement"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h3>
+<a name="pfngetcalledcount" class="anchor" href="#pfngetcalledcount"><span class="octicon octicon-link"></span></a>pfn.getCalledCount()</h3>
+
+<p>Returns the total number of times that proxy was called.</p>
+
+<h3>
+<a name="pfngetcontextn" class="anchor" href="#pfngetcontextn"><span class="octicon octicon-link"></span></a>pfn.getContext(n)</h3>
+
+<p>If n is within bounds returns the context used on the nth call to the wrapped function, otherwise returns undefined.</p>
+
+<h3>
+<a name="pfngetargspassedn" class="anchor" href="#pfngetargspassedn"><span class="octicon octicon-link"></span></a>pfn.getArgsPassed([n])</h3>
+
+<p>If called with 'n' and 'n' is within bounds then returns the array found at argsPassed[n], otherwise returns argsPassed.  </p>
+
+<h3>
+<a name="pfngetreturnedn" class="anchor" href="#pfngetreturnedn"><span class="octicon octicon-link"></span></a>pfn.getReturned([n])</h3>
+
+<p>If called with 'n' and 'n' is within bounds then returns value found at returned[n], otherwise returns returned.</p>
+
+<h3>
+<a name="pfngetdatan" class="anchor" href="#pfngetdatan"><span class="octicon octicon-link"></span></a>pfn.getData(n)</h3>
+
+<p>If 'n' is within bounds then returns an info object, otherwise returns undefined. An info object's properties values reflect what proxy noted for that invocation of the wrapped function and include:</p>
+
+<h4>
+<a name="count---a-number-that-represents-the-invocation-count---eg-if-it-is-3-then-the-info-object-represents-information-that-was-noted-the-3rd-time-the-wrapped-function-was-called" class="anchor" href="#count---a-number-that-represents-the-invocation-count---eg-if-it-is-3-then-the-info-object-represents-information-that-was-noted-the-3rd-time-the-wrapped-function-was-called"><span class="octicon octicon-link"></span></a>count - a number that represents the invocation count - e.g. if it is 3 then the info object represents information that was noted the 3rd time the wrapped function was called.</h4>
+
+<h4>
+<a name="argspassed----an-array-whose-elements-are-the-arguments-passed-to-the-wrapped-function-when-it-was-called" class="anchor" href="#argspassed----an-array-whose-elements-are-the-arguments-passed-to-the-wrapped-function-when-it-was-called"><span class="octicon octicon-link"></span></a>argsPassed -  an array whose elements are the arguments passed to the wrapped function when it was called.</h4>
+
+<h4>
+<a name="context---the-context-used-to-call-the-wrapped-function" class="anchor" href="#context---the-context-used-to-call-the-wrapped-function"><span class="octicon octicon-link"></span></a>context - the context used to call the wrapped function.</h4>
+
+<h4>
+<a name="returned---what-the-wrapped-function-returned" class="anchor" href="#returned---what-the-wrapped-function-returned"><span class="octicon octicon-link"></span></a>returned - what the wrapped function returned.</h4>
+
+<h3>
+<a name="pfnwascalledn" class="anchor" href="#pfnwascalledn"><span class="octicon octicon-link"></span></a>pfn.wasCalled([n])</h3>
+
+<p>Returns a boolean. If you just want to know if the wrapped function was called then call wasCalled with no arguments. If you want to know if the callback was called n times then pass n as an argument.</p>
+
+<h3>
+<a name="pfndataiteratorcallback" class="anchor" href="#pfndataiteratorcallback"><span class="octicon octicon-link"></span></a>pfn.dataIterator(callback)</h3>
+
+<p>A higher order function that iterates through the collected data and calls <strong>callback</strong> with an <strong>info</strong> object (see pfn.getData above) for each invocation of proxy.</p>
+
+<h2>
+<a name="getuitestcontainerelement" class="anchor" href="#getuitestcontainerelement"><span class="octicon octicon-link"></span></a>getUiTestContainerElement()</h2>
 
 <p>Returns the UI test container DOM element. This element's ID defaults to <strong>ui-test-container</strong> but can be overridden (please see UI Tests above and <strong>Configuration</strong> below).</p>
 
 <div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">$uiTestContainerElement</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">getUiTestContainerElement</span><span class="p">());</span>
 </pre></div>
 
-<h3>
-<a name="getuitestcontainerelementid" class="anchor" href="#getuitestcontainerelementid"><span class="octicon octicon-link"></span></a>getUiTestContainerElementId()</h3>
+<h2>
+<a name="getuitestcontainerelementid" class="anchor" href="#getuitestcontainerelementid"><span class="octicon octicon-link"></span></a>getUiTestContainerElementId()</h2>
 
 <p>Returns the id of the UI test container DOM element. This element's ID defaults to <strong>ui-test-container</strong> but can be overridden (please see <strong>UI Tests</strong> above and <strong>Configuration</strong> below).</p>
 
@@ -448,12 +530,12 @@
 </ol><h2>
 <a name="changes" class="anchor" href="#changes"><span class="octicon octicon-link"></span></a>Changes</h2>
 
-<p>v1.1.0 - introduces a simpler calling converntion for proxy, removing one level of indirection. Please note that this is a breaking change. To upgrade your tests please modify your calls to proxy as follows:</p>
+<p>v1.2.0 - proxy completely rewritten and its API simplified. proxy can now spy on property methods and now also notes the context when the wrapped function is called.
+v1.1.1 - bug fix for proxy.getArgsPassed(index) which would throw an exception if argsPassed was undefined. Added check for undefined.
+v1.1.0 - introduces a simpler calling converntion for proxy, removing one level of indirection. Please note that this is a breaking change. To upgrade your tests please modify your calls to proxy as follows:</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">proxy</span><span class="p">(</span><span class="nx">functionToBeProxied</span><span class="p">);</span>
 </pre></div>
-
-<p>v1.1.1 - bug fix for proxy.getArgsPassed(index) which would throw an exception if argsPassed was undefined. Added check for undefined.</p>
       </section>
       <footer>
         <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
