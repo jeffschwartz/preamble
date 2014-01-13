@@ -530,9 +530,11 @@
 </ol><h2>
 <a name="changes" class="anchor" href="#changes"><span class="octicon octicon-link"></span></a>Changes</h2>
 
-<p>v1.2.0 - proxy completely rewritten and its API simplified. proxy can now spy on property methods and now also notes the context when the wrapped function is called.
-v1.1.1 - bug fix for proxy.getArgsPassed(index) which would throw an exception if argsPassed was undefined. Added check for undefined.
-v1.1.0 - introduces a simpler calling converntion for proxy, removing one level of indirection. Please note that this is a breaking change. To upgrade your tests please modify your calls to proxy as follows:</p>
+<p>v1.2.0 - proxy completely rewritten and its API simplified. proxy can now spy on property methods and now also notes the context when the wrapped function is called.</p>
+
+<p>v1.1.1 - bug fix for proxy.getArgsPassed(index) which would throw an exception if argsPassed was undefined. Added check for undefined.</p>
+
+<p>v1.1.0 - introduces a simpler calling converntion for proxy, removing one level of indirection. Please note that this is a breaking change. To upgrade your tests please modify your calls to proxy as follows:</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">proxy</span><span class="p">(</span><span class="nx">functionToBeProxied</span><span class="p">);</span>
 </pre></div>
