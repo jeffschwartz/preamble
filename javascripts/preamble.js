@@ -65,7 +65,7 @@
             html = '<p>' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
         }else{
             //catch(e)
-            html = '<p>An error occurred,  "' + arguments[0]  + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+            html = '<p>An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
         }
         elStatusContainer.innerHTML = html;
     }
@@ -78,7 +78,7 @@
 
     function showTotalsToBeRun(){
         setTimeout(function(){
-            var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
+            var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
             elStatusContainer.insertAdjacentHTML('beforeend', html);
         }, 1);
     }
@@ -127,11 +127,11 @@
         html = '<p id="preamble-elapsed-time">Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +  totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + ' passed' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p id="preamble-results-summary-failed" class="summary failed">0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html += '<p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
         }else{
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
         }
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
