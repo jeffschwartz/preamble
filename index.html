@@ -391,8 +391,8 @@
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'Using proxy on a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'proxy(function) can tell you a lot abut a function'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-        <span class="kd">var</span> <span class="nx">fn</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-            <span class="k">return</span> <span class="mi">1000</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">fn</span> <span class="o">=</span> <span class="nx">proxy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">amount</span><span class="p">){</span>
+            <span class="k">return</span> <span class="nx">amount</span><span class="p">;</span>
         <span class="p">});</span>
         <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
             <span class="nx">fn</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
