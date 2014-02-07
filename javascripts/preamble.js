@@ -137,7 +137,7 @@
         elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    function showAllResults(){
+    function showResultsDetails(){
         var groupLabel = '';
         var testLabel = '';
         var html = '';
@@ -173,7 +173,7 @@
 
     function showResults(){
         showResultsSummary();
-        showAllResults();
+        showResultsDetails();
     }
 
     function genTotalsFromResults(){
@@ -655,7 +655,7 @@
 
     //Shown while the testsQueue is being loaded.
     function showStartMessage(){
-        elStatusContainer.innerHTML = '<p>Building queues. Please wait...</p>';
+        elStatusContainer.innerHTML += '<p>Building queues. Please wait...</p>';
     }
 
     //Called after the testsQueue has been generated.
@@ -822,6 +822,13 @@
 
     }
 
+    function showCoverage(){
+        var html;
+        //Show groups and tests coverage in the header.
+        html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '</p>';
+        elStatusContainer.innerHTML = html;
+    }
+
     /**
      * It all starts here!!!
      */
@@ -907,8 +914,6 @@
 
     //Catch errors.
     try{
-        //Show the start message.
-        showStartMessage();
         //Build the testsQueue as user calls group, test or asyncTest.
         //Keep checking the testsQueue's length until it is 'stable'.
         //Stable is defined by a time interval during which the length
@@ -918,6 +923,11 @@
             if(testsQueue.length === testsQueueCount){
                 if(testsQueueStableCount > 1){
                     clearInterval(intervalId);
+                    //Show total groups and test to be covered.
+                    showCoverage();
+                    //Show the start message.
+                    showStartMessage();
+                    //Run!
                     runner();
                 }else{
                     testsQueueStableCount++;
