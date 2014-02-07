@@ -1,12 +1,12 @@
 /*global preambleConfig*/
-//Preamble 1.2.3
+//Preamble 1.3.0
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v1.2.3';
+    var version = 'v1.3.0';
     //Targeted DOM elements.
     var elPreambleContainer = document.getElementById('preamble-container');
     var elHeader;
@@ -16,11 +16,11 @@
     //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asynTestDelay: 20}).
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
-    //asyncTestDelay: (default 500 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-    //asyncBeforeAfterTestDelay: Default value = 500. Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
+    //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
+    //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
     //name: (default 'Test') - set to a meaningful name.
     //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500, name: 'Test', uiTestContainerId: 'ui-test-container'};
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container'};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -65,7 +65,7 @@
             html = '<p>' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
         }else{
             //catch(e)
-            html = '<p>An error occurred,  "' + arguments[0]  + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+            html = '<p>An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
         }
         elStatusContainer.innerHTML = html;
     }
@@ -78,7 +78,7 @@
 
     function showTotalsToBeRun(){
         setTimeout(function(){
-            var html = '<p>Queues built.</p><p>Running ' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '/' + totTests + pluralize(' test', totTests) +'/' + totGroups + pluralize(' group', totGroups) + '...</p>';
+            var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
             elStatusContainer.insertAdjacentHTML('beforeend', html);
         }, 1);
     }
@@ -127,17 +127,17 @@
         html = '<p id="preamble-elapsed-time">Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed, 0 tests failed.' + '</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +  totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + ' passed' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p id="preamble-results-summary-failed" class="summary failed">0 tests passed, ' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed)  + ' failed.</p>';
+            html += '<p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
         }else{
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totGroupsPassed + pluralize(' group', totGroupsPassed) + ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totGroupsFailed + pluralize(' group', totGroupsFailed) + ' failed.</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
         }
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    function showAllResults(){
+    function showResultsDetails(){
         var groupLabel = '';
         var testLabel = '';
         var html = '';
@@ -173,7 +173,7 @@
 
     function showResults(){
         showResultsSummary();
-        showAllResults();
+        showResultsDetails();
     }
 
     function genTotalsFromResults(){
@@ -655,7 +655,7 @@
 
     //Shown while the testsQueue is being loaded.
     function showStartMessage(){
-        elStatusContainer.innerHTML = '<p>Building queues. Please wait...</p>';
+        elStatusContainer.innerHTML += '<p>Building queues. Please wait...</p>';
     }
 
     //Called after the testsQueue has been generated.
@@ -822,88 +822,12 @@
 
     }
 
-    //function proxy(){
-    //    //A factory-module pattern that uses fn to wrap the original function. It also uses fn as an object, 
-    //    //adding supporting methods to it. fn and its supporting methods reference variables defined within 
-    //    //the scope of the factory which are therefore available to fn and its supporting methods through 
-    //    //closure after the factory method returns fn.
-    //    var proxyFactory = function(fnArg){
-    //        var xCalled = 0;
-    //        var contexts = [];
-    //        var argsPassed = [];
-    //        var returned = [];
-    //        var fnToCall = fnArg;
-    //        var fn = function(){
-    //            xCalled += 1;
-    //            contexts.push(this);
-    //            var args = [].slice.call(arguments);
-    //            argsPassed.push(args.length ? args : []);
-    //            var ret;
-    //            //1 argument was passed, the function to call.
-    //            ret = fnToCall.apply(this, args);
-    //            returned.push(ret);
-    //            return ret;
-    //        };
-    //        //If you just want to know if the callback was called then call
-    //        //wasCalled with no args. If you want to know if the callback
-    //        //was called n times, pass n as an argument.
-    //        fn.wasCalled = function(){
-    //            return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
-    //        };
-    //        //Returns contexts[n] if called with n and n >= 0 and n <= xCalled - 1.
-    //        //Returns contexts if called without arguments and contexts.length > 0.
-    //        //Returns undefined if neither of the previous conditions were met.
-    //        fn.getContexts = function(){
-    //            var index = arguments.length === 1 ? arguments[0] : -1;
-    //            if(xCalled && (index >= 0) && (index <= xCalled - 1)){
-    //                return contexts[arguments[0]];
-    //            }else if(contexts.length){
-    //                return contexts;
-    //            }
-    //        };
-    //        //Returns the number of times that the callback was called.
-    //        fn.getCalledCount = function(){
-    //            return xCalled;
-    //        };
-    //        //Returns argsPassed if called with 0 arguments.
-    //        //Returns argsPassed[n] if called with 1 argument.
-    //        //Returns argsPassed[n][n] if called with 2 arguments.
-    //        fn.getArgsPassed = function(){
-    //            if(arguments.length === 0){
-    //                return argsPassed;
-    //            }else if(arguments.length >= 1){
-    //                if(argsPassed.length && argsPassed.length >= arguments[0]){
-    //                    if(arguments.length === 2){
-    //                        if(argsPassed[arguments[0]].length >= arguments[1]){
-    //                            return argsPassed[arguments[0]][arguments[1]];
-    //                        }else{
-    //                            return undefined;
-    //                        }
-    //                    }else{
-    //                        return argsPassed[arguments[0]];
-    //                    }
-    //                }else{
-    //                    return undefined;
-    //                }
-    //            }
-    //        };
-    //        //Returns returned[n] if called with n. 
-    //        //Returns returns if called 0 arguments.
-    //        fn.getReturned = function(){
-    //            if(arguments.length === 1){
-    //                if(returned.length && returned.length >= arguments[0]){
-    //                    return returned[arguments[0]];
-    //                }else{
-    //                    return undefined;
-    //                }
-    //            }else{
-    //                return returned;
-    //            }
-    //        };
-    //        return fn;
-    //    };
-    //    return proxyFactory(arguments[0]);
-    //}
+    function showCoverage(){
+        var html;
+        //Show groups and tests coverage in the header.
+        html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '</p>';
+        elStatusContainer.innerHTML = html;
+    }
 
     /**
      * It all starts here!!!
@@ -921,7 +845,7 @@
     window.onerror = errorHandler;
 
     //Add markup structure to the DOM.
-    elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"></section><section id="preamble-results-container"></section></div>';
+    elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Please wait...</p></section><section id="preamble-results-container"></section></div>';
 
     //Append the ui test container.
     elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
@@ -990,8 +914,6 @@
 
     //Catch errors.
     try{
-        //Show the start message.
-        showStartMessage();
         //Build the testsQueue as user calls group, test or asyncTest.
         //Keep checking the testsQueue's length until it is 'stable'.
         //Stable is defined by a time interval during which the length
@@ -1001,6 +923,11 @@
             if(testsQueue.length === testsQueueCount){
                 if(testsQueueStableCount > 1){
                     clearInterval(intervalId);
+                    //Show total groups and test to be covered.
+                    showCoverage();
+                    //Show the start message.
+                    showStartMessage();
+                    //Run!
                     runner();
                 }else{
                     testsQueueStableCount++;
