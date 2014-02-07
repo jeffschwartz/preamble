@@ -20,7 +20,7 @@
     //asyncBeforeAfterTestDelay: Default value = 500. Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
     //name: (default 'Test') - set to a meaningful name.
     //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 500, asyncBeforeAfterTestDelay: 500, name: 'Test', uiTestContainerId: 'ui-test-container'};
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container'};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
