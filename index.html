@@ -38,7 +38,7 @@
 
 <p>Preamble is a powerful Test Driven Development framework for JavaScript written in JavaScript. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your test scripts interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy, intuitive and fun.</p>
 
-<p>This is an example of a simple asynchronous test</p>
+<p>This is an example of a simple synchronous test:</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'truthy'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">test</span><span class="p">(</span><span class="s1">'true === true'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
@@ -47,7 +47,7 @@
 <span class="p">});</span>
 </pre></div>
 
-<p>and this is an example of a simple asynchronous test.</p>
+<p>And this is an example of a simple asynchronous test:</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">group</span><span class="p">(</span><span class="s1">'asynchronous'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
     <span class="nx">asyncTest</span><span class="p">(</span><span class="s1">'fetch data from database via Ajaax'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
