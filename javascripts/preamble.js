@@ -77,6 +77,8 @@
     }
 
     function showTotalsToBeRun(){
+        //v1.4.0 For external reporting.
+        window.Preamble.totalAssertions = assertionsQueue.length;
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
             elStatusContainer.insertAdjacentHTML('beforeend', html);
@@ -135,6 +137,14 @@
         }
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
+        //v1.4.0 For external reporting.
+        window.Preamble.status = 'Tesing Finished';
+        window.Preamble.groupsPassed = totGroupsPassed;
+        window.Preamble.groupsFailed = totGroupsFailed;
+        window.Preamble.testsPassed = totTestsPassed;
+        window.Preamble.testsFailed = totTestsFailed;
+        window.Preamble.assertionsPassed = totAssertionsPassed;
+        window.Preamble.assertionsFailed = totAssertionsFailed;
     }
 
     function showResultsDetails(){
@@ -825,7 +835,7 @@
     function showCoverage(){
         var html;
         //Show groups and tests coverage in the header.
-        html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '</p>';
+        html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '.</p>';
         elStatusContainer.innerHTML = html;
         //v1.4.0
         window.Preamble.totalGroups = totGroups;
@@ -915,9 +925,13 @@
     }
 
     //v1.4.0 For external reporting. Using window.Preamble to store status and test results.    
-    window.Preamble.status = null;
-    window.Preamble.testsPassed = null;
-    window.Preamble.testsFailed = null;
+    window.Preamble.status = '';
+    window.Preamble.groupsPassed = 0;
+    window.Preamble.groupsFailed = 0;
+    window.Preamble.testsPassed = 0;
+    window.Preamble.testsFailed = 0;
+    window.Preamble.assertionsPassed = 0;
+    window.Preamble.assertionsFailed = 0;
 
     /**
      * Wait while the testsQueue is loaded.
