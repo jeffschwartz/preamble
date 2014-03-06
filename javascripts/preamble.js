@@ -78,7 +78,7 @@
 
     function showTotalsToBeRun(){
         //v1.4.0 For external reporting.
-        window.Preamble.totalAssertions = assertionsQueue.length;
+        window.Preamble.ext.totalAssertions = assertionsQueue.length;
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
             elStatusContainer.insertAdjacentHTML('beforeend', html);
@@ -138,13 +138,13 @@
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
         //v1.4.0 For external reporting.
-        window.Preamble.status = 'Tesing Finished';
-        window.Preamble.groupsPassed = totGroupsPassed;
-        window.Preamble.groupsFailed = totGroupsFailed;
-        window.Preamble.testsPassed = totTestsPassed;
-        window.Preamble.testsFailed = totTestsFailed;
-        window.Preamble.assertionsPassed = totAssertionsPassed;
-        window.Preamble.assertionsFailed = totAssertionsFailed;
+        window.Preamble._ext.status = 'Tesing Finished';
+        window.Preamble._ext.groupsPassed = totGroupsPassed;
+        window.Preamble._ext.groupsFailed = totGroupsFailed;
+        window.Preamble._ext.testsPassed = totTestsPassed;
+        window.Preamble._ext.testsFailed = totTestsFailed;
+        window.Preamble._ext.assertionsPassed = totAssertionsPassed;
+        window.Preamble._ext.assertionsFailed = totAssertionsFailed;
     }
 
     function showResultsDetails(){
@@ -838,8 +838,8 @@
         html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '.</p>';
         elStatusContainer.innerHTML = html;
         //v1.4.0
-        window.Preamble.totalGroups = totGroups;
-        window.Preamble.totalTests = totTests;
+        window.Preamble._ext.totalGroups = totGroups;
+        window.Preamble._ext.totalTests = totTests;
     }
 
     /**
@@ -875,8 +875,8 @@
     //Display the version.
     elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
 
-    //v1.4.0 For external reporting. Now we always use window.Preamble, even if config.wondowGlobals is true.
-    window.Preamble = {};
+    //v1.4.0 For external reporting. Now we always use window._ext.Preamble, even if config.wondowGlobals is true.
+    window.Preamble.ext = {};
 
     //If the windowGlabals config option is false then window globals will
     //not be used and the one Preamble name space will be used instead.
@@ -924,14 +924,14 @@
         };
     }
 
-    //v1.4.0 For external reporting. Using window.Preamble to store status and test results.    
-    window.Preamble.status = '';
-    window.Preamble.groupsPassed = 0;
-    window.Preamble.groupsFailed = 0;
-    window.Preamble.testsPassed = 0;
-    window.Preamble.testsFailed = 0;
-    window.Preamble.assertionsPassed = 0;
-    window.Preamble.assertionsFailed = 0;
+    //v1.4.0 For external reporting. Using window.Preamble.ext to store status and test results.    
+    window.Preamble.ext.status = '';
+    window.Preamble.ext.groupsPassed = 0;
+    window.Preamble.ext.groupsFailed = 0;
+    window.Preamble.ext.testsPassed = 0;
+    window.Preamble.ext.testsFailed = 0;
+    window.Preamble.ext.assertionsPassed = 0;
+    window.Preamble.ext.assertionsFailed = 0;
 
     /**
      * Wait while the testsQueue is loaded.
@@ -940,7 +940,7 @@
     //Catch errors.
     try{
         //Set status to "loading".
-        window.Preamble.status = 'loading';
+        window.Preamble.ext.status = 'loading';
 
         //Build the testsQueue as user calls group, test or asyncTest.
         //Keep checking the testsQueue's length until it is 'stable'.
