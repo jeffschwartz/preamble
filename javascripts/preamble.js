@@ -827,6 +827,9 @@
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '</p>';
         elStatusContainer.innerHTML = html;
+        //v1.4.0
+        window.Preamble.totalGroups = totGroups;
+        window.Preamble.totalTests = totTests;
     }
 
     /**
@@ -861,6 +864,9 @@
 
     //Display the version.
     elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
+
+    //v1.4.0 For external reporting. Now we always use window.Preamble, even if config.wondowGlobals is true.
+    window.Preamble = {};
 
     //If the windowGlabals config option is false then window globals will
     //not be used and the one Preamble name space will be used instead.
@@ -908,12 +914,20 @@
         };
     }
 
+    //v1.4.0 For external reporting. Using window.Preamble to store status and test results.    
+    window.Preamble.status = null;
+    window.Preamble.testsPassed = null;
+    window.Preamble.testsFailed = null;
+
     /**
      * Wait while the testsQueue is loaded.
      */
 
     //Catch errors.
     try{
+        //Set status to "loading".
+        window.Preamble.status = 'loading';
+
         //Build the testsQueue as user calls group, test or asyncTest.
         //Keep checking the testsQueue's length until it is 'stable'.
         //Stable is defined by a time interval during which the length
