@@ -78,7 +78,7 @@
 
     function showTotalsToBeRun(){
         //v1.4.0 For external reporting.
-        window.Preamble.ext.totalAssertions = assertionsQueue.length;
+        window.Preamble._ext.totalAssertions = assertionsQueue.length;
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
             elStatusContainer.insertAdjacentHTML('beforeend', html);
@@ -875,9 +875,6 @@
     //Display the version.
     elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
 
-    //v1.4.0 For external reporting. Now we always use window._ext.Preamble, even if config.wondowGlobals is true.
-    window.Preamble.ext = {};
-
     //If the windowGlabals config option is false then window globals will
     //not be used and the one Preamble name space will be used instead.
     if(config.windowGlobals){
@@ -924,14 +921,16 @@
         };
     }
 
-    //v1.4.0 For external reporting. Using window.Preamble.ext to store status and test results.    
-    window.Preamble.ext.status = '';
-    window.Preamble.ext.groupsPassed = 0;
-    window.Preamble.ext.groupsFailed = 0;
-    window.Preamble.ext.testsPassed = 0;
-    window.Preamble.ext.testsFailed = 0;
-    window.Preamble.ext.assertionsPassed = 0;
-    window.Preamble.ext.assertionsFailed = 0;
+    //v1.4.0 For external reporting.
+    window.Preamble = window.Preamble || {};
+    window.Preamble._ext = {};
+    window.Preamble._ext.status = '';
+    window.Preamble._ext.groupsPassed = 0;
+    window.Preamble._ext.groupsFailed = 0;
+    window.Preamble._ext.testsPassed = 0;
+    window.Preamble._ext.testsFailed = 0;
+    window.Preamble._ext.assertionsPassed = 0;
+    window.Preamble._ext.assertionsFailed = 0;
 
     /**
      * Wait while the testsQueue is loaded.
@@ -940,7 +939,7 @@
     //Catch errors.
     try{
         //Set status to "loading".
-        window.Preamble.ext.status = 'loading';
+        window.Preamble._ext.status = 'loading';
 
         //Build the testsQueue as user calls group, test or asyncTest.
         //Keep checking the testsQueue's length until it is 'stable'.
