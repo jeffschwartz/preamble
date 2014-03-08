@@ -78,7 +78,11 @@
 
     function showTotalsToBeRun(){
         //v1.4.0 For external reporting.
-        window.Preamble._ext.totalAssertions = assertionsQueue.length;
+        //window.Preamble._ext.totalAssertions = assertionsQueue.length;
+        publishStatusUpdate({
+            status: 'totalAssertionsToBeRun',
+            totalAssertionsToBeRun: assertionsQueue.length
+        });
         setTimeout(function(){
             var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
             elStatusContainer.insertAdjacentHTML('beforeend', html);
@@ -118,6 +122,18 @@
         return result;
     }
 
+    function wrapStringWith(wrapChar, string){
+        return wrapChar + string + wrapChar;
+    }
+
+    function singleQuote(string){
+        return wrapStringWith('\'', string);
+    }
+
+    function doubleQuote(string){
+        return wrapStringWith('"', string);
+    }
+
     //Configuration
     function configure(){
         config = window.preambleConfig ? merge(defaultConfig, preambleConfig) : defaultConfig;
@@ -138,13 +154,24 @@
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
         //v1.4.0 For external reporting.
-        window.Preamble._ext.status = 'Tesing Finished';
-        window.Preamble._ext.groupsPassed = totGroupsPassed;
-        window.Preamble._ext.groupsFailed = totGroupsFailed;
-        window.Preamble._ext.testsPassed = totTestsPassed;
-        window.Preamble._ext.testsFailed = totTestsFailed;
-        window.Preamble._ext.assertionsPassed = totAssertionsPassed;
-        window.Preamble._ext.assertionsFailed = totAssertionsFailed;
+        //window.Preamble._ext.status = 'Tesing Finished';
+        //window.Preamble._ext.groupsPassed = totGroupsPassed;
+        //window.Preamble._ext.groupsFailed = totGroupsFailed;
+        //window.Preamble._ext.testsPassed = totTestsPassed;
+        //window.Preamble._ext.testsFailed = totTestsFailed;
+        //window.Preamble._ext.assertionsPassed = totAssertionsPassed;
+        //window.Preamble._ext.assertionsFailed = totAssertionsFailed;
+        publishStatusUpdate({
+            status: 'resultsSummary', 
+            resultsSummary: {
+                groupsPassed: totGroupsPassed,
+                groupsFailed: totGroupsFailed,
+                testsPassed: totTestsPassed,
+                testsFailed: totTestsFailed,
+                assertionsPassed: totAssertionsPassed,
+                assertionsFailed: totAssertionsFailed
+            }
+        });
     }
 
     function showResultsDetails(){
@@ -838,8 +865,15 @@
         html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '.</p>';
         elStatusContainer.innerHTML = html;
         //v1.4.0
-        window.Preamble._ext.totalGroups = totGroups;
-        window.Preamble._ext.totalTests = totTests;
+        //window.Preamble._ext.totalGroups = totGroups;
+        //window.Preamble._ext.totalTests = totTests;
+        publishStatusUpdate({
+            status: 'coverage',
+            coverage: {
+                totalGroups: totGroups,
+                totalTests: totTests
+            }
+        });
     }
 
     /**
@@ -924,13 +958,118 @@
     //v1.4.0 For external reporting.
     window.Preamble = window.Preamble || {};
     window.Preamble._ext = {};
-    window.Preamble._ext.status = '';
-    window.Preamble._ext.groupsPassed = 0;
-    window.Preamble._ext.groupsFailed = 0;
-    window.Preamble._ext.testsPassed = 0;
-    window.Preamble._ext.testsFailed = 0;
-    window.Preamble._ext.assertionsPassed = 0;
-    window.Preamble._ext.assertionsFailed = 0;
+    //window.Preamble._ext.status = '';
+    //window.Preamble._ext.groupsPassed = 0;
+    //window.Preamble._ext.groupsFailed = 0;
+    //window.Preamble._ext.testsPassed = 0;
+    //window.Preamble._ext.testsFailed = 0;
+    //window.Preamble._ext.assertionsPassed = 0;
+    //window.Preamble._ext.assertionsFailed = 0;
+    
+    window.Preamble._ext = (function(){
+        /**
+         * A hash-of-hashes pubsub implementation.
+         */
+
+        //subscribers is a hash of hashes:
+        //{'some topic': {'some token': callbackfunction, 'some token': callbackfunction, . etc. }, . etc }
+        var subscribers = {}, totalSubscribers = 0, lastToken = 0;
+
+        //Generates a unique token.
+        function getToken(){
+            return lastToken += 1;
+        }
+
+        //Returns a function bound to a context.
+        function bindTo(fArg, context){
+            return fArg.bind(context);
+        }
+
+        //Returns a function which wraps subscribers callback in a setTimeout callback.
+        function makeAsync(topic, callback){
+            return function(topic, data){
+                setTimeout(function(){
+                    callback(topic, data);
+                }, 1);
+            };
+        }
+
+        //Adds a subscriber and returns a token to allow unsubscribing.
+        function subscribe(topic, handler){
+            var token = getToken(), 
+                boundAsyncHandler = makeAsync(topic, bindTo(handler, window.Preamble._ext));
+            //Add topic to subscribers if it doesn't already have it.
+            if(!subscribers.hasOwnProperty(topic)){
+                subscribers[topic] = {};
+            }
+            //Add subscriber to subscribers.
+            subscribers[topic][token] = boundAsyncHandler;
+            //Maintain a count of total subscribers.
+            totalSubscribers++;
+            //Return the token to the caller so it can unsubscribe.
+            return token;
+        }
+
+        //Unsubscribe subscriber.
+        function unsubscribe(topic, token){
+            if(subscribers.hasOwnProperty(topic)){
+                if(subscribers[topic].hasOwnProperty(token)){
+                    delete subscribers[topic][token]; 
+                    totalSubscribers--;
+                }
+            }
+        }
+
+        function publish(topic, data){
+            var token;
+            if(subscribers.hasOwnProperty(topic)){
+                for(token in subscribers[topic] ){
+                    if(subscribers[topic].hasOwnProperty(token)){
+                        if(data){subscribers[topic][token](topic, data);}
+                        else{subscribers[topic][token](topic);}
+                    }
+                }
+            }
+        }
+
+        //Returns the total subscribers count.
+        function getCountOfSubscribers(){
+            return totalSubscribers;
+        }
+
+        //Returns the subscriber count by topic.
+        function getCountOfSubscribersByTopic(topic){
+            var prop, count = 0;
+            if(subscribers.hasOwnProperty(topic)){for(prop in subscribers[topic]){if(subscribers[topic].hasOwnProperty(prop)){count++;}}}
+            return count;
+        }
+
+        //Returns the object that exposes the pubsub API.
+        return {
+            subscribe: subscribe, 
+            unsubscribe: unsubscribe, 
+            publish: publish, 
+            getCountOfSubscribers: getCountOfSubscribers, 
+            getCountOfSubscribersByTopic: getCountOfSubscribersByTopic
+        };
+
+    }());
+
+    /**
+     * Subscribe to pubsub to show status updates in the console.
+     * TODO(J.S.): comment this out or remove this after testing has completed.
+     */
+    window.Preamble._ext.subscribe('status update', function(topic, data){
+        console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
+    });
+
+    /**
+     * Higher-level functionality ontop of pubsub.
+     */
+
+    function publishStatusUpdate(data) {
+        window.Preamble._ext.publish('status update', data);
+    }
 
     /**
      * Wait while the testsQueue is loaded.
@@ -939,7 +1078,8 @@
     //Catch errors.
     try{
         //Set status to "loading".
-        window.Preamble._ext.status = 'loading';
+        //window.Preamble._ext.status = 'loading';
+        publishStatusUpdate({status: 'loading'});
 
         //Build the testsQueue as user calls group, test or asyncTest.
         //Keep checking the testsQueue's length until it is 'stable'.
