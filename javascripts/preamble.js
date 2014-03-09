@@ -976,10 +976,10 @@
     //window.Preamble._ext.assertionsPassed = 0;
     //window.Preamble._ext.assertionsFailed = 0;
     
+    /**
+     * A hash-of-hashes pubsub implementation.
+     */
     window.Preamble._ext = (function(){
-        /**
-         * A hash-of-hashes pubsub implementation.
-         */
 
         //subscribers is a hash of hashes:
         //{'some topic': {'some token': callbackfunction, 'some token': callbackfunction, . etc. }, . etc }
@@ -1035,8 +1035,11 @@
             if(subscribers.hasOwnProperty(topic)){
                 for(token in subscribers[topic] ){
                     if(subscribers[topic].hasOwnProperty(token)){
-                        if(data){subscribers[topic][token](topic, data);}
-                        else{subscribers[topic][token](topic);}
+                        if(data){
+                            subscribers[topic][token](topic, data);
+                        } else{
+                            subscribers[topic][token](topic);
+                        }
                     }
                 }
             }
