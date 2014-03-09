@@ -63,9 +63,19 @@
         if(arguments.length === 3){
             //window.onerror
             html = '<p>' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
+            //v1.4.0 For external reporting.
+            publishStatusUpdate({
+                status: 'error',
+                error: arguments[0] + '. File: ' + arguments[1] + '. Line: ' + arguments[2]
+            });
         }else{
             //catch(e)
             html = '<p>An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+            publishStatusUpdate({
+                status: 'error',
+                error: 'An error occurred, "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>'
+
+            });
         }
         elStatusContainer.innerHTML = html;
     }
@@ -126,9 +136,9 @@
         return wrapChar + string + wrapChar;
     }
 
-    function singleQuote(string){
-        return wrapStringWith('\'', string);
-    }
+    //function singleQuote(string){
+    //    return wrapStringWith('\'', string);
+    //}
 
     function doubleQuote(string){
         return wrapStringWith('"', string);
@@ -1057,7 +1067,7 @@
 
     /**
      * Subscribe to pubsub to show status updates in the console.
-     * TODO(J.S.): comment this out or remove this after testing has completed.
+     * TODO(J.S.)
      */
     window.Preamble._ext.subscribe('status update', function(topic, data){
         console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
