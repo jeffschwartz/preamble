@@ -174,6 +174,7 @@
         publishStatusUpdate({
             status: 'resultsSummary', 
             resultsSummary: {
+                timeElapsed: timerEnd - timerStart, 
                 groupsPassed: totGroupsPassed,
                 groupsFailed: totGroupsFailed,
                 testsPassed: totTestsPassed,
