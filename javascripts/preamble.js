@@ -21,7 +21,7 @@
     //name: (default 'Test') - set to a meaningful name.
     //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
     //autoStart: (default: true) - for internal use only. If Karma is detected then autoStart is set to false.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoSart: true};
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoStart: true};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -1085,12 +1085,15 @@
 
         //Build the testsQueue as user calls group, test or asyncTest.
         //Keep checking the testsQueue's length until it is 'stable'.
+        //Keep checking that config.autoStart is true.
         //Stable is defined by a time interval during which the length
         //of the testsQueue remains constant, indicating that all tests
         //have been loaded. Once stable, run the tests.
+        //config.autoStart can only be false if it set by an external
+        //process (e.g. Karma adapter).
         intervalId = setInterval(function(){
             if(testsQueue.length === testsQueueCount){
-                if(testsQueueStableCount > 1){
+                if(testsQueueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
                     //Show total groups and test to be covered.
                     showCoverage();
