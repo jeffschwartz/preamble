@@ -1,12 +1,12 @@
 /*global preambleConfig*/
-//Preamble 1.3.0
+//Preamble 1.4.0
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v1.3.0';
+    var version = 'v1.4.0';
     //Targeted DOM elements.
     var elPreambleContainer = document.getElementById('preamble-container');
     var elHeader;
@@ -20,7 +20,8 @@
     //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
     //name: (default 'Test') - set to a meaningful name.
     //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container'};
+    //autoStart: (default: true) - for internal use only. If Karma is detected then autoStart is set to false.
+    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoSart: true};
     //Merged configuration options.
     var config = {};
     var currentTestHash;
@@ -88,7 +89,6 @@
 
     function showTotalsToBeRun(){
         //v1.4.0 For external reporting.
-        //window.Preamble._ext.totalAssertions = assertionsQueue.length;
         publishStatusUpdate({
             status: 'totalAssertionsToBeRun',
             totalAssertionsToBeRun: assertionsQueue.length
@@ -164,13 +164,6 @@
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
         //v1.4.0 For external reporting.
-        //window.Preamble._ext.status = 'Tesing Finished';
-        //window.Preamble._ext.groupsPassed = totGroupsPassed;
-        //window.Preamble._ext.groupsFailed = totGroupsFailed;
-        //window.Preamble._ext.testsPassed = totTestsPassed;
-        //window.Preamble._ext.testsFailed = totTestsFailed;
-        //window.Preamble._ext.assertionsPassed = totAssertionsPassed;
-        //window.Preamble._ext.assertionsFailed = totAssertionsFailed;
         publishStatusUpdate({
             status: 'resultsSummary', 
             resultsSummary: {
@@ -876,8 +869,6 @@
         html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '.</p>';
         elStatusContainer.innerHTML = html;
         //v1.4.0
-        //window.Preamble._ext.totalGroups = totGroups;
-        //window.Preamble._ext.totalTests = totTests;
         publishStatusUpdate({
             status: 'coverage',
             coverage: {
@@ -968,19 +959,17 @@
 
     //v1.4.0 For external reporting.
     window.Preamble = window.Preamble || {};
-    window.Preamble._ext = {};
-    //window.Preamble._ext.status = '';
-    //window.Preamble._ext.groupsPassed = 0;
-    //window.Preamble._ext.groupsFailed = 0;
-    //window.Preamble._ext.testsPassed = 0;
-    //window.Preamble._ext.testsFailed = 0;
-    //window.Preamble._ext.assertionsPassed = 0;
-    //window.Preamble._ext.assertionsFailed = 0;
+    window.Preamble.__ext__ = {};
+    
+    /**
+     * Expose config options.
+     */
+    window.Preamble.__ext__.config = config;
     
     /**
      * A hash-of-hashes pubsub implementation.
      */
-    window.Preamble._ext = (function(){
+    var pubsub = window.Preamble.__ext__.pubsub = (function(){
 
         //subscribers is a hash of hashes:
         //{'some topic': {'some token': callbackfunction, 'some token': callbackfunction, . etc. }, . etc }
@@ -1008,7 +997,7 @@
         //Adds a subscriber and returns a token to allow unsubscribing.
         function subscribe(topic, handler){
             var token = getToken(), 
-                boundAsyncHandler = makeAsync(topic, bindTo(handler, window.Preamble._ext));
+                boundAsyncHandler = makeAsync(topic, bindTo(handler, window.Preamble.__ext__));
             //Add topic to subscribers if it doesn't already have it.
             if(!subscribers.hasOwnProperty(topic)){
                 subscribers[topic] = {};
@@ -1071,9 +1060,9 @@
 
     /**
      * Subscribe to pubsub to show status updates in the console.
-     * TODO(J.S.)
+     * TODO(J.S.) Comment this out prior to release?
      */
-    window.Preamble._ext.subscribe('status update', function(topic, data){
+    pubsub.subscribe('status update', function(topic, data){
         console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
     });
 
@@ -1082,7 +1071,7 @@
      */
 
     function publishStatusUpdate(data) {
-        window.Preamble._ext.publish('status update', data);
+        pubsub.publish('status update', data);
     }
 
     /**
@@ -1092,7 +1081,6 @@
     //Catch errors.
     try{
         //Set status to "loading".
-        //window.Preamble._ext.status = 'loading';
         publishStatusUpdate({status: 'loading'});
 
         //Build the testsQueue as user calls group, test or asyncTest.
