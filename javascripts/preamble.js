@@ -1,4 +1,3 @@
-/*global preambleConfig*/
 //Preamble 1.4.0
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
