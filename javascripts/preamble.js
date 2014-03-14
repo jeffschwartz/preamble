@@ -145,7 +145,7 @@
 
     //Configuration
     function configure(){
-        config = window.preambleConfig ? merge(defaultConfig, preambleConfig) : defaultConfig;
+        config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
     }
 
     function showResultsSummary(){
