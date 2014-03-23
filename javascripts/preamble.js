@@ -71,6 +71,7 @@
         }else{
             //catch(e)
             html = '<p>An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+            //v1.4.0 For external reporting.
             publishStatusUpdate({
                 status: 'error',
                 error: 'An error occurred, "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>'
@@ -961,13 +962,17 @@
     window.Preamble.__ext__ = {};
     
     /**
+     * v1.4.0 For external reporting.
      * Expose config options.
      */
+
     window.Preamble.__ext__.config = config;
     
     /**
+     * v1.4.0 For external reporting.
      * A hash-of-hashes pubsub implementation.
      */
+    
     var pubsub = window.Preamble.__ext__.pubsub = (function(){
 
         //subscribers is a hash of hashes:
@@ -1058,14 +1063,17 @@
     }());
 
     /**
+     * v1.4.0 For external reporting.
      * Subscribe to pubsub to show status updates in the console.
      * TODO(J.S.) Comment this out prior to release?
      */
+
     pubsub.subscribe('status update', function(topic, data){
         console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
     });
 
     /**
+     * v1.4.0 For external reporting.
      * Higher-level functionality ontop of pubsub.
      */
 
@@ -1079,7 +1087,7 @@
 
     //Catch errors.
     try{
-        //Set status to "loading".
+        //v1.4.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
 
         //Build the testsQueue as user calls group, test or asyncTest.
