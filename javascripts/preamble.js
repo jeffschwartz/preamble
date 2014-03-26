@@ -386,10 +386,27 @@
         var i,
             len,
             item;
+
+        //function reportBreakResult(failCountForTest, groupLabel, testLabel){
+        //    publishStatusUpdate({
+        //        status: 'testResult',
+        //        testResult: {
+        //            failCountForTest: failCountForTest,
+        //            groupLabel: groupLabel,
+        //            testLabel: testLabel
+        //        } 
+        //    });
+        //}
+
         //Show totals for groups, test, assertions before running the tests.
         showTotalsToBeRun();
         //A slight delay so user can see the totals and they don't flash.
         setTimeout(function(){
+            //v1.4.0 Set reporting breaks.
+            //var groupLabel = '';
+            //var testLabel = '';
+            ////v1.4.0 Buckets for reporting breaks.
+            //var failCountForTest = 0;
             //Synchronously iterate over the assertionsQueue, running each item's assertion.
             for (i = 0, len = assertionsQueue.length; i < len; i++) {
                 item = assertionsQueue[i];
@@ -397,6 +414,8 @@
                 if(item.result){
                     totAssertionsPassed++;
                 }else{
+                    ////v1.4.0
+                    //failCountForTest++;
                     totAssertionsFailed++;
                 }
                 switch(item.assertion.name){
@@ -420,11 +439,27 @@
                         break;
                 }
                 results.push(item);
+                ////v1.4.0 If there's a group break then report and reset.
+                //if(item.groupLabel !== groupLabel){
+                //    reportBreakResult(failCountForTest, groupLabel, testLabel);
+                //    //Setup the next breaks.
+                //    failCountForTest = 0;
+                //    groupLabel = item.groupLabel;
+                //    testLabel = item.testLabel;
+                //}
+                ////v1.4.0 If there's a test break then report and reset.
+                //if(item.testLabel !== testLabel){
+                //    reportBreakResult(failCountForTest, groupLabel, testLabel);
+                //    //Setup the next break.
+                //    testLabel = item.testLabel;
+                //}
                 if(config.shortCircuit && totAssertionsFailed){
                     reporter();
                     return;
                 }
             }
+            ////v1.4.0 Report for last reporting break.
+            //reportBreakResult(failCountForTest, groupLabel, testLabel);
             //Record the end time.
             timerEnd = Date.now();
             //Report the results.
@@ -998,8 +1033,9 @@
             };
         }
 
-        //Adds a subscriber and returns a token to allow unsubscribing.
-        function subscribe(topic, handler){
+        //Adds a subscriber for a topic with a callback 
+        //and returns a token to allow unsubscribing.
+        function on(topic, handler){
             var token = getToken(), 
                 boundAsyncHandler = makeAsync(topic, bindTo(handler, window.Preamble.__ext__));
             //Add topic to subscribers if it doesn't already have it.
@@ -1014,8 +1050,8 @@
             return token;
         }
 
-        //Unsubscribe subscriber.
-        function unsubscribe(topic, token){
+        //Removes a subscriber for a topic.
+        function off(topic, token){
             if(subscribers.hasOwnProperty(topic)){
                 if(subscribers[topic].hasOwnProperty(token)){
                     delete subscribers[topic][token]; 
@@ -1024,7 +1060,8 @@
             }
         }
 
-        function publish(topic, data){
+        //Publishes an event for a topic with optional data.
+        function emit(topic, data){
             var token;
             if(subscribers.hasOwnProperty(topic)){
                 for(token in subscribers[topic] ){
@@ -1053,9 +1090,9 @@
 
         //Returns the object that exposes the pubsub API.
         return {
-            subscribe: subscribe, 
-            unsubscribe: unsubscribe, 
-            publish: publish, 
+            on: on, 
+            off: off, 
+            emit: emit, 
             getCountOfSubscribers: getCountOfSubscribers, 
             getCountOfSubscribersByTopic: getCountOfSubscribersByTopic
         };
@@ -1068,7 +1105,7 @@
      * TODO(J.S.) Comment this out prior to release?
      */
 
-    pubsub.subscribe('status update', function(topic, data){
+    pubsub.on('status update', function(topic, data){
         console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
     });
 
@@ -1078,7 +1115,7 @@
      */
 
     function publishStatusUpdate(data) {
-        pubsub.publish('status update', data);
+        pubsub.emit('status update', data);
     }
 
     /**
