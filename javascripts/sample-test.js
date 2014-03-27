@@ -1,5 +1,5 @@
 group('This group will intentionally fail', function(){
-    test('Does true === false', function(){
+    test('true === false', function(){
         isTrue(false, "Yes, true === false!");
     });
 });
