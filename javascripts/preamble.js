@@ -94,7 +94,9 @@
             totalAssertionsToBeRun: assertionsQueue.length
         });
         setTimeout(function(){
-            var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
+            var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + 
+                totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + 
+                pluralize(' assertion', assertionsQueue.length) + '...</p>';
             elStatusContainer.insertAdjacentHTML('beforeend', html);
         }, 1);
     }
@@ -155,11 +157,20 @@
         html = '<p id="preamble-elapsed-time">Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(totAssertionsFailed === 0){
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +  totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + ' passed' + '</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + 
+                pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +  
+                totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + ' passed' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
+            html += '<p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + 
+                pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + 
+                totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
         }else{
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + 
+                pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + 
+                totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + 
+                ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + 
+                pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + 
+                '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
         }
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
@@ -182,6 +193,8 @@
         var groupLabel = '';
         var testLabel = '';
         var html = '';
+        var traces;
+        var a;
         elResults.style.display = 'block';
         results.forEach(function(result){
             if(result.testLabel !== testLabel){
@@ -195,17 +208,33 @@
                 }
             }
             if(result.groupLabel !== groupLabel){
-                html += '<div class="group-container"><a class="group" href="?group=' + encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
+                html += '<div class="group-container"><a class="group" href="?group=' + 
+                    encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
-                html += '<div class="tests-container"><a class="test" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
+                html += '<div class="tests-container"><a class="test" href="?group=' + 
+                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  failed"</div>';
+                //v1.4.0 Show a stack trace.
+                a = result.stackTrace.split(' at '); 
+                traces = a.reduce(function(previousValue, currentValue){
+                    if(currentValue.trim() !== 'error' && currentValue.trim() !== 'Error' && currentValue.search(/preamble.js/) === -1){
+                        return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
+                    }else{
+                        return previousValue;
+                    }
+                }, '');
+                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + 
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">Error: "' + 
+                    result.assertionLabel + '" (' + result.displayAssertionName + 
+                    ')  failed:</a></div><div class="stacktrace-container failed bold">' + traces + '</div>';
             }else{
-                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</div>';
+                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + 
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + 
+                    result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</a></div>';
             }
         });
         html += '</div></div>';
@@ -467,8 +496,9 @@
         }, 1);
     }
 
-    function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
-        assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, isAsync: isAsync});
+    function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync, stackTrace){
+        assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, 
+            value: value, expectation: expectation, isAsync: isAsync, stackTrace: stackTrace});
     }
 
     function throwException(errMessage){
@@ -480,9 +510,14 @@
             if(arguments.length !== 3){
                 throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
             }
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
-                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, currentTestHash.isAsync);
+            try{
+                throw new Error();
+            }catch(error){
+                //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
+                    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
+                    currentTestHash.isAsync, error.stack? error.stack : null);
+            }
         }
     }
 
@@ -491,7 +526,12 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
+            try{
+                throw new Error();
+            }catch(error){
+                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, 
+                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+            }
         }
     }
 
@@ -500,7 +540,12 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, value, true, currentTestHash.isAsync);
+            try{
+                throw new Error();
+            }catch(error){
+                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, 
+                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+            }
         }
     }
 
@@ -509,9 +554,14 @@
             if(arguments.length !== 3){
                 throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
             }
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
-                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, currentTestHash.isAsync);
+            try{
+                throw new Error();
+            }catch(error){
+                //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
+                    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
+                    currentTestHash.isAsync, error.stack? error.stack : null);
+            }
         }
     }
 
@@ -520,7 +570,12 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
+            try{
+                throw new Error();
+            }catch(error){
+                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, 
+                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+            }
         }
     }
 
@@ -529,7 +584,12 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, value, true, currentTestHash.isAsync);
+            try{
+                throw new Error();
+            }catch(error){
+                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, 
+                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+            }
         }
     }
 
@@ -724,7 +784,9 @@
     //Form: asyncTest(label[, interval], callback).
     var asyncTest = function asyncTest(label){
         if(testFilter === label || testFilter === ''){
-            testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
+            testsQueue.push(combine(currentTestHash, {
+                testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], 
+                isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
             totTests++;
         }
     };

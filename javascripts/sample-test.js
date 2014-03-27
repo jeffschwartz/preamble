@@ -1,3 +1,9 @@
+group('This group will intentionally fail', function(){
+    test('Does true === false', function(){
+        isTrue(false, "Yes, true === false!");
+    });
+});
+
 group('Does it work?', function(){
     test('Hello World!', function(){
         var hw = 'Hello World!';
