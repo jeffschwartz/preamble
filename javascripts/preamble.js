@@ -189,12 +189,22 @@
         });
     }
 
+    //v1.4.0 Returns the "line" in a stack trace that pinpoints the assertion that failed.
+    function stackTrace(st) {
+        var a;
+        a = st.split(' at '); 
+        return a.reduce(function(previousValue, currentValue){
+            if(currentValue.trim() !== 'error' && currentValue.trim() !== 'Error' && currentValue.search(/preamble.js/) === -1){
+                return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
+            }else{
+                return previousValue;
+            }
+        }, '');
+    }
     function showResultsDetails(){
         var groupLabel = '';
         var testLabel = '';
         var html = '';
-        var traces;
-        var a;
         elResults.style.display = 'block';
         results.forEach(function(result){
             if(result.testLabel !== testLabel){
@@ -218,19 +228,10 @@
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                //v1.4.0 Show a stack trace.
-                a = result.stackTrace.split(' at '); 
-                traces = a.reduce(function(previousValue, currentValue){
-                    if(currentValue.trim() !== 'error' && currentValue.trim() !== 'Error' && currentValue.search(/preamble.js/) === -1){
-                        return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
-                    }else{
-                        return previousValue;
-                    }
-                }, '');
                 html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + 
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">Error: "' + 
                     result.assertionLabel + '" (' + result.displayAssertionName + 
-                    ')  failed:</a></div><div class="stacktrace-container failed bold">' + traces + '</div>';
+                    ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
                 html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + 
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + 
