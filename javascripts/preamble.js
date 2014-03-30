@@ -200,7 +200,7 @@
         if(a.length > 1){
             a.shift();
         }
-        //Remove references to preamble.
+        //Filter out all references to preamble.js.
         return a.reduce(function(previousValue, currentValue){
             if(currentValue.search(/preamble.js/) === -1){
                 return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
