@@ -515,6 +515,10 @@
         throw new Error(errMessage);
     }
 
+    function stackTraceFromError(error){
+        return error.stack ? error.stack : error.stacktrace ? error.stacktrace : null;
+    }
+
     function noteEqualAssertion(value, expectation, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 3){
@@ -526,7 +530,7 @@
                 //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
                 pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
                     currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-                    currentTestHash.isAsync, error.stack? error.stack : stacktrace ? stacktrace : null);
+                    currentTestHash.isAsync, stackTraceFromError(error));
             }
         }
     }
@@ -540,7 +544,7 @@
                 throw new Error();
             }catch(error){
                 pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, 
-                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
             }
         }
     }
@@ -554,7 +558,7 @@
                 throw new Error();
             }catch(error){
                 pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, 
-                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
             }
         }
     }
@@ -570,7 +574,7 @@
                 //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
                 pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
                     currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-                    currentTestHash.isAsync, error.stack? error.stack : null);
+                    currentTestHash.isAsync, stackTraceFromError(error));
             }
         }
     }
@@ -584,7 +588,7 @@
                 throw new Error();
             }catch(error){
                 pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, 
-                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
             }
         }
     }
@@ -598,7 +602,7 @@
                 throw new Error();
             }catch(error){
                 pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, 
-                        value, true, currentTestHash.isAsync, error.stack? error.stack : null);
+                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
             }
         }
     }
