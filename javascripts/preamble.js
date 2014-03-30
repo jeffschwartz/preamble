@@ -189,18 +189,27 @@
         });
     }
 
-    //v1.4.0 Returns the "line" in a stack trace that pinpoints the assertion that failed.
+    //v1.4.0 Returns the "line" in the stack trace that points to the failed assertion.
+    //Safari currently doesn't support stack traces for exceptions.
     function stackTrace(st) {
         var a;
+        //For chrome & opera stack traces.
         a = st.split(' at '); 
+        //For firefox stack trace.
+        a = a.length > 1 ? a : st.split(/\w*@/);
+        if(a.length > 1){
+            a.shift();
+        }
+        //Remove references to preamble.
         return a.reduce(function(previousValue, currentValue){
-            if(currentValue.trim() !== 'error' && currentValue.trim() !== 'Error' && currentValue.search(/preamble.js/) === -1){
+            if(currentValue.search(/preamble.js/) === -1){
                 return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
             }else{
                 return previousValue;
             }
         }, '');
     }
+
     function showResultsDetails(){
         var groupLabel = '';
         var testLabel = '';
@@ -517,7 +526,7 @@
                 //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
                 pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
                     currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-                    currentTestHash.isAsync, error.stack? error.stack : null);
+                    currentTestHash.isAsync, error.stack? error.stack : stacktrace ? stacktrace : null);
             }
         }
     }
