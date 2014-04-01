@@ -52,6 +52,8 @@
     var assertionFilter;
     //v.1.4.0 The stack trace property used by the browser.
     var stackTraceProperty;
+    //v.1.4.0 RegEx for getting file from stack trace.
+    var reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
@@ -194,8 +196,7 @@
     //v1.4.0 Returns the "line" in the stack trace that points to the failed assertion.
     function stackTrace(st) {
         //Get all file references...
-        var re = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
-        var matches = st.match(re);
+        var matches = st.match(reFileFromStackTrace);
         //... and filter out all references to preamble.js.
         return matches.reduce(function(previousValue, currentValue){
             if(currentValue.search(/preamble.js/) === -1){
