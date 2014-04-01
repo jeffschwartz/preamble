@@ -50,6 +50,8 @@
     var groupFilter;
     var testFilter;
     var assertionFilter;
+    //v.1.4.0 The stack trace property used by the browser.
+    var stackTraceProperty;
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
@@ -190,18 +192,12 @@
     }
 
     //v1.4.0 Returns the "line" in the stack trace that points to the failed assertion.
-    //Safari currently doesn't support stack traces for exceptions.
     function stackTrace(st) {
-        var a;
-        //For chrome & opera stack traces.
-        a = st.split(' at '); 
-        //For firefox stack trace.
-        a = a.length > 1 ? a : st.split(/\w*@/);
-        if(a.length > 1){
-            a.shift();
-        }
-        //Filter out all references to preamble.js.
-        return a.reduce(function(previousValue, currentValue){
+        //Get all file references...
+        var re = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
+        var matches = st.match(re);
+        //... and filter out all references to preamble.js.
+        return matches.reduce(function(previousValue, currentValue){
             if(currentValue.search(/preamble.js/) === -1){
                 return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
             }else{
@@ -210,6 +206,7 @@
         }, '');
     }
 
+    //v.1.4.0 Including the stack trace file reference for failed assertions.
     function showResultsDetails(){
         var groupLabel = '';
         var testLabel = '';
@@ -506,6 +503,7 @@
         }, 1);
     }
 
+    //v1.4.0 Pushing stack trace onto the queue.
     function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync, stackTrace){
         assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, 
             value: value, expectation: expectation, isAsync: isAsync, stackTrace: stackTrace});
@@ -515,10 +513,25 @@
         throw new Error(errMessage);
     }
 
-    function stackTraceFromError(error){
-        return error.stack ? error.stack : error.stacktrace ? error.stacktrace : null;
+    //v.1.4.0 Sets the stack trace property used by the browser.
+    function setStackTraceProperty(){
+        try{
+            throw new Error('woops');
+        }catch(error){
+            stackTraceProperty = error.stack ? 'stack' : error.stacktrace ? 'stacktrace' : undefined; 
+        }
     }
 
+    //v1.4.0 Returns the stack trace from an error object.
+    function stackTraceFromError(error){
+        if(stackTraceProperty){
+            return error[stackTraceProperty];
+        }else{
+            return null;
+        }
+    }
+
+    //v.1.4.0 Including a stack trace.
     function noteEqualAssertion(value, expectation, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 3){
@@ -535,6 +548,7 @@
         }
     }
 
+    //v.1.4.0 Including a stack trace.
     function noteIsTrueAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -549,6 +563,7 @@
         }
     }
 
+    //v.1.4.0 Including a stack trace.
     function noteIsTruthyAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -563,6 +578,7 @@
         }
     }
 
+    //v.1.4.0 Including a stack trace.
     function noteNotEqualAssertion(value, expectation, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 3){
@@ -579,6 +595,7 @@
         }
     }
 
+    //v.1.4.0 Including a stack trace.
     function noteIsFalseAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -593,6 +610,7 @@
         }
     }
 
+    //v.1.4.0 Including a stack trace.
     function noteIsNotTruthyAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -1001,6 +1019,9 @@
     //Configure the runtime environment.
     configure();
 
+    //v1.4.0 Capture exception's stack trace property.
+    setStackTraceProperty();
+
     //Handle global errors.
     window.onerror = errorHandler;
 
@@ -1182,6 +1203,7 @@
      */
 
     pubsub.on('status update', function(topic, data){
+        //TODO(jeff): remove console.log before mergin with development.
         console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
     });
 
