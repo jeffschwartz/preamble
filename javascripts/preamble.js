@@ -24,7 +24,7 @@
     //Merged configuration options.
     var config = {};
     var currentTestHash;
-    var assertionsQueue = [];//Array of assertions. Calls are sequential. TODO support async.
+    var assertionsQueue = [];//Array of assertions. Calls are sequential.
     var testsQueue = [];//Array of test to be run. It is the first queue to be built!
     var results = [];//Array of results.
     var assert;
