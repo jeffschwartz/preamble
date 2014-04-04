@@ -995,16 +995,16 @@
 
     function showCoverage(){
         var html;
+        var totGroupsPlrzd = pluralize(' group', totGroups);
+        var totTestsPlrzd = pluralize(' test', totTests);
+        var coverage = 'Covering ' + totGroups + totGroupsPlrzd + '/' + totTests + totTestsPlrzd + '.';
         //Show groups and tests coverage in the header.
-        html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '.</p>';
+        html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         elStatusContainer.innerHTML = html;
         //v1.4.0
         publishStatusUpdate({
             status: 'coverage',
-            coverage: {
-                totalGroups: totGroups,
-                totalTests: totTests
-            }
+            coverage: coverage
         });
     }
 
