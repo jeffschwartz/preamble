@@ -524,12 +524,16 @@
     }
 
     //v1.4.0 Returns the stack trace from an error object.
-    function stackTraceFromError(error){
+    function stackTraceFromError(){
+        var stack = null;
         if(stackTraceProperty){
-            return error[stackTraceProperty];
-        }else{
-            return null;
+            try{
+                throw new Error();
+            }catch(error){
+                stack = error[stackTraceProperty];
+            }
         }
+        return stack;
     }
 
     //v.1.4.0 Including a stack trace.
@@ -538,14 +542,10 @@
             if(arguments.length !== 3){
                 throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
             }
-            try{
-                throw new Error();
-            }catch(error){
-                //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
-                    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-                    currentTestHash.isAsync, stackTraceFromError(error));
-            }
+           //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
+                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
+                currentTestHash.isAsync, stackTraceFromError());
         }
     }
 
@@ -555,12 +555,8 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
             }
-            try{
-                throw new Error();
-            }catch(error){
-                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, 
-                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
-            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, 
+                    value, true, currentTestHash.isAsync, stackTraceFromError());
         }
     }
 
@@ -570,12 +566,8 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            try{
-                throw new Error();
-            }catch(error){
-                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, 
-                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
-            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, 
+                    value, true, currentTestHash.isAsync, stackTraceFromError());
         }
     }
 
@@ -585,14 +577,10 @@
             if(arguments.length !== 3){
                 throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
             }
-            try{
-                throw new Error();
-            }catch(error){
-                //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
-                    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-                    currentTestHash.isAsync, stackTraceFromError(error));
-            }
+            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
+                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
+                currentTestHash.isAsync, stackTraceFromError());
         }
     }
 
@@ -602,12 +590,8 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
             }
-            try{
-                throw new Error();
-            }catch(error){
-                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, 
-                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
-            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, 
+                    value, true, currentTestHash.isAsync, stackTraceFromError());
         }
     }
 
@@ -617,12 +601,8 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            try{
-                throw new Error();
-            }catch(error){
-                pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, 
-                        value, true, currentTestHash.isAsync, stackTraceFromError(error));
-            }
+            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, 
+                    value, true, currentTestHash.isAsync, stackTraceFromError());
         }
     }
 
