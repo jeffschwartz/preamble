@@ -1220,11 +1220,11 @@
         //v1.4.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
 
-        //Build the groupsQueue as user calls group.
+        //Wait while the groupsQueue is built as scripts call group function.
         //Keep checking the groupsQueue's length until it is 'stable'.
         //Keep checking that config.autoStart is true.
         //Stable is defined by a time interval during which the length
-        //of the groupsQueue remains constant, indicating that all tests
+        //of the groupsQueue remains constant, indicating that all groups
         //have been loaded. Once stable, run the tests.
         //config.autoStart can only be false if it set by an external
         //process (e.g. Karma adapter).
