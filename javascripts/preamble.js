@@ -23,14 +23,16 @@
     var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoStart: true};
     //Merged configuration options.
     var config = {};
+    //v1.4.0
+    var groupsQueue=[];
     var currentTestHash;
     var assertionsQueue = [];//Array of assertions. Calls are sequential.
     var testsQueue = [];//Array of test to be run. It is the first queue to be built!
     var results = [];//Array of results.
     var assert;
-    var testsQueueCount = 0;
-    var testsQueueStableCount = 0;
-    var testsQueueStableInterval = 500;
+    var groupsQueueCount = 0;
+    var groupsQueueStableCount = 0;
+    var groupsQueueStableInterval = 500;
     var intervalId;
     var totGroups = 0;
     var totGroupsPassed = 0;
@@ -747,48 +749,59 @@
 
     //Note runBeforeEach.
     function beforeEachTest(callback){
-        currentTestHash.beforeEachTest = callback;
+        var cgqi = groupsQueue[groupsQueue.length - 1];
+        cgqi.beforeEachTest = callback;
     }
 
     //Note asyncRunBeforeEach.
     function asyncBeforeEachTest(callback){
+        var cgqi = groupsQueue[groupsQueue.length - 1];
         if(arguments.length === 2){
-            currentTestHash.asyncBeforeTestInterval = arguments[0];
-            currentTestHash.asyncBeforeEachTest = arguments[1];
+            cgqi.asyncBeforeTestInterval = arguments[0];
+            cgqi.asyncBeforeEachTest = arguments[1];
         }else{
-            currentTestHash.asyncBeforeEachTest = callback;
+            cgqi.asyncBeforeEachTest = callback;
         }
     }
 
     //Note runAfterEach.
     function afterEachTest(callback){
-        currentTestHash.afterEachTest = callback;
+        var cgqi = groupsQueue[groupsQueue.length - 1];
+        cgqi.afterEachTest = callback;
     }
 
     //Note asyncRunAfterEach.
     function asyncAfterEachTest(callback){
+        var cgqi = groupsQueue[groupsQueue.length - 1];
         if(arguments.length === 2){
-            currentTestHash.asyncAfterTestInterval = arguments[0];
-            currentTestHash.asyncAfterEachTest = arguments[1];
+            cgqi.asyncAfterTestInterval = arguments[0];
+            cgqi.asyncAfterEachTest = arguments[1];
         }
-        currentTestHash.asyncAfterEachTest = callback;
+        cgqi.asyncAfterEachTest = callback;
     }
 
     //Provides closure and a label to a group of tests.
     var group = function group(label, callback){
+        var start;
+        var end;
         if(groupFilter === label || groupFilter === ''){
-            currentTestHash = {groupLabel: label};
-            totGroups++;
-            callback();
+            //currentTestHash = {groupLabel: label};
+            //totGroups++;
+            //callback();
+            groupsQueue.push({groupLabel: label, callback: callback, tests: []});
+            start = Date.now();
+            callback(); // will call function test.
+            end = Date.now();
+            groupsQueue[groupsQueue.length - 1].duration = end - start;
         }
     };
 
     //Provides closure and a label to a synchronous test
     //and registers its callback in its testsQueue item.
     var test = function test(label, callback){
+        var cgqi = groupsQueue[groupsQueue.length - 1];
         if(testFilter === label || testFilter === ''){
-            testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
-            totTests++;
+            cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
         }
     };
 
@@ -796,10 +809,11 @@
     //and registers its callback in its testsQueue item.
     //Form: asyncTest(label[, interval], callback).
     var asyncTest = function asyncTest(label){
+        var cgqi = groupsQueue[groupsQueue.length - 1];
         if(testFilter === label || testFilter === ''){
-            testsQueue.push(combine(currentTestHash, {
+            cgqi.tests.push(combine(currentTestHash, {
                 testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], 
-                isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
+                isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
             totTests++;
         }
     };
@@ -975,9 +989,9 @@
 
     function showCoverage(){
         var html;
-        var totGroupsPlrzd = pluralize(' group', totGroups);
+        var totGroupsPlrzd = pluralize(' group', groupsQueue.length);
         var totTestsPlrzd = pluralize(' test', totTests);
-        var coverage = 'Covering ' + totGroups + totGroupsPlrzd + '/' + totTests + totTestsPlrzd + '.';
+        var coverage = 'Covering ' + groupsQueue.length + totGroupsPlrzd + '/' + totTests + totTestsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         elStatusContainer.innerHTML = html;
@@ -1206,17 +1220,17 @@
         //v1.4.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
 
-        //Build the testsQueue as user calls group, test or asyncTest.
-        //Keep checking the testsQueue's length until it is 'stable'.
+        //Build the groupsQueue as user calls group.
+        //Keep checking the groupsQueue's length until it is 'stable'.
         //Keep checking that config.autoStart is true.
         //Stable is defined by a time interval during which the length
-        //of the testsQueue remains constant, indicating that all tests
+        //of the groupsQueue remains constant, indicating that all tests
         //have been loaded. Once stable, run the tests.
         //config.autoStart can only be false if it set by an external
         //process (e.g. Karma adapter).
         intervalId = setInterval(function(){
-            if(testsQueue.length === testsQueueCount){
-                if(testsQueueStableCount > 1 && config.autoStart){
+            if(groupsQueue.length === groupsQueueCount){
+                if(groupsQueueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
                     //Show total groups and test to be covered.
                     showCoverage();
@@ -1225,13 +1239,13 @@
                     //Run!
                     runner();
                 }else{
-                    testsQueueStableCount++;
+                    groupsQueueStableCount++;
                 }
             }else{
-                testsQueueStableCount = 0;
-                testsQueueCount = testsQueue.length;
+                groupsQueueStableCount = 0;
+                groupsQueueCount = groupsQueue.length;
             }
-        }, testsQueueStableInterval);
+        }, groupsQueueStableInterval);
     } catch(e) {
         errorHandler(e);
     }
