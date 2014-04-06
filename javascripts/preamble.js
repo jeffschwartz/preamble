@@ -781,7 +781,7 @@
     }
 
     //Provides closure and a label to a group of tests.
-    var group = function group(label, callback){
+    function group(label, callback){
         var start;
         var end;
         if(groupFilter === label || groupFilter === ''){
@@ -794,21 +794,21 @@
             end = Date.now();
             groupsQueue[groupsQueue.length - 1].duration = end - start;
         }
-    };
+    }
 
     //Provides closure and a label to a synchronous test
     //and registers its callback in its testsQueue item.
-    var test = function test(label, callback){
+    function test(label, callback){
         var cgqi = groupsQueue[groupsQueue.length - 1];
         if(testFilter === label || testFilter === ''){
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
         }
-    };
+    }
 
     //Provides closure and a label to an asynchronous test
     //and registers its callback in its testsQueue item.
     //Form: asyncTest(label[, interval], callback).
-    var asyncTest = function asyncTest(label){
+    function asyncTest(label){
         var cgqi = groupsQueue[groupsQueue.length - 1];
         if(testFilter === label || testFilter === ''){
             cgqi.tests.push(combine(currentTestHash, {
@@ -816,7 +816,7 @@
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
             totTests++;
         }
-    };
+    }
 
     //Shown while the testsQueue is being loaded.
     function showStartMessage(){
