@@ -27,7 +27,7 @@
     var groupsQueue=[];
     var currentTestHash;
     var assertionsQueue = [];//Array of assertions. Calls are sequential.
-    var testsQueue = [];//Array of test to be run. It is the first queue to be built!
+    //var testsQueue = [];//Array of test to be run. It is the first queue to be built!;
     var results = [];//Array of results.
     var assert;
     var groupsQueueCount = 0;
@@ -56,6 +56,9 @@
     var stackTraceProperty;
     //v.1.4.0 RegEx for getting file from stack trace.
     var reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
+    //v1.4.0
+    var currentGroupIndex;
+    var currentTestIndex;
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
@@ -501,15 +504,21 @@
             //reportBreakResult(failCountForTest, groupLabel, testLabel);
             //Record the end time.
             timerEnd = Date.now();
-            //Report the results.
-            reporter();
+            ////Report the results.
+            //reporter();
         }, 1);
     }
 
+    ////v1.4.0 Pushing stack trace onto the queue.
+    //function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync, stackTrace){
+    //    assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, 
+    //        value: value, expectation: expectation, isAsync: isAsync, stackTrace: stackTrace});
+    //}
+
     //v1.4.0 Pushing stack trace onto the queue.
-    function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync, stackTrace){
-        assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, 
-            value: value, expectation: expectation, isAsync: isAsync, stackTrace: stackTrace});
+
+    function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
+        currentTestHash.assertions.push({assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, stackTrace: stackTrace});
     }
 
     function throwException(errMessage){
@@ -545,9 +554,11 @@
                 throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
             }
            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
-                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-                currentTestHash.isAsync, stackTraceFromError());
+            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
+            //    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
+            //    currentTestHash.isAsync, stackTraceFromError());
+            pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value, 
+                currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
     }
 
@@ -557,8 +568,9 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, 
-                    value, true, currentTestHash.isAsync, stackTraceFromError());
+            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, 
+            //        value, true, currentTestHash.isAsync, stackTraceFromError());
+            pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
         }
     }
 
@@ -568,8 +580,9 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, 
-                    value, true, currentTestHash.isAsync, stackTraceFromError());
+            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, 
+            //        value, true, currentTestHash.isAsync, stackTraceFromError());
+            pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
         }
     }
 
@@ -580,9 +593,11 @@
                 throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
             }
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
-                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-                currentTestHash.isAsync, stackTraceFromError());
+            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
+            //    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
+            //    currentTestHash.isAsync, stackTraceFromError());
+            pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value, 
+                currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
     }
 
@@ -592,8 +607,9 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, 
-                    value, true, currentTestHash.isAsync, stackTraceFromError());
+            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, 
+            //        value, true, currentTestHash.isAsync, stackTraceFromError());
+            pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
         }
     }
 
@@ -603,8 +619,9 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, 
-                    value, true, currentTestHash.isAsync, stackTraceFromError());
+            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, 
+            //        value, true, currentTestHash.isAsync, stackTraceFromError());
+            pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
         }
     }
 
@@ -660,14 +677,14 @@
 
     //Runs setup synchronously for each test.
     function runBeforeEachSync(){
-        currentTestHash.beforeTestVal = currentTestHash.beforeEachTest();
+        currentTestHash.beforeTestVal = groupsQueue[currentGroupIndex].beforeEachTest();
         currentTestStep++;
         runTest();
     }
 
     //Runs setup asynchronously for each test.
     function runBeforeEachAsync(){
-        currentTestHash.beforeTestVal = currentTestHash.asyncBeforeEachTest();
+        currentTestHash.beforeTestVal = groupsQueue[currentGroupIndex].asyncBeforeEachTest();
         setTimeout(function(){
             currentTestStep++;
             runTest();
@@ -676,14 +693,14 @@
 
     //Runs tear down synchronously for each test.
     function runAfterEachSync(){
-        currentTestHash.afterEachTest();
+        groupsQueue[currentGroupIndex].afterEachTest();
         currentTestStep++;
         runTest();
     }
 
     //Runs tear down asynchronously for each test.
     function runAfterEachAsync(){
-        currentTestHash.asyncAfterEachTest();
+        groupsQueue[currentGroupIndex].asyncAfterEachTest();
         setTimeout(function(){
             currentTestStep++;
             runTest();
@@ -697,9 +714,9 @@
         setTimeout(function(){
             switch(currentTestStep){
                 case 0: //Runs beforeEach.
-                    if(currentTestHash.beforeEachTest){
+                    if(groupsQueue[currentGroupIndex].beforeEachTest){
                         runBeforeEachSync();
-                    }else if(currentTestHash.asyncBeforeEachTest){
+                    }else if(groupsQueue[currentGroupIndex].asyncBeforeEachTest){
                         runBeforeEachAsync();
                     }else{
                         currentTestStep++;
@@ -714,9 +731,9 @@
                     }
                     break;
                 case 2: //Runs afterEach.
-                    if(currentTestHash.afterEachTest){
+                    if(groupsQueue[currentGroupIndex].afterEachTest){
                         runAfterEachSync();
-                    }else if(currentTestHash.asyncAfterEachTest){
+                    }else if(groupsQueue[currentGroupIndex].asyncAfterEachTest){
                         runAfterEachAsync();
                     }else{
                         currentTestStep++;
@@ -726,26 +743,40 @@
                 case 3: //Sets up the processing of the next test to be run.
                     testsQueueIndex++;
                     testIsRunning = false;
-                    runTests();
+                    //runTests();
+                    pubsub.emit('runTest');
                     break;
             }
         }, 1);
     }
 
-    //Runs each test in testsQueue to build assertionsQueue.
-    function runTests(){
-        var len = testsQueue.length;
-        while(testsQueueIndex < len && !testIsRunning){
-            currentTestHash  = testsQueue[testsQueueIndex];
-            currentTestStep = 0;
-            testIsRunning = true;
-            runTest();
-        }
-        if(testsQueueIndex === len){
-            //Run the assertions in the assertionsQueue.
-            runAssertions();
-        }
-    }
+    ////Runs each test in testsQueue to build assertionsQueue.
+    //function runTests(){
+    //    var len = testsQueue.length;
+    //    while(testsQueueIndex < len && !testIsRunning){
+    //        currentTestHash = testsQueue[testsQueueIndex];
+    //        currentTestStep = 0;
+    //        testIsRunning = true;
+    //        runTest();
+    //    }
+    //    if(testsQueueIndex === len){
+    //        //Run the assertions in the assertionsQueue.
+    //        runAssertions();
+    //    }
+    //}
+
+    //function runGroups(){
+    //    groupsQueue.forEach(function(group){
+    //        testsQueue = group.tests;
+    //        testsQueueIndex = 0;
+    //        testsQueue.start = Date.now();
+    //        runTests();
+    //        //runAssertions();
+    //        testsQueue.end = Date.now();
+    //    });
+    //    //Report the results.
+    //    reporter();
+    //}
 
     //Note runBeforeEach.
     function beforeEachTest(callback){
@@ -823,13 +854,18 @@
         elStatusContainer.innerHTML += '<p>Building queues. Please wait...</p>';
     }
 
-    //Called after the testsQueue has been generated.
-    function runner(){
-        //Record the start time.
-        timerStart = Date.now();
-        //Run each test in the testsQueue.
-        runTests();
-    }
+    ////Called after the testsQueue has been generated.
+    //function runner(){
+    //    //Record the start time.
+    //    var start = Date.now();
+    //    var end;
+    //    //Run the groups.
+    //    runGroups();
+    //    //Record the end time.
+    //    end = Date.now();
+    //    //Record the duration for the group.
+    //    groupsQueue.duration +=  end - start;
+    //}
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
@@ -990,16 +1026,17 @@
     function showCoverage(){
         var html;
         var totGroupsPlrzd = pluralize(' group', groupsQueue.length);
+        //v1.4.0 Calculate total tests by reducing the groupsQueue.
+        var totTests = groupsQueue.reduce(function(prevValue, curValue){
+            return prevValue + curValue.tests.length;
+        }, 0);
         var totTestsPlrzd = pluralize(' test', totTests);
         var coverage = 'Covering ' + groupsQueue.length + totGroupsPlrzd + '/' + totTests + totTestsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         elStatusContainer.innerHTML = html;
         //v1.4.0
-        publishStatusUpdate({
-            status: 'coverage',
-            coverage: coverage
-        });
+        publishStatusUpdate({status: 'coverage', coverage: coverage});
     }
 
     /**
@@ -1192,6 +1229,74 @@
     }());
 
     /**
+     * v1.4.0 Internal event handling.
+     */
+
+    //Convenience method for registering handlers.
+    function on(topic, handler){
+        pubsub.on(topic, handler);
+    }
+
+    ////Convenience method for removing handlers.
+    //function off(topic, token){
+    //    pubsub.off(topic, token);
+    //}
+
+    //Returns the duration for a group by reducing it's 'tests' durations.
+    function duration(collection) {
+        return collection.reduce(function(prevValue, curValue){
+            return prevValue + curValue.duration;
+        }, 0);
+    }
+
+    //Iniitialize.
+    on('start', function(){
+        //Mark the time testing started.
+        currentGroupIndex = -1;
+        //Fire 'runGroup' event to run the 1st group.
+        pubsub.emit('runGroup');
+    });
+
+    //Runs a single group.
+    on('runGroup', function(){
+        var group = currentGroupIndex >= 0 && groupsQueue[currentGroupIndex];
+        if(group){
+            group.duration = duration(group.tests);
+        }
+        currentGroupIndex++;
+        if(currentGroupIndex < groupsQueue.length){
+            currentTestIndex = -1;
+            pubsub.emit('runTest');
+        }else{
+            pubsub.emit('end');
+        }
+    });
+
+    //Runs a single test.
+    on('runTest', function(){
+        var test = currentTestIndex >= 0 && groupsQueue[currentGroupIndex].tests[currentTestIndex];
+        if(test){
+            test.end = Date.now();
+            test.duration = test.end - test.start; 
+        }
+        currentTestIndex++;
+        if(currentTestIndex < groupsQueue[currentGroupIndex].tests.length){
+            groupsQueue[currentGroupIndex].tests[currentTestIndex].start = Date.now();
+            //pubsub.emit('runTest');
+            currentTestHash = groupsQueue[currentGroupIndex].tests[currentTestIndex];
+            currentTestStep = 0;
+            runTest();
+        }else{
+            pubsub.emit('runGroup');
+        }
+    });
+
+    //All groups ran.
+    on('end', function(){
+        groupsQueue.duration = duration(groupsQueue);
+    });
+
+    /**
      * v1.4.0 For external reporting.
      * Subscribe to pubsub to show status updates in the console.
      * TODO(J.S.) Comment this out prior to release?
@@ -1212,7 +1317,7 @@
     }
 
     /**
-     * Wait while the testsQueue is loaded.
+     * Wait while the groupsQueue is loaded.
      */
 
     //Catch errors.
@@ -1237,7 +1342,8 @@
                     //Show the start message.
                     showStartMessage();
                     //Run!
-                    runner();
+                    pubsub.emit('start');
+                    //runner();
                 }else{
                     groupsQueueStableCount++;
                 }
