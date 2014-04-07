@@ -425,30 +425,11 @@
 
     //Loops through the assertionsQueue, running each assertion and records the results.
     function runAssertions(){
-        var i,
-            len,
-            item;
-
-        //function reportBreakResult(failCountForTest, groupLabel, testLabel){
-        //    publishStatusUpdate({
-        //        status: 'testResult',
-        //        testResult: {
-        //            failCountForTest: failCountForTest,
-        //            groupLabel: groupLabel,
-        //            testLabel: testLabel
-        //        } 
-        //    });
-        //}
-
+        var i, len, item;
         //Show totals for groups, test, assertions before running the tests.
-        showTotalsToBeRun();
+        //showTotalsToBeRun();
         //A slight delay so user can see the totals and they don't flash.
         setTimeout(function(){
-            //v1.4.0 Set reporting breaks.
-            //var groupLabel = '';
-            //var testLabel = '';
-            ////v1.4.0 Buckets for reporting breaks.
-            //var failCountForTest = 0;
             //Synchronously iterate over the assertionsQueue, running each item's assertion.
             for (i = 0, len = assertionsQueue.length; i < len; i++) {
                 item = assertionsQueue[i];
@@ -456,8 +437,6 @@
                 if(item.result){
                     totAssertionsPassed++;
                 }else{
-                    ////v1.4.0
-                    //failCountForTest++;
                     totAssertionsFailed++;
                 }
                 switch(item.assertion.name){
@@ -481,31 +460,13 @@
                         break;
                 }
                 results.push(item);
-                ////v1.4.0 If there's a group break then report and reset.
-                //if(item.groupLabel !== groupLabel){
-                //    reportBreakResult(failCountForTest, groupLabel, testLabel);
-                //    //Setup the next breaks.
-                //    failCountForTest = 0;
-                //    groupLabel = item.groupLabel;
-                //    testLabel = item.testLabel;
-                //}
-                ////v1.4.0 If there's a test break then report and reset.
-                //if(item.testLabel !== testLabel){
-                //    reportBreakResult(failCountForTest, groupLabel, testLabel);
-                //    //Setup the next break.
-                //    testLabel = item.testLabel;
-                //}
                 if(config.shortCircuit && totAssertionsFailed){
                     reporter();
                     return;
                 }
             }
-            ////v1.4.0 Report for last reporting break.
-            //reportBreakResult(failCountForTest, groupLabel, testLabel);
             //Record the end time.
             timerEnd = Date.now();
-            ////Report the results.
-            //reporter();
         }, 1);
     }
 
@@ -851,7 +812,7 @@
 
     //Shown while the testsQueue is being loaded.
     function showStartMessage(){
-        elStatusContainer.innerHTML += '<p>Building queues. Please wait...</p>';
+        elStatusContainer.innerHTML = '<p>Building queues. Please wait...</p>';
     }
 
     ////Called after the testsQueue has been generated.
@@ -1031,10 +992,19 @@
             return prevValue + curValue.tests.length;
         }, 0);
         var totTestsPlrzd = pluralize(' test', totTests);
-        var coverage = 'Covering ' + groupsQueue.length + totGroupsPlrzd + '/' + totTests + totTestsPlrzd + '.';
+        var totAssertions = 0;
+        groupsQueue.forEach(function(group){
+            var tot = group.tests.reduce(function(prevValue, curValue){
+                return prevValue + curValue.assertions.length;
+            }, 0);
+            totAssertions += tot;
+        });
+        var totAssertionsPlrzd = pluralize(' assertion', totAssertions);
+        var coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' + 
+            totTests + ' ' + totTestsPlrzd + '/' + totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
-        elStatusContainer.innerHTML = html;
+        elStatusContainer.innerHTML += html;
         //v1.4.0
         publishStatusUpdate({status: 'coverage', coverage: coverage});
     }
@@ -1268,6 +1238,7 @@
             currentTestIndex = -1;
             pubsub.emit('runTest');
         }else{
+            showCoverage();
             pubsub.emit('end');
         }
     });
@@ -1337,8 +1308,8 @@
             if(groupsQueue.length === groupsQueueCount){
                 if(groupsQueueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
-                    //Show total groups and test to be covered.
-                    showCoverage();
+                    ////Show total groups and test to be covered.
+                    //showCoverage();
                     //Show the start message.
                     showStartMessage();
                     //Run!
