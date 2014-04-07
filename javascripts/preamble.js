@@ -1261,7 +1261,7 @@
     on('runGroup', function(){
         var group = currentGroupIndex >= 0 && groupsQueue[currentGroupIndex];
         if(group){
-            group.duration = duration(group.tests);
+            group.duration += duration(group.tests);
         }
         currentGroupIndex++;
         if(currentGroupIndex < groupsQueue.length){
