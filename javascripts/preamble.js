@@ -1302,7 +1302,7 @@
      * TODO(J.S.) Comment this out prior to release?
      */
 
-    pubsub.on('status update', function(topic, data){
+    on('status update', function(topic, data){
         //TODO(jeff): remove console.log before mergin with development.
         console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
     });
