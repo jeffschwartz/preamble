@@ -397,77 +397,105 @@
     function assertEqual(a, b){
         return a_equals_b(a, b);
     }
+    assertEqual._desc = 'equal';
 
     // "strict" a === true, simple boolean test
     function assertIsTrue(a){
         return a_equals_true(a);
     }
+    assertIsTrue._desc = 'isTrue';
 
     // "non strict" a == true, simple boolean test
     function assertIsTruthy(a){
         return a_is_truthy(a);
     }
+    assertIsTruthy._desc = 'isTruthy';
 
     // "strict" a !== b
     function assertNotEqual(a, b){
         return a_notequals_b(a, b);
     }
+    assertNotEqual._desc = 'notEqual';
 
     // "strict" a === false, simple boolean test
     function assertIsFalse(a){
         return a_equals_false(a);
     }
+    assertIsFalse._desc = 'isFalse';
 
     // "non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
         return a_is_not_truthy(a);
     }
+    assertIsNotTruthy._desc = 'isNotTruthy';
 
     //Loops through the assertionsQueue, running each assertion and records the results.
-    function runAssertions(){
+    //function runAssertions(){
+    //    var i, len, item;
+    //    //Show totals for groups, test, assertions before running the tests.
+    //    //showTotalsToBeRun();
+    //    //A slight delay so user can see the totals and they don't flash.
+    //    setTimeout(function(){
+    //        //Synchronously iterate over the assertionsQueue, running each item's assertion.
+    //        for (i = 0, len = assertionsQueue.length; i < len; i++) {
+    //            item = assertionsQueue[i];
+    //            item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+    //            if(item.result){
+    //                totAssertionsPassed++;
+    //            }else{
+    //                totAssertionsFailed++;
+    //            }
+    //            //switch(item.assertion.name){
+    //            //    case 'assertIsTrue':
+    //            //        item.displayAssertionName = 'isTrue';
+    //            //        break;
+    //            //    case 'assertIsTruthy':
+    //            //        item.displayAssertionName = 'isTruthy';
+    //            //        break;
+    //            //    case 'assertIsFalse':
+    //            //        item.displayAssertionName = 'isFalse';
+    //            //        break;
+    //            //    case 'assertIsNotTruthy':
+    //            //        item.displayAssertionName = 'isNotTruthy';
+    //            //        break;
+    //            //    case 'assertEqual':
+    //            //        item.displayAssertionName = 'equal';
+    //            //        break;
+    //            //    case 'assertNotEqual':
+    //            //        item.displayAssertionName = 'notEqual';
+    //            //        break;
+    //            //}
+    //            item.displayAssertionName = item.assertion._desc;
+    //            results.push(item);
+    //            if(config.shortCircuit && totAssertionsFailed){
+    //                reporter();
+    //                return;
+    //            }
+    //        }
+    //        //Record the end time.
+    //        timerEnd = Date.now();
+    //    }, 1);
+    //}
+    function runAssertions(assertionsQueue){
         var i, len, item;
-        //Show totals for groups, test, assertions before running the tests.
-        //showTotalsToBeRun();
-        //A slight delay so user can see the totals and they don't flash.
-        setTimeout(function(){
-            //Synchronously iterate over the assertionsQueue, running each item's assertion.
-            for (i = 0, len = assertionsQueue.length; i < len; i++) {
-                item = assertionsQueue[i];
-                item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-                if(item.result){
-                    totAssertionsPassed++;
-                }else{
-                    totAssertionsFailed++;
-                }
-                switch(item.assertion.name){
-                    case 'assertIsTrue':
-                        item.displayAssertionName = 'isTrue';
-                        break;
-                    case 'assertIsTruthy':
-                        item.displayAssertionName = 'isTruthy';
-                        break;
-                    case 'assertIsFalse':
-                        item.displayAssertionName = 'isFalse';
-                        break;
-                    case 'assertIsNotTruthy':
-                        item.displayAssertionName = 'isNotTruthy';
-                        break;
-                    case 'assertEqual':
-                        item.displayAssertionName = 'equal';
-                        break;
-                    case 'assertNotEqual':
-                        item.displayAssertionName = 'notEqual';
-                        break;
-                }
-                results.push(item);
-                if(config.shortCircuit && totAssertionsFailed){
-                    reporter();
-                    return;
-                }
+        //Iterate over the assertionsQueue, running each item's assertion.
+        for (i = 0, len = assertionsQueue.length; i < len; i++) {
+            item = assertionsQueue[i];
+            item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            if(item.result){
+                totAssertionsPassed++;
+            }else{
+                totAssertionsFailed++;
             }
-            //Record the end time.
-            timerEnd = Date.now();
-        }, 1);
+            item.displayAssertionName = item.assertion._desc;
+            //results.push(item);
+            if(config.shortCircuit && totAssertionsFailed){
+                reporter();
+                return;
+            }
+        }
+            ////Record the end time.
+            //timerEnd = Date.now();
     }
 
     ////v1.4.0 Pushing stack trace onto the queue.
@@ -1221,9 +1249,8 @@
 
     //Iniitialize.
     on('start', function(){
-        //Mark the time testing started.
+        groupsQueue.start = Date.now();
         currentGroupIndex = -1;
-        //Fire 'runGroup' event to run the 1st group.
         pubsub.emit('runGroup');
     });
 
@@ -1247,6 +1274,7 @@
     on('runTest', function(){
         var test = currentTestIndex >= 0 && groupsQueue[currentGroupIndex].tests[currentTestIndex];
         if(test){
+            runAssertions(test.assertions);
             test.end = Date.now();
             test.duration = test.end - test.start; 
         }
@@ -1264,6 +1292,8 @@
 
     //All groups ran.
     on('end', function(){
+        groupsQueue.end = Date.now();
+        groupsQueue.totalElapsedTime = groupsQueue.end - groupsQueue.start;
         groupsQueue.duration = duration(groupsQueue);
     });
 
