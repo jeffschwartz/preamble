@@ -19,35 +19,23 @@
     //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
     //name: (default 'Test') - set to a meaningful name.
     //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-    //autoStart: (default: true) - for internal use only. If Karma is detected then autoStart is set to false.
+    //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
     var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoStart: true};
     //Merged configuration options.
     var config = {};
     //v1.4.0
     var groupsQueue=[];
+    groupsQueue.totTests = 0;
     var currentTestHash;
-    //var assertionsQueue = [];
-    //var testsQueue = [];//Array of test to be run. It is the first queue to be built!;
-    //var results = [];//Array of results.
     var assert;
-    var groupsQueueCount = 0;
+    //v1.4.0
+    var prevGroupsQueueCount = 0;
     var groupsQueueStableCount = 0;
     var groupsQueueStableInterval = 500;
     var intervalId;
-    //var totGroupsPassed = 0;
-    //var totGroupsFailed = 0;
-    //var totGroups = 0;
-    var totTests = 0;
+    //var totTests = 0;
     var totAssertions = 0;
-    //var totTestsPassed = 0;
-    //var totTestsFailed = 0;
-    //var totAssertionsPassed = 0;
-    //var totAssertionsFailed = 0;
     var isProcessAborted = false;
-    //var testsQueueIndex = 0;
-    //var testIsRunning = false;
-    //var timerStart;
-    //var timerEnd;
     //Filters.
     var currentTestStep;
     var groupFilter;
@@ -202,14 +190,14 @@
         var html;
         var totGroups = groupsQueue.length;
         var totGroupsPassed = groupsQueue.length - groupsQueue.totGroupsFailed;
-        var totTestsPassed = totTests - groupsQueue.totTestsFailed;
+        var totTestsPassed = groupsQueue.totTests - groupsQueue.totTestsFailed;
         var totAssertionsPassed = totAssertions - groupsQueue.totAssertionsFailed;
         //Show elapsed time.
         html = '<p id="preamble-elapsed-time">Tests completed in ' + (groupsQueue.duration) + ' milliseconds.</p>';
         //Show a summary in the header.
         if(groupsQueue.result){
             html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroups + 
-                pluralize(' group', totGroups) + '/' + totTests+ pluralize(' test', totTests) + '/' +  
+                pluralize(' group', totGroups) + '/' + groupsQueue.totTests+ pluralize(' test', groupsQueue.totTests) + '/' +  
                 totAssertions + pluralize(' assertion', totAssertions) + ' passed' + '</p>';
         }else if(totAssertionsPassed === 0){
             html += '<p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed + 
@@ -915,7 +903,7 @@
         var cgqi = groupsQueue[groupsQueue.length - 1];
         if(testFilter === label || testFilter === ''){
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
-            totTests++;
+            groupsQueue.totTests++;
         }
     }
 
@@ -928,7 +916,7 @@
             cgqi.tests.push(combine(currentTestHash, {
                 testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], 
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
-            totTests++;
+            groupsQueue.totTests++;
         }
     }
 
@@ -1109,10 +1097,10 @@
     function showCoverage(){
         var html;
         var totGroupsPlrzd = pluralize(' group', groupsQueue.length);
-        var totTestsPlrzd = pluralize(' test', totTests);
+        var totTestsPlrzd = pluralize(' test', groupsQueue.totTests);
         var totAssertionsPlrzd = pluralize(' assertion', totAssertions);
         var coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' + 
-            totTests + ' ' + totTestsPlrzd + '/' + totAssertions + totAssertionsPlrzd + '.';
+            groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         elStatusContainer.innerHTML += html;
@@ -1487,7 +1475,7 @@
         //config.autoStart can only be false if it set by an external
         //process (e.g. Karma adapter).
         intervalId = setInterval(function(){
-            if(groupsQueue.length === groupsQueueCount){
+            if(groupsQueue.length === prevGroupsQueueCount){
                 if(groupsQueueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
                     ////Show total groups and test to be covered.
@@ -1502,7 +1490,7 @@
                 }
             }else{
                 groupsQueueStableCount = 0;
-                groupsQueueCount = groupsQueue.length;
+                prevGroupsQueueCount = groupsQueue.length;
             }
         }, groupsQueueStableInterval);
     } catch(e) {
