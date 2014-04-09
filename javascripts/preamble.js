@@ -12,7 +12,7 @@
     var elStatusContainer;
     var elResults;
     var elUiTestContainer;
-    //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asynTestDelay: 20}).
+    //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20}).
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
     //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
@@ -26,7 +26,7 @@
     //v1.4.0
     var groupsQueue=[];
     //v1.4.0 Can only be true if config.shortCircuit is true and an assertion has failed.
-    var isShortCircuited = false; 
+    var isShortCircuited = false;
     groupsQueue.totTests = 0;
     groupsQueue.totAssertions = 0;
     var currentTestHash;
@@ -145,19 +145,19 @@
         }
         //Show a summary in the header.
         if(groupsQueue.result){
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroups + 
-                pluralize(' group', totGroups) + '/' + groupsQueue.totTests+ pluralize(' test', groupsQueue.totTests) + '/' +  
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroups +
+                pluralize(' group', totGroups) + '/' + groupsQueue.totTests+ pluralize(' test', groupsQueue.totTests) + '/' +
                 groupsQueue.totAssertions + pluralize(' assertion', groupsQueue.totAssertions) + ' passed' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed + 
-                pluralize(' group', groupsQueue.totGroupsFailed) + '/' + groupsQueue.totTestsFailed + pluralize(' test', groupsQueue.totTestsFailed) + '/' + 
+            html += '<p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed +
+                pluralize(' group', groupsQueue.totGroupsFailed) + '/' + groupsQueue.totTestsFailed + pluralize(' test', groupsQueue.totTestsFailed) + '/' +
                 groupsQueue.totAssertionsFailed + pluralize(' assertion', groupsQueue.totAssertionsFailed) + ' failed.</p>';
         }else{
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + 
-                pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + 
-                totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + 
-                ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed + 
-                pluralize(' group', groupsQueue.totGroupsFailed) + '/' + groupsQueue.totTestsFailed + pluralize(' test', groupsQueue.totTestsFailed) + 
+            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed +
+                pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +
+                totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) +
+                ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed +
+                pluralize(' group', groupsQueue.totGroupsFailed) + '/' + groupsQueue.totTestsFailed + pluralize(' test', groupsQueue.totTestsFailed) +
                 '/' + groupsQueue.totAssertionsFailed + pluralize(' assertion', groupsQueue.totAssertionsFailed) + ' failed.</p>';
         }
         html += '<a href="?">Rerun All Tests</a>';
@@ -196,23 +196,23 @@
                 }
             }
             if(result.groupLabel !== groupLabel){
-                html += '<div class="group-container"><a class="group" href="?group=' + 
+                html += '<div class="group-container"><a class="group" href="?group=' +
                     encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
-                html += '<div class="tests-container"><a class="test" href="?group=' + 
+                html += '<div class="tests-container"><a class="test" href="?group=' +
                     encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + 
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">Error: "' + 
-                    result.assertionLabel + '" (' + result.displayAssertionName + 
+                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">Error: "' +
+                    result.assertionLabel + '" (' + result.displayAssertionName +
                     ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
-                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + 
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + 
+                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' +
                     result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</a></div>';
             }
         });
@@ -366,8 +366,8 @@
 
     function runAssertions(test){
         var assertionsQueue = test.assertions;
-        var i; 
-        var len; 
+        var i;
+        var len;
         var item;
         test.totFailed = 0;
         //Iterate over the assertionsQueue, running each item's assertion.
@@ -397,7 +397,7 @@
         try{
             throw new Error('woops');
         }catch(error){
-            stackTraceProperty = error.stack ? 'stack' : error.stacktrace ? 'stacktrace' : undefined; 
+            stackTraceProperty = error.stack ? 'stack' : error.stacktrace ? 'stacktrace' : undefined;
         }
     }
 
@@ -421,7 +421,7 @@
                 throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
             }
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value, 
+            pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
     }
@@ -453,7 +453,7 @@
                 throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
             }
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value, 
+            pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
     }
@@ -668,7 +668,7 @@
         var cgqi = groupsQueue[groupsQueue.length - 1];
         if(testFilter === label || testFilter === ''){
             cgqi.tests.push(combine(currentTestHash, {
-                testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], 
+                testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
             groupsQueue.totTests++;
         }
@@ -685,10 +685,10 @@
     }
 
     //Completely rewritten for v1.2.0.
-    //A factory that creates a proxy wrapper for any function or object method prperty. 
-    //Use it to determine if the wrapped function was called, how many times it was called, 
-    //the arguments that were passed to it, the contexts it was called with and what it 
-    //returned. Extemely useful for testing synchronous and asynchronous methods.  
+    //A factory that creates a proxy wrapper for any function or object method property.
+    //Use it to determine if the wrapped function was called, how many times it was called,
+    //the arguments that were passed to it, the contexts it was called with and what it
+    //returned. Extremely useful for testing synchronous and asynchronous methods.
     function proxy(){
 
         var proxyFactory = function(){
@@ -699,7 +699,7 @@
             //A counter used to note how many times proxy has been called.
             var xCalled = 0;
 
-            //An array whose elements note the context used to calll the wrapped function.
+            //An array whose elements note the context used to call the wrapped function.
             var contexts = [];
 
             //An array of arrays used to note the arguments that were passed to proxy.
@@ -717,7 +717,7 @@
                 return xCalled;
             };
 
-            //If n is within bounds returns the context used on the nth 
+            //If n is within bounds returns the context used on the nth
             //call to the wrapped function, otherwise returns undefined.
             var getContext = function(n){
                 if(n >= 0 && n < xCalled){
@@ -725,7 +725,7 @@
                 }
             };
 
-            //If called with 'n' and 'n' is within bounds then returns the 
+            //If called with 'n' and 'n' is within bounds then returns the
             //array found at argsPassed[n], otherwise returns argsPassed.
             var getArgsPassed = function(){
                 if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < argsPassed.length){
@@ -735,7 +735,7 @@
                 }
             };
 
-            //If called with 'n' and 'n' is within bounds then returns 
+            //If called with 'n' and 'n' is within bounds then returns
             //value found at returned[n], otherwise returns returned.
             var getReturned = function(){
                 if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < returned.length){
@@ -745,31 +745,30 @@
                 }
             };
 
-            //If 'n' is within bounds then returns an 
+            //If 'n' is within bounds then returns an
             //info object, otherwise returns undefined.
             var getData= function(n){
                 if(n >= 0 && n < xCalled){
                     var args = getArgsPassed(n);
                     var context = getContext(n);
                     var ret = getReturned(n);
-                    var info = {
+                    return {
                         count: n + 1,
                         argsPassed: args,
                         context: context,
                         returned: ret
                     };
-                    return info;
                 }
             };
 
-            //If you just want to know if the wrapped function was called 
-            //then call wasCalled with no args. If you want to know if the 
+            //If you just want to know if the wrapped function was called
+            //then call wasCalled with no args. If you want to know if the
             //callback was called n times, pass n as an argument.
             var wasCalled = function(){
                 return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
             };
 
-            //A higher order function - iterates through the collected data and 
+            //A higher order function - iterates through the collected data and
             //returns the information collected for each invocation of proxy.
             var dataIterator = function(callback){
                 for(var i = 0; i < xCalled; i++){
@@ -794,7 +793,7 @@
             };
 
             //
-            //Exposed Lovwer level API - see Privileged functions used by API above.
+            //Exposed lovwer level API - see Privileged functions used by API above.
             //
 
             fn.getCalledCount = getCalledCount;
@@ -810,14 +809,14 @@
             //
             //Exposed Higher Order API - see Privileged functions used by API above.
             //
-            
+
             fn.wasCalled = wasCalled;
 
             fn.dataIterator = dataIterator;
 
             //Replaces object's method property with proxy's fn.
             if(arguments.length === 2){
-                arguments[0][arguments[1]] = fn; 
+                arguments[0][arguments[1]] = fn;
             }
 
             //Return fn to the caller.
@@ -835,7 +834,7 @@
         var totGroupsPlrzd = pluralize(' group', groupsQueue.length);
         var totTestsPlrzd = pluralize(' test', groupsQueue.totTests);
         var totAssertionsPlrzd = pluralize(' assertion', groupsQueue.totAssertions);
-        var coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' + 
+        var coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' +
             groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
@@ -927,19 +926,19 @@
     //v1.4.0 For external reporting.
     window.Preamble = window.Preamble || {};
     window.Preamble.__ext__ = {};
-    
+
     /**
      * v1.4.0 For external reporting.
      * Expose config options.
      */
 
     window.Preamble.__ext__.config = config;
-    
+
     /**
      * v1.4.0 For external reporting.
      * A hash-of-hashes pubsub implementation.
      */
-    
+
     var pubsub = window.Preamble.__ext__.pubsub = (function(){
 
         //subscribers is a hash of hashes:
@@ -958,17 +957,17 @@
 
         //Returns a function which wraps subscribers callback in a setTimeout callback.
         function makeAsync(topic, callback){
-            return function(topic, data){
+            return function(data){
                 setTimeout(function(){
                     callback(topic, data);
                 }, 1);
             };
         }
 
-        //Adds a subscriber for a topic with a callback 
+        //Adds a subscriber for a topic with a callback
         //and returns a token to allow unsubscribing.
         function on(topic, handler){
-            var token = getToken(), 
+            var token = getToken(),
                 boundAsyncHandler = makeAsync(topic, bindTo(handler, window.Preamble.__ext__));
             //Add topic to subscribers if it doesn't already have it.
             if(!subscribers.hasOwnProperty(topic)){
@@ -986,7 +985,7 @@
         function off(topic, token){
             if(subscribers.hasOwnProperty(topic)){
                 if(subscribers[topic].hasOwnProperty(token)){
-                    delete subscribers[topic][token]; 
+                    delete subscribers[topic][token];
                     totalSubscribers--;
                 }
             }
@@ -999,9 +998,9 @@
                 for(token in subscribers[topic] ){
                     if(subscribers[topic].hasOwnProperty(token)){
                         if(data){
-                            subscribers[topic][token](topic, data);
+                            subscribers[topic][token](data);
                         } else{
-                            subscribers[topic][token](topic);
+                            subscribers[topic][token]();
                         }
                     }
                 }
@@ -1022,10 +1021,10 @@
 
         //Returns the object that exposes the pubsub API.
         return {
-            on: on, 
-            off: off, 
-            emit: emit, 
-            getCountOfSubscribers: getCountOfSubscribers, 
+            on: on,
+            off: off,
+            emit: emit,
+            getCountOfSubscribers: getCountOfSubscribers,
             getCountOfSubscribersByTopic: getCountOfSubscribersByTopic
         };
 
@@ -1059,10 +1058,10 @@
             group.tests.forEach(function(test){
                 test.assertions.forEach(function(assertion){
                     results.push({
-                        groupLabel: group.groupLabel, 
-                        testLabel: test.testLabel, 
-                        result: assertion.result, 
-                        assertionLabel: assertion.assertionLabel, 
+                        groupLabel: group.groupLabel,
+                        testLabel: test.testLabel,
+                        result: assertion.result,
+                        assertionLabel: assertion.assertionLabel,
                         displayAssertionName: assertion.displayAssertionName,
                         stackTrace: assertion.stackTrace
                     });
@@ -1072,7 +1071,7 @@
         return results;
     }
 
-    //Iniitialize.
+    //Initialize.
     on('start', function(){
         //Overall passed/failed.
         groupsQueue.result = true;
@@ -1160,7 +1159,7 @@
         groupsQueue.totGroupsFailed = groupsQueue.reduce(function(prevValue, group){
             return !group.result ? prevValue + 1 : prevValue;
         }, 0);
-        groupsQueue.result = groupsQueue.totAssertionsFailed === 0 ? true : false;
+        groupsQueue.result = groupsQueue.totAssertionsFailed === 0;
         showResultsSummary();
         showResultsDetails(mapGroupsToResults());
     });
@@ -1172,7 +1171,7 @@
      */
 
     on('status update', function(topic, data){
-        //TODO(jeff): remove console.log before mergin with development.
+        //TODO(jeff): remove console.log before merging with development.
         console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
     });
 
