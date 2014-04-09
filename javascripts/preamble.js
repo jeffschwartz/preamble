@@ -25,7 +25,7 @@
     var config = {};
     //v1.4.0
     var groupsQueue=[];
-    //v1.4.0
+    //v1.4.0 Can only be true if config.shortCircuit is true and an assertion has failed.
     var isShortCircuited = false; 
     groupsQueue.totTests = 0;
     groupsQueue.totAssertions = 0;
@@ -36,7 +36,6 @@
     var groupsQueueStableCount = 0;
     var groupsQueueStableInterval = 500;
     var intervalId;
-    //var isProcessAborted = false;
     //Filters.
     var currentTestStep;
     var groupFilter;
@@ -221,18 +220,6 @@
         elResults.innerHTML = html;
     }
 
-    //function showResults(){
-    //    showResultsSummary();
-    //    showResultsDetails();
-    //}
-
-    //function reporter(){
-    //    //genTotalsFromResults();
-    //    if(!isProcessAborted){
-    //        showResults();
-    //    }
-    //}
-
     function compareArrays(a, b){
         var i,
             len;
@@ -341,37 +328,37 @@
 
     //Assertion runners.
 
-    // "strict" a === b
+    //"strict" a === b
     function assertEqual(a, b){
         return a_equals_b(a, b);
     }
     assertEqual._desc = 'equal';
 
-    // "strict" a === true, simple boolean test
+    //"strict" a === true, simple boolean test
     function assertIsTrue(a){
         return a_equals_true(a);
     }
     assertIsTrue._desc = 'isTrue';
 
-    // "non strict" a == true, simple boolean test
+    //"non strict" a == true, simple boolean test
     function assertIsTruthy(a){
         return a_is_truthy(a);
     }
     assertIsTruthy._desc = 'isTruthy';
 
-    // "strict" a !== b
+    //"strict" a !== b
     function assertNotEqual(a, b){
         return a_notequals_b(a, b);
     }
     assertNotEqual._desc = 'notEqual';
 
-    // "strict" a === false, simple boolean test
+    //"strict" a === false, simple boolean test
     function assertIsFalse(a){
         return a_equals_false(a);
     }
     assertIsFalse._desc = 'isFalse';
 
-    // "non strict" a == true, simple boolean test
+    //"non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
         return a_is_not_truthy(a);
     }
@@ -658,7 +645,7 @@
         if(groupFilter === label || groupFilter === ''){
             groupsQueue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
-            callback(); // will call function test.
+            callback(); //will call function test.
             end = Date.now();
             groupsQueue[groupsQueue.length - 1].duration = end - start;
         }
@@ -685,11 +672,6 @@
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
             groupsQueue.totTests++;
         }
-    }
-
-    //Shown while the testsQueue is being loaded.
-    function showStartMessage(){
-        elStatusContainer.innerHTML = '<p>Building queues. Please wait...</p>';
     }
 
     //Returns the ui test container element.
@@ -1181,9 +1163,6 @@
         groupsQueue.result = groupsQueue.totAssertionsFailed === 0 ? true : false;
         showResultsSummary();
         showResultsDetails(mapGroupsToResults());
-        //if(isShortCircuited){
-        //    errorHandler(new Error('Test failed and short circuited');
-        //}
     });
 
     /**
@@ -1227,13 +1206,8 @@
             if(groupsQueue.length === prevGroupsQueueCount){
                 if(groupsQueueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
-                    ////Show total groups and test to be covered.
-                    //showCoverage();
-                    //Show the start message.
-                    //showStartMessage();
                     //Run!
                     emit('start');
-                    //runner();
                 }else{
                     groupsQueueStableCount++;
                 }
