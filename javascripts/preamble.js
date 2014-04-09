@@ -25,7 +25,10 @@
     var config = {};
     //v1.4.0
     var groupsQueue=[];
+    //v1.4.0
+    var isShortCircuited = false; 
     groupsQueue.totTests = 0;
+    groupsQueue.totAssertions = 0;
     var currentTestHash;
     var assert;
     //v1.4.0
@@ -33,9 +36,7 @@
     var groupsQueueStableCount = 0;
     var groupsQueueStableInterval = 500;
     var intervalId;
-    //var totTests = 0;
-    var totAssertions = 0;
-    var isProcessAborted = false;
+    //var isProcessAborted = false;
     //Filters.
     var currentTestStep;
     var groupFilter;
@@ -57,7 +58,7 @@
     //Display caught errors to the browser.
     function errorHandler(){
         var html;
-        isProcessAborted = true;
+        //isProcessAborted = true;
         if(arguments.length === 3){
             //window.onerror
             html = '<p>' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
@@ -84,20 +85,6 @@
         var pluralizer = arguments === 2 ? arguments[1] : 's';
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
-
-    //function showTotalsToBeRun(){
-    //    //v1.4.0 For external reporting.
-    //    publishStatusUpdate({
-    //        status: 'totalAssertionsToBeRun',
-    //        totalAssertionsToBeRun: assertionsQueue.length
-    //    });
-    //    setTimeout(function(){
-    //        var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + 
-    //            totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + 
-    //            pluralize(' assertion', assertionsQueue.length) + '...</p>';
-    //        elStatusContainer.insertAdjacentHTML('beforeend', html);
-    //    }, 1);
-    //}
 
     function deepCopy(arg){
         return JSON.parse(JSON.stringify(arg));
@@ -136,10 +123,6 @@
         return wrapChar + string + wrapChar;
     }
 
-    //function singleQuote(string){
-    //    return wrapStringWith('\'', string);
-    //}
-
     function doubleQuote(string){
         return wrapStringWith('"', string);
     }
@@ -149,56 +132,23 @@
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
     }
 
-    //function showResultsSummary(){
-    //    var html;
-    //    //Show elapsed time.
-    //    html = '<p id="preamble-elapsed-time">Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
-    //    //Show a summary in the header.
-    //    if(totAssertionsFailed === 0){
-    //        html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + 
-    //            pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +  
-    //            totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + ' passed' + '</p>';
-    //    }else if(totAssertionsPassed === 0){
-    //        html += '<p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + 
-    //            pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + 
-    //            totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
-    //    }else{
-    //        html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + 
-    //            pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + 
-    //            totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + 
-    //            ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + 
-    //            pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + 
-    //            '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
-    //    }
-    //    html += '<a href="?">Rerun All Tests</a>';
-    //    elStatusContainer.insertAdjacentHTML('beforeend', html);
-    //    //v1.4.0 For external reporting.
-    //    publishStatusUpdate({
-    //        status: 'resultsSummary', 
-    //        resultsSummary: {
-    //            timeElapsed: timerEnd - timerStart, 
-    //            groupsPassed: totGroupsPassed,
-    //            groupsFailed: totGroupsFailed,
-    //            testsPassed: totTestsPassed,
-    //            testsFailed: totTestsFailed,
-    //            assertionsPassed: totAssertionsPassed,
-    //            assertionsFailed: totAssertionsFailed
-    //        }
-    //    });
-    //}
     function showResultsSummary(){
         var html;
         var totGroups = groupsQueue.length;
         var totGroupsPassed = groupsQueue.length - groupsQueue.totGroupsFailed;
         var totTestsPassed = groupsQueue.totTests - groupsQueue.totTestsFailed;
-        var totAssertionsPassed = totAssertions - groupsQueue.totAssertionsFailed;
+        var totAssertionsPassed = groupsQueue.totAssertions - groupsQueue.totAssertionsFailed;
         //Show elapsed time.
-        html = '<p id="preamble-elapsed-time">Tests completed in ' + (groupsQueue.duration) + ' milliseconds.</p>';
+        if(isShortCircuited){
+            html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + (groupsQueue.duration) + ' milliseconds.</p>';
+        }else{
+            html = '<p id="preamble-elapsed-time">Tests completed in ' + (groupsQueue.duration) + ' milliseconds.</p>';
+        }
         //Show a summary in the header.
         if(groupsQueue.result){
             html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroups + 
                 pluralize(' group', totGroups) + '/' + groupsQueue.totTests+ pluralize(' test', groupsQueue.totTests) + '/' +  
-                totAssertions + pluralize(' assertion', totAssertions) + ' passed' + '</p>';
+                groupsQueue.totAssertions + pluralize(' assertion', groupsQueue.totAssertions) + ' passed' + '</p>';
         }else if(totAssertionsPassed === 0){
             html += '<p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed + 
                 pluralize(' group', groupsQueue.totGroupsFailed) + '/' + groupsQueue.totTestsFailed + pluralize(' test', groupsQueue.totTestsFailed) + '/' + 
@@ -229,47 +179,6 @@
         }, '');
     }
 
-    ////v.1.4.0 Including the stack trace file reference for failed assertions.
-    //function showResultsDetails(){
-    //    var groupLabel = '';
-    //    var testLabel = '';
-    //    var html = '';
-    //    elResults.style.display = 'block';
-    //    results.forEach(function(result){
-    //        if(result.testLabel !== testLabel){
-    //            if(html.length){
-    //                html += '</div>';
-    //            }
-    //        }
-    //        if(result.groupLabel !== groupLabel){
-    //            if(html.length){
-    //                html += '</div></a>';
-    //            }
-    //        }
-    //        if(result.groupLabel !== groupLabel){
-    //            html += '<div class="group-container"><a class="group" href="?group=' + 
-    //                encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
-    //            groupLabel = result.groupLabel;
-    //        }
-    //        if(result.testLabel !== testLabel){
-    //            html += '<div class="tests-container"><a class="test" href="?group=' + 
-    //                encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
-    //            testLabel = result.testLabel;
-    //        }
-    //        if(!result.result){
-    //            html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + 
-    //                '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">Error: "' + 
-    //                result.assertionLabel + '" (' + result.displayAssertionName + 
-    //                ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
-    //        }else{
-    //            html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + 
-    //                '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + 
-    //                result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</a></div>';
-    //        }
-    //    });
-    //    html += '</div></div>';
-    //    elResults.innerHTML = html;
-    //}
     //v.1.4.0 Including the stack trace file reference for failed assertions.
     function showResultsDetails(results){
         var groupLabel = '';
@@ -312,59 +221,17 @@
         elResults.innerHTML = html;
     }
 
-    function showResults(){
-        showResultsSummary();
-        showResultsDetails();
-    }
-
-    //function genTotalsFromResults(){
-    //    var prevGroupLabel;
-    //    var prevTestLabel;
-    //    results.forEach(function(result){
-    //        if(!result.result){
-    //            if(result.groupLabel !== prevGroupLabel){
-    //                totGroupsFailed++;
-    //                prevGroupLabel = result.groupLabel;
-    //            }
-    //            if(result.testLabel !== prevTestLabel){
-    //                totTestsFailed++;
-    //                prevTestLabel = result.testLabel;
-    //            }
-    //        }
-    //    });
-    //    totTestsPassed = totTests - totTestsFailed;
-    //    totGroupsPassed = totGroups - totGroupsFailed;
+    //function showResults(){
+    //    showResultsSummary();
+    //    showResultsDetails();
     //}
-    //function genTotalsFromResults(){
-    //    var totTestsFailed;
-    //    var totTestsPassed;
-    //    var totGroupsFailed;
-    //    var totGroupsPassed;
-    //    function testFailed(test){
-    //        var failed = test.assertions.some(function(assertion){
-    //            return !assertion.result;
-    //        });
-    //        return failed;
+
+    //function reporter(){
+    //    //genTotalsFromResults();
+    //    if(!isProcessAborted){
+    //        showResults();
     //    }
-    //    groupsQueue.forEach(function(group){
-    //        group.result = true;
-    //        group.tests.forEach(function(test){
-    //            test.result = true;
-    //            if(testFailed(test)){
-    //                totTestsFailed++;
-    //                test.result = false;
-    //                group.result = false;
-    //            }
-    //        });
-    //    });
     //}
-
-    function reporter(){
-        //genTotalsFromResults();
-        if(!isProcessAborted){
-            showResults();
-        }
-    }
 
     function compareArrays(a, b){
         var i,
@@ -510,53 +377,6 @@
     }
     assertIsNotTruthy._desc = 'isNotTruthy';
 
-    //Loops through the assertionsQueue, running each assertion and records the results.
-    //function runAssertions(){
-    //    var i, len, item;
-    //    //Show totals for groups, test, assertions before running the tests.
-    //    //showTotalsToBeRun();
-    //    //A slight delay so user can see the totals and they don't flash.
-    //    setTimeout(function(){
-    //        //Synchronously iterate over the assertionsQueue, running each item's assertion.
-    //        for (i = 0, len = assertionsQueue.length; i < len; i++) {
-    //            item = assertionsQueue[i];
-    //            item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-    //            if(item.result){
-    //                totAssertionsPassed++;
-    //            }else{
-    //                totAssertionsFailed++;
-    //            }
-    //            //switch(item.assertion.name){
-    //            //    case 'assertIsTrue':
-    //            //        item.displayAssertionName = 'isTrue';
-    //            //        break;
-    //            //    case 'assertIsTruthy':
-    //            //        item.displayAssertionName = 'isTruthy';
-    //            //        break;
-    //            //    case 'assertIsFalse':
-    //            //        item.displayAssertionName = 'isFalse';
-    //            //        break;
-    //            //    case 'assertIsNotTruthy':
-    //            //        item.displayAssertionName = 'isNotTruthy';
-    //            //        break;
-    //            //    case 'assertEqual':
-    //            //        item.displayAssertionName = 'equal';
-    //            //        break;
-    //            //    case 'assertNotEqual':
-    //            //        item.displayAssertionName = 'notEqual';
-    //            //        break;
-    //            //}
-    //            item.displayAssertionName = item.assertion._desc;
-    //            results.push(item);
-    //            if(config.shortCircuit && totAssertionsFailed){
-    //                reporter();
-    //                return;
-    //            }
-    //        }
-    //        //Record the end time.
-    //        timerEnd = Date.now();
-    //    }, 1);
-    //}
     function runAssertions(test){
         var assertionsQueue = test.assertions;
         var i; 
@@ -569,22 +389,16 @@
             item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
             item.displayAssertionName = item.assertion._desc;
             if(config.shortCircuit && !item.result){
-                reporter();
+                isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
                 return;
             }
         }
     }
 
-    ////v1.4.0 Pushing stack trace onto the queue.
-    //function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync, stackTrace){
-    //    assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, 
-    //        value: value, expectation: expectation, isAsync: isAsync, stackTrace: stackTrace});
-    //}
-
     //v1.4.0 Pushing stack trace onto the queue and maintain assertions counter.
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         currentTestHash.assertions.push({assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, stackTrace: stackTrace});
-        totAssertions++;
+        groupsQueue.totAssertions++;
     }
 
     function throwException(errMessage){
@@ -619,10 +433,7 @@
             if(arguments.length !== 3){
                 throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
             }
-           //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
-            //    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-            //    currentTestHash.isAsync, stackTraceFromError());
+            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
             pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value, 
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
@@ -634,8 +445,6 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
             }
-            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, 
-            //        value, true, currentTestHash.isAsync, stackTraceFromError());
             pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
         }
     }
@@ -646,8 +455,6 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, 
-            //        value, true, currentTestHash.isAsync, stackTraceFromError());
             pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
         }
     }
@@ -659,9 +466,6 @@
                 throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
             }
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
-            //    currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, 
-            //    currentTestHash.isAsync, stackTraceFromError());
             pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value, 
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
@@ -673,8 +477,6 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
             }
-            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, 
-            //        value, true, currentTestHash.isAsync, stackTraceFromError());
             pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
         }
     }
@@ -685,8 +487,6 @@
             if(arguments.length !== 2){
                 throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
             }
-            //pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, 
-            //        value, true, currentTestHash.isAsync, stackTraceFromError());
             pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
         }
     }
@@ -776,8 +576,6 @@
     //Runs the 5 steps of a test's life cycle - 1) before each test, 2) test, 3) after each test,
     //4) run assertions, 5) setup next test. The current test is the one pointed to by currentTestHash.
     function runTest(){
-        ////Run the test life cycle asynchronously so the Browser remains responsive.
-        ////setTimeout(function(){
         switch(currentTestStep){
             case 0: //Runs beforeEach.
                 currentTestHash.start = Date.now();
@@ -820,34 +618,6 @@
         //}, 1);
     }
 
-    ////Runs each test in testsQueue to build assertionsQueue.
-    //function runTests(){
-    //    var len = testsQueue.length;
-    //    while(testsQueueIndex < len && !testIsRunning){
-    //        currentTestHash = testsQueue[testsQueueIndex];
-    //        currentTestStep = 0;
-    //        testIsRunning = true;
-    //        runTest();
-    //    }
-    //    if(testsQueueIndex === len){
-    //        //Run the assertions in the assertionsQueue.
-    //        runAssertions();
-    //    }
-    //}
-
-    //function runGroups(){
-    //    groupsQueue.forEach(function(group){
-    //        testsQueue = group.tests;
-    //        testsQueueIndex = 0;
-    //        testsQueue.start = Date.now();
-    //        runTests();
-    //        //runAssertions();
-    //        testsQueue.end = Date.now();
-    //    });
-    //    //Report the results.
-    //    reporter();
-    //}
-
     //Note runBeforeEach.
     function beforeEachTest(callback){
         var cgqi = groupsQueue[groupsQueue.length - 1];
@@ -886,9 +656,6 @@
         var start;
         var end;
         if(groupFilter === label || groupFilter === ''){
-            //currentTestHash = {groupLabel: label};
-            //totGroups++;
-            //callback();
             groupsQueue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
             callback(); // will call function test.
@@ -925,19 +692,6 @@
         elStatusContainer.innerHTML = '<p>Building queues. Please wait...</p>';
     }
 
-    ////Called after the testsQueue has been generated.
-    //function runner(){
-    //    //Record the start time.
-    //    var start = Date.now();
-    //    var end;
-    //    //Run the groups.
-    //    runGroups();
-    //    //Record the end time.
-    //    end = Date.now();
-    //    //Record the duration for the group.
-    //    groupsQueue.duration +=  end - start;
-    //}
-
     //Returns the ui test container element.
     function getUiTestContainerElement(){
         return elUiTestContainer;
@@ -972,9 +726,9 @@
             //An array whose elements note what the wrapped function returned.
             var returned = [];
 
-            ///
-            ///Privileged functions used by API
-            ///
+            //
+            //Privileged functions used by API
+            //
 
             //Returns the number of times the wrapped function was called.
             var getCalledCount = function(){
@@ -1057,9 +811,9 @@
                 return ret;
             };
 
-            ///
-            ///Exposed Lovwer level API - see Privileged functions used by API above.
-            ///
+            //
+            //Exposed Lovwer level API - see Privileged functions used by API above.
+            //
 
             fn.getCalledCount = getCalledCount;
 
@@ -1071,9 +825,9 @@
 
             fn.getData = getData;
 
-            ///
-            ///Exposed Higher Order API - see Privileged functions used by API above.
-            ///
+            //
+            //Exposed Higher Order API - see Privileged functions used by API above.
+            //
             
             fn.wasCalled = wasCalled;
 
@@ -1098,14 +852,12 @@
         var html;
         var totGroupsPlrzd = pluralize(' group', groupsQueue.length);
         var totTestsPlrzd = pluralize(' test', groupsQueue.totTests);
-        var totAssertionsPlrzd = pluralize(' assertion', totAssertions);
+        var totAssertionsPlrzd = pluralize(' assertion', groupsQueue.totAssertions);
         var coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' + 
-            groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + totAssertions + totAssertionsPlrzd + '.';
+            groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
-        elStatusContainer.innerHTML += html;
-        ////v1.4.0
-        //publishStatusUpdate({status: 'coverage', coverage: coverage});
+        elStatusContainer.innerHTML = html;
     }
 
     /**
@@ -1127,7 +879,7 @@
     window.onerror = errorHandler;
 
     //Add markup structure to the DOM.
-    elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Please wait...</p></section><section id="preamble-results-container"></section></div>';
+    elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Building queues. Please wait...</p></section><section id="preamble-results-container"></section></div>';
 
     //Append the ui test container.
     elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
@@ -1311,11 +1063,6 @@
         pubsub.emit(topic, data);
     }
 
-    ////Convenience method for removing handlers.
-    //function off(topic, token){
-    //    pubsub.off(topic, token);
-    //}
-
     //Returns the duration for a group by reducing it's 'tests' durations.
     function duration(collection) {
         return collection.reduce(function(prevValue, curValue){
@@ -1370,7 +1117,7 @@
             group.result = group.totFailed ? false : true;
         }
         currentGroupIndex++;
-        if(currentGroupIndex < groupsQueue.length){
+        if(currentGroupIndex < groupsQueue.length && !isShortCircuited){
             currentTestIndex = -1;
             emit('runTest');
         }else{
@@ -1399,7 +1146,7 @@
             test.duration = elapsed > 0 ? elapsed : 1;
         }
         currentTestIndex++;
-        if(currentTestIndex < groupsQueue[currentGroupIndex].tests.length){
+        if(currentTestIndex < groupsQueue[currentGroupIndex].tests.length && !isShortCircuited){
             currentTestHash = groupsQueue[currentGroupIndex].tests[currentTestIndex];
             currentTestStep = 0;
             runTest();
@@ -1416,7 +1163,7 @@
         //Record how many assertions failed.
         groupsQueue.totAssertionsFailed = groupsQueue.reduce(function(prevValue, group){
             var t = group.tests.reduce(function(prevValue, test){
-                return prevValue + test.totFailed;
+                return test.totFailed ? prevValue + test.totFailed : 0;
             }, 0);
             return prevValue + t;
         }, 0);
@@ -1432,9 +1179,11 @@
             return !group.result ? prevValue + 1 : prevValue;
         }, 0);
         groupsQueue.result = groupsQueue.totAssertionsFailed === 0 ? true : false;
-        //genTotalsFromResults();
         showResultsSummary();
         showResultsDetails(mapGroupsToResults());
+        //if(isShortCircuited){
+        //    errorHandler(new Error('Test failed and short circuited');
+        //}
     });
 
     /**
@@ -1481,7 +1230,7 @@
                     ////Show total groups and test to be covered.
                     //showCoverage();
                     //Show the start message.
-                    showStartMessage();
+                    //showStartMessage();
                     //Run!
                     emit('start');
                     //runner();
