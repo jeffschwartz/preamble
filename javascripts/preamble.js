@@ -61,7 +61,7 @@
         //isProcessAborted = true;
         if(arguments.length === 3){
             //window.onerror
-            html = '<p>' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
+            html = '<p class="failed">' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
             //v1.4.0 For external reporting.
             publishStatusUpdate({
                 status: 'error',
@@ -69,7 +69,7 @@
             });
         }else{
             //catch(e)
-            html = '<p>An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+            html = '<p class="failed">An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
             //v1.4.0 For external reporting.
             publishStatusUpdate({
                 status: 'error',
@@ -131,12 +131,10 @@
     //v1.4.0 Support for in-line configuration.
     //Called once internally but may be called again if test script calls it.
     function configure(){
+        //v1.4.0
         var configArg = arguments && arguments[0];
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
-        //if(configArg && configArg.name){
-        //    elHeader.innerHTML = config.name;
-        //}
 
         //Capture filters, if any.
         groupFilter = loadPageVar('group');
@@ -935,7 +933,12 @@
             groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
-        elStatusContainer.innerHTML = html;
+        //v1.4.0 Preserve error message that replaces 'Building queues. Please wait...'.
+        if(elStatusContainer.innerHTML === '<p>Building queues. Please wait...</p>'){
+            elStatusContainer.innerHTML = html;
+        }else{
+            elStatusContainer.innerHTML += html;
+        }
     }
 
     /**

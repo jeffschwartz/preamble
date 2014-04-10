@@ -1,7 +1,3 @@
-configure({
-    name: 'Yada Yada'
-});
-
 group('This group will intentionally fail', function(){
     test('true === false', function(){
         isTrue(false, "Yes, true === false!");
