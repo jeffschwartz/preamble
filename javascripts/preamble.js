@@ -697,7 +697,6 @@
                 emit('runTest');
                 break;
         }
-        //}, 1);
     }
 
     //Note runBeforeEach.
