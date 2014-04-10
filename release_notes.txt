@@ -1,14 +1,20 @@
-v1.4.0
+v1.4.0: This release is mostly a housekeeping release, an opportunity to provide
+better implementations, performance and maintainability for a number of the 
+internal processes that Preamble performs for running tests. In addition, some 
+new internal functionality has been added that will allow it to operate and
+communicate with external processes, such as Karma for example.
 
     1) Restructured and reorganized code-base.
 
     2) Implemented on/off/emit. Using it internally to drive tests and will be 
     used in future releases for supporting Karma adapter and other external 
-    processes that require additional adapters.
+    processes that require additional adapters. Event handlers are called 
+    asynchronously for improved performance.
 
     3) Improved the accuracy of the reported timing statistics by excluding the
     elapsed times that are due to the latency from overhead (all the code that 
-    isn't test specific).
+    isn't specifically test related, such as latency incurred when transitioning 
+    from one test life-cycle state to the next).
 
     4) Added in-line configuration support. Tests can now configure themselves 
     by including a call to either Preamble.configure or configure with a hash 
@@ -17,6 +23,10 @@ v1.4.0
     preamble-config.js was used. *IMPORTANT - USING IN-LINE CONFIGURATION TO 
     OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
 
-    5) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
+    5) Added showing stack traces for all failed assertions for all browsers 
+    that publish either 'stack' or 'stacktrace' properties on thrown Error 
+    objects.
+
+    6) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
     it to wrap <div id="ui-test-container" class="ui-test-container">. This was 
     required in order to support in-line configuration (see #4, above). 

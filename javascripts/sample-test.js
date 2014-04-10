@@ -1,3 +1,7 @@
+configure({
+    name: 'Sample Test Suite'
+})
+
 group('This group will intentionally fail', function(){
     test('true === false', function(){
         isTrue(false, 'Yes, true === false!');
