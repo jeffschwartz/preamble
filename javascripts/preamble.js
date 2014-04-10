@@ -7,11 +7,12 @@
     //Version
     var version = 'v1.4.0';
     //Targeted DOM elements.
-    var elPreambleContainer = document.getElementById('preamble-container');
+    var elPreambleContainer = document.getElementById('preamble-test-container');
     var elHeader;
     var elStatusContainer;
-    var elResults;
+    var elUiContainer = document.getElementById('preamble-ui-container');
     var elUiTestContainer;
+    var elResults;
     //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20}).
     //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
     //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
@@ -127,8 +128,104 @@
     }
 
     //Configuration
+    //v1.4.0 Support for in-line configuration.
+    //Called once internally but may be called again if test script calls it.
     function configure(){
+        var configArg = arguments && arguments[0];
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
+        config = configArg ? merge(config, configArg) : config;
+        //if(configArg && configArg.name){
+        //    elHeader.innerHTML = config.name;
+        //}
+
+        //Capture filters, if any.
+        groupFilter = loadPageVar('group');
+        testFilter = loadPageVar('test');
+        assertionFilter = loadPageVar('assertion');
+
+        //v1.4.0 Capture exception's stack trace property.
+        setStackTraceProperty();
+
+        //Handle global errors.
+        window.onerror = errorHandler;
+
+        //Add markup structure to the DOM.
+        elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Building queues. Please wait...</p></section><section id="preamble-results-container"></section></div>';
+
+        //Append the ui test container.
+        //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
+        elUiContainer.innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
+
+        //Capture DOM elements for later use.
+        elHeader = document.getElementById('preamble-header');
+        elStatusContainer = document.getElementById('preamble-status-container');
+        elResults = document.getElementById('preamble-results-container');
+        elUiTestContainer = document.getElementById(config.uiTestContainerId);
+
+        //Display the name.
+        elHeader.innerHTML = config.name;
+
+        //Display the version.
+        elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
+
+        //If the windowGlabals config option is false then window globals will
+        //not be used and the one Preamble name space will be used instead.
+        if(config.windowGlobals){
+            window.configure = configure;
+            window.group = group;
+            window.beforeEachTest = beforeEachTest;
+            window.asyncBeforeEachTest = asyncBeforeEachTest;
+            window.afterEachTest = afterEachTest;
+            window.asyncAfterEachTest = asyncAfterEachTest;
+            window.test = test;
+            window.asyncTest = asyncTest;
+            window.whenAsyncDone = whenAsyncDone;
+            window.equal = noteEqualAssertion;
+            window.notEqual = noteNotEqualAssertion;
+            window.isTrue = noteIsTrueAssertion;
+            window.isFalse = noteIsFalseAssertion;
+            window.isTruthy = noteIsTruthyAssertion;
+            window.isNotTruthy = noteIsNotTruthyAssertion;
+            window.getUiTestContainerElement = getUiTestContainerElement;
+            window.getUiTestContainerElementId = getUiTestContainerElementId;
+            window.proxy = proxy;
+        }else{
+            window.Preamble = {
+                configure: configure,
+                group: group,
+                beforeEachTest: beforeEachTest,
+                asyncBeforeEachTest: asyncBeforeEachTest,
+                afterEachTest: afterEachTest,
+                asyncAfterEachTest: asyncAfterEachTest,
+                test: test,
+                asyncTest: asyncTest,
+                whenAsyncDone: whenAsyncDone,
+                getUiTestContainerElement: getUiTestContainerElement,
+                getUiTestContainerElementId: getUiTestContainerElementId,
+                proxy: proxy
+            };
+            //Functions to "note" assertions are passed as the
+            //1st parameter to each test's callback function.
+            assert = {
+                equal: noteEqualAssertion,
+                notEqual: noteNotEqualAssertion,
+                isTrue: noteIsTrueAssertion,
+                isFalse: noteIsFalseAssertion,
+                isTruthy: noteIsTruthyAssertion,
+                isNotTruthy: noteIsNotTruthyAssertion
+            };
+        }
+
+        //v1.4.0 For external reporting.
+        window.Preamble = window.Preamble || {};
+        window.Preamble.__ext__ = {};
+
+        /**
+         * v1.4.0 For external reporting.
+         * Expose config options.
+         */
+
+        window.Preamble.__ext__.config = config;
     }
 
     function showResultsSummary(){
@@ -845,94 +942,96 @@
      * It all starts here!!!
      */
 
-    //Capture filters if any.
-    groupFilter = loadPageVar('group');
-    testFilter = loadPageVar('test');
-    assertionFilter = loadPageVar('assertion');
+    ////Capture filters if any.
+    //groupFilter = loadPageVar('group');
+    //testFilter = loadPageVar('test');
+    //assertionFilter = loadPageVar('assertion');
 
     //Configure the runtime environment.
     configure();
 
-    //v1.4.0 Capture exception's stack trace property.
-    setStackTraceProperty();
+    ////v1.4.0 Capture exception's stack trace property.
+    //setStackTraceProperty();
 
-    //Handle global errors.
-    window.onerror = errorHandler;
+    ////Handle global errors.
+    //window.onerror = errorHandler;
 
-    //Add markup structure to the DOM.
-    elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Building queues. Please wait...</p></section><section id="preamble-results-container"></section></div>';
+    ////Add markup structure to the DOM.
+    //elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Building queues. Please wait...</p></section><section id="preamble-results-container"></section></div>';
 
-    //Append the ui test container.
-    elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
+    ////Append the ui test container.
+    //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
 
-    //Capture DOM elements for later use.
-    elHeader = document.getElementById('preamble-header');
-    elStatusContainer = document.getElementById('preamble-status-container');
-    elResults = document.getElementById('preamble-results-container');
-    elUiTestContainer = document.getElementById(config.uiTestContainerId);
+    ////Capture DOM elements for later use.
+    //elHeader = document.getElementById('preamble-header');
+    //elStatusContainer = document.getElementById('preamble-status-container');
+    //elResults = document.getElementById('preamble-results-container');
+    //elUiTestContainer = document.getElementById(config.uiTestContainerId);
 
-    //Display the name.
-    elHeader.innerHTML = config.name;
+    ////Display the name.
+    //elHeader.innerHTML = config.name;
 
-    //Display the version.
-    elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
+    ////Display the version.
+    //elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
 
-    //If the windowGlabals config option is false then window globals will
-    //not be used and the one Preamble name space will be used instead.
-    if(config.windowGlobals){
-        window.group = group;
-        window.beforeEachTest = beforeEachTest;
-        window.asyncBeforeEachTest = asyncBeforeEachTest;
-        window.afterEachTest = afterEachTest;
-        window.asyncAfterEachTest = asyncAfterEachTest;
-        window.test = test;
-        window.asyncTest = asyncTest;
-        window.whenAsyncDone = whenAsyncDone;
-        window.equal = noteEqualAssertion;
-        window.notEqual = noteNotEqualAssertion;
-        window.isTrue = noteIsTrueAssertion;
-        window.isFalse = noteIsFalseAssertion;
-        window.isTruthy = noteIsTruthyAssertion;
-        window.isNotTruthy = noteIsNotTruthyAssertion;
-        window.getUiTestContainerElement = getUiTestContainerElement;
-        window.getUiTestContainerElementId = getUiTestContainerElementId;
-        window.proxy = proxy;
-    }else{
-        window.Preamble = {
-            group: group,
-            beforeEachTest: beforeEachTest,
-            asyncBeforeEachTest: asyncBeforeEachTest,
-            afterEachTest: afterEachTest,
-            asyncAfterEachTest: asyncAfterEachTest,
-            test: test,
-            asyncTest: asyncTest,
-            whenAsyncDone: whenAsyncDone,
-            getUiTestContainerElement: getUiTestContainerElement,
-            getUiTestContainerElementId: getUiTestContainerElementId,
-            proxy: proxy
-        };
-        //Functions to "note" assertions are passed as the
-        //1st parameter to each test's callback function.
-        assert = {
-            equal: noteEqualAssertion,
-            notEqual: noteNotEqualAssertion,
-            isTrue: noteIsTrueAssertion,
-            isFalse: noteIsFalseAssertion,
-            isTruthy: noteIsTruthyAssertion,
-            isNotTruthy: noteIsNotTruthyAssertion
-        };
-    }
+    ////If the windowGlabals config option is false then window globals will
+    ////not be used and the one Preamble name space will be used instead.
+    //if(config.windowGlobals){
+    //    window.configure = configure;
+    //    window.group = group;
+    //    window.beforeEachTest = beforeEachTest;
+    //    window.asyncBeforeEachTest = asyncBeforeEachTest;
+    //    window.afterEachTest = afterEachTest;
+    //    window.asyncAfterEachTest = asyncAfterEachTest;
+    //    window.test = test;
+    //    window.asyncTest = asyncTest;
+    //    window.whenAsyncDone = whenAsyncDone;
+    //    window.equal = noteEqualAssertion;
+    //    window.notEqual = noteNotEqualAssertion;
+    //    window.isTrue = noteIsTrueAssertion;
+    //    window.isFalse = noteIsFalseAssertion;
+    //    window.isTruthy = noteIsTruthyAssertion;
+    //    window.isNotTruthy = noteIsNotTruthyAssertion;
+    //    window.getUiTestContainerElement = getUiTestContainerElement;
+    //    window.getUiTestContainerElementId = getUiTestContainerElementId;
+    //    window.proxy = proxy;
+    //}else{
+    //    window.Preamble = {
+    //        configure: configure,
+    //        group: group,
+    //        beforeEachTest: beforeEachTest,
+    //        asyncBeforeEachTest: asyncBeforeEachTest,
+    //        afterEachTest: afterEachTest,
+    //        asyncAfterEachTest: asyncAfterEachTest,
+    //        test: test,
+    //        asyncTest: asyncTest,
+    //        whenAsyncDone: whenAsyncDone,
+    //        getUiTestContainerElement: getUiTestContainerElement,
+    //        getUiTestContainerElementId: getUiTestContainerElementId,
+    //        proxy: proxy
+    //    };
+    //    //Functions to "note" assertions are passed as the
+    //    //1st parameter to each test's callback function.
+    //    assert = {
+    //        equal: noteEqualAssertion,
+    //        notEqual: noteNotEqualAssertion,
+    //        isTrue: noteIsTrueAssertion,
+    //        isFalse: noteIsFalseAssertion,
+    //        isTruthy: noteIsTruthyAssertion,
+    //        isNotTruthy: noteIsNotTruthyAssertion
+    //    };
+    //}
 
-    //v1.4.0 For external reporting.
-    window.Preamble = window.Preamble || {};
-    window.Preamble.__ext__ = {};
+    ////v1.4.0 For external reporting.
+    //window.Preamble = window.Preamble || {};
+    //window.Preamble.__ext__ = {};
 
     /**
      * v1.4.0 For external reporting.
      * Expose config options.
      */
 
-    window.Preamble.__ext__.config = config;
+    //window.Preamble.__ext__.config = config;
 
     /**
      * v1.4.0 For external reporting.
