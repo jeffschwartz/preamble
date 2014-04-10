@@ -945,100 +945,11 @@
      * It all starts here!!!
      */
 
-    ////Capture filters if any.
-    //groupFilter = loadPageVar('group');
-    //testFilter = loadPageVar('test');
-    //assertionFilter = loadPageVar('assertion');
-
     //Configure the runtime environment.
     configure();
 
-    ////v1.4.0 Capture exception's stack trace property.
-    //setStackTraceProperty();
-
-    ////Handle global errors.
-    //window.onerror = errorHandler;
-
-    ////Add markup structure to the DOM.
-    //elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Building queues. Please wait...</p></section><section id="preamble-results-container"></section></div>';
-
-    ////Append the ui test container.
-    //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
-
-    ////Capture DOM elements for later use.
-    //elHeader = document.getElementById('preamble-header');
-    //elStatusContainer = document.getElementById('preamble-status-container');
-    //elResults = document.getElementById('preamble-results-container');
-    //elUiTestContainer = document.getElementById(config.uiTestContainerId);
-
-    ////Display the name.
-    //elHeader.innerHTML = config.name;
-
-    ////Display the version.
-    //elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
-
-    ////If the windowGlabals config option is false then window globals will
-    ////not be used and the one Preamble name space will be used instead.
-    //if(config.windowGlobals){
-    //    window.configure = configure;
-    //    window.group = group;
-    //    window.beforeEachTest = beforeEachTest;
-    //    window.asyncBeforeEachTest = asyncBeforeEachTest;
-    //    window.afterEachTest = afterEachTest;
-    //    window.asyncAfterEachTest = asyncAfterEachTest;
-    //    window.test = test;
-    //    window.asyncTest = asyncTest;
-    //    window.whenAsyncDone = whenAsyncDone;
-    //    window.equal = noteEqualAssertion;
-    //    window.notEqual = noteNotEqualAssertion;
-    //    window.isTrue = noteIsTrueAssertion;
-    //    window.isFalse = noteIsFalseAssertion;
-    //    window.isTruthy = noteIsTruthyAssertion;
-    //    window.isNotTruthy = noteIsNotTruthyAssertion;
-    //    window.getUiTestContainerElement = getUiTestContainerElement;
-    //    window.getUiTestContainerElementId = getUiTestContainerElementId;
-    //    window.proxy = proxy;
-    //}else{
-    //    window.Preamble = {
-    //        configure: configure,
-    //        group: group,
-    //        beforeEachTest: beforeEachTest,
-    //        asyncBeforeEachTest: asyncBeforeEachTest,
-    //        afterEachTest: afterEachTest,
-    //        asyncAfterEachTest: asyncAfterEachTest,
-    //        test: test,
-    //        asyncTest: asyncTest,
-    //        whenAsyncDone: whenAsyncDone,
-    //        getUiTestContainerElement: getUiTestContainerElement,
-    //        getUiTestContainerElementId: getUiTestContainerElementId,
-    //        proxy: proxy
-    //    };
-    //    //Functions to "note" assertions are passed as the
-    //    //1st parameter to each test's callback function.
-    //    assert = {
-    //        equal: noteEqualAssertion,
-    //        notEqual: noteNotEqualAssertion,
-    //        isTrue: noteIsTrueAssertion,
-    //        isFalse: noteIsFalseAssertion,
-    //        isTruthy: noteIsTruthyAssertion,
-    //        isNotTruthy: noteIsNotTruthyAssertion
-    //    };
-    //}
-
-    ////v1.4.0 For external reporting.
-    //window.Preamble = window.Preamble || {};
-    //window.Preamble.__ext__ = {};
-
     /**
-     * v1.4.0 For external reporting.
-     * Expose config options.
-     */
-
-    //window.Preamble.__ext__.config = config;
-
-    /**
-     * v1.4.0 For external reporting.
-     * A hash-of-hashes pubsub implementation.
+     * v1.4.0 A hash-of-hashes pubsub implementation.
      */
 
     var pubsub = window.Preamble.__ext__.pubsub = (function(){
