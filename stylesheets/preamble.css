@@ -85,6 +85,16 @@ section{
 .failed {
     color: #f40000;
 }
+.bold {
+    font-weight: bold;
+}
+.stacktrace-container {
+    padding: 0 20px 0 40px;
+}
+.stacktrace {
+    margin: 0;
+    padding: 5px 20px 0 0;
+}
 .ui-test-container{
     position: absolute;
     top: -10000px;
