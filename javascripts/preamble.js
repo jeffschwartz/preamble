@@ -21,6 +21,7 @@
         //(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
         //name: (default 'Test') - set to a meaningful name.
         //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+        //hidePassedGroups: (default: false) - v2.0.0 set to true to hide padded groups.
         //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
         defaultConfig = {
             shortCircuit: false, 
@@ -169,7 +170,9 @@
         //Display the name.
         elHeader.innerHTML = config.name;
         //Display the version.
-        elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
+        //v2.0.0 Add ckeckboxes.
+        elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>' + 
+                '<div><input id="hidePassedCheckBox" type="checkbox" checked>Hide Passed Groups</input></div>');
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
@@ -278,9 +281,20 @@
     function showResultsDetails(results){
         var groupLabel = '',
             testLabel = '',
-            html = '';
+            html = '', 
+            //v2.0.0 Hide passed tests.
+            rslts = [];
         elResults.style.display = 'block';
-        results.forEach(function(result){
+        //v2.0.0 Hide passed tests.
+        if(document.getElementById('hidePassedCheckBox').checked){
+            rslts = results.filter(function(curValue){
+                if(!curValue.result){
+                    return curValue; 
+                }
+            });
+        }
+        rslts = !rslts.length ? results : rslts;
+        rslts.forEach(function(result){
             if(result.testLabel !== testLabel){
                 if(html.length){
                     html += '</div>';

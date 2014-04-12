@@ -24,8 +24,11 @@ header{
     border-bottom: solid 1px #CCC;
     box-sizing: border-box;
 }
+header input:first-child {
+    margin-left: 0;
+}
 .container{
-    margin: 61px 0 0 0;
+    margin: 73px 0 0 0;
     width: 100%;
     box-sizing: border-box;
 }
