@@ -5,50 +5,49 @@
     'use strict';
 
     //Version
-    var version = 'v2.0.0';
+    var version = 'v2.0.0',
     //Targeted DOM elements.
-    var elPreambleContainer = document.getElementById('preamble-test-container');
-    var elHeader;
-    var elStatusContainer;
-    var elUiContainer = document.getElementById('preamble-ui-container');
-    var elUiTestContainer;
-    var elResults;
-    //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20}).
-    //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
-    //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
-    //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-    //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
-    //name: (default 'Test') - set to a meaningful name.
-    //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-    //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoStart: true};
-    //Merged configuration options.
-    var config = {};
-    //v2.0.0
-    var groupsQueue=[];
-    //v2.0.0 Can only be true if config.shortCircuit is true and an assertion has failed.
-    var isShortCircuited = false;
-    groupsQueue.totTests = 0;
-    groupsQueue.totAssertions = 0;
-    var currentTestHash;
-    var assert;
-    //v2.0.0
-    var prevGroupsQueueCount = 0;
-    var groupsQueueStableCount = 0;
-    var groupsQueueStableInterval = 500;
-    var intervalId;
-    //Filters.
-    var currentTestStep;
-    var groupFilter;
-    var testFilter;
-    var assertionFilter;
-    //v.2.0.0 The stack trace property used by the browser.
-    var stackTraceProperty;
-    //v.2.0.0 RegEx for getting file from stack trace.
-    var reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
-    //v2.0.0
-    var currentGroupIndex;
-    var currentTestIndex;
+        elPreambleContainer = document.getElementById('preamble-test-container'),
+        elHeader,
+        elStatusContainer,
+        elUiContainer = document.getElementById('preamble-ui-container'),
+        elUiTestContainer,
+        elResults,
+        //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20}).
+        //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
+        //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
+        //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
+        //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
+        //(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
+        //name: (default 'Test') - set to a meaningful name.
+        //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+        //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
+        defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoStart: true},
+        //Merged configuration options.
+        config = {},
+        //v2.0.0
+        groupsQueue=[],
+        //v2.0.0 Can only be true if config.shortCircuit is true and an assertion has failed.
+        isShortCircuited = false,
+        currentTestHash,
+        assert,
+        //v2.0.0
+        prevGroupsQueueCount = 0,
+        groupsQueueStableCount = 0,
+        groupsQueueStableInterval = 500,
+        intervalId,
+        //Filters.
+        currentTestStep,
+        groupFilter,
+        testFilter,
+        assertionFilter,
+        //v.2.0.0 The stack trace property used by the browser.
+        stackTraceProperty,
+        //v.2.0.0 RegEx for getting file from stack trace.
+        reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
+        //v2.0.0
+        currentGroupIndex,
+        currentTestIndex;
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
@@ -91,8 +90,8 @@
     }
 
     function combine(){
-        var result = {};
-        var sources = [].slice.call(arguments, 0);
+        var result = {},
+            sources = [].slice.call(arguments, 0);
         sources.forEach(function(source){
             var prop;
             for(prop in source){
@@ -105,9 +104,9 @@
     }
 
     function merge(){
-        var result = {};
-        var target = arguments[0];
-        var sources = [].slice.call(arguments, 1);
+        var result = {},
+            target = arguments[0],
+            sources = [].slice.call(arguments, 1);
         sources.forEach(function(source){
             var prop;
             for(prop in target){
@@ -135,37 +134,31 @@
         var configArg = arguments && arguments[0];
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
-
+        //Totals
+        groupsQueue.totTests = 0;
+        groupsQueue.totAssertions = 0;
         //Capture filters, if any.
         groupFilter = loadPageVar('group');
         testFilter = loadPageVar('test');
         assertionFilter = loadPageVar('assertion');
-
         //v2.0.0 Capture exception's stack trace property.
         setStackTraceProperty();
-
         //Handle global errors.
         window.onerror = errorHandler;
-
         //Add markup structure to the DOM.
         elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Building queues. Please wait...</p></section><section id="preamble-results-container"></section></div>';
-
         //Append the ui test container.
         //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
         elUiContainer.innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
-
         //Capture DOM elements for later use.
         elHeader = document.getElementById('preamble-header');
         elStatusContainer = document.getElementById('preamble-status-container');
         elResults = document.getElementById('preamble-results-container');
         elUiTestContainer = document.getElementById(config.uiTestContainerId);
-
         //Display the name.
         elHeader.innerHTML = config.name;
-
         //Display the version.
         elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
-
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
@@ -213,25 +206,22 @@
                 isNotTruthy: noteIsNotTruthyAssertion
             };
         }
-
         //v2.0.0 For external reporting.
         window.Preamble = window.Preamble || {};
         window.Preamble.__ext__ = {};
-
         /**
          * v2.0.0 For external reporting.
          * Expose config options.
          */
-
         window.Preamble.__ext__.config = config;
     }
 
     function showResultsSummary(){
-        var html;
-        var totGroups = groupsQueue.length;
-        var totGroupsPassed = groupsQueue.length - groupsQueue.totGroupsFailed;
-        var totTestsPassed = groupsQueue.totTests - groupsQueue.totTestsFailed;
-        var totAssertionsPassed = groupsQueue.totAssertions - groupsQueue.totAssertionsFailed;
+        var html,
+            totGroups = groupsQueue.length,
+            totGroupsPassed = groupsQueue.length - groupsQueue.totGroupsFailed,
+            totTestsPassed = groupsQueue.totTests - groupsQueue.totTestsFailed,
+            totAssertionsPassed = groupsQueue.totAssertions - groupsQueue.totAssertionsFailed;
         //Show elapsed time.
         if(isShortCircuited){
             html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + (groupsQueue.duration) + ' milliseconds.</p>';
@@ -275,9 +265,9 @@
 
     //v.2.0.0 Including the stack trace file reference for failed assertions.
     function showResultsDetails(results){
-        var groupLabel = '';
-        var testLabel = '';
-        var html = '';
+        var groupLabel = '',
+            testLabel = '',
+            html = '';
         elResults.style.display = 'block';
         results.forEach(function(result){
             if(result.testLabel !== testLabel){
@@ -460,10 +450,10 @@
     assertIsNotTruthy._desc = 'isNotTruthy';
 
     function runAssertions(test){
-        var assertionsQueue = test.assertions;
-        var i;
-        var len;
-        var item;
+        var assertionsQueue = test.assertions,
+            i,
+            len,
+            item;
         test.totFailed = 0;
         //Iterate over the assertionsQueue, running each item's assertion.
         for (i = 0, len = assertionsQueue.length; i < len; i++) {
@@ -734,8 +724,8 @@
 
     //Provides closure and a label to a group of tests.
     function group(label, callback){
-        var start;
-        var end;
+        var start,
+            end;
         if(groupFilter === label || groupFilter === ''){
             groupsQueue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
@@ -784,152 +774,128 @@
     //the arguments that were passed to it, the contexts it was called with and what it
     //returned. Extremely useful for testing synchronous and asynchronous methods.
     function proxy(){
-
         var proxyFactory = function(){
-
             //The wrapped function to call.
-            var fnToCall = arguments.length === 2 ? arguments[0][arguments[1]] : arguments[0];
-
-            //A counter used to note how many times proxy has been called.
-            var xCalled = 0;
-
-            //An array whose elements note the context used to call the wrapped function.
-            var contexts = [];
-
-            //An array of arrays used to note the arguments that were passed to proxy.
-            var argsPassed = [];
-
-            //An array whose elements note what the wrapped function returned.
-            var returned = [];
-
-            //
-            //Privileged functions used by API
-            //
-
-            //Returns the number of times the wrapped function was called.
-            var getCalledCount = function(){
-                return xCalled;
-            };
-
-            //If n is within bounds returns the context used on the nth
-            //call to the wrapped function, otherwise returns undefined.
-            var getContext = function(n){
-                if(n >= 0 && n < xCalled){
-                    return contexts[n];
-                }
-            };
-
-            //If called with 'n' and 'n' is within bounds then returns the
-            //array found at argsPassed[n], otherwise returns argsPassed.
-            var getArgsPassed = function(){
-                if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < argsPassed.length){
-                    return argsPassed[arguments[0]];
-                }else{
-                    return argsPassed;
-                }
-            };
-
-            //If called with 'n' and 'n' is within bounds then returns
-            //value found at returned[n], otherwise returns returned.
-            var getReturned = function(){
-                if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < returned.length){
-                    return returned[arguments[0]];
-                }else{
-                    return returned;
-                }
-            };
-
-            //If 'n' is within bounds then returns an
-            //info object, otherwise returns undefined.
-            var getData= function(n){
-                if(n >= 0 && n < xCalled){
-                    var args = getArgsPassed(n);
-                    var context = getContext(n);
-                    var ret = getReturned(n);
-                    return {
-                        count: n + 1,
-                        argsPassed: args,
-                        context: context,
-                        returned: ret
-                    };
-                }
-            };
-
-            //If you just want to know if the wrapped function was called
-            //then call wasCalled with no args. If you want to know if the
-            //callback was called n times, pass n as an argument.
-            var wasCalled = function(){
-                return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
-            };
-
-            //A higher order function - iterates through the collected data and
-            //returns the information collected for each invocation of proxy.
-            var dataIterator = function(callback){
-                for(var i = 0; i < xCalled; i++){
-                    callback(getData(i));
-                }
-            };
-
-            //The function that is returned to the caller.
-            var fn = function(){
-                //Note the context that the proxy was called with.
-                contexts.push(this);
-                //Note the arguments that were passed for this invocation.
-                var args = [].slice.call(arguments);
-                argsPassed.push(args.length ? args : []);
-                //Increment the called count for this invocation.
-                xCalled += 1;
-                //Call the wrapped function noting what it returns.
-                var ret = fnToCall.apply(this, args);
-                returned.push(ret);
-                //Return what the wrapped function returned to the caller.
-                return ret;
-            };
-
+            var fnToCall = arguments.length === 2 ? arguments[0][arguments[1]] : arguments[0],
+                //A counter used to note how many times proxy has been called.
+                xCalled = 0,
+                //An array whose elements note the context used to call the wrapped function.
+                contexts = [],
+                //An array of arrays used to note the arguments that were passed to proxy.
+                argsPassed = [],
+                //An array whose elements note what the wrapped function returned.
+                returned = [],
+                //
+                //Privileged functions used by API
+                //
+                //Returns the number of times the wrapped function was called.
+                getCalledCount = function(){
+                    return xCalled;
+                },
+                //If n is within bounds returns the context used on the nth
+                //call to the wrapped function, otherwise returns undefined.
+                getContext = function(n){
+                    if(n >= 0 && n < xCalled){
+                        return contexts[n];
+                    }
+                },
+                //If called with 'n' and 'n' is within bounds then returns the
+                //array found at argsPassed[n], otherwise returns argsPassed.
+                getArgsPassed = function(){
+                    if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < argsPassed.length){
+                        return argsPassed[arguments[0]];
+                    }else{
+                        return argsPassed;
+                    }
+                },
+                //value found at returned[n], otherwise returns returned.
+                getReturned = function(){
+                    if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < returned.length){
+                        return returned[arguments[0]];
+                    }else{
+                        return returned;
+                    }
+                },
+                //If 'n' is within bounds then returns an
+                //info object, otherwise returns undefined.
+                getData= function(n){
+                    var args,
+                        context,
+                        ret;
+                    if(n >= 0 && n < xCalled){
+                        args = getArgsPassed(n);
+                        context = getContext(n);
+                        ret = getReturned(n);
+                        return {
+                            count: n + 1,
+                            argsPassed: args,
+                            context: context,
+                            returned: ret
+                        };
+                    }
+                },
+                //If you just want to know if the wrapped function was called
+                //then call wasCalled with no args. If you want to know if the
+                //callback was called n times, pass n as an argument.
+                wasCalled = function(){
+                    return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
+                },
+                //A higher order function - iterates through the collected data and
+                //returns the information collected for each invocation of proxy.
+                dataIterator = function(callback){
+                    var i;
+                    for(i = 0; i < xCalled; i++){
+                        callback(getData(i));
+                    }
+                },
+                //The function that is returned to the caller.
+                fn = function(){
+                    var args,
+                        ret;
+                    //Note the context that the proxy was called with.
+                    contexts.push(this);
+                    //Note the arguments that were passed for this invocation.
+                    args = [].slice.call(arguments);
+                    argsPassed.push(args.length ? args : []);
+                    //Increment the called count for this invocation.
+                    xCalled += 1;
+                    //Call the wrapped function noting what it returns.
+                    ret = fnToCall.apply(this, args);
+                    returned.push(ret);
+                    //Return what the wrapped function returned to the caller.
+                    return ret;
+                };
             //
             //Exposed lovwer level API - see Privileged functions used by API above.
             //
-
             fn.getCalledCount = getCalledCount;
-
             fn.getContext = getContext;
-
             fn.getArgsPassed = getArgsPassed;
-
             fn.getReturned = getReturned;
-
             fn.getData = getData;
-
             //
             //Exposed Higher Order API - see Privileged functions used by API above.
             //
-
             fn.wasCalled = wasCalled;
-
             fn.dataIterator = dataIterator;
-
             //Replaces object's method property with proxy's fn.
             if(arguments.length === 2){
                 arguments[0][arguments[1]] = fn;
             }
-
             //Return fn to the caller.
             return fn;
         };
-
         //Convert arguments to an array, call factory and returns its value to the caller.
-        var args = [].slice.call(arguments);
-        return proxyFactory.apply(null, args);
-
+        return proxyFactory.apply(null, [].slice.call(arguments));
     }
 
     function showCoverage(){
-        var html;
-        var totGroupsPlrzd = pluralize(' group', groupsQueue.length);
-        var totTestsPlrzd = pluralize(' test', groupsQueue.totTests);
-        var totAssertionsPlrzd = pluralize(' assertion', groupsQueue.totAssertions);
-        var coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' +
-            groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
+        var html,
+            totGroupsPlrzd = pluralize(' group', groupsQueue.length),
+            totTestsPlrzd = pluralize(' test', groupsQueue.totTests),
+            totAssertionsPlrzd = pluralize(' assertion', groupsQueue.totAssertions),
+            coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' +
+                groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         //v2.0.0 Preserve error message that replaces 'Building queues. Please wait...'.
@@ -952,21 +918,17 @@
      */
 
     var pubsub = window.Preamble.__ext__.pubsub = (function(){
-
         //subscribers is a hash of hashes:
         //{'some topic': {'some token': callbackfunction, 'some token': callbackfunction, . etc. }, . etc }
         var subscribers = {}, totalSubscribers = 0, lastToken = 0;
-
         //Generates a unique token.
         function getToken(){
             return lastToken += 1;
         }
-
         //Returns a function bound to a context.
         function bindTo(fArg, context){
             return fArg.bind(context);
         }
-
         //Returns a function which wraps subscribers callback in a setTimeout callback.
         function makeAsync(topic, callback){
             return function(data){
@@ -975,7 +937,6 @@
                 }, 1);
             };
         }
-
         //Adds a subscriber for a topic with a callback
         //and returns a token to allow unsubscribing.
         function on(topic, handler){
@@ -992,7 +953,6 @@
             //Return the token to the caller so it can unsubscribe.
             return token;
         }
-
         //Removes a subscriber for a topic.
         function off(topic, token){
             if(subscribers.hasOwnProperty(topic)){
@@ -1002,7 +962,6 @@
                 }
             }
         }
-
         //Publishes an event for a topic with optional data.
         function emit(topic, data){
             var token;
@@ -1018,19 +977,16 @@
                 }
             }
         }
-
         //Returns the total subscribers count.
         function getCountOfSubscribers(){
             return totalSubscribers;
         }
-
         //Returns the subscriber count by topic.
         function getCountOfSubscribersByTopic(topic){
             var prop, count = 0;
             if(subscribers.hasOwnProperty(topic)){for(prop in subscribers[topic]){if(subscribers[topic].hasOwnProperty(prop)){count++;}}}
             return count;
         }
-
         //Returns the object that exposes the pubsub API.
         return {
             on: on,
@@ -1039,7 +995,6 @@
             getCountOfSubscribers: getCountOfSubscribers,
             getCountOfSubscribersByTopic: getCountOfSubscribersByTopic
         };
-
     }());
 
     /**
@@ -1121,8 +1076,8 @@
 
     //Runs a single test.
     on('runTest', function(){
-        var test = currentTestIndex >= 0 && groupsQueue[currentGroupIndex].tests[currentTestIndex];
-        var elapsed;
+        var test = currentTestIndex >= 0 && groupsQueue[currentGroupIndex].tests[currentTestIndex],
+            elapsed;
         if(test){
             //Mark the test with how many of its assertions failed.
             test.totFailed = test.assertions.reduce(function(prevValue, curValue){
