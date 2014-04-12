@@ -1,11 +1,11 @@
-//Preamble 1.4.0
+//Preamble 2.0.0
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v1.4.0';
+    var version = 'v2.0.0';
     //Targeted DOM elements.
     var elPreambleContainer = document.getElementById('preamble-test-container');
     var elHeader;
@@ -24,15 +24,15 @@
     var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoStart: true};
     //Merged configuration options.
     var config = {};
-    //v1.4.0
+    //v2.0.0
     var groupsQueue=[];
-    //v1.4.0 Can only be true if config.shortCircuit is true and an assertion has failed.
+    //v2.0.0 Can only be true if config.shortCircuit is true and an assertion has failed.
     var isShortCircuited = false;
     groupsQueue.totTests = 0;
     groupsQueue.totAssertions = 0;
     var currentTestHash;
     var assert;
-    //v1.4.0
+    //v2.0.0
     var prevGroupsQueueCount = 0;
     var groupsQueueStableCount = 0;
     var groupsQueueStableInterval = 500;
@@ -42,11 +42,11 @@
     var groupFilter;
     var testFilter;
     var assertionFilter;
-    //v.1.4.0 The stack trace property used by the browser.
+    //v.2.0.0 The stack trace property used by the browser.
     var stackTraceProperty;
-    //v.1.4.0 RegEx for getting file from stack trace.
+    //v.2.0.0 RegEx for getting file from stack trace.
     var reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
-    //v1.4.0
+    //v2.0.0
     var currentGroupIndex;
     var currentTestIndex;
 
@@ -62,7 +62,7 @@
         if(arguments.length === 3){
             //window.onerror
             html = '<p class="failed">' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
-            //v1.4.0 For external reporting.
+            //v2.0.0 For external reporting.
             publishStatusUpdate({
                 status: 'error',
                 error: arguments[0] + '. File: ' + arguments[1] + '. Line: ' + arguments[2]
@@ -70,7 +70,7 @@
         }else{
             //catch(e)
             html = '<p class="failed">An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
-            //v1.4.0 For external reporting.
+            //v2.0.0 For external reporting.
             publishStatusUpdate({
                 status: 'error',
                 error: 'An error occurred, "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>'
@@ -128,10 +128,10 @@
     }
 
     //Configuration
-    //v1.4.0 Support for in-line configuration.
+    //v2.0.0 Support for in-line configuration.
     //Called once internally but may be called again if test script calls it.
     function configure(){
-        //v1.4.0
+        //v2.0.0
         var configArg = arguments && arguments[0];
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
@@ -141,7 +141,7 @@
         testFilter = loadPageVar('test');
         assertionFilter = loadPageVar('assertion');
 
-        //v1.4.0 Capture exception's stack trace property.
+        //v2.0.0 Capture exception's stack trace property.
         setStackTraceProperty();
 
         //Handle global errors.
@@ -214,12 +214,12 @@
             };
         }
 
-        //v1.4.0 For external reporting.
+        //v2.0.0 For external reporting.
         window.Preamble = window.Preamble || {};
         window.Preamble.__ext__ = {};
 
         /**
-         * v1.4.0 For external reporting.
+         * v2.0.0 For external reporting.
          * Expose config options.
          */
 
@@ -259,7 +259,7 @@
         elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    //v1.4.0 Returns the "line" in the stack trace that points to the failed assertion.
+    //v2.0.0 Returns the "line" in the stack trace that points to the failed assertion.
     function stackTrace(st) {
         //Get all file references...
         var matches = st.match(reFileFromStackTrace);
@@ -273,7 +273,7 @@
         }, '');
     }
 
-    //v.1.4.0 Including the stack trace file reference for failed assertions.
+    //v.2.0.0 Including the stack trace file reference for failed assertions.
     function showResultsDetails(results){
         var groupLabel = '';
         var testLabel = '';
@@ -477,7 +477,7 @@
         }
     }
 
-    //v1.4.0 Pushing stack trace onto the queue and maintain assertions counter.
+    //v2.0.0 Pushing stack trace onto the queue and maintain assertions counter.
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         currentTestHash.assertions.push({assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, stackTrace: stackTrace});
         groupsQueue.totAssertions++;
@@ -487,7 +487,7 @@
         throw new Error(errMessage);
     }
 
-    //v.1.4.0 Sets the stack trace property used by the browser.
+    //v.2.0.0 Sets the stack trace property used by the browser.
     function setStackTraceProperty(){
         try{
             throw new Error('woops');
@@ -496,7 +496,7 @@
         }
     }
 
-    //v1.4.0 Returns the stack trace from an error object.
+    //v2.0.0 Returns the stack trace from an error object.
     function stackTraceFromError(){
         var stack = null;
         if(stackTraceProperty){
@@ -509,7 +509,7 @@
         return stack;
     }
 
-    //v.1.4.0 Including a stack trace.
+    //v.2.0.0 Including a stack trace.
     function noteEqualAssertion(value, expectation, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 3){
@@ -521,7 +521,7 @@
         }
     }
 
-    //v.1.4.0 Including a stack trace.
+    //v.2.0.0 Including a stack trace.
     function noteIsTrueAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -531,7 +531,7 @@
         }
     }
 
-    //v.1.4.0 Including a stack trace.
+    //v.2.0.0 Including a stack trace.
     function noteIsTruthyAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -541,7 +541,7 @@
         }
     }
 
-    //v.1.4.0 Including a stack trace.
+    //v.2.0.0 Including a stack trace.
     function noteNotEqualAssertion(value, expectation, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 3){
@@ -553,7 +553,7 @@
         }
     }
 
-    //v.1.4.0 Including a stack trace.
+    //v.2.0.0 Including a stack trace.
     function noteIsFalseAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -563,7 +563,7 @@
         }
     }
 
-    //v.1.4.0 Including a stack trace.
+    //v.2.0.0 Including a stack trace.
     function noteIsNotTruthyAssertion(value, label){
         if(assertionFilter === label || assertionFilter === ''){
             if(arguments.length !== 2){
@@ -932,7 +932,7 @@
             groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
-        //v1.4.0 Preserve error message that replaces 'Building queues. Please wait...'.
+        //v2.0.0 Preserve error message that replaces 'Building queues. Please wait...'.
         if(elStatusContainer.innerHTML === '<p>Building queues. Please wait...</p>'){
             elStatusContainer.innerHTML = html;
         }else{
@@ -948,7 +948,7 @@
     configure();
 
     /**
-     * v1.4.0 A hash-of-hashes pubsub implementation.
+     * v2.0.0 A hash-of-hashes pubsub implementation.
      */
 
     var pubsub = window.Preamble.__ext__.pubsub = (function(){
@@ -1043,7 +1043,7 @@
     }());
 
     /**
-     * v1.4.0 Internal event handling.
+     * v2.0.0 Internal event handling.
      */
 
     //Convenience method for registering handlers.
@@ -1177,7 +1177,7 @@
     });
 
     /**
-     * v1.4.0 For external reporting.
+     * v2.0.0 For external reporting.
      * Subscribe to pubsub to show status updates in the console.
      * TODO(J.S.) Comment this out prior to release?
      */
@@ -1188,7 +1188,7 @@
     });
 
     /**
-     * v1.4.0 For external reporting.
+     * v2.0.0 For external reporting.
      * Higher-level functionality ontop of pubsub.
      */
 
@@ -1202,7 +1202,7 @@
 
     //Catch errors.
     try{
-        //v1.4.0 For external reporting. Set status to "loading".
+        //v2.0.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
 
         //Wait while the groupsQueue is built as scripts call group function.

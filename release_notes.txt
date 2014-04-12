@@ -1,8 +1,9 @@
-v1.4.0: This release is mostly a housekeeping release, an opportunity to provide
+v2.0.0: This release is mostly a housekeeping release, an opportunity to provide
 better implementations, performance and maintainability for a number of the 
-internal processes that Preamble performs for running tests. In addition, some 
-new internal functionality has been added that will allow it to operate and
-communicate with external processes, such as Karma for example.
+internal processes that Preamble performs while running tests. Some new internal 
+functionality has been added that will allow Preamble to operate and communicate 
+with external processes, such as Karma. A breaking change was introduced to the 
+layout in index.html, which was necessary to support in-line configuration.
 
     1) Restructured and reorganized code-base.
 
