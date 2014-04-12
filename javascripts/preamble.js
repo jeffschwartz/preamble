@@ -6,7 +6,7 @@
 
     //Version
     var version = 'v2.0.0',
-    //Targeted DOM elements.
+        //Targeted DOM elements.
         elPreambleContainer = document.getElementById('preamble-test-container'),
         elHeader,
         elStatusContainer,
@@ -22,7 +22,15 @@
         //name: (default 'Test') - set to a meaningful name.
         //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
         //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
-        defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container', autoStart: true},
+        defaultConfig = {
+            shortCircuit: false, 
+            windowGlobals: true, 
+            asyncTestDelay: 10, 
+            asyncBeforeAfterTestDelay: 10, 
+            name: 'Test', 
+            uiTestContainerId: 'ui-test-container', 
+            autoStart: true
+        },
         //Merged configuration options.
         config = {},
         //v2.0.0
@@ -68,12 +76,13 @@
             });
         }else{
             //catch(e)
-            html = '<p class="failed">An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+            html = '<p class="failed">An error occurred,  "' + arguments[0] + 
+                '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
             //v2.0.0 For external reporting.
             publishStatusUpdate({
                 status: 'error',
-                error: 'An error occurred, "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>'
-
+                error: 'An error occurred, "' + arguments[0] + 
+                    '" and all further processing has been terminated. Please check your browser console for additional details.</p>'
             });
         }
         elStatusContainer.innerHTML = html;
@@ -146,7 +155,9 @@
         //Handle global errors.
         window.onerror = errorHandler;
         //Add markup structure to the DOM.
-        elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Building queues. Please wait...</p></section><section id="preamble-results-container"></section></div>';
+        elPreambleContainer.innerHTML = '<header id="preamble-header-container">' + '<h1 id="preamble-header"></h1>' + 
+            '</header>' + '<div class="container">' + '<section id="preamble-status-container">' + 
+            '<p>Building queues. Please wait...</p>' + '</section><section id="preamble-results-container"></section></div>';
         //Append the ui test container.
         //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
         elUiContainer.innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
@@ -865,9 +876,7 @@
                     //Return what the wrapped function returned to the caller.
                     return ret;
                 };
-            //
             //Exposed lovwer level API - see Privileged functions used by API above.
-            //
             fn.getCalledCount = getCalledCount;
             fn.getContext = getContext;
             fn.getArgsPassed = getArgsPassed;
@@ -1159,7 +1168,6 @@
     try{
         //v2.0.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
-
         //Wait while the groupsQueue is built as scripts call group function.
         //Keep checking the groupsQueue's length until it is 'stable'.
         //Keep checking that config.autoStart is true.
