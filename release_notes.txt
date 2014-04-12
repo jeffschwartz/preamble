@@ -28,6 +28,10 @@ layout in index.html, which was necessary to support in-line configuration.
     that publish either 'stack' or 'stacktrace' properties on thrown Error 
     objects.
 
-    6) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
+    6) Added 'Hide Passed Groups' feature, including a "hidePassedGroups" 
+    configuration property, which defaults to "false" and a check box to 
+    override the configuration.
+
+    7) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
     it to wrap <div id="ui-test-container" class="ui-test-container">. This was 
     required in order to support in-line configuration (see #4, above). 

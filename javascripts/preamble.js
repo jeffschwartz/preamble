@@ -172,7 +172,7 @@
         //Display the version.
         //v2.0.0 Add ckeckboxes.
         elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>' + 
-                '<div><input id="hidePassedCheckBox" type="checkbox" checked>Hide Passed Groups</input></div>');
+                '<div><input id="hidePassedCheckBox" type="checkbox">Hide Passed Groups</input></div>');
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
@@ -306,7 +306,8 @@
                 }
             }
             if(result.groupLabel !== groupLabel){
-                html += '<div class="group-container"><a class="group" href="?group=' +
+                //v2.0.0 Added "data-passed" attribute for hiding passed tests.
+                html += '<div class="group-container"' + 'data-passed="' + result.result + '"><a class="group" href="?group=' +
                     encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
