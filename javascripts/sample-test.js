@@ -80,7 +80,7 @@ group('An asynchronous test with no before/after eachTest', function(){
         var val;
         setTimeout(function(){
             val = 'Isn\'t JavaScript amazing?';
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             isTrue(val === 'Isn\'t JavaScript amazing?', 'Yest it is!');
         });
@@ -90,33 +90,24 @@ group('An asynchronous test with no before/after eachTest', function(){
 group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
     var count = 0;
     asyncBeforeEachTest(function(){
-        count = 1;
+        count = 2;
     });
-    asyncTest('Is count 1?', function(){
+    asyncTest('Is count 20?', function(){
         setTimeout(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isTrue(count === 1, 'count equals 1.');
             count *= 10;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isTrue(count === 10, 'now count equals 10');
+            isTrue(count === 20, 'Yes, count now is 20');
         });
     });
-    asyncTest('Is count 10?', function(){
-        isFalse(count === 10, 'count doesn\'t equals 10 anymore.');
-        isTrue(count === 1, 'count now equals 1 again.');
+    asyncTest('Is count 200?', function(){
         setTimeout(function(){
             count *= 100;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isFalse(count === 10, 'count doesn\'t equal 10 anymore');
-            isTrue(count === 100, 'count now equals 100');
+            isTrue(count === 200, 'Yes, count now is 200');
         });
     });
 });
@@ -126,26 +117,22 @@ group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     asyncAfterEachTest(function(){
         count = 1;
     });
-    asyncTest('Is count 1?', function(){
+    asyncTest('Is count 10?', function(){
         setTimeout(function(){
             count = 10;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isTrue(count === 10, 'now count equals 10');
+            isTrue(count === 10, 'Yes, count now is 10');
         });
     });
-    asyncTest('Is count still 10?', function(){
-        isFalse(count === 10, 'count doesn\'t equals 10 anymore.');
-        isTrue(count === 1, 'count now equals 1 again.');
+    asyncTest('Is count 100?', function(){
         setTimeout(function(){
             count *= 100;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isTrue(count === 100, 'count now equals 100');
+            isTrue(count === 100, 'Yes, count now is 100');
         });
     });
 });
@@ -155,16 +142,13 @@ group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
         return {num: 1};
     });
     asyncTest('Was object passed?', function(val){
-        var obj;
         setTimeout(function(){
-            isFalse(typeof val === 'undefined', 'obj is not undefined');
-            equal(val, {num: 1}, '{num: 1} was passed to asyncTestu');
-            obj = val;
-            obj.num *= 100;
-        }, 10);
+            val.num *= 100;
+        }, 1);
 
         whenAsyncDone(function(){
-            isTrue(obj.num === 100, 'now obj.num equals 100');
+            isFalse(typeof val === 'undefined', '{num: 1} was passed to asyncTest');
+            isTrue(val.num === 100, '{num: 1} was changed to {num: 100}');
         });
     });
 });
@@ -177,7 +161,7 @@ group('proxy captures calling information which can be tested against', function
         setTimeout(function(){
             fn('Somewhere over');
             fn('the rainbow');
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             isTrue(fn.wasCalled(2), 'fn was called twice.');
             equal(fn.getCalledCount(), 2, 'fn was called twice.');
@@ -201,7 +185,7 @@ group('proxy captures calling information which can be tested against', function
         setTimeout(function(){
             fn1('Somewhere over ');
             fn2('the rainbow');
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             isTrue(fn1.wasCalled(1), 'fn1 was called once.');
             equal(fn1.getCalledCount(), 1, 'fn1 was called once.');
@@ -226,7 +210,7 @@ group('proxy captures calling information which can be tested against', function
         setTimeout(function(){
             foo.name('Somewhere over ');
             foo.name('the rainbow');
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             equal(foo.title, 'Somewhere over the rainbow', 'foo.title = "Somewhere over the rainbow"');
             isTrue(foo.name.wasCalled(2), 'callback was called twice.');
