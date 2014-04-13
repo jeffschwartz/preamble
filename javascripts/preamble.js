@@ -13,6 +13,8 @@
         elUiContainer = document.getElementById('preamble-ui-container'),
         elUiTestContainer,
         elResults,
+        //v2.0.0
+        elHidePassedCheckBox,
         //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20}).
         //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
         //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
@@ -30,6 +32,7 @@
             asyncBeforeAfterTestDelay: 10, 
             name: 'Test', 
             uiTestContainerId: 'ui-test-container', 
+            hidePassedGroups: false,
             autoStart: true
         },
         //Merged configuration options.
@@ -136,6 +139,37 @@
         return wrapStringWith('"', string);
     }
 
+    function hidePassedGroupsCheckBoxHandler(){
+        var elDivs = document.getElementsByTagName('div'),
+            i,
+            ii,
+            l,
+            ll,
+            attributes,
+            elGroupContainers = [],
+            classes = '',
+            passed;
+        for(i = 0, l= elDivs.length; i < l; i++){
+            attributes = elDivs[i].getAttribute('class');
+            if(attributes && attributes.length){
+                attributes = elDivs[i].getAttribute('class').split(' ');
+                for(ii = 0, ll = attributes.length; ii < ll; ii++){
+                    if(attributes[ii] === 'group-container'){
+                        elGroupContainers.push(elDivs[i]);
+                    }
+                }
+            }
+        }
+        classes = elHidePassedCheckBox.checked ? 'group-container group-container-hidden' : 'group-container';
+        elGroupContainers.forEach(function(elGroup){
+            passed = elGroup.getAttribute('data-passed');
+            passed = passed === 'true' ? true : false;
+            if(passed){
+                elGroup.setAttribute('class', classes);
+            }
+        });
+    }
+
     //Configuration
     //v2.0.0 Support for in-line configuration.
     //Called once internally but may be called again if test script calls it.
@@ -172,7 +206,16 @@
         //Display the version.
         //v2.0.0 Add ckeckboxes.
         elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>' + 
-                '<div><input id="hidePassedCheckBox" type="checkbox">Hide Passed Groups</input></div>');
+                '<div><label for="hidePassedCheckBox"><input id="hidePassedCheckBox" type="checkbox"' + 
+                (config.hidePassedGroups ? 'checked' : '') + '>Hide Passed Groups</input></div>');
+        elHidePassedCheckBox = document.getElementById('hidePassedCheckBox');
+        //v2.0.0 Handle click event on "hidePassedCheckBox" to toggle display of passed groups.
+        if( elHidePassedCheckBox.addEventListener){
+            elHidePassedCheckBox.addEventListener('click', hidePassedGroupsCheckBoxHandler);
+        }else{
+            elHidePassedCheckBox.attachEvent('onclick', hidePassedGroupsCheckBoxHandler);
+        }
+        
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
@@ -283,16 +326,17 @@
             testLabel = '',
             html = '', 
             //v2.0.0 Hide passed tests.
-            rslts = [];
+            rslts = [],
+            hidePassed = elHidePassedCheckBox.checked;
         elResults.style.display = 'block';
-        //v2.0.0 Hide passed tests.
-        if(document.getElementById('hidePassedCheckBox').checked){
-            rslts = results.filter(function(curValue){
-                if(!curValue.result){
-                    return curValue; 
-                }
-            });
-        }
+        ////v2.0.0 Exclude passed tests.
+        //if(document.getElementById('hidePassedCheckBox').checked){
+        //    rslts = results.filter(function(curValue){
+        //        if(!curValue.result){
+        //            return curValue; 
+        //        }
+        //    });
+        //}
         rslts = !rslts.length ? results : rslts;
         rslts.forEach(function(result){
             if(result.testLabel !== testLabel){
@@ -307,7 +351,8 @@
             }
             if(result.groupLabel !== groupLabel){
                 //v2.0.0 Added "data-passed" attribute for hiding passed tests.
-                html += '<div class="group-container"' + 'data-passed="' + result.result + '"><a class="group" href="?group=' +
+                html += '<div class="group-container' + (hidePassed && result.result ? ' group-container-hidden' : '') + 
+                    '"' + 'data-passed="' + result.result + '"><a class="group" href="?group=' +
                     encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
