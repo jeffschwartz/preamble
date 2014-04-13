@@ -1,6 +1,7 @@
 configure({
-    name: 'Sample Test Suite'
-})
+    name: 'Sample Test Suite',
+    hidePassedGroups: true
+});
 
 group('This group will intentionally fail', function(){
     test('true === false', function(){
