@@ -46,7 +46,7 @@
         //v2.0.0
         prevGroupsQueueCount = 0,
         groupsQueueStableCount = 0,
-        groupsQueueStableInterval = 500,
+        groupsQueueStableInterval = 1,
         intervalId,
         //Filters.
         currentTestStep,
@@ -176,6 +176,11 @@
     function configure(){
         //v2.0.0
         var configArg = arguments && arguments[0];
+        //Ignore configuration once testing has started.
+        if(configArg && groupsQueue.length){
+            alert('no no no!');
+            return;
+        }
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
         //Totals
@@ -192,7 +197,7 @@
         //Add markup structure to the DOM.
         elPreambleContainer.innerHTML = '<header id="preamble-header-container">' + '<h1 id="preamble-header"></h1>' + 
             '</header>' + '<div class="container">' + '<section id="preamble-status-container">' + 
-            '<p>Building queues. Please wait...</p>' + '</section><section id="preamble-results-container"></section></div>';
+            '<p>Building queue. Please wait...</p>' + '</section><section id="preamble-results-container"></section></div>';
         //Append the ui test container.
         //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
         elUiContainer.innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
@@ -283,7 +288,7 @@
         if(isShortCircuited){
             html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + (groupsQueue.duration) + ' milliseconds.</p>';
         }else{
-            html = '<p id="preamble-elapsed-time">Tests completed in ' + (groupsQueue.duration) + ' milliseconds.</p>';
+            html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + groupsQueue.totalElapsedTime  + ' milliseconds.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (groupsQueue.duration) + ' milliseconds.</p>';
         }
         //Show a summary in the header.
         if(groupsQueue.result){
@@ -957,8 +962,8 @@
                 groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
-        //v2.0.0 Preserve error message that replaces 'Building queues. Please wait...'.
-        if(elStatusContainer.innerHTML === '<p>Building queues. Please wait...</p>'){
+        //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
+        if(elStatusContainer.innerHTML === '<p>Building queue. Please wait...</p>'){
             elStatusContainer.innerHTML = html;
         }else{
             elStatusContainer.innerHTML += html;
@@ -1107,7 +1112,6 @@
         groupsQueue.totTestsFailed = 0;
         //Total failed assertions.
         groupsQueue.totAssertionsFailed = 0;
-        groupsQueue.start = Date.now();
         currentGroupIndex = -1;
         emit('runGroup');
     });
@@ -1164,8 +1168,6 @@
 
     //All groups ran.
     on('end', function(){
-        groupsQueue.end = Date.now();
-        groupsQueue.totalElapsedTime = groupsQueue.end - groupsQueue.start;
         groupsQueue.duration = duration(groupsQueue);
         //Record how many assertions failed.
         groupsQueue.totAssertionsFailed = groupsQueue.reduce(function(prevValue, group){
@@ -1186,6 +1188,8 @@
             return !group.result ? prevValue + 1 : prevValue;
         }, 0);
         groupsQueue.result = groupsQueue.totAssertionsFailed === 0;
+        groupsQueue.end = Date.now();
+        groupsQueue.totalElapsedTime = groupsQueue.end - groupsQueue.start;
         showResultsSummary();
         showResultsDetails(mapGroupsToResults());
     });
@@ -1216,6 +1220,8 @@
 
     //Catch errors.
     try{
+        //v2.0.0 Start time, used to report total elapsed time.
+        groupsQueue.start = Date.now();
         //v2.0.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
         //Wait while the groupsQueue is built as scripts call group function.
