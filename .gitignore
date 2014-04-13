@@ -1,4 +1,6 @@
 .tern-port
 preamble.sublime-workspace
+.idea
 **/*.swp
+**/*.swo
 temp.md

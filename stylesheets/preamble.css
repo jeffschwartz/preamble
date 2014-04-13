@@ -24,8 +24,11 @@ header{
     border-bottom: solid 1px #CCC;
     box-sizing: border-box;
 }
+header input:first-child {
+    margin-left: 0;
+}
 .container{
-    margin: 61px 0 0 0;
+    margin: 73px 0 0 0;
     width: 100%;
     box-sizing: border-box;
 }
@@ -45,6 +48,10 @@ section{
 }
 .group-container{
     padding-top: 15px;
+}
+/*v2.0.0*/
+.group-container-hidden{
+    display: none;
 }
 .group-container:first-child {
     padding-top: 0;
@@ -84,6 +91,16 @@ section{
 }
 .failed {
     color: #f40000;
+}
+.bold {
+    font-weight: bold;
+}
+.stacktrace-container {
+    padding: 0 20px 0 40px;
+}
+.stacktrace {
+    margin: 0;
+    padding: 5px 20px 0 0;
 }
 .ui-test-container{
     position: absolute;
