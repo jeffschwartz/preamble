@@ -326,19 +326,9 @@
             testLabel = '',
             html = '', 
             //v2.0.0 Hide passed tests.
-            rslts = [],
             hidePassed = elHidePassedCheckBox.checked;
         elResults.style.display = 'block';
-        ////v2.0.0 Exclude passed tests.
-        //if(document.getElementById('hidePassedCheckBox').checked){
-        //    rslts = results.filter(function(curValue){
-        //        if(!curValue.result){
-        //            return curValue; 
-        //        }
-        //    });
-        //}
-        rslts = !rslts.length ? results : rslts;
-        rslts.forEach(function(result){
+        results.forEach(function(result){
             if(result.testLabel !== testLabel){
                 if(html.length){
                     html += '</div>';
