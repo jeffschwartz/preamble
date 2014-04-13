@@ -142,16 +142,13 @@ group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
         return {num: 1};
     });
     asyncTest('Was object passed?', function(val){
-        var obj;
         setTimeout(function(){
-            obj = val;
-            obj.num *= 100;
-        }, 1);
+            val.num *= 100;
+        }, 10);
 
         whenAsyncDone(function(){
-            isFalse(typeof val === 'undefined', 'obj is not undefined');
-            equal(val, {num: 1}, '{num: 1} was passed to asyncTestu');
-            isTrue(obj.num === 100, 'now obj.num equals 100');
+            isFalse(typeof val === 'undefined', '{num: 1} was passed to asyncTest');
+            isTrue(val.num === 100, '{num: 1} was changed to {num: 100}');
         });
     });
 });
