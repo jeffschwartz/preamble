@@ -350,8 +350,8 @@
             }
             if(result.groupLabel !== groupLabel){
                 //v2.0.0 Added "data-passed" attribute for hiding passed tests.
-                html += '<div class="group-container' + (hidePassed && result.result ? ' group-container-hidden' : '') + 
-                    '"' + 'data-passed="' + result.result + '"><a class="group" href="?group=' +
+                html += '<div class="group-container' + (hidePassed && result.groupResult ? ' group-container-hidden' : '') + 
+                    '"' + 'data-passed="' + result.groupResult + '"><a class="group" href="?group=' +
                     encodeURI(result.groupLabel) + '"' + groupTile + '>' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
@@ -1094,6 +1094,7 @@
                 test.assertions.forEach(function(assertion){
                     results.push({
                         groupLabel: group.groupLabel,
+                        groupResult: group.result,
                         testLabel: test.testLabel,
                         result: assertion.result,
                         assertionLabel: assertion.assertionLabel,

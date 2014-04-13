@@ -90,33 +90,24 @@ group('An asynchronous test with no before/after eachTest', function(){
 group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
     var count = 0;
     asyncBeforeEachTest(function(){
-        count = 1;
+        count = 2;
     });
-    asyncTest('Is count 1?', function(){
+    asyncTest('Is count 20?', function(){
         setTimeout(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isTrue(count === 1, 'count equals 1.');
             count *= 10;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isTrue(count === 10, 'now count equals 10');
+            isTrue(count === 20, 'Yes, count now is 20');
         });
     });
-    asyncTest('Is count 10?', function(){
-        isFalse(count === 10, 'count doesn\'t equals 10 anymore.');
-        isTrue(count === 1, 'count now equals 1 again.');
+    asyncTest('Is count 200?', function(){
         setTimeout(function(){
             count *= 100;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isFalse(count === 10, 'count doesn\'t equal 10 anymore');
-            isTrue(count === 100, 'count now equals 100');
+            isTrue(count === 200, 'Yes, count now is 200');
         });
     });
 });
@@ -126,26 +117,22 @@ group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     asyncAfterEachTest(function(){
         count = 1;
     });
-    asyncTest('Is count 1?', function(){
+    asyncTest('Is count 10?', function(){
         setTimeout(function(){
             count = 10;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isTrue(count === 10, 'now count equals 10');
+            isTrue(count === 10, 'Yes, count now is 10');
         });
     });
-    asyncTest('Is count still 10?', function(){
-        isFalse(count === 10, 'count doesn\'t equals 10 anymore.');
-        isTrue(count === 1, 'count now equals 1 again.');
+    asyncTest('Is count 100?', function(){
         setTimeout(function(){
             count *= 100;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
-            isTrue(count === 100, 'count now equals 100');
+            isTrue(count === 100, 'Yes, count now is 100');
         });
     });
 });
@@ -157,13 +144,13 @@ group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
     asyncTest('Was object passed?', function(val){
         var obj;
         setTimeout(function(){
-            isFalse(typeof val === 'undefined', 'obj is not undefined');
-            equal(val, {num: 1}, '{num: 1} was passed to asyncTestu');
             obj = val;
             obj.num *= 100;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
+            isFalse(typeof val === 'undefined', 'obj is not undefined');
+            equal(val, {num: 1}, '{num: 1} was passed to asyncTestu');
             isTrue(obj.num === 100, 'now obj.num equals 100');
         });
     });
