@@ -80,7 +80,7 @@ group('An asynchronous test with no before/after eachTest', function(){
         var val;
         setTimeout(function(){
             val = 'Isn\'t JavaScript amazing?';
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             isTrue(val === 'Isn\'t JavaScript amazing?', 'Yest it is!');
         });
@@ -144,7 +144,7 @@ group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
     asyncTest('Was object passed?', function(val){
         setTimeout(function(){
             val.num *= 100;
-        }, 10);
+        }, 1);
 
         whenAsyncDone(function(){
             isFalse(typeof val === 'undefined', '{num: 1} was passed to asyncTest');
@@ -161,7 +161,7 @@ group('proxy captures calling information which can be tested against', function
         setTimeout(function(){
             fn('Somewhere over');
             fn('the rainbow');
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             isTrue(fn.wasCalled(2), 'fn was called twice.');
             equal(fn.getCalledCount(), 2, 'fn was called twice.');
@@ -185,7 +185,7 @@ group('proxy captures calling information which can be tested against', function
         setTimeout(function(){
             fn1('Somewhere over ');
             fn2('the rainbow');
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             isTrue(fn1.wasCalled(1), 'fn1 was called once.');
             equal(fn1.getCalledCount(), 1, 'fn1 was called once.');
@@ -210,7 +210,7 @@ group('proxy captures calling information which can be tested against', function
         setTimeout(function(){
             foo.name('Somewhere over ');
             foo.name('the rainbow');
-        }, 10);
+        }, 1);
         whenAsyncDone(function(){
             equal(foo.title, 'Somewhere over the rainbow', 'foo.title = "Somewhere over the rainbow"');
             isTrue(foo.name.wasCalled(2), 'callback was called twice.');
