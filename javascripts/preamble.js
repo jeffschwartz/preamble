@@ -331,7 +331,11 @@
             testLabel = '',
             html = '', 
             //v2.0.0 Hide passed tests.
-            hidePassed = elHidePassedCheckBox.checked;
+            hidePassed = elHidePassedCheckBox.checked,
+            //v2.0.0 Titles for anchor tags.
+            groupTile = 'title="Click here to filter by this group."',
+            testTitle = 'title="Click here to filter by this test."',
+            assertionTitle = 'title="Click here to filter by this assertion."';
         elResults.style.display = 'block';
         results.forEach(function(result){
             if(result.testLabel !== testLabel){
@@ -348,22 +352,22 @@
                 //v2.0.0 Added "data-passed" attribute for hiding passed tests.
                 html += '<div class="group-container' + (hidePassed && result.result ? ' group-container-hidden' : '') + 
                     '"' + 'data-passed="' + result.result + '"><a class="group" href="?group=' +
-                    encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
+                    encodeURI(result.groupLabel) + '"' + groupTile + '>' + result.groupLabel + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
                 html += '<div class="tests-container"><a class="test" href="?group=' +
-                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
+                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '"' + testTitle + '>' + result.testLabel + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
                 html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">Error: "' +
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '"' + assertionTitle + '>Error: "' +
                     result.assertionLabel + '" (' + result.displayAssertionName +
                     ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
                 html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' +
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '"' + assertionTitle + '>"' +
                     result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</a></div>';
             }
         });
