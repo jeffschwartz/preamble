@@ -4,7 +4,7 @@ Preamble is a powerful Test Driven Development framework for JavaScript written 
 
 Documentation lives here: http://jeffschwartz.github.io/preamble/
 
-### Prending v2 Release Notes
+#### Prending v2 Release Notes
 This release introduces several new features as well as numerous changes to the
 code base.
 
