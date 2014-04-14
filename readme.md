@@ -1,8 +1,10 @@
-**A JavaScript Testing Framework**
+### A JavaScript Testing Framework ###
 
 Preamble is a powerful Test Driven Development framework for JavaScript written in JavaScript. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your test scripts interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy, intuitive and fun.
 
 Documentation lives here: http://jeffschwartz.github.io/preamble/
+
+Join the discussion here: https://groups.google.com/forum/#!forum/preamble-users/
 
 #### Prending v2 Release Notes
 This release introduces several new features as well as numerous changes to the
@@ -49,7 +51,7 @@ configuration property, which defaults to "false" and a check box to
 override the configuration.
 
 9) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
-it to wrap <div id="ui-test-container" class="ui-test-container">. This was 
+it to wrap &ltdiv id="ui-test-container" class="ui-test-container"&gt. This was 
 required in order to support in-line configuration (see item 1 above). 
 
 10) Display timings for groups and tests in details report.
