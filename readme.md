@@ -49,7 +49,7 @@ configuration property, which defaults to "false" and a check box to
 override the configuration.
 
 9) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
-it to wrap <div id="ui-test-container" class="ui-test-container">. This was 
+it to wrap &ltdiv id="ui-test-container" class="ui-test-container"&gt. This was 
 required in order to support in-line configuration (see item 1 above). 
 
 10) Display timings for groups and tests in details report.
