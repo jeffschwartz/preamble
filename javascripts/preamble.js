@@ -208,7 +208,8 @@
                     });
                 case 'assertion':
                     return config.filters.some(function(fltr){
-                        return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test) && (fltr.assertion === '*' || fltr.assertion === labels.assertion);
+                        return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test) && 
+                            (fltr.assertion === '*' || fltr.assertion === labels.assertion);
                     });
             }
         }
