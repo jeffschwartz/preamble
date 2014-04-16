@@ -45,11 +45,13 @@
         assert,
         //v2.0.0
         prevGroupsQueueCount = 0,
+        //v2.0.0
         groupsQueueStableCount = 0,
+        //v2.0.0
         groupsQueueStableInterval = 1,
         intervalId,
-        //Filters.
         currentTestStep,
+        //Filters.
         groupFilter,
         testFilter,
         assertionFilter,
@@ -351,13 +353,14 @@
             if(result.groupLabel !== groupLabel){
                 //v2.0.0 Added "data-passed" attribute for hiding passed tests.
                 html += '<div class="group-container' + (hidePassed && result.groupResult ? ' group-container-hidden' : '') + 
-                    '"' + 'data-passed="' + result.groupResult + '"><a class="group" href="?group=' +
+                    '"' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '"' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
-                html += '<div class="tests-container"><a class="test" href="?group=' +
-                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '"' + testTitle + '>' + result.testLabel + ' (' + result.testDuration + 'ms)' + '</a>';
+                html += '<div class="tests-container"><a class="test' + (!result.testResult ? ' failed' : '') + '" href="?group=' +
+                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '"' + testTitle + '>' + result.testLabel + 
+                    ' (' + result.testDuration + 'ms)' + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
@@ -1098,6 +1101,7 @@
                         groupResult: group.result,
                         testLabel: test.testLabel,
                         testDuration: test.duration,
+                        testResult: test.result,
                         result: assertion.result,
                         assertionLabel: assertion.assertionLabel,
                         displayAssertionName: assertion.displayAssertionName,
