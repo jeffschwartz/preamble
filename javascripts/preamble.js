@@ -15,15 +15,18 @@
         elResults,
         //v2.0.0
         elHidePassedCheckBox,
-        //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20}).
+        //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
+        //or in-line in your tests.
         //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
         //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
+        //*IMPORTANT - USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
         //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
         //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
         //(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
         //name: (default 'Test') - set to a meaningful name.
         //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
         //hidePassedGroups: (default: false) - v2.0.0 set to true to hide padded groups.
+        //filters: (default: []]) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}.
         //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
         defaultConfig = {
             shortCircuit: false, 
@@ -33,6 +36,7 @@
             name: 'Test', 
             uiTestContainerId: 'ui-test-container', 
             hidePassedGroups: false,
+            filters: [],
             autoStart: true
         },
         //Merged configuration options.
@@ -51,10 +55,12 @@
         queueStableInterval = 1,
         intervalId,
         currentTestStep,
-        //Filters.
-        groupFilter,
-        testFilter,
-        assertionFilter,
+        ////Run-time filter, it takes precedent over config provided filters.
+        //runtimeGroupFilter,
+        //runtimeTestFilter,
+        //runtimeAssertionFilter,
+        //v2.0.0 Run-time filter
+        runtimeFilter = {},
         //v.2.0.0 The stack trace property used by the browser.
         stackTraceProperty,
         //v.2.0.0 RegEx for getting file from stack trace.
@@ -173,6 +179,36 @@
         });
     }
 
+    //v2.0.0 Filtering.
+    function filter(level, label){
+        //Check if there is a run-time filter first, because it takes precendence over config provided filters
+        if(runtimeFilter.group){
+            switch(level){
+                case 'group':
+                    if(runtimeFilter.group && runtimeFilter.group === label){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+                case 'test':
+                    if(runtimeFilter.test && runtimeFilter.test === label){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+                case 'assertion':
+                    if(runtimeFilter.assertion && runtimeFilter.assertion === label){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                    break;
+            }
+        }
+    }
+
     //Configuration
     //v2.0.0 Support for in-line configuration.
     //Called once internally but may be called again if test script calls it.
@@ -189,10 +225,10 @@
         //Totals
         queue.totTests = 0;
         queue.totAssertions = 0;
-        //Capture filters, if any.
-        groupFilter = loadPageVar('group');
-        testFilter = loadPageVar('test');
-        assertionFilter = loadPageVar('assertion');
+        //Capture run-time filters, if any. Run-time filters take precedent over config provided filters.
+        runtimeFilter.group = loadPageVar('group');
+        runtimeFilter.test = loadPageVar('test');
+        runtimeFilter.assertion = loadPageVar('assertion');
         //v2.0.0 Capture exception's stack trace property.
         setStackTraceProperty();
         //Handle global errors.
@@ -577,7 +613,7 @@
 
     //v.2.0.0 Including a stack trace.
     function noteEqualAssertion(value, expectation, label){
-        if(assertionFilter === label || assertionFilter === ''){
+        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
             if(arguments.length !== 3){
                 throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
             }
@@ -589,7 +625,7 @@
 
     //v.2.0.0 Including a stack trace.
     function noteIsTrueAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
+        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
             if(arguments.length !== 2){
                 throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
             }
@@ -599,7 +635,7 @@
 
     //v.2.0.0 Including a stack trace.
     function noteIsTruthyAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
+        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
             if(arguments.length !== 2){
                 throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
             }
@@ -609,7 +645,7 @@
 
     //v.2.0.0 Including a stack trace.
     function noteNotEqualAssertion(value, expectation, label){
-        if(assertionFilter === label || assertionFilter === ''){
+        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
             if(arguments.length !== 3){
                 throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
             }
@@ -621,7 +657,7 @@
 
     //v.2.0.0 Including a stack trace.
     function noteIsFalseAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
+        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
             if(arguments.length !== 2){
                 throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
             }
@@ -631,7 +667,7 @@
 
     //v.2.0.0 Including a stack trace.
     function noteIsNotTruthyAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
+        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
             if(arguments.length !== 2){
                 throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
             }
@@ -802,7 +838,7 @@
     function group(label, callback){
         var start,
             end;
-        if(groupFilter === label || groupFilter === ''){
+        if(runtimeFilter.group === label || runtimeFilter.group === ''){
             queue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
             callback(); //will call function test.
@@ -815,7 +851,7 @@
     //and registers its callback in its testsQueue item.
     function test(label, callback){
         var cgqi = queue[queue.length - 1];
-        if(testFilter === label || testFilter === ''){
+        if(runtimeFilter.test === label || runtimeFilter.test === ''){
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
             queue.totTests++;
         }
@@ -826,7 +862,7 @@
     //Form: asyncTest(label[, interval], callback).
     function asyncTest(label){
         var cgqi = queue[queue.length - 1];
-        if(testFilter === label || testFilter === ''){
+        if(runtimeFilter.test === label || runtimeFilter.test === ''){
             cgqi.tests.push(combine(currentTestHash, {
                 testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
