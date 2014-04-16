@@ -1,16 +1,11 @@
 configure({
     name: 'Sample Test Suite',
-    hidePassedGroups: false,
+    hidePassedGroups: true,
     filters: [
         {
             group: 'Truthy boolean evaluation', 
-            test: 'When using truthy boolean evaluation', 
-            assertion: 'a valid reference is true'
-        },
-        {
-            group: 'Truthy boolean evaluation', 
-            test: 'When using truthy boolean evaluation', 
-            assertion: 'true is true'
+            test: '*', 
+            assertion: '*'
         }         
     ]
 });
