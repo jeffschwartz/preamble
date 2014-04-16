@@ -38,17 +38,17 @@
         //Merged configuration options.
         config = {},
         //v2.0.0
-        groupsQueue=[],
+        queue=[],
         //v2.0.0 Can only be true if config.shortCircuit is true and an assertion has failed.
         isShortCircuited = false,
         currentTestHash,
         assert,
         //v2.0.0
-        prevGroupsQueueCount = 0,
+        prevQueueCount = 0,
         //v2.0.0
-        groupsQueueStableCount = 0,
+        queueStableCount = 0,
         //v2.0.0
-        groupsQueueStableInterval = 1,
+        queueStableInterval = 1,
         intervalId,
         currentTestStep,
         //Filters.
@@ -65,7 +65,8 @@
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
-      return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') + '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
+        return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') + 
+            '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
     }
 
     //Display caught errors to the browser.
@@ -179,15 +180,15 @@
         //v2.0.0
         var configArg = arguments && arguments[0];
         //Ignore configuration once testing has started.
-        if(configArg && groupsQueue.length){
+        if(configArg && queue.length){
             alert('no no no!');
             return;
         }
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
         //Totals
-        groupsQueue.totTests = 0;
-        groupsQueue.totAssertions = 0;
+        queue.totTests = 0;
+        queue.totAssertions = 0;
         //Capture filters, if any.
         groupFilter = loadPageVar('group');
         testFilter = loadPageVar('test');
@@ -282,32 +283,34 @@
 
     function showResultsSummary(){
         var html,
-            totGroups = groupsQueue.length,
-            totGroupsPassed = groupsQueue.length - groupsQueue.totGroupsFailed,
-            totTestsPassed = groupsQueue.totTests - groupsQueue.totTestsFailed,
-            totAssertionsPassed = groupsQueue.totAssertions - groupsQueue.totAssertionsFailed;
+            totGroups = queue.length,
+            totGroupsPassed = queue.length - queue.totGroupsFailed,
+            totTestsPassed = queue.totTests - queue.totTestsFailed,
+            totAssertionsPassed = queue.totAssertions - queue.totAssertionsFailed;
         //Show elapsed time.
         if(isShortCircuited){
-            html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + (groupsQueue.duration) + ' milliseconds.</p>';
+            html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + 
+                (queue.duration) + ' milliseconds.</p>';
         }else{
-            html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + groupsQueue.totalElapsedTime  + ' milliseconds.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (groupsQueue.duration) + ' milliseconds.</p>';
+            html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + queue.totalElapsedTime  + 
+                ' milliseconds.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + ' milliseconds.</p>';
         }
         //Show a summary in the header.
-        if(groupsQueue.result){
+        if(queue.result){
             html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroups +
-                pluralize(' group', totGroups) + '/' + groupsQueue.totTests+ pluralize(' test', groupsQueue.totTests) + '/' +
-                groupsQueue.totAssertions + pluralize(' assertion', groupsQueue.totAssertions) + ' passed' + '</p>';
+                pluralize(' group', totGroups) + '/' + queue.totTests+ pluralize(' test', queue.totTests) + '/' +
+                queue.totAssertions + pluralize(' assertion', queue.totAssertions) + ' passed' + '</p>';
         }else if(totAssertionsPassed === 0){
-            html += '<p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed +
-                pluralize(' group', groupsQueue.totGroupsFailed) + '/' + groupsQueue.totTestsFailed + pluralize(' test', groupsQueue.totTestsFailed) + '/' +
-                groupsQueue.totAssertionsFailed + pluralize(' assertion', groupsQueue.totAssertionsFailed) + ' failed.</p>';
+            html += '<p id="preamble-results-summary-failed" class="summary failed">' + queue.totGroupsFailed +
+                pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) + '/' +
+                queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</p>';
         }else{
             html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed +
                 pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +
                 totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) +
-                ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + groupsQueue.totGroupsFailed +
-                pluralize(' group', groupsQueue.totGroupsFailed) + '/' + groupsQueue.totTestsFailed + pluralize(' test', groupsQueue.totTestsFailed) +
-                '/' + groupsQueue.totAssertionsFailed + pluralize(' assertion', groupsQueue.totAssertionsFailed) + ' failed.</p>';
+                ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + queue.totGroupsFailed +
+                pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) +
+                '/' + queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</p>';
         }
         html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
@@ -543,7 +546,7 @@
     //v2.0.0 Pushing stack trace onto the queue and maintain assertions counter.
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         currentTestHash.assertions.push({assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, stackTrace: stackTrace});
-        groupsQueue.totAssertions++;
+        queue.totAssertions++;
     }
 
     function throwException(errMessage){
@@ -688,14 +691,14 @@
 
     //Runs setup synchronously for each test.
     function runBeforeEachSync(){
-        currentTestHash.beforeTestVal = groupsQueue[currentGroupIndex].beforeEachTest();
+        currentTestHash.beforeTestVal = queue[currentGroupIndex].beforeEachTest();
         currentTestStep++;
         runTest();
     }
 
     //Runs setup asynchronously for each test.
     function runBeforeEachAsync(){
-        currentTestHash.beforeTestVal = groupsQueue[currentGroupIndex].asyncBeforeEachTest();
+        currentTestHash.beforeTestVal = queue[currentGroupIndex].asyncBeforeEachTest();
         setTimeout(function(){
             currentTestStep++;
             runTest();
@@ -704,14 +707,14 @@
 
     //Runs tear down synchronously for each test.
     function runAfterEachSync(){
-        groupsQueue[currentGroupIndex].afterEachTest();
+        queue[currentGroupIndex].afterEachTest();
         currentTestStep++;
         runTest();
     }
 
     //Runs tear down asynchronously for each test.
     function runAfterEachAsync(){
-        groupsQueue[currentGroupIndex].asyncAfterEachTest();
+        queue[currentGroupIndex].asyncAfterEachTest();
         setTimeout(function(){
             currentTestStep++;
             runTest();
@@ -724,9 +727,9 @@
         switch(currentTestStep){
             case 0: //Runs beforeEach.
                 currentTestHash.start = Date.now();
-                if(groupsQueue[currentGroupIndex].beforeEachTest){
+                if(queue[currentGroupIndex].beforeEachTest){
                     runBeforeEachSync();
-                }else if(groupsQueue[currentGroupIndex].asyncBeforeEachTest){
+                }else if(queue[currentGroupIndex].asyncBeforeEachTest){
                     runBeforeEachAsync();
                 }else{
                     currentTestStep++;
@@ -741,9 +744,9 @@
                 }
                 break;
             case 2: //Runs afterEach.
-                if(groupsQueue[currentGroupIndex].afterEachTest){
+                if(queue[currentGroupIndex].afterEachTest){
                     runAfterEachSync();
-                }else if(groupsQueue[currentGroupIndex].asyncAfterEachTest){
+                }else if(queue[currentGroupIndex].asyncAfterEachTest){
                     runAfterEachAsync();
                 }else{
                     currentTestStep++;
@@ -764,13 +767,13 @@
 
     //Note runBeforeEach.
     function beforeEachTest(callback){
-        var cgqi = groupsQueue[groupsQueue.length - 1];
+        var cgqi = queue[queue.length - 1];
         cgqi.beforeEachTest = callback;
     }
 
     //Note asyncRunBeforeEach.
     function asyncBeforeEachTest(callback){
-        var cgqi = groupsQueue[groupsQueue.length - 1];
+        var cgqi = queue[queue.length - 1];
         if(arguments.length === 2){
             cgqi.asyncBeforeTestInterval = arguments[0];
             cgqi.asyncBeforeEachTest = arguments[1];
@@ -781,13 +784,13 @@
 
     //Note runAfterEach.
     function afterEachTest(callback){
-        var cgqi = groupsQueue[groupsQueue.length - 1];
+        var cgqi = queue[queue.length - 1];
         cgqi.afterEachTest = callback;
     }
 
     //Note asyncRunAfterEach.
     function asyncAfterEachTest(callback){
-        var cgqi = groupsQueue[groupsQueue.length - 1];
+        var cgqi = queue[queue.length - 1];
         if(arguments.length === 2){
             cgqi.asyncAfterTestInterval = arguments[0];
             cgqi.asyncAfterEachTest = arguments[1];
@@ -800,21 +803,21 @@
         var start,
             end;
         if(groupFilter === label || groupFilter === ''){
-            groupsQueue.push({groupLabel: label, callback: callback, tests: []});
+            queue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
             callback(); //will call function test.
             end = Date.now();
-            groupsQueue[groupsQueue.length - 1].duration = end - start;
+            queue[queue.length - 1].duration = end - start;
         }
     }
 
     //Provides closure and a label to a synchronous test
     //and registers its callback in its testsQueue item.
     function test(label, callback){
-        var cgqi = groupsQueue[groupsQueue.length - 1];
+        var cgqi = queue[queue.length - 1];
         if(testFilter === label || testFilter === ''){
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
-            groupsQueue.totTests++;
+            queue.totTests++;
         }
     }
 
@@ -822,12 +825,12 @@
     //and registers its callback in its testsQueue item.
     //Form: asyncTest(label[, interval], callback).
     function asyncTest(label){
-        var cgqi = groupsQueue[groupsQueue.length - 1];
+        var cgqi = queue[queue.length - 1];
         if(testFilter === label || testFilter === ''){
             cgqi.tests.push(combine(currentTestHash, {
                 testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
-            groupsQueue.totTests++;
+            queue.totTests++;
         }
     }
 
@@ -944,9 +947,7 @@
             fn.getArgsPassed = getArgsPassed;
             fn.getReturned = getReturned;
             fn.getData = getData;
-            //
             //Exposed Higher Order API - see Privileged functions used by API above.
-            //
             fn.wasCalled = wasCalled;
             fn.dataIterator = dataIterator;
             //Replaces object's method property with proxy's fn.
@@ -962,11 +963,11 @@
 
     function showCoverage(){
         var html,
-            totGroupsPlrzd = pluralize(' group', groupsQueue.length),
-            totTestsPlrzd = pluralize(' test', groupsQueue.totTests),
-            totAssertionsPlrzd = pluralize(' assertion', groupsQueue.totAssertions),
-            coverage = 'Covering ' + groupsQueue.length + ' ' + totGroupsPlrzd + '/' +
-                groupsQueue.totTests + ' ' + totTestsPlrzd + '/' + groupsQueue.totAssertions + totAssertionsPlrzd + '.';
+            totGroupsPlrzd = pluralize(' group', queue.length),
+            totTestsPlrzd = pluralize(' test', queue.totTests),
+            totAssertionsPlrzd = pluralize(' assertion', queue.totAssertions),
+            coverage = 'Covering ' + queue.length + ' ' + totGroupsPlrzd + '/' +
+                queue.totTests + ' ' + totTestsPlrzd + '/' + queue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
@@ -980,6 +981,9 @@
     /**
      * It all starts here!!!
      */
+
+    //v2.0.0 Start time, used to report total elapsed time.
+    queue.start = Date.now();
 
     //Configure the runtime environment.
     configure();
@@ -1089,10 +1093,10 @@
         }, 0);
     }
 
-    //Flattens groupsQueue to an array of results that can be easily reported.
+    //Flattens queue to an array of results that can be easily reported.
     function mapGroupsToResults(){
         var results = [];
-        groupsQueue.forEach(function(group){
+        queue.forEach(function(group){
             group.tests.forEach(function(test){
                 test.assertions.forEach(function(assertion){
                     results.push({
@@ -1116,20 +1120,20 @@
     //Initialize.
     on('start', function(){
         //Overall passed/failed.
-        groupsQueue.result = true;
+        queue.result = true;
         //Total failed groups.
-        groupsQueue.totGroupsFailed = 0;
+        queue.totGroupsFailed = 0;
         //Total failed tests.
-        groupsQueue.totTestsFailed = 0;
+        queue.totTestsFailed = 0;
         //Total failed assertions.
-        groupsQueue.totAssertionsFailed = 0;
+        queue.totAssertionsFailed = 0;
         currentGroupIndex = -1;
         emit('runGroup');
     });
 
     //Runs a single group.
     on('runGroup', function(){
-        var group = currentGroupIndex >= 0 && groupsQueue[currentGroupIndex];
+        var group = currentGroupIndex >= 0 && queue[currentGroupIndex];
         if(group){
             group.duration += duration(group.tests);
             //Record how many tests failed.
@@ -1139,7 +1143,7 @@
             group.result = group.totFailed ? false : true;
         }
         currentGroupIndex++;
-        if(currentGroupIndex < groupsQueue.length && !isShortCircuited){
+        if(currentGroupIndex < queue.length && !isShortCircuited){
             currentTestIndex = -1;
             emit('runTest');
         }else{
@@ -1150,7 +1154,7 @@
 
     //Runs a single test.
     on('runTest', function(){
-        var test = currentTestIndex >= 0 && groupsQueue[currentGroupIndex].tests[currentTestIndex],
+        var test = currentTestIndex >= 0 && queue[currentGroupIndex].tests[currentTestIndex],
             elapsed;
         if(test){
             //Mark the test with how many of its assertions failed.
@@ -1161,15 +1165,15 @@
             test.result = test.totFailed === 0;
             if(!test.result){
                 //Mark tests as having failed.
-                groupsQueue[currentGroupIndex].tests.result = false;
+                queue[currentGroupIndex].tests.result = false;
             }
             elapsed = test.end - test.start;
             //Don't report 0 durations!
             test.duration = elapsed > 0 ? elapsed : 1;
         }
         currentTestIndex++;
-        if(currentTestIndex < groupsQueue[currentGroupIndex].tests.length && !isShortCircuited){
-            currentTestHash = groupsQueue[currentGroupIndex].tests[currentTestIndex];
+        if(currentTestIndex < queue[currentGroupIndex].tests.length && !isShortCircuited){
+            currentTestHash = queue[currentGroupIndex].tests[currentTestIndex];
             currentTestStep = 0;
             runTest();
         }else{
@@ -1179,28 +1183,28 @@
 
     //All groups ran.
     on('end', function(){
-        groupsQueue.duration = duration(groupsQueue);
+        queue.duration = duration(queue);
         //Record how many assertions failed.
-        groupsQueue.totAssertionsFailed = groupsQueue.reduce(function(prevValue, group){
+        queue.totAssertionsFailed = queue.reduce(function(prevValue, group){
             var t = group.tests.reduce(function(prevValue, test){
                 return test.totFailed ? prevValue + test.totFailed : 0;
             }, 0);
             return prevValue + t;
         }, 0);
         //Record how many tests failed.
-        groupsQueue.totTestsFailed = groupsQueue.reduce(function(prevValue, group){
+        queue.totTestsFailed = queue.reduce(function(prevValue, group){
             var t = group.tests.reduce(function(prevValue, test){
                 return !test.result ? prevValue + 1 : prevValue;
             }, 0);
             return prevValue + t;
         }, 0);
         //Record how many groups failed.
-        groupsQueue.totGroupsFailed = groupsQueue.reduce(function(prevValue, group){
+        queue.totGroupsFailed = queue.reduce(function(prevValue, group){
             return !group.result ? prevValue + 1 : prevValue;
         }, 0);
-        groupsQueue.result = groupsQueue.totAssertionsFailed === 0;
-        groupsQueue.end = Date.now();
-        groupsQueue.totalElapsedTime = groupsQueue.end - groupsQueue.start;
+        queue.result = queue.totAssertionsFailed === 0;
+        queue.end = Date.now();
+        queue.totalElapsedTime = queue.end - queue.start;
         showResultsSummary();
         showResultsDetails(mapGroupsToResults());
     });
@@ -1226,37 +1230,35 @@
     }
 
     /**
-     * Wait while the groupsQueue is loaded.
+     * Wait while the queue is loaded.
      */
 
     //Catch errors.
     try{
-        //v2.0.0 Start time, used to report total elapsed time.
-        groupsQueue.start = Date.now();
         //v2.0.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
-        //Wait while the groupsQueue is built as scripts call group function.
-        //Keep checking the groupsQueue's length until it is 'stable'.
+        //Wait while the queue is built as scripts call group function.
+        //Keep checking the queue's length until it is 'stable'.
         //Keep checking that config.autoStart is true.
         //Stable is defined by a time interval during which the length
-        //of the groupsQueue remains constant, indicating that all groups
+        //of the queue remains constant, indicating that all groups
         //have been loaded. Once stable, run the tests.
         //config.autoStart can only be false if it set by an external
         //process (e.g. Karma adapter).
         intervalId = setInterval(function(){
-            if(groupsQueue.length === prevGroupsQueueCount){
-                if(groupsQueueStableCount > 1 && config.autoStart){
+            if(queue.length === prevQueueCount){
+                if(queueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
                     //Run!
                     emit('start');
                 }else{
-                    groupsQueueStableCount++;
+                    queueStableCount++;
                 }
             }else{
-                groupsQueueStableCount = 0;
-                prevGroupsQueueCount = groupsQueue.length;
+                queueStableCount = 0;
+                prevQueueCount = queue.length;
             }
-        }, groupsQueueStableInterval);
+        }, queueStableInterval);
     } catch(e) {
         errorHandler(e);
     }
