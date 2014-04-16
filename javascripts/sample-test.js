@@ -1,6 +1,18 @@
 configure({
     name: 'Sample Test Suite',
-    hidePassedGroups: true
+    hidePassedGroups: false,
+    filters: [
+        {
+            group: 'Truthy boolean evaluation', 
+            test: 'When using truthy boolean evaluation', 
+            assertion: 'a valid reference is true'
+        },
+        {
+            group: 'Truthy boolean evaluation', 
+            test: 'When using truthy boolean evaluation', 
+            assertion: 'true is true'
+        }         
+    ]
 });
 
 group('This group will intentionally fail', function(){

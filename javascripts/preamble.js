@@ -55,12 +55,12 @@
         queueStableInterval = 1,
         intervalId,
         currentTestStep,
-        ////Run-time filter, it takes precedent over config provided filters.
+        ////Run-time filter, it takes precedent over configuration filters.
         //runtimeGroupFilter,
         //runtimeTestFilter,
         //runtimeAssertionFilter,
         //v2.0.0 Run-time filter
-        runtimeFilter = {},
+        runtimeFilter,
         //v.2.0.0 The stack trace property used by the browser.
         stackTraceProperty,
         //v.2.0.0 RegEx for getting file from stack trace.
@@ -180,31 +180,36 @@
     }
 
     //v2.0.0 Filtering.
-    function filter(level, label){
-        //Check if there is a run-time filter first, because it takes precendence over config provided filters
+    function filter(level, labels){
+        //If there are no runtime and configuration filters then return true.
+        if(!runtimeFilter.group && !config.filters.length){
+            return true;
+        }
+        //Check if there is a run-time filter first, because it takes precendence over configuration filters
         if(runtimeFilter.group){
             switch(level){
                 case 'group':
-                    if(runtimeFilter.group && runtimeFilter.group === label){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                    break;
+                    return runtimeFilter.group === labels.group;
                 case 'test':
-                    if(runtimeFilter.test && runtimeFilter.test === label){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                    break;
+                    return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test);
                 case 'assertion':
-                    if(runtimeFilter.assertion && runtimeFilter.assertion === label){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                    break;
+                    return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test) && 
+                        (runtimeFilter.assertion === '' || runtimeFilter.assertion === labels.assertion);
+            }
+        }else{
+            switch(level){
+                case 'group':
+                    return config.filters.some(function(fltr){
+                        return fltr.group === labels.group;
+                    });
+                case 'test':
+                    return config.filters.some(function(fltr){
+                        return fltr.group === labels.group && fltr.test === labels.test;
+                    });
+                case 'assertion':
+                    return config.filters.some(function(fltr){
+                        return fltr.group === labels.group && fltr.test === labels.test && fltr.assertion === labels.assertion
+                    });
             }
         }
     }
@@ -225,10 +230,8 @@
         //Totals
         queue.totTests = 0;
         queue.totAssertions = 0;
-        //Capture run-time filters, if any. Run-time filters take precedent over config provided filters.
-        runtimeFilter.group = loadPageVar('group');
-        runtimeFilter.test = loadPageVar('test');
-        runtimeFilter.assertion = loadPageVar('assertion');
+        //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
+        runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test'), assertion: loadPageVar('assertion')};
         //v2.0.0 Capture exception's stack trace property.
         setStackTraceProperty();
         //Handle global errors.
@@ -613,66 +616,130 @@
 
     //v.2.0.0 Including a stack trace.
     function noteEqualAssertion(value, expectation, label){
-        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-            if(arguments.length !== 3){
-                throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 3){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
             pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
+        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
+        //    if(arguments.length !== 3){
+        //        throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        //    }
+        //    //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+        //    pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
+        //        currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
+        //}
     }
 
     //v.2.0.0 Including a stack trace.
     function noteIsTrueAssertion(value, label){
-        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
         }
+        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
+        //    if(arguments.length !== 2){
+        //        throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
+        //    }
+        //    pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
+        //}
     }
 
     //v.2.0.0 Including a stack trace.
     function noteIsTruthyAssertion(value, label){
-        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
         }
+        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
+        //    if(arguments.length !== 2){
+        //        throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
+        //    }
+        //    pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
+        //}
     }
 
     //v.2.0.0 Including a stack trace.
     function noteNotEqualAssertion(value, expectation, label){
-        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-            if(arguments.length !== 3){
-                throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 3){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
             pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
+        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
+        //    if(arguments.length !== 3){
+        //        throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
+        //    }
+        //    //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+        //    pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
+        //        currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
+        //}
     }
 
     //v.2.0.0 Including a stack trace.
     function noteIsFalseAssertion(value, label){
-        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
         }
+        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
+        //    if(arguments.length !== 2){
+        //        throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
+        //    }
+        //    pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
+        //}
     }
 
     //v.2.0.0 Including a stack trace.
     function noteIsNotTruthyAssertion(value, label){
-        if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
         }
+        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
+        //    if(arguments.length !== 2){
+        //        throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
+        //    }
+        //    pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
+        //}
     }
 
     //Starts the timer for an async test. When the timeout is triggered it calls
@@ -838,23 +905,34 @@
     function group(label, callback){
         var start,
             end;
-        if(runtimeFilter.group === label || runtimeFilter.group === ''){
+        if(filter('group', {group: label})){
             queue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
-            callback(); //will call function test.
+            callback(); //will call function test/asyncTest.
             end = Date.now();
             queue[queue.length - 1].duration = end - start;
         }
+        //if(runtimeFilter.group === label || runtimeFilter.group === ''){
+        //    queue.push({groupLabel: label, callback: callback, tests: []});
+        //    start = Date.now();
+        //    callback(); //will call function test/asyncTest.
+        //    end = Date.now();
+        //    queue[queue.length - 1].duration = end - start;
+        //}
     }
 
     //Provides closure and a label to a synchronous test
     //and registers its callback in its testsQueue item.
     function test(label, callback){
         var cgqi = queue[queue.length - 1];
-        if(runtimeFilter.test === label || runtimeFilter.test === ''){
+        if(filter('test', {group: cgqi.groupLabel, test: label})){
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
             queue.totTests++;
         }
+        //if(runtimeFilter.test === label || runtimeFilter.test === ''){
+        //    cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
+        //    queue.totTests++;
+        //}
     }
 
     //Provides closure and a label to an asynchronous test
@@ -862,12 +940,19 @@
     //Form: asyncTest(label[, interval], callback).
     function asyncTest(label){
         var cgqi = queue[queue.length - 1];
-        if(runtimeFilter.test === label || runtimeFilter.test === ''){
+        if(filter('test', {group: cgqi.groupLabel, test: label})){
             cgqi.tests.push(combine(currentTestHash, {
                 testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
             queue.totTests++;
+
         }
+        //if(runtimeFilter.test === label || runtimeFilter.test === ''){
+        //    cgqi.tests.push(combine(currentTestHash, {
+        //        testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
+        //        isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
+        //    queue.totTests++;
+        //}
     }
 
     //Returns the ui test container element.
