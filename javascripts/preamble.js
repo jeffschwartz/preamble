@@ -981,6 +981,9 @@
      * It all starts here!!!
      */
 
+    //v2.0.0 Start time, used to report total elapsed time.
+    queue.start = Date.now();
+
     //Configure the runtime environment.
     configure();
 
@@ -1231,8 +1234,6 @@
 
     //Catch errors.
     try{
-        //v2.0.0 Start time, used to report total elapsed time.
-        queue.start = Date.now();
         //v2.0.0 For external reporting. Set status to "loading".
         publishStatusUpdate({status: 'loading'});
         //Wait while the queue is built as scripts call group function.
