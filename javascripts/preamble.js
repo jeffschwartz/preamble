@@ -27,7 +27,8 @@
         //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
         //hidePassedGroups: (default: false) - v2.0.0 set to true to hide padded groups.
         //filters: (default: []]) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}.
-        //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
+        //You can also use the wildcard '*' character for test and/or assertions to specify that all tests and/or all assertions, respectively, should be included in the filter.
+        //autoStart: (default: true) - for internal use only. Adapters for external processes, such as Karma, initially set this to true and will eventually set it to false when appropriate.
         defaultConfig = {
             shortCircuit: false, 
             windowGlobals: true, 
