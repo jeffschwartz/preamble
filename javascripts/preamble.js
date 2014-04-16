@@ -65,7 +65,8 @@
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
-      return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') + '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
+        return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') + 
+            '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
     }
 
     //Display caught errors to the browser.
@@ -288,9 +289,11 @@
             totAssertionsPassed = queue.totAssertions - queue.totAssertionsFailed;
         //Show elapsed time.
         if(isShortCircuited){
-            html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + (queue.duration) + ' milliseconds.</p>';
+            html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + 
+                (queue.duration) + ' milliseconds.</p>';
         }else{
-            html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + queue.totalElapsedTime  + ' milliseconds.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + ' milliseconds.</p>';
+            html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + queue.totalElapsedTime  + 
+                ' milliseconds.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + ' milliseconds.</p>';
         }
         //Show a summary in the header.
         if(queue.result){
@@ -944,9 +947,7 @@
             fn.getArgsPassed = getArgsPassed;
             fn.getReturned = getReturned;
             fn.getData = getData;
-            //
             //Exposed Higher Order API - see Privileged functions used by API above.
-            //
             fn.wasCalled = wasCalled;
             fn.dataIterator = dataIterator;
             //Replaces object's method property with proxy's fn.
