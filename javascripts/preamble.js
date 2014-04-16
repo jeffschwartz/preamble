@@ -44,7 +44,7 @@
         currentTestHash,
         assert,
         //v2.0.0
-        prevGroupsQueueCount = 0,
+        prevQueueCount = 0,
         //v2.0.0
         queueStableCount = 0,
         //v2.0.0
@@ -1245,7 +1245,7 @@
         //config.autoStart can only be false if it set by an external
         //process (e.g. Karma adapter).
         intervalId = setInterval(function(){
-            if(queue.length === prevGroupsQueueCount){
+            if(queue.length === prevQueueCount){
                 if(queueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
                     //Run!
@@ -1255,7 +1255,7 @@
                 }
             }else{
                 queueStableCount = 0;
-                prevGroupsQueueCount = queue.length;
+                prevQueueCount = queue.length;
             }
         }, queueStableInterval);
     } catch(e) {
