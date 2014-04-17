@@ -1,13 +1,6 @@
 configure({
     name: 'Sample Test Suite',
-    hidePassedGroups: true/*,*/
-    //filters: [
-        //{
-            //group: 'Truthy boolean evaluation', 
-            //test: '*', 
-            //assertion: '*'
-        //}         
-    /*]*/
+    hidePassedGroups: true
 });
 
 group('This group will intentionally fail', function(){
