@@ -14,17 +14,35 @@
         elUiTestContainer,
         elResults,
         //v2.0.0
-        elHidePassedCheckBox,
-        //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20}).
-        //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
-        //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
-        //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-        //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
-        //(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
-        //name: (default 'Test') - set to a meaningful name.
-        //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-        //hidePassedGroups: (default: false) - v2.0.0 set to true to hide padded groups.
-        //autoStart: (default: true) - for internal use only. If Karma is running then autoStart is set to false.
+        elHpg,
+        /**
+         *Default configuration options - override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
+         *or in-line in your tests.
+         *
+         *shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
+         *
+         *windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
+         *USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
+         *
+         *asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous 
+         *tests to complete.
+         *
+         *asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
+         *(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
+         *
+         *name: (default 'Test') - set to a meaningful name.
+         *
+         *uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+         *
+         *hidePassedGroups: (default: false) - v2.0.0 set to true to hide passed groups.
+         *
+         *filters: (default: []]) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
+         *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
+         *all tests and/or all assertions, respectively, should be included in the filter.
+         *
+         *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
+         *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
+         */
         defaultConfig = {
             shortCircuit: false, 
             windowGlobals: true, 
@@ -33,6 +51,7 @@
             name: 'Test', 
             uiTestContainerId: 'ui-test-container', 
             hidePassedGroups: false,
+            filters: [],
             autoStart: true
         },
         //Merged configuration options.
@@ -51,10 +70,8 @@
         queueStableInterval = 1,
         intervalId,
         currentTestStep,
-        //Filters.
-        groupFilter,
-        testFilter,
-        assertionFilter,
+        //v2.0.0 Run-time filter
+        runtimeFilter,
         //v.2.0.0 The stack trace property used by the browser.
         stackTraceProperty,
         //v.2.0.0 RegEx for getting file from stack trace.
@@ -142,7 +159,17 @@
         return wrapStringWith('"', string);
     }
 
-    function hidePassedGroupsCheckBoxHandler(){
+    //v2.0.0 Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+    function domAddEventHandler(el, event, handler){
+        if( el.addEventListener){
+            el.addEventListener(event, handler);
+        }else{
+            el.attachEvent('on' + event, handler);
+        }
+    }
+
+    //v2.0.0 Click event handler for the hidePassedGroups checkbox.
+    function hpgClickHandler(){
         var elDivs = document.getElementsByTagName('div'),
             i,
             ii,
@@ -155,7 +182,8 @@
         for(i = 0, l= elDivs.length; i < l; i++){
             attributes = elDivs[i].getAttribute('class');
             if(attributes && attributes.length){
-                attributes = elDivs[i].getAttribute('class').split(' ');
+                //attributes = elDivs[i].getAttribute('class').split(' ');
+                attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
                     if(attributes[ii] === 'group-container'){
                         elGroupContainers.push(elDivs[i]);
@@ -163,14 +191,50 @@
                 }
             }
         }
-        classes = elHidePassedCheckBox.checked ? 'group-container group-container-hidden' : 'group-container';
+        classes = elHpg.checked ? 'group-container group-container-hidden' : 'group-container';
         elGroupContainers.forEach(function(elGroup){
             passed = elGroup.getAttribute('data-passed');
-            passed = passed === 'true' ? true : false;
+            passed = passed === 'true';
             if(passed){
                 elGroup.setAttribute('class', classes);
             }
         });
+    }
+
+    //v2.0.0 Filtering.
+    function filter(level, labels){
+        //If there are no runtime and configuration filters then return true.
+        if(!runtimeFilter.group && !config.filters.length){
+            return true;
+        }
+        //Check if there is a run-time filter first, because it takes precendence over configuration filters
+        if(runtimeFilter.group){
+            switch(level){
+                case 'group':
+                    return runtimeFilter.group === labels.group;
+                case 'test':
+                    return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test);
+                case 'assertion':
+                    return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test) && 
+                        (runtimeFilter.assertion === '' || runtimeFilter.assertion === labels.assertion);
+            }
+        }else{
+            switch(level){
+                case 'group':
+                    return config.filters.some(function(fltr){
+                        return fltr.group === labels.group;
+                    });
+                case 'test':
+                    return config.filters.some(function(fltr){
+                        return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test);
+                    });
+                case 'assertion':
+                    return config.filters.some(function(fltr){
+                        return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test) && 
+                            (fltr.assertion === '*' || fltr.assertion === labels.assertion);
+                    });
+            }
+        }
     }
 
     //Configuration
@@ -189,10 +253,8 @@
         //Totals
         queue.totTests = 0;
         queue.totAssertions = 0;
-        //Capture filters, if any.
-        groupFilter = loadPageVar('group');
-        testFilter = loadPageVar('test');
-        assertionFilter = loadPageVar('assertion');
+        //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
+        runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test'), assertion: loadPageVar('assertion')};
         //v2.0.0 Capture exception's stack trace property.
         setStackTraceProperty();
         //Handle global errors.
@@ -202,7 +264,6 @@
             '</header>' + '<div class="container">' + '<section id="preamble-status-container">' + 
             '<p>Building queue. Please wait...</p>' + '</section><section id="preamble-results-container"></section></div>';
         //Append the ui test container.
-        //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
         elUiContainer.innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
         //Capture DOM elements for later use.
         elHeader = document.getElementById('preamble-header');
@@ -214,16 +275,11 @@
         //Display the version.
         //v2.0.0 Add ckeckboxes.
         elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>' + 
-                '<div><label for="hidePassedCheckBox"><input id="hidePassedCheckBox" type="checkbox"' + 
+                '<div><label for="hidePassedGroups"><input id="hidePassedGroups" type="checkbox"' + 
                 (config.hidePassedGroups ? 'checked' : '') + '>Hide Passed Groups</input></div>');
-        elHidePassedCheckBox = document.getElementById('hidePassedCheckBox');
-        //v2.0.0 Handle click event on "hidePassedCheckBox" to toggle display of passed groups.
-        if( elHidePassedCheckBox.addEventListener){
-            elHidePassedCheckBox.addEventListener('click', hidePassedGroupsCheckBoxHandler);
-        }else{
-            elHidePassedCheckBox.attachEvent('onclick', hidePassedGroupsCheckBoxHandler);
-        }
-        
+        elHpg = document.getElementById('hidePassedGroups');
+        //v2.0.0 Handle click event on "hidePassedGroups" to toggle display of passed groups.
+        domAddEventHandler(elHpg, 'click', hpgClickHandler);
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
@@ -290,10 +346,10 @@
         //Show elapsed time.
         if(isShortCircuited){
             html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + 
-                (queue.duration) + ' milliseconds.</p>';
+                (queue.duration) + 'ms.</p>';
         }else{
             html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + queue.totalElapsedTime  + 
-                ' milliseconds.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + ' milliseconds.</p>';
+                'ms.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + 'ms.</p>';
         }
         //Show a summary in the header.
         if(queue.result){
@@ -336,7 +392,7 @@
             testLabel = '',
             html = '', 
             //v2.0.0 Hide passed tests.
-            hidePassed = elHidePassedCheckBox.checked,
+            hidePassed = elHpg.checked,
             //v2.0.0 Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
@@ -545,7 +601,13 @@
 
     //v2.0.0 Pushing stack trace onto the queue and maintain assertions counter.
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
-        currentTestHash.assertions.push({assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, stackTrace: stackTrace});
+        currentTestHash.assertions.push({
+            assertion: assertion, 
+            assertionLabel: assertionLabel, 
+            value: value, 
+            expectation: expectation, 
+            stackTrace: stackTrace
+        });
         queue.totAssertions++;
     }
 
@@ -577,10 +639,14 @@
 
     //v.2.0.0 Including a stack trace.
     function noteEqualAssertion(value, expectation, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 3){
-                throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 3){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
             pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
@@ -589,30 +655,42 @@
 
     //v.2.0.0 Including a stack trace.
     function noteIsTrueAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
         }
     }
 
     //v.2.0.0 Including a stack trace.
     function noteIsTruthyAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
         }
     }
 
     //v.2.0.0 Including a stack trace.
     function noteNotEqualAssertion(value, expectation, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 3){
-                throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 3){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
             pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
@@ -621,20 +699,28 @@
 
     //v.2.0.0 Including a stack trace.
     function noteIsFalseAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
         }
     }
 
     //v.2.0.0 Including a stack trace.
     function noteIsNotTruthyAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
-            }
+        if(arguments.length !== 2){
+            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        }
+        if(filter('assertion', {
+            group: queue[currentGroupIndex].groupLabel, 
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
+            assertion: label
+        })){
             pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
         }
     }
@@ -802,10 +888,10 @@
     function group(label, callback){
         var start,
             end;
-        if(groupFilter === label || groupFilter === ''){
+        if(filter('group', {group: label})){
             queue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
-            callback(); //will call function test.
+            callback(); //will call function test/asyncTest.
             end = Date.now();
             queue[queue.length - 1].duration = end - start;
         }
@@ -815,7 +901,7 @@
     //and registers its callback in its testsQueue item.
     function test(label, callback){
         var cgqi = queue[queue.length - 1];
-        if(testFilter === label || testFilter === ''){
+        if(filter('test', {group: cgqi.groupLabel, test: label})){
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
             queue.totTests++;
         }
@@ -826,11 +912,12 @@
     //Form: asyncTest(label[, interval], callback).
     function asyncTest(label){
         var cgqi = queue[queue.length - 1];
-        if(testFilter === label || testFilter === ''){
+        if(filter('test', {group: cgqi.groupLabel, test: label})){
             cgqi.tests.push(combine(currentTestHash, {
                 testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
                 isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
             queue.totTests++;
+
         }
     }
 
@@ -965,9 +1052,10 @@
         var html,
             totGroupsPlrzd = pluralize(' group', queue.length),
             totTestsPlrzd = pluralize(' test', queue.totTests),
-            totAssertionsPlrzd = pluralize(' assertion', queue.totAssertions),
+            //totAssertionsPlrzd = pluralize(' assertion', queue.totAssertions),
             coverage = 'Covering ' + queue.length + ' ' + totGroupsPlrzd + '/' +
-                queue.totTests + ' ' + totTestsPlrzd + '/' + queue.totAssertions + totAssertionsPlrzd + '.';
+                queue.totTests + ' ' + totTestsPlrzd;
+                //queue.totTests + ' ' + totTestsPlrzd + '/' + queue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
@@ -1059,7 +1147,13 @@
         //Returns the subscriber count by topic.
         function getCountOfSubscribersByTopic(topic){
             var prop, count = 0;
-            if(subscribers.hasOwnProperty(topic)){for(prop in subscribers[topic]){if(subscribers[topic].hasOwnProperty(prop)){count++;}}}
+            if(subscribers.hasOwnProperty(topic)){
+                for(prop in subscribers[topic]){
+                    if(subscribers[topic].hasOwnProperty(prop)){
+                        count++;
+                    }
+                }
+            }
             return count;
         }
         //Returns the object that exposes the pubsub API.
@@ -1119,6 +1213,7 @@
 
     //Initialize.
     on('start', function(){
+        showCoverage();
         //Overall passed/failed.
         queue.result = true;
         //Total failed groups.
@@ -1147,7 +1242,7 @@
             currentTestIndex = -1;
             emit('runTest');
         }else{
-            showCoverage();
+            //showCoverage();
             emit('end');
         }
     });
