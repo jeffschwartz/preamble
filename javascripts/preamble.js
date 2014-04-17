@@ -36,7 +36,7 @@
          *
          *hidePassedGroups: (default: false) - v2.0.0 set to true to hide passed groups.
          *
-         *filters: (default: []]) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
+         *filters: (default: []) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
          *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
          *all tests and/or all assertions, respectively, should be included in the filter.
          *
