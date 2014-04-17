@@ -56,10 +56,6 @@
         queueStableInterval = 1,
         intervalId,
         currentTestStep,
-        ////Run-time filter, it takes precedent over configuration filters.
-        //runtimeGroupFilter,
-        //runtimeTestFilter,
-        //runtimeAssertionFilter,
         //v2.0.0 Run-time filter
         runtimeFilter,
         //v.2.0.0 The stack trace property used by the browser.
@@ -254,7 +250,6 @@
             '</header>' + '<div class="container">' + '<section id="preamble-status-container">' + 
             '<p>Building queue. Please wait...</p>' + '</section><section id="preamble-results-container"></section></div>';
         //Append the ui test container.
-        //elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
         elUiContainer.innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
         //Capture DOM elements for later use.
         elHeader = document.getElementById('preamble-header');
@@ -271,12 +266,6 @@
         elHpg = document.getElementById('hidePassedGroups');
         //v2.0.0 Handle click event on "hidePassedGroups" to toggle display of passed groups.
         domAddEventHandler(elHpg, 'click', hpgClickHandler);
-        //if( elHpg.addEventListener){
-        //    elHpg.addEventListener('click', hpgClickHandler);
-        //}else{
-        //    elHpg.attachEvent('onclick', hpgClickHandler);
-        //}
-        
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
@@ -343,10 +332,10 @@
         //Show elapsed time.
         if(isShortCircuited){
             html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + 
-                (queue.duration) + ' milliseconds.</p>';
+                (queue.duration) + 'ms.</p>';
         }else{
             html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + queue.totalElapsedTime  + 
-                ' milliseconds.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + ' milliseconds.</p>';
+                'ms.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + 'ms.</p>';
         }
         //Show a summary in the header.
         if(queue.result){
@@ -598,7 +587,13 @@
 
     //v2.0.0 Pushing stack trace onto the queue and maintain assertions counter.
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
-        currentTestHash.assertions.push({assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, stackTrace: stackTrace});
+        currentTestHash.assertions.push({
+            assertion: assertion, 
+            assertionLabel: assertionLabel, 
+            value: value, 
+            expectation: expectation, 
+            stackTrace: stackTrace
+        });
         queue.totAssertions++;
     }
 
@@ -642,14 +637,6 @@
             pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
-        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-        //    if(arguments.length !== 3){
-        //        throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
-        //    }
-        //    //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-        //    pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
-        //        currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
-        //}
     }
 
     //v.2.0.0 Including a stack trace.
@@ -664,12 +651,6 @@
         })){
             pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
         }
-        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-        //    if(arguments.length !== 2){
-        //        throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
-        //    }
-        //    pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
-        //}
     }
 
     //v.2.0.0 Including a stack trace.
@@ -684,12 +665,6 @@
         })){
             pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
         }
-        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-        //    if(arguments.length !== 2){
-        //        throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
-        //    }
-        //    pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
-        //}
     }
 
     //v.2.0.0 Including a stack trace.
@@ -706,14 +681,6 @@
             pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
         }
-        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-        //    if(arguments.length !== 3){
-        //        throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
-        //    }
-        //    //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-        //    pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
-        //        currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
-        //}
     }
 
     //v.2.0.0 Including a stack trace.
@@ -728,12 +695,6 @@
         })){
             pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
         }
-        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-        //    if(arguments.length !== 2){
-        //        throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
-        //    }
-        //    pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
-        //}
     }
 
     //v.2.0.0 Including a stack trace.
@@ -748,12 +709,6 @@
         })){
             pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
         }
-        //if(runtimeFilter.assertion === label || runtimeFilter.assertion === ''){
-        //    if(arguments.length !== 2){
-        //        throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
-        //    }
-        //    pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
-        //}
     }
 
     //Starts the timer for an async test. When the timeout is triggered it calls
@@ -926,13 +881,6 @@
             end = Date.now();
             queue[queue.length - 1].duration = end - start;
         }
-        //if(runtimeFilter.group === label || runtimeFilter.group === ''){
-        //    queue.push({groupLabel: label, callback: callback, tests: []});
-        //    start = Date.now();
-        //    callback(); //will call function test/asyncTest.
-        //    end = Date.now();
-        //    queue[queue.length - 1].duration = end - start;
-        //}
     }
 
     //Provides closure and a label to a synchronous test
@@ -943,10 +891,6 @@
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
             queue.totTests++;
         }
-        //if(runtimeFilter.test === label || runtimeFilter.test === ''){
-        //    cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
-        //    queue.totTests++;
-        //}
     }
 
     //Provides closure and a label to an asynchronous test
@@ -961,12 +905,6 @@
             queue.totTests++;
 
         }
-        //if(runtimeFilter.test === label || runtimeFilter.test === ''){
-        //    cgqi.tests.push(combine(currentTestHash, {
-        //        testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
-        //        isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
-        //    queue.totTests++;
-        //}
     }
 
     //Returns the ui test container element.
@@ -1195,7 +1133,13 @@
         //Returns the subscriber count by topic.
         function getCountOfSubscribersByTopic(topic){
             var prop, count = 0;
-            if(subscribers.hasOwnProperty(topic)){for(prop in subscribers[topic]){if(subscribers[topic].hasOwnProperty(prop)){count++;}}}
+            if(subscribers.hasOwnProperty(topic)){
+                for(prop in subscribers[topic]){
+                    if(subscribers[topic].hasOwnProperty(prop)){
+                        count++;
+                    }
+                }
+            }
             return count;
         }
         //Returns the object that exposes the pubsub API.
