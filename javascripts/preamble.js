@@ -15,20 +15,34 @@
         elResults,
         //v2.0.0
         elHpg,
-        //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
-        //or in-line in your tests.
-        //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
-        //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
-        //*IMPORTANT - USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
-        //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-        //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
-        //(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
-        //name: (default 'Test') - set to a meaningful name.
-        //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-        //hidePassedGroups: (default: false) - v2.0.0 set to true to hide passed groups.
-        //filters: (default: []]) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}.
-        //You can also use the wildcard '*' character for test and/or assertions to specify that all tests and/or all assertions, respectively, should be included in the filter.
-        //autoStart: (default: true) - for internal use only. Adapters for external processes, such as Karma, initially set this to true and will eventually set it to false when appropriate.
+        /**
+         *Default configuration options - override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
+         *or in-line in your tests.
+         *
+         *shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
+         *
+         *windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
+         *USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
+         *
+         *asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous 
+         *tests to complete.
+         *
+         *asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
+         *(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
+         *
+         *name: (default 'Test') - set to a meaningful name.
+         *
+         *uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+         *
+         *hidePassedGroups: (default: false) - v2.0.0 set to true to hide passed groups.
+         *
+         *filters: (default: []]) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
+         *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
+         *all tests and/or all assertions, respectively, should be included in the filter.
+         *
+         *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
+         *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
+         */
         defaultConfig = {
             shortCircuit: false, 
             windowGlobals: true, 
