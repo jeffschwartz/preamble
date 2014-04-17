@@ -173,7 +173,7 @@
         classes = elHidePassedCheckBox.checked ? 'group-container group-container-hidden' : 'group-container';
         elGroupContainers.forEach(function(elGroup){
             passed = elGroup.getAttribute('data-passed');
-            passed = passed === 'true' ? true : false;
+            passed = passed === 'true';
             if(passed){
                 elGroup.setAttribute('class', classes);
             }
