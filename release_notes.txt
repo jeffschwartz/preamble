@@ -7,7 +7,7 @@ implementations, performance and ease of maintainability for the internal
 processes that Preamble performs while running tests. Also, new internal 
 functionality has been added that will allow Preamble to operate and communicate
 with external processes, such as Karma, in future releases. A breaking change 
-was introduced to the layout in index.html (see item 9 below), which was 
+was introduced to the layout in index.html (see item 10 below), which was 
 necessary to support in-line configuration. *IMPORTANT - PLEASE UPDATE EXISTING 
 PROJECTS TO USE THE NEW INDEX.HTML FILE INCLUDED IN THIS RELEASE.  
 
@@ -42,8 +42,15 @@ Error objects.
 configuration property, which defaults to "false" and a check box to 
 override the configuration.
 
-9) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
+9) Added configuration-based filtering. Set 1 or more filters by adding 
+hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}. 
+You can also use the wildcard '*' character for test and/or assertions to 
+specify that all tests and/or all assertions, respectively, should be included 
+in the filter.
+
+
+10) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
 it to wrap <div id="ui-test-container" class="ui-test-container">. This was 
 required in order to support in-line configuration (see item 1 above). 
 
-10) Display timings for groups and tests in details report.
+11) Added display timings for groups and tests in details report.
