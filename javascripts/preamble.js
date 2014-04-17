@@ -14,7 +14,7 @@
         elUiTestContainer,
         elResults,
         //v2.0.0
-        elHidePassedCheckBox,
+        elHpg,
         //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
         //or in-line in your tests.
         //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
@@ -25,7 +25,7 @@
         //(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
         //name: (default 'Test') - set to a meaningful name.
         //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-        //hidePassedGroups: (default: false) - v2.0.0 set to true to hide padded groups.
+        //hidePassedGroups: (default: false) - v2.0.0 set to true to hide passed groups.
         //filters: (default: []]) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}.
         //You can also use the wildcard '*' character for test and/or assertions to specify that all tests and/or all assertions, respectively, should be included in the filter.
         //autoStart: (default: true) - for internal use only. Adapters for external processes, such as Karma, initially set this to true and will eventually set it to false when appropriate.
@@ -149,7 +149,17 @@
         return wrapStringWith('"', string);
     }
 
-    function hidePassedGroupsCheckBoxHandler(){
+    //v2.0.0 Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+    function domAddEventHandler(el, event, handler){
+        if( el.addEventListener){
+            el.addEventListener(event, handler);
+        }else{
+            el.attachEvent('on' + event, handler);
+        }
+    }
+
+    //v2.0.0 Click event handler for the hidePassedGroups checkbox.
+    function hpgClickHandler(){
         var elDivs = document.getElementsByTagName('div'),
             i,
             ii,
@@ -162,7 +172,8 @@
         for(i = 0, l= elDivs.length; i < l; i++){
             attributes = elDivs[i].getAttribute('class');
             if(attributes && attributes.length){
-                attributes = elDivs[i].getAttribute('class').split(' ');
+                //attributes = elDivs[i].getAttribute('class').split(' ');
+                attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
                     if(attributes[ii] === 'group-container'){
                         elGroupContainers.push(elDivs[i]);
@@ -170,7 +181,7 @@
                 }
             }
         }
-        classes = elHidePassedCheckBox.checked ? 'group-container group-container-hidden' : 'group-container';
+        classes = elHpg.checked ? 'group-container group-container-hidden' : 'group-container';
         elGroupContainers.forEach(function(elGroup){
             passed = elGroup.getAttribute('data-passed');
             passed = passed === 'true';
@@ -255,15 +266,16 @@
         //Display the version.
         //v2.0.0 Add ckeckboxes.
         elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>' + 
-                '<div><label for="hidePassedCheckBox"><input id="hidePassedCheckBox" type="checkbox"' + 
+                '<div><label for="hidePassedGroups"><input id="hidePassedGroups" type="checkbox"' + 
                 (config.hidePassedGroups ? 'checked' : '') + '>Hide Passed Groups</input></div>');
-        elHidePassedCheckBox = document.getElementById('hidePassedCheckBox');
-        //v2.0.0 Handle click event on "hidePassedCheckBox" to toggle display of passed groups.
-        if( elHidePassedCheckBox.addEventListener){
-            elHidePassedCheckBox.addEventListener('click', hidePassedGroupsCheckBoxHandler);
-        }else{
-            elHidePassedCheckBox.attachEvent('onclick', hidePassedGroupsCheckBoxHandler);
-        }
+        elHpg = document.getElementById('hidePassedGroups');
+        //v2.0.0 Handle click event on "hidePassedGroups" to toggle display of passed groups.
+        domAddEventHandler(elHpg, 'click', hpgClickHandler);
+        //if( elHpg.addEventListener){
+        //    elHpg.addEventListener('click', hpgClickHandler);
+        //}else{
+        //    elHpg.attachEvent('onclick', hpgClickHandler);
+        //}
         
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
@@ -377,7 +389,7 @@
             testLabel = '',
             html = '', 
             //v2.0.0 Hide passed tests.
-            hidePassed = elHidePassedCheckBox.checked,
+            hidePassed = elHpg.checked,
             //v2.0.0 Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
@@ -1088,9 +1100,10 @@
         var html,
             totGroupsPlrzd = pluralize(' group', queue.length),
             totTestsPlrzd = pluralize(' test', queue.totTests),
-            totAssertionsPlrzd = pluralize(' assertion', queue.totAssertions),
+            //totAssertionsPlrzd = pluralize(' assertion', queue.totAssertions),
             coverage = 'Covering ' + queue.length + ' ' + totGroupsPlrzd + '/' +
-                queue.totTests + ' ' + totTestsPlrzd + '/' + queue.totAssertions + totAssertionsPlrzd + '.';
+                queue.totTests + ' ' + totTestsPlrzd;
+                //queue.totTests + ' ' + totTestsPlrzd + '/' + queue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
         html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
@@ -1242,6 +1255,7 @@
 
     //Initialize.
     on('start', function(){
+        showCoverage();
         //Overall passed/failed.
         queue.result = true;
         //Total failed groups.
@@ -1270,7 +1284,7 @@
             currentTestIndex = -1;
             emit('runTest');
         }else{
-            showCoverage();
+            //showCoverage();
             emit('end');
         }
     });
