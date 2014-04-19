@@ -1,37 +1,79 @@
+.summary {
+  padding: 10px 10px;
+  font-weight: bold;
+}
 html,
 body {
-  font-family: 'Loras', serif;
-  font-size: 11px;
-  margin: 0 0 300px 0;
-  color: #aaa;
+  font-family: Monaco, "Lucida Console", monospace;
+  font-size: 14px;
+  margin: 0;
+  background-color: #fdf6e3;
+  color: #aaaaaa;
 }
 h1 {
   margin: 0;
-  font-size: 2.5rem;
-  color: #888;
+  font-size: 14px;
+  color: #657b83;
 }
 h1 + small {
-  font-size: 1rem;
-  color: #AAA;
+  font-size: 14px;
+  color: #aaaaaa;
 }
 header {
-  background-color: #FFF;
+  background-color: #fdf6e3;
   position: fixed;
   top: 0;
   z-index: 10000;
   width: 100%;
-  padding: 10px 0 10px 20px;
+  padding: 10px 30px;
   opacity: 1;
   border-bottom: solid 1px #CCC;
   box-sizing: border-box;
+}
+.banner {
+  float: left;
+}
+#time {
+  display: none;
+  float: right;
+}
+#coverage {
+  padding: 10px 10px;
+  font-weight: bold;
+  color: #657b83;
+  background-color: #eee;
+}
+#coverage a {
+  color: #aaaaaa;
+}
+.hpgui {
+  float: right;
 }
 header input:first-child {
   margin-left: 0;
 }
 .container {
-  margin: 73px 0 0 0;
+  margin: 49px 0 0 0;
   width: 100%;
   box-sizing: border-box;
+}
+.summary-passed {
+  padding: 10px 10px;
+  font-weight: bold;
+  background-color: #3cb371;
+  color: #fff;
+}
+.summary-failed {
+  padding: 10px 10px;
+  font-weight: bold;
+  background-color: #ff4500;
+  color: #fff;
+}
+.passed {
+  color: #3cb371;
+}
+.failed {
+  color: #ff4500;
 }
 p:last-child {
   margin-bottom: 0;
@@ -44,11 +86,14 @@ section {
   padding: 10px 20px;
   width: 100%;
   box-sizing: border-box;
-  border-bottom: solid 1px #CCC;
   font-size: 1rem;
 }
 .group-container {
+  padding: 10px 10px;
+  font-weight: bold;
   padding-top: 15px;
+  font-size: .85rem;
+  line-height: 1rem;
 }
 /*v2.0.0*/
 .group-container-hidden {
@@ -87,12 +132,6 @@ section {
 .assertion-container a:hover {
   text-decoration: underline;
 }
-.passed {
-  color: #008400;
-}
-.failed {
-  color: #f40000;
-}
 .bold {
   font-weight: bold;
 }
@@ -102,6 +141,7 @@ section {
 .stacktrace {
   margin: 0;
   padding: 5px 20px 0 0;
+  color: #ff4500;
 }
 .ui-test-container {
   position: absolute;

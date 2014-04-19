@@ -1,36 +1,81 @@
+@bg-color: #fdf6e3;
+@font-size: 14px;
+@normal-color: #aaa;
+@darker-color: #657b83;
+@passed-color: rgb(60, 179, 113);
+@failed-color: rgb(255,69,0);
+.summary{
+    padding: 10px 10px;
+    font-weight: bold;
+}
 html, body{
-    font-family: 'Loras', serif;
-    font-size: 11px;
-    margin: 0 0 300px 0;
-    color: #aaa;
+    font-family: Monaco, "Lucida Console", monospace;
+    font-size: @font-size;
+    margin: 0;
+    background-color: @bg-color;
+    color: @normal-color;
 }
 h1{
     margin: 0;
-    font-size: 2.5rem;
-    color: #888;
+    font-size: @font-size;
+    color: @darker-color;
 }
 h1 + small{
-    font-size: 1rem;
-    color: #AAA;
+    font-size: @font-size;
+    color: @normal-color;
 }
 header{
-    background-color: #FFF;
+    background-color: @bg-color;
     position: fixed;
     top: 0;
     z-index: 10000;
     width: 100%;
-    padding: 10px 0 10px 20px;
+    padding: 10px 30px;
     opacity: 1;
     border-bottom: solid 1px #CCC;
     box-sizing: border-box;
+}
+.banner {
+    float: left;
+}
+#time{
+    display: none;
+    float: right;
+}
+#coverage{
+    .summary;
+    color: @darker-color;
+    background-color: #eee;
+}
+#coverage a{
+    color: @normal-color;
+}
+.hpgui{
+    float: right;
 }
 header input:first-child {
     margin-left: 0;
 }
 .container{
-    margin: 73px 0 0 0;
+    margin: 49px 0 0 0;
     width: 100%;
     box-sizing: border-box;
+}
+.summary-passed {
+    .summary;
+    background-color: @passed-color;
+    color: #fff;
+}
+.summary-failed {
+    .summary;
+    background-color: @failed-color;
+    color: #fff;
+}
+.passed{
+    color: @passed-color;
+}
+.failed{
+    color: @failed-color;
 }
 p:last-child{
     margin-bottom: 0;
@@ -43,11 +88,13 @@ section{
     padding: 10px 20px;
     width: 100%;
     box-sizing: border-box;
-    border-bottom: solid 1px #CCC;
     font-size: 1rem;
 }
 .group-container{
+    .summary;
     padding-top: 15px;
+    font-size: .85rem;
+    line-height: 1rem;
 }
 /*v2.0.0*/
 .group-container-hidden{
@@ -86,12 +133,6 @@ section{
 .assertion-container a:hover{
     text-decoration: underline;
 }
-.passed {
-    color: #008400;
-}
-.failed {
-    color: #f40000;
-}
 .bold {
     font-weight: bold;
 }
@@ -101,6 +142,7 @@ section{
 .stacktrace {
     margin: 0;
     padding: 5px 20px 0 0;
+    color: @failed-color;
 }
 .ui-test-container{
     position: absolute;

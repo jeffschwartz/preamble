@@ -13,8 +13,8 @@
         elUiContainer = document.getElementById('preamble-ui-container'),
         elUiTestContainer,
         elResults,
-        //v2.0.0
-        elHpg,
+        ////v2.0.0
+        //elHpg,
         /**
          *Default configuration options - override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
          *or in-line in your tests.
@@ -191,7 +191,7 @@
                 }
             }
         }
-        classes = elHpg.checked ? 'group-container group-container-hidden' : 'group-container';
+        classes = document.getElementById('hidePassedGroups').checked ? 'group-container group-container-hidden' : 'group-container';
         elGroupContainers.forEach(function(elGroup){
             passed = elGroup.getAttribute('data-passed');
             passed = passed === 'true';
@@ -242,7 +242,8 @@
     //Called once internally but may be called again if test script calls it.
     function configure(){
         //v2.0.0
-        var configArg = arguments && arguments[0];
+        var configArg = arguments && arguments[0],
+            s;
         //Ignore configuration once testing has started.
         if(configArg && queue.length){
             alert('no no no!');
@@ -260,9 +261,27 @@
         //Handle global errors.
         window.onerror = errorHandler;
         //Add markup structure to the DOM.
-        elPreambleContainer.innerHTML = '<header id="preamble-header-container">' + '<h1 id="preamble-header"></h1>' + 
-            '</header>' + '<div class="container">' + '<section id="preamble-status-container">' + 
-            '<p>Building queue. Please wait...</p>' + '</section><section id="preamble-results-container"></section></div>';
+        //elPreambleContainer.innerHTML = '<header id="preamble-header-container">' + '<h1 id="preamble-header"></h1>' + 
+        //    '</header>' + '<div class="container">' + '<section id="preamble-status-container">' + 
+        //    '<p>Building queue. Please wait...</p>' + '</section><section id="preamble-results-container"></section></div>';
+        s = '<header>' + 
+            '<div class="banner"><h1><span id="name">{{name}}</span> - <span><i>Preamble</i><span> <span><i id="version">{{version}}</i></span></h1></div>' + 
+            '<div id="time"><span>Completed in <span title="total test time/total elapsed time">{{tt}}ms/{{et}}ms</span></div>' +
+            '</header>' +
+            '<div class="container">' + '<section id="preamble-status-container">' + '<div class="summary">Building queue. Please wait...</div>' + '</section>' + 
+            '<section id="preamble-results-container"></section></div>';
+        //Set the config name.
+        s = s.replace(/{{name}}/, config.name);
+        //Set the version.
+        s = s.replace(/{{version}}/, version);
+        elPreambleContainer.innerHTML = s;
+        //document.getElementById('name').innerHTML = config.name;
+        ////Display the version.
+        //document.getElementById('version').innerHTML = version;
+        //Set hide passed groups checkbox.
+        if(config.hidePassedGroup){
+            document.getElementById('hidePassedGroups').setAttribute('checked');
+        }
         //Append the ui test container.
         elUiContainer.innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
         //Capture DOM elements for later use.
@@ -270,16 +289,16 @@
         elStatusContainer = document.getElementById('preamble-status-container');
         elResults = document.getElementById('preamble-results-container');
         elUiTestContainer = document.getElementById(config.uiTestContainerId);
-        //Display the name.
-        elHeader.innerHTML = config.name;
-        //Display the version.
-        //v2.0.0 Add ckeckboxes.
-        elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>' + 
-                '<div><label for="hidePassedGroups"><input id="hidePassedGroups" type="checkbox"' + 
-                (config.hidePassedGroups ? 'checked' : '') + '>Hide Passed Groups</input></div>');
-        elHpg = document.getElementById('hidePassedGroups');
+        ////Display the name.
+        //elHeader.innerHTML = config.name;
+        ////Display the version.
+        ////v2.0.0 Add ckeckboxes.
+        //elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>' + 
+        //        '<div><label for="hidePassedGroups"><input id="hidePassedGroups" type="checkbox"' + 
+        //        (config.hidePassedGroups ? 'checked' : '') + '>Hide Passed Groups</input></div>');
+        //elHeader.innerHTML = '<div class="header"><'
         //v2.0.0 Handle click event on "hidePassedGroups" to toggle display of passed groups.
-        domAddEventHandler(elHpg, 'click', hpgClickHandler);
+        //domAddEventHandler(elHpg, 'click', hpgClickHandler);
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
@@ -339,36 +358,46 @@
 
     function showResultsSummary(){
         var html,
+            el,
+            s,
             totGroups = queue.length,
             totGroupsPassed = queue.length - queue.totGroupsFailed,
             totTestsPassed = queue.totTests - queue.totTestsFailed,
             totAssertionsPassed = queue.totAssertions - queue.totAssertionsFailed;
+        
+        el = document.getElementById('time');
+        s = el.innerHTML;
+        s = s.replace(/{{tt}}/, queue.duration);
+        s = s.replace(/{{et}}/, queue.totalElapsedTime);
+        el.innerHTML = s;
+        el.style.display = 'block';
         //Show elapsed time.
-        if(isShortCircuited){
-            html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + 
-                (queue.duration) + 'ms.</p>';
-        }else{
-            html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + queue.totalElapsedTime  + 
-                'ms.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + 'ms.</p>';
-        }
-        //Show a summary in the header.
+        //if(isShortCircuited){
+        //    html = '<p id="preamble-elapsed-time" class="failed">Tests aborted due to short-circuiting after ' + 
+        //        (queue.duration) + 'ms.</p>';
+        //}else{
+        //    html = '<p id="preamble-elapsed-time">Total elapsed time (includes latency) was ' + queue.totalElapsedTime  + 
+        //        'ms.' + '</p><p id="preamble-elapsed-time">Tests completed in ' + (queue.duration) + 'ms.</p>';
+        //}
+        //v2.0.0 Show coverage.
+        showCoverage();
         if(queue.result){
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroups +
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + totGroups +
                 pluralize(' group', totGroups) + '/' + queue.totTests+ pluralize(' test', queue.totTests) + '/' +
-                queue.totAssertions + pluralize(' assertion', queue.totAssertions) + ' passed' + '</p>';
+                queue.totAssertions + pluralize(' assertion', queue.totAssertions) + ' passed' + '</div>';
         }else if(totAssertionsPassed === 0){
-            html += '<p id="preamble-results-summary-failed" class="summary failed">' + queue.totGroupsFailed +
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + queue.totGroupsFailed +
                 pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) + '/' +
-                queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</p>';
+                queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</div>';
         }else{
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed +
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + totGroupsPassed +
                 pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +
                 totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) +
-                ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + queue.totGroupsFailed +
+                ' passed.</div><div id="preamble-results-summary-failed" class="summary-failed">' + queue.totGroupsFailed +
                 pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) +
-                '/' + queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</p>';
+                '/' + queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</div>';
         }
-        html += '<a href="?">Rerun All Tests</a>';
+        //html += '<a href="?">Rerun All Tests</a>';
         elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
@@ -392,7 +421,7 @@
             testLabel = '',
             html = '', 
             //v2.0.0 Hide passed tests.
-            hidePassed = elHpg.checked,
+            hidePassed = document.getElementById('hidePassedGroups').checked,
             //v2.0.0 Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
@@ -1049,21 +1078,30 @@
     }
 
     function showCoverage(){
-        var html,
-            totGroupsPlrzd = pluralize(' group', queue.length),
-            totTestsPlrzd = pluralize(' test', queue.totTests),
+        var /*html,*/
+            //totGroupsPlrzd = pluralize(' group', queue.length),
+            //totTestsPlrzd = pluralize(' test', queue.totTests),
             //totAssertionsPlrzd = pluralize(' assertion', queue.totAssertions),
-            coverage = 'Covering ' + queue.length + ' ' + totGroupsPlrzd + '/' +
-                queue.totTests + ' ' + totTestsPlrzd;
+            coverage = '<div id="coverage">Covered {{tg}}/{{tt}}/{{ta}}' +
+            '<div class="hpgui"><label for="hidePassedGroups">Hide passed groups</label>' + 
+            '<input id="hidePassedGroups" type="checkbox" {{checked}}></div>' +
+            ' - <a href="?"> run all</a>' +
+            '</div>';
                 //queue.totTests + ' ' + totTestsPlrzd + '/' + queue.totAssertions + totAssertionsPlrzd + '.';
         //Show groups and tests coverage in the header.
-        html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
+        coverage = coverage.replace(/{{tg}}/, queue.length + pluralize(' group', queue.length));
+        coverage = coverage.replace(/{{tt}}/, queue.totTests + pluralize(' test', queue.totTests));
+        coverage = coverage.replace(/{{ta}}/, queue.totAssertions + pluralize(' assertion', queue.totAssertions));
+        coverage = coverage.replace(/{{checked}}/, config.hidePassedGroups ? 'checked' : '');
+        //html = '<p id="preamble-coverage" class="summary">' + coverage + '</p>';
         //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
-        if(elStatusContainer.innerHTML === '<p>Building queue. Please wait...</p>'){
-            elStatusContainer.innerHTML = html;
+        if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
+            elStatusContainer.innerHTML = coverage;
         }else{
-            elStatusContainer.innerHTML += html;
+            elStatusContainer.innerHTML += coverage;
         }
+        document.getElementById('coverage').style.display = 'block';
+        domAddEventHandler(document.getElementById('hidePassedGroups'), 'click', hpgClickHandler);
     }
 
     /**
@@ -1213,7 +1251,7 @@
 
     //Initialize.
     on('start', function(){
-        showCoverage();
+        //showCoverage();
         //Overall passed/failed.
         queue.result = true;
         //Total failed groups.
