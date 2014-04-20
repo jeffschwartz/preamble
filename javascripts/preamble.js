@@ -173,7 +173,6 @@
         for(i = 0, l= elDivs.length; i < l; i++){
             attributes = elDivs[i].getAttribute('class');
             if(attributes && attributes.length){
-                //attributes = elDivs[i].getAttribute('class').split(' ');
                 attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
                     if(attributes[ii] === 'group-container'){
@@ -359,7 +358,6 @@
                 pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) +
                 '/' + queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</div>';
         }
-        //html += '<a href="?">Rerun All Tests</a>';
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     }
 
