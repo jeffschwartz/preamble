@@ -4,3 +4,4 @@ preamble.sublime-workspace
 **/*.swp
 **/*.swo
 temp.md
+node_modules

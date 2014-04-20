@@ -1,111 +1,152 @@
-html, body{
-    font-family: 'Lora', serif;
-    font-size: 11px;
-    margin: 0 0 300px 0;
-    color: #aaa;
+.summary {
+  padding: 10px 10px;
+  font-weight: bold;
 }
-h1{
-    margin: 0;
-    font-size: 2.5rem;
-    color: #888;
+html,
+body {
+  font-family: Monaco, "Lucida Console", monospace;
+  font-size: 14px;
+  margin: 0;
+  background-color: #fdf6e3;
+  color: #aaaaaa;
 }
-h1 + small{
-    font-size: 1rem;
-    color: #AAA;
+h1 {
+  margin: 0;
+  font-size: 14px;
+  color: #657b83;
 }
-header{
-    background-color: #FFF;
-    position: fixed;
-    top: 0;
-    z-index: 10000;
-    width: 100%;
-    padding: 10px 0 10px 20px;
-    opacity: 1;
-    border-bottom: solid 1px #CCC;
-    box-sizing: border-box;
+h1 + small {
+  font-size: 14px;
+  color: #aaaaaa;
+}
+header {
+  background-color: #fdf6e3;
+  position: fixed;
+  top: 0;
+  z-index: 10000;
+  width: 100%;
+  padding: 10px 30px;
+  opacity: 1;
+  border-bottom: solid 1px #CCC;
+  box-sizing: border-box;
+}
+.banner {
+  float: left;
+}
+#time {
+  display: none;
+  float: right;
+}
+#coverage {
+  padding: 10px 10px;
+  font-weight: bold;
+  color: #657b83;
+  background-color: #eee;
+}
+#coverage a {
+  color: #aaaaaa;
+}
+.hpgui {
+  float: right;
 }
 header input:first-child {
-    margin-left: 0;
+  margin-left: 0;
 }
-.container{
-    margin: 73px 0 0 0;
-    width: 100%;
-    box-sizing: border-box;
+.container {
+  margin: 49px 0 0 0;
+  width: 100%;
+  box-sizing: border-box;
 }
-p:last-child{
-    margin-bottom: 0;
+.summary-passed {
+  padding: 10px 10px;
+  font-weight: bold;
+  background-color: #3cb371;
+  color: #fff;
 }
-#preamble-results-container{
-    font-size: 1rem;
-    display: none;
-}
-section{
-    padding: 10px 20px;
-    width: 100%;
-    box-sizing: border-box;
-    border-bottom: solid 1px #CCC;
-    font-size: 1rem;
-}
-.group-container{
-    padding-top: 15px;
-}
-/*v2.0.0*/
-.group-container-hidden{
-    display: none;
-}
-.group-container:first-child {
-    padding-top: 0;
-}
-.group-container a{
-    text-decoration: none;
-}
-.group-container a:hover{
-    text-decoration: underline;
-}
-.group {
-    color: #888;
-}
-.tests-container{
-    padding: 5px 20px 0 20px;
-}
-.tests-container a{
-    text-decoration: none;
-}
-.tests-container a:hover{
-    text-decoration: underline;
-}
-.test{
-    color: #888;
-}
-.assertion-container{
-    padding: 5px 20px 0 20px;
-}
-.assertion-container a{
-    text-decoration: none;
-}
-.assertion-container a:hover{
-    text-decoration: underline;
+.summary-failed {
+  padding: 10px 10px;
+  font-weight: bold;
+  background-color: #ff4500;
+  color: #fff;
 }
 .passed {
-    color: #008400;
+  color: #3cb371;
 }
 .failed {
-    color: #f40000;
+  color: #ff4500;
+}
+p:last-child {
+  margin-bottom: 0;
+}
+#preamble-results-container {
+  font-size: 1rem;
+  display: none;
+}
+section {
+  padding: 10px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+.group-container {
+  padding: 10px 10px;
+  font-weight: bold;
+  padding-top: 15px;
+  font-size: .85rem;
+  line-height: 1rem;
+}
+/*v2.0.0*/
+.group-container-hidden {
+  display: none;
+}
+.group-container:first-child {
+  padding-top: 0;
+}
+.group-container a {
+  text-decoration: none;
+}
+.group-container a:hover {
+  text-decoration: underline;
+}
+.group {
+  color: #888;
+}
+.tests-container {
+  padding: 5px 20px 0 20px;
+}
+.tests-container a {
+  text-decoration: none;
+}
+.tests-container a:hover {
+  text-decoration: underline;
+}
+.test {
+  color: #888;
+}
+.assertion-container {
+  padding: 5px 20px 0 20px;
+}
+.assertion-container a {
+  text-decoration: none;
+}
+.assertion-container a:hover {
+  text-decoration: underline;
 }
 .bold {
-    font-weight: bold;
+  font-weight: bold;
 }
 .stacktrace-container {
-    padding: 0 20px 0 40px;
+  padding: 0 20px 0 40px;
 }
 .stacktrace {
-    margin: 0;
-    padding: 5px 20px 0 0;
+  margin: 0;
+  padding: 5px 20px 0 0;
+  color: #ff4500;
 }
-.ui-test-container{
-    position: absolute;
-    top: -10000px;
-    left: -10000px;
-    width: 1000px;
-    height: 1000px
+.ui-test-container {
+  position: absolute;
+  top: -10000px;
+  left: -10000px;
+  width: 1000px;
+  height: 1000px;
 }

@@ -1,0 +1,153 @@
+@bg-color: #fdf6e3;
+@font-size: 14px;
+@normal-color: #aaa;
+@darker-color: #657b83;
+@passed-color: rgb(60, 179, 113);
+@failed-color: rgb(255,69,0);
+.summary{
+    padding: 10px 10px;
+    font-weight: bold;
+}
+html, body{
+    font-family: Monaco, "Lucida Console", monospace;
+    font-size: @font-size;
+    margin: 0;
+    background-color: @bg-color;
+    color: @normal-color;
+}
+h1{
+    margin: 0;
+    font-size: @font-size;
+    color: @darker-color;
+}
+h1 + small{
+    font-size: @font-size;
+    color: @normal-color;
+}
+header{
+    background-color: @bg-color;
+    position: fixed;
+    top: 0;
+    z-index: 10000;
+    width: 100%;
+    padding: 10px 30px;
+    opacity: 1;
+    border-bottom: solid 1px #CCC;
+    box-sizing: border-box;
+}
+.banner {
+    float: left;
+}
+#time{
+    display: none;
+    float: right;
+}
+#coverage{
+    .summary;
+    color: @darker-color;
+    background-color: #eee;
+}
+#coverage a{
+    color: @normal-color;
+}
+.hpgui{
+    float: right;
+}
+header input:first-child {
+    margin-left: 0;
+}
+.container{
+    margin: 49px 0 0 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+.summary-passed {
+    .summary;
+    background-color: @passed-color;
+    color: #fff;
+}
+.summary-failed {
+    .summary;
+    background-color: @failed-color;
+    color: #fff;
+}
+.passed{
+    color: @passed-color;
+}
+.failed{
+    color: @failed-color;
+}
+p:last-child{
+    margin-bottom: 0;
+}
+#preamble-results-container{
+    font-size: 1rem;
+    display: none;
+}
+section{
+    padding: 10px 20px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+.group-container{
+    .summary;
+    padding-top: 15px;
+    font-size: .85rem;
+    line-height: 1rem;
+}
+/*v2.0.0*/
+.group-container-hidden{
+    display: none;
+}
+.group-container:first-child {
+    padding-top: 0;
+}
+.group-container a{
+    text-decoration: none;
+}
+.group-container a:hover{
+    text-decoration: underline;
+}
+.group {
+    color: #888;
+}
+.tests-container{
+    padding: 5px 20px 0 20px;
+}
+.tests-container a{
+    text-decoration: none;
+}
+.tests-container a:hover{
+    text-decoration: underline;
+}
+.test{
+    color: #888;
+}
+.assertion-container{
+    padding: 5px 20px 0 20px;
+}
+.assertion-container a{
+    text-decoration: none;
+}
+.assertion-container a:hover{
+    text-decoration: underline;
+}
+.bold {
+    font-weight: bold;
+}
+.stacktrace-container {
+    padding: 0 20px 0 40px;
+}
+.stacktrace {
+    margin: 0;
+    padding: 5px 20px 0 0;
+    color: @failed-color;
+}
+.ui-test-container{
+    position: absolute;
+    top: -10000px;
+    left: -10000px;
+    width: 1000px;
+    height: 1000px
+}
