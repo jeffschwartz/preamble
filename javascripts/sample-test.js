@@ -9,7 +9,7 @@ group('This group will intentionally fail', function(){
     });
 });
 
-group('Does it work?', function(){
+group('It work', function(){
     test('Hello World!', function(){
         var hw = 'Hello World!';
         isTrue(hw === 'Hello World!', 'Yes, it works!');
@@ -50,12 +50,12 @@ group('2 synchronous test with "beforeEachTest"', function(){
     beforeEachTest(function(){
         count = 1;
     });
-    test('Is count 1?', function(){
+    test('Count is 1', function(){
         isFalse(count === 0, 'count doesn\'t equal 0');
         isTrue(count === 1, 'count does equal 1');
         isTrue((count += 1) === 2, 'count now equals 2');
     });
-    test('Is count still 2?', function(){
+    test('Count is still 2', function(){
         isFalse(count === 2, 'nope, it isn\'t still 2');
         isTrue(count === 1, 'now count equals 1');
     });
@@ -66,17 +66,17 @@ group('2 synchronous test with "afterEachTest"', function(){
     afterEachTest(function(){
         count = 1;
     });
-    test('Is count 0?', function(){
+    test('Count is 0', function(){
         isTrue(count === 0, 'count does equal 0.');
     });
-    test('Is count still 0?', function(){
+    test('Count is still 0', function(){
         isFalse(count === 0, 'count doesn\'t equal 0.');
         isTrue(count === 1, 'count now equals 1.');
     });
 });
 
 group('An asynchronous test with no before/after eachTest', function(){
-    asyncTest('Isn\'t JavaScript amazing?', function(){
+    asyncTest('JavaScript is amazing', function(){
         var val;
         setTimeout(function(){
             val = 'Isn\'t JavaScript amazing?';
@@ -92,7 +92,7 @@ group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
     asyncBeforeEachTest(function(){
         count = 2;
     });
-    asyncTest('Is count 20?', function(){
+    asyncTest('Count is 20', function(){
         setTimeout(function(){
             count *= 10;
         }, 1);
@@ -101,7 +101,7 @@ group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
             isTrue(count === 20, 'Yes, count now is 20');
         });
     });
-    asyncTest('Is count 200?', function(){
+    asyncTest('Count is 200', function(){
         setTimeout(function(){
             count *= 100;
         }, 1);
@@ -117,7 +117,7 @@ group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     asyncAfterEachTest(function(){
         count = 1;
     });
-    asyncTest('Is count 10?', function(){
+    asyncTest('Count is 10', function(){
         setTimeout(function(){
             count = 10;
         }, 1);
@@ -126,7 +126,7 @@ group('2 asynchronous tests with "asyncAfterEachTest"', function(){
             isTrue(count === 10, 'Yes, count now is 10');
         });
     });
-    asyncTest('Is count 100?', function(){
+    asyncTest('Count is 100', function(){
         setTimeout(function(){
             count *= 100;
         }, 1);
@@ -141,7 +141,7 @@ group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
     asyncBeforeEachTest(function(){
         return {num: 1};
     });
-    asyncTest('Was object passed?', function(val){
+    asyncTest('Object was passed', function(val){
         setTimeout(function(){
             val.num *= 100;
         }, 1);

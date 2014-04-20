@@ -191,6 +191,17 @@
         });
     }
 
+    //v2.0.0 When the anchor tag "run all" is clicked, persist the hidePassedGroups checkbox state as a query parameter.
+    function runAllClickHandler(evt){
+        var checked = document.getElementById('hidePassedGroups').checked,
+            href;
+        if(config.hidePassedGroups !== checked){
+            evt.preventDefault();
+            href = evt.currentTarget.getAttribute('href');
+            window.location = href + (href[href.length -1] === '?' ? '' : '&') + 'hpg=' + checked;
+        }
+    }
+
     //v2.0.0 Filtering.
     function filter(level, labels){
         //If there are no runtime and configuration filters then return true.
@@ -262,10 +273,6 @@
         //Set the version.
         s = s.replace(/{{version}}/, version);
         document.getElementById('preamble-test-container').innerHTML = s;
-        //Set hide passed groups checkbox.
-        if(config.hidePassedGroup){
-            document.getElementById('hidePassedGroups').setAttribute('checked');
-        }
         //Append the ui test container.
         document.getElementById('preamble-ui-container').innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
         //If the windowGlabals config option is false then window globals will
@@ -385,7 +392,10 @@
             //v2.0.0 Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
-            assertionTitle = 'title="Click here to filter by this assertion."';
+            assertionTitle = 'title="Click here to filter by this assertion."',
+            as,
+            i,
+            len;
         document.getElementById('preamble-results-container').style.display = 'block';
         results.forEach(function(result){
             if(result.testLabel !== testLabel){
@@ -402,28 +412,34 @@
                 //v2.0.0 Added "data-passed" attribute for hiding passed tests.
                 html += '<div class="group-container' + (hidePassed && result.groupResult ? ' group-container-hidden' : '') + 
                     '"' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
-                    encodeURI(result.groupLabel) + '"' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
+                    encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
                 html += '<div class="tests-container"><a class="test' + (!result.testResult ? ' failed' : '') + '" href="?group=' +
-                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '"' + testTitle + '>' + result.testLabel + 
+                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
                     ' (' + result.testDuration + 'ms)' + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
                 html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '"' + assertionTitle + '>Error: "' +
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
                     result.assertionLabel + '" (' + result.displayAssertionName +
                     ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
                 html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '"' + assertionTitle + '>"' +
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>"' +
                     result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</a></div>';
             }
         });
         html += '</div></div>';
         document.getElementById('preamble-results-container').innerHTML = html;
+        domAddEventHandler(document.getElementById('hidePassedGroups'), 'click', hpgClickHandler);
+        //domAddEventHandler(document.getElementById('runAll'), 'click', runAllClickHandler);
+        as = document.getElementsByTagName('a');
+        for(i = 0, len = as.length; i < len; i++){
+            domAddEventHandler(as[i], 'click', runAllClickHandler);
+        }
     }
 
     function compareArrays(a, b){
@@ -1042,13 +1058,17 @@
             coverage = '<div id="coverage">Covered {{tg}}/{{tt}}/{{ta}}' +
             '<div class="hpgui"><label for="hidePassedGroups">Hide passed groups</label>' + 
             '<input id="hidePassedGroups" type="checkbox" {{checked}}></div>' +
-            ' - <a href="?"> run all</a>' +
-            '</div>';
+            ' - <a id="runAll" href="?"> run all</a>' +
+            '</div>',
+            hpg;
         //Show groups and tests coverage in the header.
         coverage = coverage.replace(/{{tg}}/, queue.length + pluralize(' group', queue.length));
         coverage = coverage.replace(/{{tt}}/, queue.totTests + pluralize(' test', queue.totTests));
         coverage = coverage.replace(/{{ta}}/, queue.totAssertions + pluralize(' assertion', queue.totAssertions));
-        coverage = coverage.replace(/{{checked}}/, config.hidePassedGroups ? 'checked' : '');
+        hpg = loadPageVar('hpg');
+        hpg = hpg && hpg === true;
+        hpg = hpg === '' && config.hidePassedGroups;
+        coverage = coverage.replace(/{{checked}}/, hpg ? 'checked' : '');
         //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
         if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
@@ -1056,7 +1076,6 @@
             elStatusContainer.innerHTML += coverage;
         }
         document.getElementById('coverage').style.display = 'block';
-        domAddEventHandler(document.getElementById('hidePassedGroups'), 'click', hpgClickHandler);
     }
 
     /**
