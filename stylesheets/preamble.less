@@ -1,13 +1,10 @@
+@import 'prefixer.less';
 @bg-color: #fdf6e3;
 @font-size: 14px;
 @normal-color: #aaa;
 @darker-color: #657b83;
 @passed-color: rgb(60, 179, 113);
 @failed-color: rgb(255,69,0);
-.summary{
-    padding: 10px 10px;
-    font-weight: bold;
-}
 html, body{
     font-family: Monaco, "Lucida Console", monospace;
     font-size: @font-size;
@@ -33,7 +30,7 @@ header{
     padding: 10px 30px;
     opacity: 1;
     border-bottom: solid 1px #CCC;
-    box-sizing: border-box;
+    .border-box;
 }
 .banner {
     float: left;
@@ -41,6 +38,10 @@ header{
 #time{
     display: none;
     float: right;
+}
+.summary{
+    padding: 10px 10px;
+    font-weight: bold;
 }
 #coverage{
     .summary;
@@ -59,7 +60,7 @@ header input:first-child {
 .container{
     margin: 49px 0 0 0;
     width: 100%;
-    box-sizing: border-box;
+    .border-box;
 }
 .summary-passed {
     .summary;
@@ -87,7 +88,7 @@ p:last-child{
 section{
     padding: 10px 20px;
     width: 100%;
-    box-sizing: border-box;
+    .border-box;
     font-size: 1rem;
 }
 .group-container{
