@@ -1,7 +1,3 @@
-.summary {
-  padding: 10px 10px;
-  font-weight: bold;
-}
 html,
 body {
   font-family: Monaco, "Lucida Console", monospace;
@@ -28,6 +24,8 @@ header {
   padding: 10px 30px;
   opacity: 1;
   border-bottom: solid 1px #CCC;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .banner {
@@ -36,6 +34,10 @@ header {
 #time {
   display: none;
   float: right;
+}
+.summary {
+  padding: 10px 10px;
+  font-weight: bold;
 }
 #coverage {
   padding: 10px 10px;
@@ -55,6 +57,8 @@ header input:first-child {
 .container {
   margin: 49px 0 0 0;
   width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .summary-passed {
@@ -85,6 +89,8 @@ p:last-child {
 section {
   padding: 10px 20px;
   width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   font-size: 1rem;
 }
