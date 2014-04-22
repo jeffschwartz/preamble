@@ -910,6 +910,10 @@
     function group(label, callback){
         var start,
             end;
+        //v2.0.0 Parameter checking.
+        if(arguments.length !== 2){
+            throwException('group requires 2 arguments, found ' + arguments.length);
+        }
         if(filter('group', {group: label})){
             queue.push({groupLabel: label, callback: callback, tests: []});
             start = Date.now();
@@ -923,6 +927,10 @@
     //and registers its callback in its testsQueue item.
     function test(label, callback){
         var cgqi = queue[queue.length - 1];
+        //v2.0.0 Parameter checking.
+        if(arguments.length !== 2){
+            throwException('test requires 2 arguments, found ' + arguments.length);
+        }
         if(filter('test', {group: cgqi.groupLabel, test: label})){
             cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
             queue.totTests++;
@@ -934,6 +942,10 @@
     //Form: asyncTest(label[, interval], callback).
     function asyncTest(label){
         var cgqi = queue[queue.length - 1];
+        //v2.0.0 Parameter checking.
+        if(arguments.length < 2){
+            throwException('asynTest requires 2 or 3 arguments, found ' + arguments.length);
+        }
         if(filter('test', {group: cgqi.groupLabel, test: label})){
             cgqi.tests.push(combine(currentTestHash, {
                 testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
