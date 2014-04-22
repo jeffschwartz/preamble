@@ -167,28 +167,41 @@
             l,
             ll,
             attributes,
-            elGroupContainers = [],
-            classes = '',
-            passed;
+            elContainers = [],
+            classes = '';
         for(i = 0, l= elDivs.length; i < l; i++){
             attributes = elDivs[i].getAttribute('class');
             if(attributes && attributes.length){
                 attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
-                    if(attributes[ii] === 'group-container'){
-                        elGroupContainers.push(elDivs[i]);
+                    if(attributes[ii] === 'group-container' || attributes[ii] === 'tests-container' || attributes[ii] === 'assertion-container'){
+                        elContainers.push(elDivs[i]);
                     }
                 }
             }
         }
-        classes = document.getElementById('hidePassedGroups').checked ? 'group-container group-container-hidden' : 'group-container';
-        elGroupContainers.forEach(function(elGroup){
-            passed = elGroup.getAttribute('data-passed');
-            passed = passed === 'true';
-            if(passed){
-                elGroup.setAttribute('class', classes);
-            }
-        });
+        if(document.getElementById('hidePassedGroups').checked){
+            elContainers.forEach(function(elContainer){
+                if(elContainer.getAttribute('data-passed') === 'true'){
+                    classes = elContainer.getAttribute('class');
+                    elContainer.setAttribute('class', classes + ' hidden');
+                }
+            });
+        }else{
+            elContainers.forEach(function(elContainer){
+                if(elContainer.getAttribute('data-passed') === 'true'){
+                    classes = elContainer.getAttribute('class');
+                    attributes = classes.split(' ');
+                    classes = [];
+                    attributes.forEach(function(c){
+                        if(c !== 'hidden'){
+                            classes.push(c);
+                        }
+                    });
+                    elContainer.setAttribute('class', classes);
+                }
+            });
+        }
     }
 
     //v2.0.0 When the anchor tag "run all" is clicked, persist the hidePassedGroups checkbox state as a query parameter.
@@ -410,24 +423,27 @@
             }
             if(result.groupLabel !== groupLabel){
                 //v2.0.0 Added "data-passed" attribute for hiding passed tests.
-                html += '<div class="group-container' + (hidePassed && result.groupResult ? ' group-container-hidden' : '') + 
-                    '"' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
+                html += '<div class="group-container' + (hidePassed && result.groupResult ? ' hidden' : '') + 
+                    '" ' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
                 groupLabel = result.groupLabel;
             }
             if(result.testLabel !== testLabel){
-                html += '<div class="tests-container"><a class="test' + (!result.testResult ? ' failed' : '') + '" href="?group=' +
+                html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
+                    '" ' + 'data-passed="' + result.testResult + '"><a class="test' + (!result.testResult ? ' failed' : '') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
                     ' (' + result.testDuration + 'ms)' + '</a>';
                 testLabel = result.testLabel;
             }
             if(!result.result){
-                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
+                html += '<div class="assertion-container' + (hidePassed && result.result ? ' hidden' : '') + 
+                    '" ' + 'data-passed="' + result.result + '"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
                     result.assertionLabel + '" (' + result.displayAssertionName +
                     ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
-                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
+                html += '<div class="assertion-container' + (hidePassed && result.result ? ' hidden' : '') + 
+                    '" ' + 'data-passed="' + result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>"' +
                     result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</a></div>';
             }
@@ -436,6 +452,7 @@
         document.getElementById('preamble-results-container').innerHTML = html;
         domAddEventHandler(document.getElementById('hidePassedGroups'), 'click', hpgClickHandler);
         //domAddEventHandler(document.getElementById('runAll'), 'click', runAllClickHandler);
+        //TODO(Jeff): Should use event delegation here!
         as = document.getElementsByTagName('a');
         for(i = 0, len = as.length; i < len; i++){
             domAddEventHandler(as[i], 'click', runAllClickHandler);

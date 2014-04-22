@@ -216,7 +216,7 @@ group('proxy captures calling information which can be tested against', function
             isTrue(foo.name.wasCalled(2), 'callback was called twice.');
             equal(foo.name.getCalledCount(), 2, 'callback was called twice.');
             var info1 = foo.name.getData(0);
-            isTrue(info1.argsPassed[0] === 'Somewhere over ', 'callback was passed "Somewhere over"');
+            isFalse(info1.argsPassed[0] === 'Somewhere over ', 'callback was passed "Somewhere over"');
             isTrue(info1.returned === 'Somewhere over ', 'callback returned "Somewhere over "');
             isTrue(info1.context === foo, 'foo.name was called the 1st time with the foo context');
             var info2 = foo.name.getData(1);
