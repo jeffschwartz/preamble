@@ -1,6 +1,5 @@
-v2.0.0
-This release introduces several new features as well as numerous changes to the
-code base.
+v2.0.0 (Ramoth)
+This release introduces numerous new features and changes to the code base:
 
 1) Optimized, restructured and reorganized code base to provide better 
 implementations, performance and ease of maintainability for the internal 

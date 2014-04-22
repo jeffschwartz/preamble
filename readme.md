@@ -6,7 +6,7 @@ Documentation lives here: http://jeffschwartz.github.io/preamble/
 
 Join the discussion here: https://groups.google.com/forum/#!forum/preamble-users/
 
-#### Prending v2 Release Notes
+#### v2 (Ramoth) Release Notes
 This release introduces several new features as well as numerous changes to the
 code base.
 

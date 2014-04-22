@@ -1073,7 +1073,7 @@
     function showCoverage(){
         var elStatusContainer = document.getElementById('preamble-status-container'),
             coverage = '<div id="coverage">Covered {{tg}}/{{tt}}/{{ta}}' +
-            '<div class="hpgui"><label for="hidePassedGroups">Hide passed groups</label>' + 
+            '<div class="hpgui"><label for="hidePassedGroups">Hide passed tests</label>' + 
             '<input id="hidePassedGroups" type="checkbox" {{checked}}></div>' +
             ' - <a id="runAll" href="?"> run all</a>' +
             '</div>',
