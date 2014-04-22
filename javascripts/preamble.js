@@ -1083,8 +1083,9 @@
     }
 
     function showCoverage(){
-        var elStatusContainer = document.getElementById('preamble-status-container'),
-            coverage = '<div id="coverage">Covered {{tg}}/{{tt}}/{{ta}}' +
+        var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
+            elStatusContainer = document.getElementById('preamble-status-container'),
+            coverage = '<div id="coverage">' + show + ' {{tg}}/{{tt}}/{{ta}}' +
             '<div class="hpgui"><label for="hidePassedGroups">Hide passed tests</label>' + 
             '<input id="hidePassedGroups" type="checkbox" {{checked}}></div>' +
             ' - <a id="runAll" href="?"> run all</a>' +
