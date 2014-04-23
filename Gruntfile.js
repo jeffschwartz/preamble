@@ -10,10 +10,23 @@ module.exports = function ( grunt ) {
                 }
             }
         },
+        jshint : {
+            options: {
+                jshintrc: true
+            },
+            files   : ['javascripts/preamble.js']
+        },
         watch  : {
-            scripts : {
+            less : {
                 files   : ['**/*.less'],
                 tasks   : ['less'],
+                options : {
+                    interrupt : true
+                }
+            },
+            js : {
+                files   : ['javascripts/preamble.js'],
+                tasks   : ['jshint'],
                 options : {
                     interrupt : true
                 }
@@ -24,6 +37,7 @@ module.exports = function ( grunt ) {
     // Load the plugins
     grunt.loadNpmTasks( 'grunt-contrib-less' );
     grunt.loadNpmTasks( 'grunt-contrib-watch' );
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
     // Default task(s).
     grunt.registerTask( 'default', ['watch'] );
