@@ -5,3 +5,4 @@ preamble.sublime-workspace
 **/*.swo
 temp.md
 node_modules
+**/*.log
