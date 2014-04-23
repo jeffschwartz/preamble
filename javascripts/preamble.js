@@ -212,7 +212,8 @@
         if(config.hidePassedTests !== checked){
             evt.preventDefault();
             href = evt.currentTarget.getAttribute('href');
-            lastChar = href[href.length -1] === '?' ? '&' : '?';
+            lastChar = href[href.length -1];
+            lastChar = lastChar === '?' ? '' : '&';
             window.location = href + lastChar + 'hpt=' + checked;
         }
     }
