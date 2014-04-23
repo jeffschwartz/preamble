@@ -207,11 +207,13 @@
     //v2.0.0 When the anchor tag "run all" is clicked, persist the hidePassedGroups checkbox state as a query parameter.
     function runAllClickHandler(evt){
         var checked = document.getElementById('hidePassedGroups').checked,
+            lastChar,
             href;
         if(config.hidePassedGroups !== checked){
             evt.preventDefault();
             href = evt.currentTarget.getAttribute('href');
-            window.location = href + (href[href.length -1] === '?' ? '' : '&') + 'hpg=' + checked;
+            lastChar = href[href.length -1] === '?' ? '&' : '?';
+            window.location = href + lastChar + 'hpg=' + checked;
         }
     }
 
@@ -1086,19 +1088,18 @@
         var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
             elStatusContainer = document.getElementById('preamble-status-container'),
             coverage = '<div id="coverage">' + show + ' {{tg}}/{{tt}}/{{ta}}' +
-            '<div class="hpgui"><label for="hidePassedGroups">Hide passed tests</label>' + 
-            '<input id="hidePassedGroups" type="checkbox" {{checked}}></div>' +
-            ' - <a id="runAll" href="?"> run all</a>' +
-            '</div>',
+                '<div class="hpgui"><label for="hidePassedGroups">Hide passed tests</label>' + 
+                '<input id="hidePassedGroups" type="checkbox" {{checked}}></div>' +
+                ' - <a id="runAll" href="?"> run all</a>' +
+                '</div>',
             hpg;
         //Show groups and tests coverage in the header.
         coverage = coverage.replace(/{{tg}}/, queue.length + pluralize(' group', queue.length));
         coverage = coverage.replace(/{{tt}}/, queue.totTests + pluralize(' test', queue.totTests));
         coverage = coverage.replace(/{{ta}}/, queue.totAssertions + pluralize(' assertion', queue.totAssertions));
         hpg = loadPageVar('hpg');
-        hpg = hpg && hpg === true;
-        hpg = hpg === '' && config.hidePassedGroups;
-        coverage = coverage.replace(/{{checked}}/, hpg ? 'checked' : '');
+        hpg = hpg === '' && config.hidePassedGroups || hpg === 'true' && true || hpg === 'false' && false;
+        coverage = coverage.replace(/{{checked}}/, hpg && 'checked' || '');
         //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
         if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
