@@ -10,7 +10,7 @@ var preambleConfig = {
     asyncTestDelay: Default value = 10. Set the value used to wait before calling whenAsyncDone's callback.
     asyncBeforeAfterTestDelay: Default value = 10. Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest, respectively).
     name: Default value = 'Test'. Override this to display a meaningful name for your tests.
-    hidePassedGroups: Default value =  false. Set to true to hide padded groups.
+    hidePassedTests: Default value =  false. Set to true to hide padded tests.
     filters: default: [] - Set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}. You can also use the wildcard '*' character for test and/or assertions to specify that all tests and/or all assertions, respectively, should be included in the filter.
     uiTestContainerId: Default value = 'ui-test-container'. Override this to use a different id.
 };

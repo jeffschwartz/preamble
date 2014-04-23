@@ -25,7 +25,7 @@
          *
          *uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
          *
-         *hidePassedGroups: (default: false) - v2.0.0 set to true to hide passed groups.
+         *hidePassedTests: (default: false) - v2.0.0 set to true to hide passed tests.
          *
          *filters: (default: []) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
          *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
@@ -41,7 +41,7 @@
             asyncBeforeAfterTestDelay: 10, 
             name: 'Test', 
             uiTestContainerId: 'ui-test-container', 
-            hidePassedGroups: false,
+            hidePassedTests: false,
             filters: [],
             autoStart: true
         },
@@ -159,8 +159,8 @@
         }
     }
 
-    //v2.0.0 Click event handler for the hidePassedGroups checkbox.
-    function hpgClickHandler(){
+    //v2.0.0 Click event handler for the hidePassedTests checkbox.
+    function hptClickHandler(){
         var elDivs = document.getElementsByTagName('div'),
             i,
             ii,
@@ -180,7 +180,7 @@
                 }
             }
         }
-        if(document.getElementById('hidePassedGroups').checked){
+        if(document.getElementById('hidePassedTests').checked){
             elContainers.forEach(function(elContainer){
                 if(elContainer.getAttribute('data-passed') === 'true'){
                     classes = elContainer.getAttribute('class');
@@ -204,16 +204,16 @@
         }
     }
 
-    //v2.0.0 When the anchor tag "run all" is clicked, persist the hidePassedGroups checkbox state as a query parameter.
+    //v2.0.0 When the anchor tag "run all" is clicked, persist the hidePassedTests checkbox state as a query parameter.
     function runAllClickHandler(evt){
-        var checked = document.getElementById('hidePassedGroups').checked,
+        var checked = document.getElementById('hidePassedTests').checked,
             lastChar,
             href;
-        if(config.hidePassedGroups !== checked){
+        if(config.hidePassedTests !== checked){
             evt.preventDefault();
             href = evt.currentTarget.getAttribute('href');
             lastChar = href[href.length -1] === '?' ? '&' : '?';
-            window.location = href + lastChar + 'hpg=' + checked;
+            window.location = href + lastChar + 'hpt=' + checked;
         }
     }
 
@@ -403,7 +403,7 @@
             testLabel = '',
             html = '', 
             //v2.0.0 Hide passed tests.
-            hidePassed = document.getElementById('hidePassedGroups').checked,
+            hidePassed = document.getElementById('hidePassedTests').checked,
             //v2.0.0 Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
@@ -452,7 +452,7 @@
         });
         html += '</div></div>';
         document.getElementById('preamble-results-container').innerHTML = html;
-        domAddEventHandler(document.getElementById('hidePassedGroups'), 'click', hpgClickHandler);
+        domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
         //domAddEventHandler(document.getElementById('runAll'), 'click', runAllClickHandler);
         //TODO(Jeff): Should use event delegation here!
         as = document.getElementsByTagName('a');
@@ -1088,18 +1088,18 @@
         var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
             elStatusContainer = document.getElementById('preamble-status-container'),
             coverage = '<div id="coverage">' + show + ' {{tg}}/{{tt}}/{{ta}}' +
-                '<div class="hpgui"><label for="hidePassedGroups">Hide passed tests</label>' + 
-                '<input id="hidePassedGroups" type="checkbox" {{checked}}></div>' +
+                '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
+                '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
                 ' - <a id="runAll" href="?"> run all</a>' +
                 '</div>',
-            hpg;
+            hpt;
         //Show groups and tests coverage in the header.
         coverage = coverage.replace(/{{tg}}/, queue.length + pluralize(' group', queue.length));
         coverage = coverage.replace(/{{tt}}/, queue.totTests + pluralize(' test', queue.totTests));
         coverage = coverage.replace(/{{ta}}/, queue.totAssertions + pluralize(' assertion', queue.totAssertions));
-        hpg = loadPageVar('hpg');
-        hpg = hpg === '' && config.hidePassedGroups || hpg === 'true' && true || hpg === 'false' && false;
-        coverage = coverage.replace(/{{checked}}/, hpg && 'checked' || '');
+        hpt = loadPageVar('hpt');
+        hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
+        coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
         //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
         if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
