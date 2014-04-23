@@ -37,7 +37,7 @@ OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
 browsers that publish either 'stack' or 'stacktrace' properties on thrown 
 Error objects.
 
-8) Added 'Hide Passed Groups' feature, including a "hidePassedGroups" 
+8) Added 'Hide Passed Tests' feature, including a "hidePassedTests" 
 configuration property, which defaults to "false" and a check box to 
 override the configuration.
 
@@ -46,7 +46,6 @@ hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}.
 You can also use the wildcard '*' character for test and/or assertions to 
 specify that all tests and/or all assertions, respectively, should be included 
 in the filter.
-
 
 10) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
 it to wrap <div id="ui-test-container" class="ui-test-container">. This was 

@@ -46,7 +46,7 @@ OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
 browsers that publish either 'stack' or 'stacktrace' properties on thrown 
 Error objects.
 
-8) Added 'Hide Passed Groups' feature, including a "hidePassedGroups" 
+8) Added 'Hide Passed Tests' feature, including a "hidePassedTests" 
 configuration property, which defaults to "false" and a check box to 
 override the configuration.
 
