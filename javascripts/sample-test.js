@@ -3,7 +3,7 @@ configure({
     hidePassedTests: true
 });
 
-group('This group will intentionally fail', function(){
+group('This test will intentionally fail', function(){
     test('true === false', function(){
         isTrue(false, 'Yes, true === false!');
     });
