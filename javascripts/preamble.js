@@ -832,8 +832,8 @@
         }, currentTestHash.asyncAfterTestInterval || config.asyncBeforeAfterTestDelay);
     }
 
-    //Runs the 5 steps of a test's life cycle - 1) before each test, 2) test, 3) after each test,
-    //4) run assertions, 5) setup next test. The current test is the one pointed to by currentTestHash.
+    //Runs the 5 steps of a test's life cycle: 1. before each test, 2. test, 3. after each test,
+    //4. run assertions, 5. setup next test. The current test is the one pointed to by currentTestHash.
     function runTest(){
         switch(currentTestStep){
             case 0: //Runs beforeEach.
