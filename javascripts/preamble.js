@@ -263,7 +263,6 @@
             s;
         //Ignore configuration once testing has started.
         if(configArg && queue.length){
-            alert('no no no!');
             return;
         }
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
