@@ -142,7 +142,7 @@
     }
 
     //When the anchor tag "run all" is clicked, persist the hidePassedTests checkbox state as a query parameter.
-    function runAllClickHandler(evt){
+    function runClickHandler(evt){
         var checked = document.getElementById('hidePassedTests').checked,
             lastChar,
             href;
@@ -420,11 +420,10 @@
         html += '</div></div>';
         document.getElementById('preamble-results-container').innerHTML = html;
         domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
-        //domAddEventHandler(document.getElementById('runAll'), 'click', runAllClickHandler);
         //TODO(Jeff): Should use event delegation here!
         as = document.getElementsByTagName('a');
         for(i = 0, len = as.length; i < len; i++){
-            domAddEventHandler(as[i], 'click', runAllClickHandler);
+            domAddEventHandler(as[i], 'click', runClickHandler);
         }
     }
 
