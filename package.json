@@ -1,7 +1,7 @@
 {
   "name": "preamble",
   "title": "Preamble",
-  "description": "A powerful JavaScript TDD framework backed by a very powerful assertion engine that your test scripts interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy, intuitive and fun."
+  "description": "A powerful JavaScript TDD framework backed by a powerful assertion engine that your test scripts interface with through a simple to use but powerful API. Preamble makes the task of authoring tests easy, intuitive and fun.",
   "version": "2.0.0",
   "author": {
       "name": "Jeffrey Schwartz",
@@ -16,7 +16,7 @@
   "license": {
       "name": "MIT",
       "url": "http://www.opensource.org/licenses/mit-license.php"
-  }
+  },
   "keywords": [
     "preamble",
     "javascript",
@@ -25,7 +25,6 @@
     "framework",
     "unit"
   ],
-  "main": "javascripts/preamble.js",
   "devDependencies": {
     "grunt": "~0.4.4",
     "grunt-contrib-watch": "^0.6.0",
