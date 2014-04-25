@@ -6,45 +6,6 @@
 
     //Version
     var version = 'v2.0.0',
-        /**
-         *Default configuration options - override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
-         *or in-line in your tests.
-         *
-         *shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
-         *
-         *windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
-         *USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
-         *
-         *asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous 
-         *tests to complete.
-         *
-         *asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
-         *(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
-         *
-         *name: (default 'Test') - set to a meaningful name.
-         *
-         *uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-         *
-         *hidePassedTests: (default: false) - v2.0.0 set to true to hide passed tests.
-         *
-         *filters: (default: []) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
-         *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
-         *all tests and/or all assertions, respectively, should be included in the filter.
-         *
-         *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
-         *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
-         */
-        defaultConfig = {
-            shortCircuit: false, 
-            windowGlobals: true, 
-            asyncTestDelay: 10, 
-            asyncBeforeAfterTestDelay: 10, 
-            name: 'Test', 
-            uiTestContainerId: 'ui-test-container', 
-            hidePassedTests: false,
-            filters: [],
-            autoStart: true
-        },
         //Merged configuration options.
         config = {},
         //v2.0.0
@@ -258,8 +219,47 @@
     //v2.0.0 Support for in-line configuration.
     //Called once internally but may be called again if test script calls it.
     function configure(){
-        //v2.0.0
-        var configArg = arguments && arguments[0],
+        /**
+         *Default configuration options - override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
+         *or in-line in your tests.
+         *
+         *shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
+         *
+         *windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
+         *USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
+         *
+         *asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous 
+         *tests to complete.
+         *
+         *asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
+         *(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
+         *
+         *name: (default 'Test') - set to a meaningful name.
+         *
+         *uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+         *
+         *hidePassedTests: (default: false) - v2.0.0 set to true to hide passed tests.
+         *
+         *filters: (default: []) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
+         *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
+         *all tests and/or all assertions, respectively, should be included in the filter.
+         *
+         *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
+         *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
+         */
+        var defaultConfig = {
+                shortCircuit: false, 
+                windowGlobals: true, 
+                asyncTestDelay: 10, 
+                asyncBeforeAfterTestDelay: 10, 
+                name: 'Test', 
+                uiTestContainerId: 'ui-test-container', 
+                hidePassedTests: false,
+                filters: [],
+                autoStart: true
+            },
+            //v2.0.0
+            configArg = arguments && arguments[0],
             s;
         //Ignore configuration once testing has started.
         if(configArg && queue.length){
