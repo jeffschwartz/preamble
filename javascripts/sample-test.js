@@ -3,74 +3,80 @@ configure({
     hidePassedTests: true
 });
 
-group('This test will intentionally fail', function(){
-    test('true === false', function(){
-        isTrue(false, 'Yes, true === false!');
+group('How failed tests are reported', function(){
+    test('This test will intentionally fail', function(){
+        isTrue(false, 'false is true');
     });
 });
 
-group('It work', function(){
+group('How passed tests are reported', function(){
     test('Hello World!', function(){
         var hw = 'Hello World!';
         isTrue(hw === 'Hello World!', 'Yes, it works!');
     });
 });
 
-group('Truthy boolean evaluation', function(){
-    var undef;
-    var def = {};
-    var one = 1;
-    var fls = false;
-    var tru = true;
-    test('When using truthy boolean evaluation', function(){
-        isNotTruthy(undef, 'undefined is false');
-        isTruthy(def, 'a valid reference is true');
-        isTruthy(one, '1 is true');
-        isNotTruthy(fls, 'false is false');
-        isTruthy(tru, 'true is true');
+group('Boolean assertions', function(){
+    test('true', function(){
+        isTrue(true, 'true is true');
+    });
+    test('false', function(){
+        isFalse(false, 'false is false');
     });
 });
 
-group('Assertions', function(){
+group('Truthy assertions', function(){
+    var undef;
+    var def = {};
+    var one = 1;
+    var zero = 0;
+    test('When using truthy boolean evaluation', function(){
+        isNotTruthy(undef, 'undefined is not truthy');
+        isTruthy(def, 'a valid reference to an object is truthy');
+        isTruthy(one, '1 is truthy');
+        isNotTruthy(zero, '0 is not truthy');
+    });
+});
+
+group('Strict deep recursive comparison assertions', function(){
     test('Does a equal b', function(){
         var char = 'b';
         var a = {a: 'a', b: 'b'};
         var b = {a: 'a', b: b};
         var c = {a: 'a', b: 'b'};
         var three = 3;
-        notEqual(a, b, 'No way these are equal.');
-        equal(a, c, 'But these are equal.');
-        equal(char, 'b', 'Yup, these are equal too.');
-        equal(3, three, 'And so are these.');
+        notEqual(a, b, 'var a and var b are not equal.');
+        equal(a, c, 'var a and var c are equal');
+        equal(char, 'b', 'var char and "b" are equal');
+        equal(3, three, '3 and var three are equal');
     });
 });
 
-group('2 synchronous test with "beforeEachTest"', function(){
+group('Synchronous tests with "beforeEachTest"', function(){
     var count = 0;
     beforeEachTest(function(){
         count = 1;
     });
     test('Count is 1', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0');
-        isTrue(count === 1, 'count does equal 1');
-        isTrue((count += 1) === 2, 'count now equals 2');
+        isTrue(count === 1, 'count equals 1');
+        isTrue((count += 1) === 2, 'when 1 is added to count it equals 2');
     });
-    test('Count is still 2', function(){
-        isFalse(count === 2, 'nope, it isn\'t still 2');
-        isTrue(count === 1, 'now count equals 1');
+    test('Count is 1 again', function(){
+        isFalse(count === 2, 'count no longer equals 2');
+        isTrue(count === 1, 'count now equals 1');
     });
 });
 
-group('2 synchronous test with "afterEachTest"', function(){
+group('Synchronous test with "afterEachTest"', function(){
     var count = 0;
     afterEachTest(function(){
         count = 1;
     });
     test('Count is 0', function(){
-        isTrue(count === 0, 'count does equal 0.');
+        isTrue(count === 0, 'count equals 0.');
     });
-    test('Count is still 0', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0.');
+    test('Count is now 1', function(){
+        isFalse(count === 0, 'count no longer equals 0.');
         isTrue(count === 1, 'count now equals 1.');
     });
 });
