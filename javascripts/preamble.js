@@ -1,4 +1,4 @@
-//Preamble 2.0.0
+//Preamble 2.0.0 (Ramoth)
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
@@ -8,27 +8,22 @@
     var version = 'v2.0.0',
         //Merged configuration options.
         config = {},
-        //v2.0.0
         queue=[],
-        //v2.0.0 Can only be true if config.shortCircuit is true and an assertion has failed.
+        //Can only be true if config.shortCircuit is true and an assertion has failed.
         isShortCircuited = false,
         currentTestHash,
         assert,
-        //v2.0.0
         prevQueueCount = 0,
-        //v2.0.0
         queueStableCount = 0,
-        //v2.0.0
         queueStableInterval = 1,
         intervalId,
         currentTestStep,
-        //v2.0.0 Run-time filter
+        //Run-time filter
         runtimeFilter,
-        //v.2.0.0 The stack trace property used by the browser.
+        //The stack trace property used by the browser.
         stackTraceProperty,
-        //v.2.0.0 RegEx for getting file from stack trace.
+        //RegEx for getting file from stack trace.
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
-        //v2.0.0
         currentGroupIndex,
         currentTestIndex;
 
@@ -45,21 +40,10 @@
         if(arguments.length === 3){
             //window.onerror
             html = '<p class="failed">' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
-            //v2.0.0 For external reporting.
-            publishStatusUpdate({
-                status: 'error',
-                error: arguments[0] + '. File: ' + arguments[1] + '. Line: ' + arguments[2]
-            });
         }else{
             //catch(e)
             html = '<p class="failed">An error occurred,  "' + arguments[0] + 
                 '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
-            //v2.0.0 For external reporting.
-            publishStatusUpdate({
-                status: 'error',
-                error: 'An error occurred, "' + arguments[0] + 
-                    '" and all further processing has been terminated. Please check your browser console for additional details.</p>'
-            });
         }
         document.getElementById('preamble-status-container').innerHTML = html;
     }
@@ -103,15 +87,7 @@
         return result;
     }
 
-    function wrapStringWith(wrapChar, string){
-        return wrapChar + string + wrapChar;
-    }
-
-    function doubleQuote(string){
-        return wrapStringWith('"', string);
-    }
-
-    //v2.0.0 Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+    //Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
     function domAddEventHandler(el, event, handler){
         if( el.addEventListener){
             el.addEventListener(event, handler);
@@ -120,7 +96,7 @@
         }
     }
 
-    //v2.0.0 Click event handler for the hidePassedTests checkbox.
+    //Click event handler for the hidePassedTests checkbox.
     function hptClickHandler(){
         var elDivs = document.getElementsByTagName('div'),
             i,
@@ -165,7 +141,7 @@
         }
     }
 
-    //v2.0.0 When the anchor tag "run all" is clicked, persist the hidePassedTests checkbox state as a query parameter.
+    //When the anchor tag "run all" is clicked, persist the hidePassedTests checkbox state as a query parameter.
     function runAllClickHandler(evt){
         var checked = document.getElementById('hidePassedTests').checked,
             lastChar,
@@ -179,7 +155,7 @@
         }
     }
 
-    //v2.0.0 Filtering.
+    //Filtering.
     function filter(level, labels){
         //If there are no runtime and configuration filters then return true.
         if(!runtimeFilter.group && !config.filters.length){
@@ -215,9 +191,7 @@
         }
     }
 
-    //Configuration
-    //v2.0.0 Support for in-line configuration.
-    //Called once internally but may be called again if test script calls it.
+    //Configuration is called once internally but may be called again if test script employs in-line configuration.
     function configure(){
         /**
          *Default configuration options - override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
@@ -238,9 +212,9 @@
          *
          *uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
          *
-         *hidePassedTests: (default: false) - v2.0.0 set to true to hide passed tests.
+         *hidePassedTests: (default: false) - set to true to hide passed tests.
          *
-         *filters: (default: []) - v2.0.0 set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
+         *filters: (default: []) - set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
          *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
          *all tests and/or all assertions, respectively, should be included in the filter.
          *
@@ -258,7 +232,6 @@
                 filters: [],
                 autoStart: true
             },
-            //v2.0.0
             configArg = arguments && arguments[0],
             s;
         //Ignore configuration once testing has started.
@@ -272,7 +245,7 @@
         queue.totAssertions = 0;
         //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
         runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test'), assertion: loadPageVar('assertion')};
-        //v2.0.0 Capture exception's stack trace property.
+        //Capture exception's stack trace property.
         setStackTraceProperty();
         //Handle global errors.
         window.onerror = errorHandler;
@@ -337,13 +310,10 @@
                 isNotTruthy: noteIsNotTruthyAssertion
             };
         }
-        //v2.0.0 For external reporting.
         window.Preamble = window.Preamble || {};
+        //For use by external processes.
         window.Preamble.__ext__ = {};
-        /**
-         * v2.0.0 For external reporting.
-         * Expose config options.
-         */
+        //Expose config options to external processes.
         window.Preamble.__ext__.config = config;
     }
 
@@ -362,7 +332,6 @@
         s = s.replace(/{{et}}/, queue.totalElapsedTime);
         el.innerHTML = s;
         el.style.display = 'block';
-        //v2.0.0 Show coverage.
         showCoverage();
         if(queue.result){
             html = '<div id="preamble-results-summary-passed" class="summary-passed">' + totGroups +
@@ -383,7 +352,7 @@
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     }
 
-    //v2.0.0 Returns the "line" in the stack trace that points to the failed assertion.
+    //Returns the "line" in the stack trace that points to the failed assertion.
     function stackTrace(st) {
         //Get all file references...
         var matches = st.match(reFileFromStackTrace);
@@ -397,14 +366,13 @@
         }, '');
     }
 
-    //v.2.0.0 Including the stack trace file reference for failed assertions.
     function showResultsDetails(results){
         var groupLabel = '',
             testLabel = '',
             html = '', 
-            //v2.0.0 Hide passed tests.
+            //Hide passed tests.
             hidePassed = document.getElementById('hidePassedTests').checked,
-            //v2.0.0 Titles for anchor tags.
+            //Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
             assertionTitle = 'title="Click here to filter by this assertion."',
@@ -424,7 +392,6 @@
                 }
             }
             if(result.groupLabel !== groupLabel){
-                //v2.0.0 Added "data-passed" attribute for hiding passed tests.
                 html += '<div class="group-container' + (hidePassed && result.groupResult ? ' hidden' : '') + 
                     '" ' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
@@ -623,7 +590,6 @@
         }
     }
 
-    //v2.0.0 Pushing stack trace onto the queue and maintain assertions counter.
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         currentTestHash.assertions.push({
             assertion: assertion, 
@@ -639,7 +605,6 @@
         throw new Error(errMessage);
     }
 
-    //v.2.0.0 Sets the stack trace property used by the browser.
     function setStackTraceProperty(){
         try{
             throw new Error('woops');
@@ -648,7 +613,6 @@
         }
     }
 
-    //v2.0.0 Returns the stack trace from an error object.
     function stackTraceFromError(){
         var stack = null;
         if(stackTraceProperty){
@@ -661,7 +625,6 @@
         return stack;
     }
 
-    //v.2.0.0 Including a stack trace.
     function noteEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
             throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
@@ -677,7 +640,6 @@
         }
     }
 
-    //v.2.0.0 Including a stack trace.
     function noteIsTrueAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
@@ -691,7 +653,6 @@
         }
     }
 
-    //v.2.0.0 Including a stack trace.
     function noteIsTruthyAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
@@ -705,7 +666,6 @@
         }
     }
 
-    //v.2.0.0 Including a stack trace.
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
             throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
@@ -721,7 +681,6 @@
         }
     }
 
-    //v.2.0.0 Including a stack trace.
     function noteIsFalseAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
@@ -735,7 +694,6 @@
         }
     }
 
-    //v.2.0.0 Including a stack trace.
     function noteIsNotTruthyAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
@@ -912,7 +870,6 @@
     function group(label, callback){
         var start,
             end;
-        //v2.0.0 Parameter checking.
         if(arguments.length !== 2){
             throwException('group requires 2 arguments, found ' + arguments.length);
         }
@@ -929,7 +886,6 @@
     //and registers its callback in its testsQueue item.
     function test(label, callback){
         var cgqi = queue[queue.length - 1];
-        //v2.0.0 Parameter checking.
         if(arguments.length !== 2){
             throwException('test requires 2 arguments, found ' + arguments.length);
         }
@@ -944,7 +900,6 @@
     //Form: asyncTest(label[, interval], callback).
     function asyncTest(label){
         var cgqi = queue[queue.length - 1];
-        //v2.0.0 Parameter checking.
         if(arguments.length < 2){
             throwException('asynTest requires 2 or 3 arguments, found ' + arguments.length);
         }
@@ -967,7 +922,6 @@
         return config.uiTestContainerId;
     }
 
-    //Completely rewritten for v1.2.0.
     //A factory that creates a proxy wrapper for any function or object method property.
     //Use it to determine if the wrapped function was called, how many times it was called,
     //the arguments that were passed to it, the contexts it was called with and what it
@@ -1100,7 +1054,7 @@
         hpt = loadPageVar('hpt');
         hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
         coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
-        //v2.0.0 Preserve error message that replaces 'Building queue. Please wait...'.
+        //Preserve error message that replaces 'Building queue. Please wait...'.
         if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
         }else{
@@ -1113,14 +1067,14 @@
      * It all starts here!!!
      */
 
-    //v2.0.0 Start time, used to report total elapsed time.
+    //Start time, used to report total elapsed time.
     queue.start = Date.now();
 
     //Configure the runtime environment.
     configure();
 
     /**
-     * v2.0.0 A hash-of-hashes pubsub implementation.
+     * Events - publish/subscribe.
      */
 
     var pubsub = window.Preamble.__ext__.pubsub = (function(){
@@ -1210,7 +1164,7 @@
     }());
 
     /**
-     * v2.0.0 Internal event handling.
+     * Internal event handling.
      */
 
     //Convenience method for registering handlers.
@@ -1346,33 +1300,11 @@
     });
 
     /**
-     * v2.0.0 For external reporting.
-     * Subscribe to pubsub to show status updates in the console.
-     * TODO(J.S.) Comment this out prior to release?
-     */
-
-    on('status update', function(topic, data){
-        //TODO(jeff): remove console.log before merging with development.
-        console.log('topic:', doubleQuote(topic), 'status:', doubleQuote(data.status), 'data:', data[data.status]);
-    });
-
-    /**
-     * v2.0.0 For external reporting.
-     * Higher-level functionality ontop of pubsub.
-     */
-
-    function publishStatusUpdate(data) {
-        emit('status update', data);
-    }
-
-    /**
      * Wait while the queue is loaded.
      */
 
     //Catch errors.
     try{
-        //v2.0.0 For external reporting. Set status to "loading".
-        publishStatusUpdate({status: 'loading'});
         //Wait while the queue is built as scripts call group function.
         //Keep checking the queue's length until it is 'stable'.
         //Keep checking that config.autoStart is true.
