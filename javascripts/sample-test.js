@@ -52,68 +52,63 @@ group('Strict deep recursive comparison assertions', function(){
     });
 });
 
-group('Synchronous tests with "beforeEachTest"', function(){
+group('Synchronous test with "beforeEachTest"', function(){
     var count = 0;
     beforeEachTest(function(){
-        count = 1;
+        count = 100;
     });
-    test('Count is 1', function(){
-        isTrue(count === 1, 'count equals 1');
-        isTrue((count += 1) === 2, 'when 1 is added to count it equals 2');
-    });
-    test('Count is 1 again', function(){
-        isFalse(count === 2, 'count no longer equals 2');
-        isTrue(count === 1, 'count now equals 1');
+    test('count is 100', function(){
+        equal(count, 100, 'count equals 100');
     });
 });
 
-group('Synchronous test with "afterEachTest"', function(){
+group('Synchronous tests with "afterEachTest"', function(){
     var count = 0;
     afterEachTest(function(){
-        count = 1;
+        count = 100;
     });
-    test('Count is 0', function(){
-        isTrue(count === 0, 'count equals 0.');
+    test('count is 0', function(){
+        equal(count, 0, 'count equals 0.');
     });
-    test('Count is now 1', function(){
-        isFalse(count === 0, 'count no longer equals 0.');
-        isTrue(count === 1, 'count now equals 1.');
-    });
-});
-
-group('An asynchronous test with no before/after eachTest', function(){
-    asyncTest('JavaScript is amazing', function(){
-        var val;
-        setTimeout(function(){
-            val = 'Isn\'t JavaScript amazing?';
-        }, 1);
-        whenAsyncDone(function(){
-            isTrue(val === 'Isn\'t JavaScript amazing?', 'Yest it is!');
-        });
+    test('count is 100', function(){
+        equal(count, 100, 'count equals 100.');
     });
 });
 
-group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
+group('Asynchronous test', function(){
     var count = 0;
-    asyncBeforeEachTest(function(){
-        count = 2;
-    });
-    asyncTest('Count is 20', function(){
-        setTimeout(function(){
-            count *= 10;
-        }, 1);
-
+    asyncTest('count is 100', 1, function(){
+        count = 100;
         whenAsyncDone(function(){
-            isTrue(count === 20, 'Yes, count now is 20');
+            equal(count, 100, 'count equals 100');
         });
     });
-    asyncTest('Count is 200', function(){
-        setTimeout(function(){
-            count *= 100;
-        }, 1);
+});
 
+group('Asynchronous tests with "asyncBeforeEachTest"', function(){
+    var count = 0;
+    asyncBeforeEachTest(1, function(){
+        count = 10;
+        //setTimeout(function(){
+        //    count = 10;
+        //}, 1);
+    });
+    asyncTest('count is 100', 1, function(){
+        count *= 10;
+        //setTimeout(function(){
+        //    count *= 10;
+        //}, 1);
         whenAsyncDone(function(){
-            isTrue(count === 200, 'Yes, count now is 200');
+            equal(count, 100, 'count equals 100');
+        });
+    });
+    asyncTest('count is 20', 1, function(){
+        count *= 2;
+        //setTimeout(function(){
+        //    count *= 2;
+        //}, 1);
+        whenAsyncDone(function(){
+            equal(count, 20, 'count x 2 = 20');
         });
     });
 });
@@ -123,16 +118,16 @@ group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     asyncAfterEachTest(function(){
         count = 1;
     });
-    asyncTest('Count is 10', function(){
+    asyncTest('count is 10', function(){
         setTimeout(function(){
             count = 10;
         }, 1);
 
         whenAsyncDone(function(){
-            isTrue(count === 10, 'Yes, count now is 10');
+            isTrue(count === 10, 'count equals 10');
         });
     });
-    asyncTest('Count is 100', function(){
+    asyncTest('count is 100', function(){
         setTimeout(function(){
             count *= 100;
         }, 1);

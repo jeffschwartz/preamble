@@ -405,14 +405,14 @@
             len;
         document.getElementById('preamble-results-container').style.display = 'block';
         results.forEach(function(result){
-            if(result.testLabel !== testLabel){
+            if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
                 if(html.length){
                     html += '</div>';
                 }
             }
             if(result.groupLabel !== groupLabel){
                 if(html.length){
-                    html += '</div></a>';
+                    html += '</div>';
                 }
             }
             if(result.groupLabel !== groupLabel){
@@ -420,8 +420,9 @@
                     '" ' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
                 groupLabel = result.groupLabel;
+                testLabel = '';
             }
-            if(result.testLabel !== testLabel){
+            if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
                 html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
                     '" ' + 'data-passed="' + result.testResult + '"><a class="test' + (!result.testResult ? ' failed' : '') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
