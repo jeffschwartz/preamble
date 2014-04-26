@@ -405,6 +405,7 @@
             len;
         document.getElementById('preamble-results-container').style.display = 'block';
         results.forEach(function(result){
+            //Concat group and label when comparing to avoid collisions with the previous test should it have the same label.
             if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
                 if(html.length){
                     html += '</div>';
@@ -438,8 +439,8 @@
             }else{
                 html += '<div class="assertion-container' + (hidePassed && result.result ? ' hidden' : '') + 
                     '" ' + 'data-passed="' + result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>"' +
-                    result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</a></div>';
+                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
+                    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed"</a></div>';
             }
         });
         html += '</div></div>';
@@ -886,8 +887,9 @@
         if(arguments.length === 2){
             cgqi.asyncAfterTestInterval = arguments[0];
             cgqi.asyncAfterEachTest = arguments[1];
+        }else{
+            cgqi.asyncAfterEachTest = callback;
         }
-        cgqi.asyncAfterEachTest = callback;
     }
 
     //Provides closure and a label to a group of tests.
