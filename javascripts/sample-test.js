@@ -35,6 +35,7 @@ group('Truthy assertions', function(){
         isTruthy(def, 'a valid reference to an object is truthy');
         isTruthy(one, '1 is truthy');
         isNotTruthy(zero, '0 is not truthy');
+        isTruthy('1' == 1, '"1" == 1 is truthy');
     });
 });
 

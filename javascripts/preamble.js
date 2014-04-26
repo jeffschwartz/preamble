@@ -430,17 +430,21 @@
                     ' (' + result.testDuration + 'ms)' + '</a>';
                 testLabel = result.testLabel;
             }
+            //When evaluating and using result.result here, it first has to be converted into a boolean using either !result.result or !!result.result.
+            //(Using '!!', a.k.a. the double bang, converts result.result into a boolean value via result.result's truthyness.)
+            //This is because result.result isn't restricted to boolean true/false, and can be any valid JavaScript primitive or object.
+            //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
             if(!result.result){
-                html += '<div class="assertion-container' + (hidePassed && result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + result.result + '"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
+                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+                    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
                     result.assertionLabel + '" (' + result.displayAssertionName +
                     ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
-                html += '<div class="assertion-container' + (hidePassed && result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
+                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+                    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
-                    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed"</a></div>';
+                    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</a></div>';
             }
         });
         html += '</div></div>';
