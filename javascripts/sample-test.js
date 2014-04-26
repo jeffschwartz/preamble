@@ -3,134 +3,120 @@ configure({
     hidePassedTests: true
 });
 
-group('This test will intentionally fail', function(){
-    test('true === false', function(){
-        isTrue(false, 'Yes, true === false!');
+group('How failed tests are reported', function(){
+    test('This test will intentionally fail', function(){
+        isTrue(false, 'false is true');
     });
 });
 
-group('It work', function(){
+group('How passed tests are reported', function(){
     test('Hello World!', function(){
         var hw = 'Hello World!';
         isTrue(hw === 'Hello World!', 'Yes, it works!');
     });
 });
 
-group('Truthy boolean evaluation', function(){
-    var undef;
-    var def = {};
-    var one = 1;
-    var fls = false;
-    var tru = true;
-    test('When using truthy boolean evaluation', function(){
-        isNotTruthy(undef, 'undefined is false');
-        isTruthy(def, 'a valid reference is true');
-        isTruthy(one, '1 is true');
-        isNotTruthy(fls, 'false is false');
-        isTruthy(tru, 'true is true');
+group('Boolean assertions', function(){
+    test('true', function(){
+        isTrue(true, 'true is true');
+    });
+    test('false', function(){
+        isFalse(false, 'false is false');
     });
 });
 
-group('Assertions', function(){
+group('Truthy assertions', function(){
+    var undef;
+    var def = {};
+    var one = 1;
+    var zero = 0;
+    test('When using truthy boolean evaluation', function(){
+        isNotTruthy(undef, 'undefined is not truthy');
+        isTruthy(def, 'a valid reference to an object is truthy');
+        isTruthy(one, '1 is truthy');
+        isNotTruthy(zero, '0 is not truthy');
+    });
+});
+
+group('Strict deep recursive comparison assertions', function(){
     test('Does a equal b', function(){
         var char = 'b';
         var a = {a: 'a', b: 'b'};
         var b = {a: 'a', b: b};
         var c = {a: 'a', b: 'b'};
         var three = 3;
-        notEqual(a, b, 'No way these are equal.');
-        equal(a, c, 'But these are equal.');
-        equal(char, 'b', 'Yup, these are equal too.');
-        equal(3, three, 'And so are these.');
+        notEqual(a, b, 'var a and var b are not equal.');
+        equal(a, c, 'var a and var c are equal');
+        equal(char, 'b', 'var char and "b" are equal');
+        equal(3, three, '3 and var three are equal');
     });
 });
 
-group('2 synchronous test with "beforeEachTest"', function(){
+group('Synchronous test with "beforeEachTest"', function(){
     var count = 0;
     beforeEachTest(function(){
-        count = 1;
+        count = 100;
     });
-    test('Count is 1', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0');
-        isTrue(count === 1, 'count does equal 1');
-        isTrue((count += 1) === 2, 'count now equals 2');
-    });
-    test('Count is still 2', function(){
-        isFalse(count === 2, 'nope, it isn\'t still 2');
-        isTrue(count === 1, 'now count equals 1');
+    test('count is 100', function(){
+        equal(count, 100, 'count equals 100');
     });
 });
 
-group('2 synchronous test with "afterEachTest"', function(){
+group('Synchronous tests with "afterEachTest"', function(){
     var count = 0;
     afterEachTest(function(){
-        count = 1;
+        count = 100;
     });
-    test('Count is 0', function(){
-        isTrue(count === 0, 'count does equal 0.');
+    test('count is 0', function(){
+        equal(count, 0, 'count equals 0.');
     });
-    test('Count is still 0', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0.');
-        isTrue(count === 1, 'count now equals 1.');
-    });
-});
-
-group('An asynchronous test with no before/after eachTest', function(){
-    asyncTest('JavaScript is amazing', function(){
-        var val;
-        setTimeout(function(){
-            val = 'Isn\'t JavaScript amazing?';
-        }, 1);
-        whenAsyncDone(function(){
-            isTrue(val === 'Isn\'t JavaScript amazing?', 'Yest it is!');
-        });
+    test('count is 100', function(){
+        equal(count, 100, 'count equals 100.');
     });
 });
 
-group('2 asynchronous tests with "asyncBeforeEachTest"', function(){
+group('Asynchronous test', function(){
     var count = 0;
-    asyncBeforeEachTest(function(){
-        count = 2;
-    });
-    asyncTest('Count is 20', function(){
-        setTimeout(function(){
-            count *= 10;
-        }, 1);
-
+    asyncTest('count is 100', 1, function(){
+        count = 100;
         whenAsyncDone(function(){
-            isTrue(count === 20, 'Yes, count now is 20');
+            equal(count, 100, 'count equals 100');
         });
     });
-    asyncTest('Count is 200', function(){
-        setTimeout(function(){
-            count *= 100;
-        }, 1);
+});
 
+group('Asynchronous tests with "asyncBeforeEachTest"', function(){
+    var count = 0;
+    asyncBeforeEachTest(1, function(){
+        count = 10;
+    });
+    asyncTest('count is 100', 1, function(){
+        count *= 10;
         whenAsyncDone(function(){
-            isTrue(count === 200, 'Yes, count now is 200');
+            equal(count, 100, 'count equals 100');
+        });
+    });
+    asyncTest('count is 20', 1, function(){
+        count *= 2;
+        whenAsyncDone(function(){
+            equal(count, 20, 'count x 2 = 20');
         });
     });
 });
 
 group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     var count = 0;
-    asyncAfterEachTest(function(){
+    asyncAfterEachTest(1, function(){
         count = 1;
     });
-    asyncTest('Count is 10', function(){
-        setTimeout(function(){
-            count = 10;
-        }, 1);
-
+    asyncTest('count is 10', 1, function(){
+        count = 10;
         whenAsyncDone(function(){
-            isTrue(count === 10, 'Yes, count now is 10');
+            isTrue(count === 10, 'count equals 10');
         });
     });
-    asyncTest('Count is 100', function(){
-        setTimeout(function(){
-            count *= 100;
-        }, 1);
-
+    asyncTest('count is 100', 1, function(){
+        count *= 100;
         whenAsyncDone(function(){
             isTrue(count === 100, 'Yes, count now is 100');
         });
@@ -138,14 +124,11 @@ group('2 asynchronous tests with "asyncAfterEachTest"', function(){
 });
 
 group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
-    asyncBeforeEachTest(function(){
+    asyncBeforeEachTest(1, function(){
         return {num: 1};
     });
-    asyncTest('Object was passed', function(val){
-        setTimeout(function(){
-            val.num *= 100;
-        }, 1);
-
+    asyncTest('Object was passed', 1, function(val){
+        val.num *= 100;
         whenAsyncDone(function(){
             isFalse(typeof val === 'undefined', '{num: 1} was passed to asyncTest');
             isTrue(val.num === 100, '{num: 1} was changed to {num: 100}');
@@ -154,75 +137,63 @@ group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
 });
 
 group('proxy captures calling information which can be tested against', function(){
-    asyncTest('proxy a function calling it twice', function(){
+    test('proxy a function calling it twice', function(){
         var fn = proxy(function(s){
             return s;
         });
-        setTimeout(function(){
-            fn('Somewhere over');
-            fn('the rainbow');
-        }, 1);
-        whenAsyncDone(function(){
-            isTrue(fn.wasCalled(2), 'fn was called twice.');
-            equal(fn.getCalledCount(), 2, 'fn was called twice.');
-            var info1 = fn.getData(0);
-            isTrue(info1.argsPassed[0] === 'Somewhere over', 'fn was passed "Somewhere over"');
-            isTrue(info1.returned === 'Somewhere over', 'fn returned "Somewhere over"');
-            isTrue(info1.context === undefined, 'the 1st time fn was called with global context');
-            var info2 = fn.getData(1);
-            isTrue(info2.argsPassed[0] === 'the rainbow', 'fn was passed "the rainbow"');
-            isTrue(info2.returned === 'the rainbow', 'fn returned "Somewhere over"');
-            isTrue(info2.context === undefined, 'the 2nd time fn was called with global context');
-        });
+        fn('Somewhere over');
+        fn('the rainbow');
+        isTrue(fn.wasCalled(2), 'fn.wasCalled(2) returned true.');
+        equal(fn.getCalledCount(), 2, 'fn.getCalledCount() returned 2.');
+        var info1 = fn.getData(0);
+        isTrue(info1.argsPassed[0] === 'Somewhere over', 'fn was passed "Somewhere over"');
+        isTrue(info1.returned === 'Somewhere over', 'fn returned "Somewhere over"');
+        isTrue(info1.context === undefined, 'fn was called the 1st time with the global context');
+        var info2 = fn.getData(1);
+        isTrue(info2.argsPassed[0] === 'the rainbow', 'fn was passed "the rainbow"');
+        isTrue(info2.returned === 'the rainbow', 'fn returned "Somewhere over"');
+        isTrue(info2.context === undefined, 'fn was called the 2nd time with the global context');
     });
-    asyncTest('proxy two functions calling each once', function(){
+    test('proxy two functions calling each once', function(){
         var fn1 = proxy(function(s){
             return s;
         });
         var fn2 = proxy(function(s){
             return s;
         });
-        setTimeout(function(){
-            fn1('Somewhere over ');
-            fn2('the rainbow');
-        }, 1);
-        whenAsyncDone(function(){
-            isTrue(fn1.wasCalled(1), 'fn1 was called once.');
-            equal(fn1.getCalledCount(), 1, 'fn1 was called once.');
-            isTrue(fn2.wasCalled(1), 'fn2 was called once.');
-            equal(fn2.getCalledCount(), 1, 'fn2 was called once.');
-            var fn1Info = fn1.getData(0);
-            isTrue(fn1Info.argsPassed[0] === 'Somewhere over ', 'fn1 was passed "Somewhere over "');
-            isTrue(fn1Info.returned === 'Somewhere over ', 'fn1 returned "Somewhere over "');
-            isTrue(fn1Info.context === undefined, 'fn1 was called with the global context');
-            var fn2Info = fn2.getData(0);
-            isTrue(fn2Info.argsPassed[0] === 'the rainbow', 'fn2 was passed "the rainbow"');
-            isTrue(fn2Info.returned === 'the rainbow', 'fn2 returned "the rainbow"');
-            isTrue(fn2Info.context === undefined, 'fn2 was called with the global context');
-        });
+        fn1('Somewhere over ');
+        fn2('the rainbow');
+        isTrue(fn1.wasCalled(1), 'fn1.wasCalled(1) returned true.');
+        equal(fn1.getCalledCount(), 1, 'fn1.getCalledCount() returned 1.');
+        isTrue(fn2.wasCalled(1), 'fn2.wasCalled(1) returned true.');
+        equal(fn2.getCalledCount(), 1, 'fn2.getCalledCount() returned 1.');
+        var fn1Info = fn1.getData(0);
+        isTrue(fn1Info.argsPassed[0] === 'Somewhere over ', 'fn1 was passed "Somewhere over "');
+        isTrue(fn1Info.returned === 'Somewhere over ', 'fn1 returned "Somewhere over "');
+        isTrue(fn1Info.context === undefined, 'fn1 was called with the global context');
+        var fn2Info = fn2.getData(0);
+        isTrue(fn2Info.argsPassed[0] === 'the rainbow', 'fn2 was passed "the rainbow"');
+        isTrue(fn2Info.returned === 'the rainbow', 'fn2 returned "the rainbow"');
+        isTrue(fn2Info.context === undefined, 'fn2 was called with the global context');
     });
-    asyncTest('proxy a property method calling it twice', function(){
+    test('proxy a property method calling it twice', function(){
         var foo = {
             title: '',
             name: proxy(function(s){this.title += s; return s;})
         };
         proxy(foo, 'name');
-        setTimeout(function(){
-            foo.name('Somewhere over ');
-            foo.name('the rainbow');
-        }, 1);
-        whenAsyncDone(function(){
-            equal(foo.title, 'Somewhere over the rainbow', 'foo.title = "Somewhere over the rainbow"');
-            isTrue(foo.name.wasCalled(2), 'callback was called twice.');
-            equal(foo.name.getCalledCount(), 2, 'callback was called twice.');
-            var info1 = foo.name.getData(0);
-            isTrue(info1.argsPassed[0] === 'Somewhere over ', 'callback was passed "Somewhere over"');
-            isTrue(info1.returned === 'Somewhere over ', 'callback returned "Somewhere over "');
-            isTrue(info1.context === foo, 'foo.name was called the 1st time with the foo context');
-            var info2 = foo.name.getData(1);
-            isTrue(info2.argsPassed[0] === 'the rainbow', 'callback was passed "the rainbow"');
-            isTrue(info2.returned === 'the rainbow', 'callback returned "the rainbow"');
-            isTrue(info2.context === foo, 'foo.name was called the 2nd time with the foo context');
-        });
+        foo.name('Somewhere over ');
+        foo.name('the rainbow');
+        equal(foo.title, 'Somewhere over the rainbow', 'foo.title = "Somewhere over the rainbow"');
+        isTrue(foo.name.wasCalled(2), 'foo.name.wasCalled(2) returned true.');
+        equal(foo.name.getCalledCount(), 2, 'foo.name.getCalledCount() returned 2.');
+        var info1 = foo.name.getData(0);
+        isTrue(info1.argsPassed[0] === 'Somewhere over ', 'foo.name was passed "Somewhere over"');
+        isTrue(info1.returned === 'Somewhere over ', 'foo.name returned "Somewhere over "');
+        isTrue(info1.context === foo, 'foo.name was called the 1st time with the foo context');
+        var info2 = foo.name.getData(1);
+        isTrue(info2.argsPassed[0] === 'the rainbow', 'foo.name was passed "the rainbow"');
+        isTrue(info2.returned === 'the rainbow', 'foo.name returned "the rainbow"');
+        isTrue(info2.context === foo, 'foo.name was called the 2nd time with the foo context');
     });
 });
