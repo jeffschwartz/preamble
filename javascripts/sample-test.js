@@ -1,6 +1,7 @@
 /*jslint eqeq: true*/
 /*jshint strict: false*/
 /*global configure, group, beforeEachTest, asyncBeforeEachTest, afterEachTest, asyncAfterEachTest, test, asyncTest, whenAsyncDone, -getUiTestContainerElement, -getUiTestContainerElementId, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+
 configure({
     name: 'Sample Test Suite',
     hidePassedTests: true
