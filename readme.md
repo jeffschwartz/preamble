@@ -56,12 +56,14 @@ You can also use the wildcard '*' character for test and/or assertions to
 specify that all tests and/or all assertions, respectively, should be included 
 in the filter.
 
-
 10) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
 it to wrap <div id="ui-test-container" class="ui-test-container">. This was 
 required in order to support in-line configuration (see item 1 above). 
 
 11) Added display timings for groups and tests in details report.
+
+12) Removed support for returning values from beforeEachTest and 
+asyncBeforeEachTest.
 
 #### Open Source
 Preamble Is Distributed Under The MIT Software License.
