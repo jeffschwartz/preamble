@@ -142,23 +142,6 @@ group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     });
 });
 
-group('asyncBeforeEachTest can pass a value to asyncTest', function(){
-    asyncBeforeEachTest(1, function(){
-        setTimeout(function(){
-            return {num: 1};
-        }, 1);
-    });
-    asyncTest('Object was passed', 1, function(val){
-        setTimeout(function(){
-            val.num *= 100;
-        }, 1);
-        whenAsyncDone(function(){
-            isFalse(typeof val === 'undefined', '{num: 1} was passed to asyncTest');
-            isTrue(val.num === 100, '{num: 1} was changed to {num: 100}');
-        });
-    });
-});
-
 group('proxy captures calling information which can be tested against', function(){
     test('proxy a function calling it twice', function(){
         var fn = proxy(function(s){

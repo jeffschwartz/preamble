@@ -52,3 +52,6 @@ it to wrap <div id="ui-test-container" class="ui-test-container">. This was
 required in order to support in-line configuration (see item 1 above). 
 
 11) Added display timings for groups and tests in details report.
+
+12) Removed support for returning values from beforeEachTest and 
+asyncBeforeEachTest.

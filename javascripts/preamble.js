@@ -751,17 +751,9 @@
     //Runs the current test asynchronously which will call whenAsyncDone (see above).
     function runAsyncTest(){
         if(config.windowGlobals){
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback();
-            }
+            currentTestHash.testCallback();
         }else{
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback(assert);
-            }
+            currentTestHash.testCallback(assert);
         }
     }
 
@@ -770,17 +762,9 @@
     //runTests is called to continue processing the testsQueue.
     function runSyncTest(){
         if(config.windowGlobals){
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback();
-            }
+            currentTestHash.testCallback();
         }else{
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback(assert);
-            }
+            currentTestHash.testCallback(assert);
         }
         currentTestStep++;
         runTest();
@@ -788,14 +772,14 @@
 
     //Runs setup synchronously for each test.
     function runBeforeEachSync(){
-        currentTestHash.beforeTestVal = queue[currentGroupIndex].beforeEachTest();
+        queue[currentGroupIndex].beforeEachTest();
         currentTestStep++;
         runTest();
     }
 
     //Runs setup asynchronously for each test.
     function runBeforeEachAsync(){
-        currentTestHash.beforeTestVal = queue[currentGroupIndex].asyncBeforeEachTest();
+        queue[currentGroupIndex].asyncBeforeEachTest();
         setTimeout(function(){
             currentTestStep++;
             runTest();
