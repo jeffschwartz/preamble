@@ -83,7 +83,9 @@ group('Synchronous tests with "afterEachTest"', function(){
 group('Asynchronous test', function(){
     var count = 0;
     asyncTest('count is 100', 1, function(){
-        count = 100;
+        setTimeout(function(){
+            count = 100;
+        }, 1);
         whenAsyncDone(function(){
             equal(count, 100, 'count equals 100');
         });
@@ -93,16 +95,22 @@ group('Asynchronous test', function(){
 group('Asynchronous tests with "asyncBeforeEachTest"', function(){
     var count = 0;
     asyncBeforeEachTest(1, function(){
-        count = 10;
+        setTimeout(function(){
+            count = 10;
+        }, 1);
     });
     asyncTest('count is 100', 1, function(){
-        count *= 10;
+        setTimeout(function(){
+            count *= 10;
+        }, 1);
         whenAsyncDone(function(){
             equal(count, 100, 'count equals 100');
         });
     });
     asyncTest('count is 20', 1, function(){
-        count *= 2;
+        setTimeout(function(){
+            count *= 2;
+        }, 1);
         whenAsyncDone(function(){
             equal(count, 20, 'count x 2 = 20');
         });
@@ -112,28 +120,38 @@ group('Asynchronous tests with "asyncBeforeEachTest"', function(){
 group('2 asynchronous tests with "asyncAfterEachTest"', function(){
     var count = 0;
     asyncAfterEachTest(1, function(){
-        count = 1;
+        setTimeout(function(){
+            count = 1;
+        }, 1);
     });
     asyncTest('count is 10', 1, function(){
-        count = 10;
+        setTimeout(function(){
+            count = 10;
+        }, 1);
         whenAsyncDone(function(){
             isTrue(count === 10, 'count equals 10');
         });
     });
     asyncTest('count is 100', 1, function(){
-        count *= 100;
+        setTimeout(function(){
+            count *= 100;
+        }, 1);
         whenAsyncDone(function(){
             isTrue(count === 100, 'Yes, count now is 100');
         });
     });
 });
 
-group('The asyncBeforeEachTest can pass a value to asyncTest', function(){
+group('asyncBeforeEachTest can pass a value to asyncTest', function(){
     asyncBeforeEachTest(1, function(){
-        return {num: 1};
+        setTimeout(function(){
+            return {num: 1};
+        }, 1);
     });
     asyncTest('Object was passed', 1, function(val){
-        val.num *= 100;
+        setTimeout(function(){
+            val.num *= 100;
+        }, 1);
         whenAsyncDone(function(){
             isFalse(typeof val === 'undefined', '{num: 1} was passed to asyncTest');
             isTrue(val.num === 100, '{num: 1} was changed to {num: 100}');
