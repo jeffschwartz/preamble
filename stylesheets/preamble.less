@@ -23,20 +23,20 @@ h1 + small{
 }
 header{
     background-color: @bg-color;
-    position: fixed;
-    top: 0;
-    z-index: 10000;
     width: 100%;
     padding: 10px 30px;
-    opacity: 1;
     border-bottom: solid 1px #CCC;
     .border-box;
+    overflow: auto;
 }
 .hidden{
     display: none;
 }
-.banner {
+.banner{
     float: left;
+}
+#version{
+    font-size: .8rem;
 }
 #time{
     display: none;
@@ -61,7 +61,7 @@ header input:first-child {
     margin-left: 0;
 }
 .container{
-    margin: 49px 0 0 0;
+    margin: 10px 0 0 0;
     width: 100%;
     .border-box;
 }
@@ -94,6 +94,9 @@ section{
     width: 100%;
     .border-box;
     font-size: 1rem;
+}
+section:first-child{
+    padding: 5px 20px;
 }
 .group-container{
     padding-left: 10px;
