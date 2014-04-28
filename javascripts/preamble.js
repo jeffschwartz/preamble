@@ -5,7 +5,7 @@
     'use strict';
 
     //Version
-    var version = 'v2.0.0',
+    var version = 'v2.0.0 (Ramoth) RC',
         //Merged configuration options.
         config = {},
         queue=[],
