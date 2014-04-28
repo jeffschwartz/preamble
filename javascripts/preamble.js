@@ -750,10 +750,11 @@
 
     //Runs the current test asynchronously which will call whenAsyncDone (see above).
     function runAsyncTest(){
+        var rv = queue[currentGroupIndex].beforeEachReturnedValue || {};
         if(config.windowGlobals){
-            currentTestHash.testCallback();
+            currentTestHash.testCallback(rv);
         }else{
-            currentTestHash.testCallback(assert);
+            currentTestHash.testCallback(assert, rv);
         }
     }
 
@@ -761,10 +762,11 @@
     //processing of the next test is set by incrementing testQueueIndex and
     //runTests is called to continue processing the testsQueue.
     function runSyncTest(){
+        var rv = queue[currentGroupIndex].beforeEachReturnedValue || {};
         if(config.windowGlobals){
-            currentTestHash.testCallback();
+            currentTestHash.testCallback(rv);
         }else{
-            currentTestHash.testCallback(assert);
+            currentTestHash.testCallback(assert, rv);
         }
         currentTestStep++;
         runTest();
@@ -772,14 +774,16 @@
 
     //Runs setup synchronously for each test.
     function runBeforeEachSync(){
-        queue[currentGroupIndex].beforeEachTest();
+        var value = queue[currentGroupIndex].beforeEachReturnedValue = {};
+        queue[currentGroupIndex].beforeEachTest(value);
         currentTestStep++;
         runTest();
     }
 
     //Runs setup asynchronously for each test.
     function runBeforeEachAsync(){
-        queue[currentGroupIndex].asyncBeforeEachTest();
+        var value = queue[currentGroupIndex].beforeEachReturnedValue = {};
+        queue[currentGroupIndex].asyncBeforeEachTest(value);
         setTimeout(function(){
             currentTestStep++;
             runTest();
