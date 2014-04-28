@@ -172,20 +172,35 @@ group('When running an asynchronous tests with asyncAfterEachTest', function(){
     });
 });
 
-group('When using proxy', function(){
-    test('on a function and the function is called', function(){
+group('When proxy wraps a function and that function is called', function(){
+    beforeEachTest(function(val){
         var fn = proxy(function(){
             return 'JavaScript is amazing!';
         });
         fn('Tell me something about JavaScript');
-        isTrue(fn.wasCalled(1), 'we can ask it if it was called "n" times');
-        equal(fn.getCalledCount(), 1, 'we can ask it how many times it was called');
-        var info1 = fn.getData(0);
-        isTrue(info1.argsPassed[0] === 'Tell me something about JavaScript', 'we can find out what arguements it was passed');
-        isTrue(info1.returned === 'JavaScript is amazing!', 'we can find out what it returned');
-        isTrue(info1.context === undefined, 'we can verify the context that was used');
+        val.fn = fn;
     });
-    test('on a method and the method is called', function(){
+    test('then calling wasCalled(number) on that function', function(val){
+        isTrue(val.fn.wasCalled(1), 'returns true if it was called that number times');
+        isFalse(val.fn.wasCalled(2), 'and returns false if it was not called that number of times');
+    });
+    test('then calling getCalledCount() on that function', function(val){
+        equal(val.fn.getCalledCount(), 1, 'returns the number of times it was called');
+    });
+    test('then calling getData(n) on that function', function(val){
+        var info = val.fn.getData(0);
+        notEqual(info, undefined, 'returns an object');
+    });
+    test('and the object that getData(n) returns exposes and api', function(val){
+        var info = val.fn.getData(0);
+        equal(info.argsPassed[0], 'Tell me something about JavaScript', 'and calling argsPassed[n] returns the arguments that were passed to the function');
+        equal(info.returned, 'JavaScript is amazing!', 'and calling returned() returns what the function returned');
+        isTrue(info.context === undefined, 'and calling context() returns the context the function was called with');
+    });
+});
+
+group('When proxy wraps a method and that function is called', function(){
+    beforeEachTest(function(val){
         var someObject = {
             someMethod: function(){
                 return 'JavaScript is amazing!';
@@ -193,11 +208,24 @@ group('When using proxy', function(){
         };
         proxy(someObject, 'someMethod');
         someObject.someMethod('Tell me something about JavaScript');
-        isTrue(someObject.someMethod.wasCalled(1), 'we can ask it if it was called "n" times');
-        equal(someObject.someMethod.getCalledCount(), 1, 'we can ask it how many times it was called');
-        var info1 = someObject.someMethod.getData(0);
-        isTrue(info1.argsPassed[0] === 'Tell me something about JavaScript', 'we can find out what arguements it was passed');
-        isTrue(info1.returned === 'JavaScript is amazing!', 'we can find out what it returned');
-        isTrue(info1.context === someObject, 'we can verify the context that was used');
+        val.someObject = someObject;
+    });
+    test('then calling wasCalled(number) on that method', function(val){
+        isTrue(val.someObject.someMethod.wasCalled(1), 'returns true if it was called that number times');
+        isFalse(val.someObject.someMethod.wasCalled(2), 'and returns false if it was not called that number of times');
+    });
+    test('then calling getCalledCount() on that method', function(val){
+        equal(val.someObject.someMethod.getCalledCount(), 1, 'returns the number of times it was called');
+    });
+    test('then calling getData(n) on that method', function(val){
+        var info = val.someObject.someMethod.getData(0);
+        notEqual(info, undefined, 'returns an object');
+    });
+    test('and the object that getData(n) returns exposes and api', function(val){
+        var info = val.someObject.someMethod.getData(0);
+        equal(info.argsPassed[0], 'Tell me something about JavaScript', 'and calling argsPassed[n] returns the arguments that were passed to the method');
+        equal(info.returned, 'JavaScript is amazing!', 'and calling returned() returns what the function returned');
+        isTrue(info.context === val.someObject, 'and calling context() returns the context the function was called with');
     });
 });
+
