@@ -7,224 +7,197 @@ configure({
     hidePassedTests: true
 });
 
-group('How failed tests are reported', function(){
-    test('This test will intentionally fail', function(){
-        isTrue(false, 'false is true');
-    });
-});
-
-group('How passed tests are reported', function(){
-    test('Hello World!', function(){
+group('When runnig a test', function(){
+    test('and it passes', function(){
         var hw = 'Hello World!';
-        isTrue(hw === 'Hello World!', 'Yes, it works!');
+        isTrue(hw === 'Hello World!', 'it looks like this');
+    });
+    test('and it fails', function(){
+        isTrue(false, 'it looks like this');
     });
 });
 
-group('Boolean assertions', function(){
-    test('true', function(){
-        isTrue(true, 'true is true');
+group('When evaluating boolean assertions', function(){
+    test('bollean true', function(){
+        isTrue(true, 'is true');
     });
-    test('false', function(){
-        isFalse(false, 'false is false');
-    });
-});
-
-group('Truthy assertions', function(){
-    var undef;
-    var def = {};
-    var one = 1;
-    var zero = 0;
-    test('When using truthy boolean evaluation', function(){
-        isNotTruthy(undef, 'undefined is not truthy');
-        isTruthy(def, 'a valid reference to an object is truthy');
-        isTruthy(one, '1 is truthy');
-        isNotTruthy(zero, '0 is not truthy');
-        isTruthy('1' == 1, '"1" == 1 is truthy');
+    test('boolean false', function(){
+        isFalse(false, 'is false');
     });
 });
 
-group('Strict deep recursive comparison assertions', function(){
-    test('Does a equal b', function(){
-        var char = 'b';
-        var a = {a: 'a', b: 'b'};
-        var b = {a: 'a', b: b};
-        var c = {a: 'a', b: 'b'};
-        var three = 3;
-        notEqual(a, b, 'var a and var b are not equal.');
-        equal(a, c, 'var a and var c are equal');
-        equal(char, 'b', 'var char and "b" are equal');
-        equal(3, three, '3 and var three are equal');
+group('When evaluating truthy assertions', function(){
+    test('undefined', function(){
+        var undef;
+        isNotTruthy(undef, 'is not truthy');
+    });
+    test('objects', function(){
+        var def = {};
+        isTruthy(def, 'are truthy');
+    });
+    test('numeric values other than 0', function(){
+        var one = 1;
+        isTruthy(one, 'are truthy');
+    });
+    test('numeric vaules that are 0', function(){
+        var zero = 0;
+        isNotTruthy(zero, 'are not truthy');
+    });
+    test('non empty strings', function(){
+        isTruthy('not empty string', 'are truthy');
+    });
+    test('empty strings', function(){
+        isNotTruthy('', 'are not truthy');
     });
 });
 
-group('Synchronous test with "beforeEachTest"', function(){
+group('When evaluating strict, deep recursive comparison assertions', function(){
+    var char = 'b';
+    var a = {a: 'a', b: 'b'};
+    var b = {a: 'a', b: b};
+    var c = {a: 'a', b: 'b'};
+    test('2 objects with exactly the same properties and property values', function(){
+        equal(a, c, 'are equal');
+    });
+    test('2 objects with different properties or property values', function(){
+        notEqual(a, b, 'are not equal');
+    });
+    test('2 value types whose values are the same', function(){
+        equal(char, 'b', 'are equal');
+    });
+    test('2 value types whose values are  not the same', function(){
+        notEqual(char, 'a', 'are not equal');
+    });
+});
+
+group('When running a synchronous test with beforeEachTest', function(){
     var count = 0;
     beforeEachTest(function(){
         count = 100;
     });
-    test('count is 100', function(){
-        equal(count, 100, 'count equals 100');
+    test('beforeEachTest is called', function(){
+        equal(count, 100, 'before test is called');
     });
 });
 
-group('Passing a value from beforeEachTest to test', function(){
+group('When passing a value from beforeEachTest to test', function(){
     beforeEachTest(function(valObj){
         valObj.value = 10;
     });
-    test('the test can access the value', function(valObj){
-        equal(valObj.value, 10, 'value equals 10');
+    test('the test', function(valObj){
+        equal(valObj.value, 10, 'can access the value');
     });
 });
 
-group('Synchronous tests with "afterEachTest"', function(){
+group('When running a synchronous test with afterEachTest', function(){
     var count = 0;
     afterEachTest(function(){
         count = 100;
     });
-    test('count is 0', function(){
-        equal(count, 0, 'count equals 0.');
+    test('the first test', function(){
+        equal(count, 0, 'is not afftected');
     });
-    test('count is 100', function(){
-        equal(count, 100, 'count equals 100.');
+    test('but subsequent tests', function(){
+        equal(count, 100, 'are affected');
     });
 });
 
-group('Asynchronous test', function(){
+group('When running an asynchronous test', function(){
     var count = 0;
-    asyncTest('count is 100', 1, function(){
+    asyncTest('calling whenAsyncDone', 1, function(){
         setTimeout(function(){
             count = 100;
         }, 1);
         whenAsyncDone(function(){
-            equal(count, 100, 'count equals 100');
+            equal(count, 100, 'causes the whenAsyncDone callback function to be called when the asynchronous test has ended');
         });
     });
 });
 
-group('Asynchronous tests with "asyncBeforeEachTest"', function(){
+group('When running an asynchronous tests with asyncBeforeEachTest', function(){
     var count = 0;
     asyncBeforeEachTest(1, function(){
         setTimeout(function(){
             count = 10;
         }, 1);
     });
-    asyncTest('count is 100', 1, function(){
+    asyncTest('asyncBeforeEachTest is called', 1, function(){
         setTimeout(function(){
             count *= 10;
         }, 1);
         whenAsyncDone(function(){
-            equal(count, 100, 'count equals 100');
-        });
-    });
-    asyncTest('count is 20', 1, function(){
-        setTimeout(function(){
-            count *= 2;
-        }, 1);
-        whenAsyncDone(function(){
-            equal(count, 20, 'count x 2 = 20');
+            equal(count, 100, 'before asyncTest is called ');
         });
     });
 });
 
-group('Passing a value from asyncBeforeEachTest to asyncTest using', function(){
+group('When passing a value from asyncBeforeEachTest to asyncTest', function(){
     asyncBeforeEachTest(1, function(valObj){
         setTimeout(function(){
             valObj.value = 10;
         }, 1);
     });
-    asyncTest('the asyncTest can access the value', 1, function(valObj){
+    asyncTest('the asyncTest', 1, function(valObj){
         setTimeout(function(){
             //some asynchronous process...
         }, 1);
         whenAsyncDone(function(){
-            equal(valObj.value, 10, 'value equals 10');
+            equal(valObj.value, 10, 'can access the value');
         });
     });
 });
 
-group('2 asynchronous tests with "asyncAfterEachTest"', function(){
+group('When running an asynchronous tests with asyncAfterEachTest', function(){
     var count = 0;
     asyncAfterEachTest(1, function(){
         setTimeout(function(){
             count = 1;
         }, 1);
     });
-    asyncTest('count is 10', 1, function(){
+    asyncTest('the first asyncTest', 1, function(){
         setTimeout(function(){
             count = 10;
         }, 1);
         whenAsyncDone(function(){
-            isTrue(count === 10, 'count equals 10');
+            isTrue(count === 10, 'is not affected');
         });
     });
-    asyncTest('count is 100', 1, function(){
+    asyncTest('but subsequent asyncTests', 1, function(){
         setTimeout(function(){
             count *= 100;
         }, 1);
         whenAsyncDone(function(){
-            isTrue(count === 100, 'Yes, count now is 100');
+            isTrue(count === 100, 'are affected');
         });
     });
 });
 
-group('proxy captures calling information which can be tested against', function(){
-    test('proxy a function calling it twice', function(){
-        var fn = proxy(function(s){
-            return s;
+group('When using proxy', function(){
+    test('on a function and the function is called', function(){
+        var fn = proxy(function(){
+            return 'JavaScript is amazing!';
         });
-        fn('Somewhere over');
-        fn('the rainbow');
-        isTrue(fn.wasCalled(2), 'fn.wasCalled(2) returned true.');
-        equal(fn.getCalledCount(), 2, 'fn.getCalledCount() returned 2.');
+        fn('Tell me something about JavaScript');
+        isTrue(fn.wasCalled(1), 'we can ask it if it was called "n" times');
+        equal(fn.getCalledCount(), 1, 'we can ask it how many times it was called');
         var info1 = fn.getData(0);
-        isTrue(info1.argsPassed[0] === 'Somewhere over', 'fn was passed "Somewhere over"');
-        isTrue(info1.returned === 'Somewhere over', 'fn returned "Somewhere over"');
-        isTrue(info1.context === undefined, 'fn was called the 1st time with the global context');
-        var info2 = fn.getData(1);
-        isTrue(info2.argsPassed[0] === 'the rainbow', 'fn was passed "the rainbow"');
-        isTrue(info2.returned === 'the rainbow', 'fn returned "Somewhere over"');
-        isTrue(info2.context === undefined, 'fn was called the 2nd time with the global context');
+        isTrue(info1.argsPassed[0] === 'Tell me something about JavaScript', 'we can find out what arguements it was passed');
+        isTrue(info1.returned === 'JavaScript is amazing!', 'we can find out what it returned');
+        isTrue(info1.context === undefined, 'we can verify the context that was used');
     });
-    test('proxy two functions calling each once', function(){
-        var fn1 = proxy(function(s){
-            return s;
-        });
-        var fn2 = proxy(function(s){
-            return s;
-        });
-        fn1('Somewhere over ');
-        fn2('the rainbow');
-        isTrue(fn1.wasCalled(1), 'fn1.wasCalled(1) returned true.');
-        equal(fn1.getCalledCount(), 1, 'fn1.getCalledCount() returned 1.');
-        isTrue(fn2.wasCalled(1), 'fn2.wasCalled(1) returned true.');
-        equal(fn2.getCalledCount(), 1, 'fn2.getCalledCount() returned 1.');
-        var fn1Info = fn1.getData(0);
-        isTrue(fn1Info.argsPassed[0] === 'Somewhere over ', 'fn1 was passed "Somewhere over "');
-        isTrue(fn1Info.returned === 'Somewhere over ', 'fn1 returned "Somewhere over "');
-        isTrue(fn1Info.context === undefined, 'fn1 was called with the global context');
-        var fn2Info = fn2.getData(0);
-        isTrue(fn2Info.argsPassed[0] === 'the rainbow', 'fn2 was passed "the rainbow"');
-        isTrue(fn2Info.returned === 'the rainbow', 'fn2 returned "the rainbow"');
-        isTrue(fn2Info.context === undefined, 'fn2 was called with the global context');
-    });
-    test('proxy a property method calling it twice', function(){
-        var foo = {
-            title: '',
-            name: proxy(function(s){this.title += s; return s;})
+    test('on a method and the method is called', function(){
+        var someObject = {
+            someMethod: function(){
+                return 'JavaScript is amazing!';
+            }
         };
-        proxy(foo, 'name');
-        foo.name('Somewhere over ');
-        foo.name('the rainbow');
-        equal(foo.title, 'Somewhere over the rainbow', 'foo.title = "Somewhere over the rainbow"');
-        isTrue(foo.name.wasCalled(2), 'foo.name.wasCalled(2) returned true.');
-        equal(foo.name.getCalledCount(), 2, 'foo.name.getCalledCount() returned 2.');
-        var info1 = foo.name.getData(0);
-        isTrue(info1.argsPassed[0] === 'Somewhere over ', 'foo.name was passed "Somewhere over"');
-        isTrue(info1.returned === 'Somewhere over ', 'foo.name returned "Somewhere over "');
-        isTrue(info1.context === foo, 'foo.name was called the 1st time with the foo context');
-        var info2 = foo.name.getData(1);
-        isTrue(info2.argsPassed[0] === 'the rainbow', 'foo.name was passed "the rainbow"');
-        isTrue(info2.returned === 'the rainbow', 'foo.name returned "the rainbow"');
-        isTrue(info2.context === foo, 'foo.name was called the 2nd time with the foo context');
+        proxy(someObject, 'someMethod');
+        someObject.someMethod('Tell me something about JavaScript');
+        isTrue(someObject.someMethod.wasCalled(1), 'we can ask it if it was called "n" times');
+        equal(someObject.someMethod.getCalledCount(), 1, 'we can ask it how many times it was called');
+        var info1 = someObject.someMethod.getData(0);
+        isTrue(info1.argsPassed[0] === 'Tell me something about JavaScript', 'we can find out what arguements it was passed');
+        isTrue(info1.returned === 'JavaScript is amazing!', 'we can find out what it returned');
+        isTrue(info1.context === someObject, 'we can verify the context that was used');
     });
 });
