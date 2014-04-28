@@ -67,6 +67,15 @@ group('Synchronous test with "beforeEachTest"', function(){
     });
 });
 
+group('Passing a value from beforeEachTest to test', function(){
+    beforeEachTest(function(valObj){
+        valObj.value = 10;
+    });
+    test('the test can access the value', function(valObj){
+        equal(valObj.value, 10, 'value equals 10');
+    });
+});
+
 group('Synchronous tests with "afterEachTest"', function(){
     var count = 0;
     afterEachTest(function(){
@@ -113,6 +122,22 @@ group('Asynchronous tests with "asyncBeforeEachTest"', function(){
         }, 1);
         whenAsyncDone(function(){
             equal(count, 20, 'count x 2 = 20');
+        });
+    });
+});
+
+group('Passing a value from asyncBeforeEachTest to asyncTest using', function(){
+    asyncBeforeEachTest(1, function(valObj){
+        setTimeout(function(){
+            valObj.value = 10;
+        }, 1);
+    });
+    asyncTest('the asyncTest can access the value', 1, function(valObj){
+        setTimeout(function(){
+            //some asynchronous process...
+        }, 1);
+        whenAsyncDone(function(){
+            equal(valObj.value, 10, 'value equals 10');
         });
     });
 });
