@@ -292,13 +292,21 @@
         if(config.windowGlobals){
             window.configure = configure;
             window.group = group;
+            window.when = group;
             window.beforeEachTest = beforeEachTest;
+            window.beforeEach= beforeEachTest;
             window.asyncBeforeEachTest = asyncBeforeEachTest;
+            window.beforeEachAsync = asyncBeforeEachTest;
             window.afterEachTest = afterEachTest;
+            window.afterEach= afterEachTest;
             window.asyncAfterEachTest = asyncAfterEachTest;
+            window.afterEachAsync = asyncAfterEachTest;
             window.test = test;
+            window.then = test;
             window.asyncTest = asyncTest;
+            window.thenAsync= asyncTest;
             window.whenAsyncDone = whenAsyncDone;
+            window.whenDone = whenAsyncDone;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -312,13 +320,21 @@
             window.Preamble = {
                 configure: configure,
                 group: group,
+                when: group,
                 beforeEachTest: beforeEachTest,
+                beforeEach: beforeEachTest,
                 asyncBeforeEachTest: asyncBeforeEachTest,
+                beforeEachAsync: asyncBeforeEachTest,
                 afterEachTest: afterEachTest,
+                afterEach: afterEachTest,
                 asyncAfterEachTest: asyncAfterEachTest,
+                afterEachAsync: asyncAfterEachTest,
                 test: test,
+                then: test,
                 asyncTest: asyncTest,
+                thenAsync: asyncTest,
                 whenAsyncDone: whenAsyncDone,
+                whenDone: whenAsyncDone,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
                 proxy: proxy

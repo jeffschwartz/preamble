@@ -63,3 +63,12 @@ beforeEachTest and asyncBeforeEachTest callbacks. Properties can be set on this
 object. This same object is also passed to test and asyncTest which can access
 any properties that have been set on it. See item 2 above.
 
+14) Added abbreviated/rephrased semantic alternatives "beforeEach", 
+"beforeEachAsync", "afterEach", "afterEachAsync" and "whenDone" for 
+"beforeEachTest", "asyncBeforeEachTest", "afterEachTest", "asyncAfterEachTest"
+and "whenAsyncDone", respectively.
+
+15) Added BDD-LIKE semantic alternatives "when", "then" and "thenAsync" for 
+TDD "group", "test" and "asyncTest", respectively. This is experimental and most 
+likely will see changes. User feedback are welcomed and appreciated.
+
