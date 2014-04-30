@@ -4,7 +4,7 @@
 
 /* 
  *This script uses BDD-like semantics. If you prefer TDD 
- *semantics, then please see javascripts\sample2-test.js.
+ *semantics, then please see javascripts\sample-test.js.
  */ 
 
 configure({
@@ -80,8 +80,8 @@ when('Running synchronous tests with beforeEach', function(){
     beforeEach(function(){
         count = 100;
     });
-    then('beforeEach is called before the tests are called', function(){
-        equal(count, 100, 'before test is called');
+    then('beforeEach is called', function(){
+        equal(count, 100, 'before tests are called');
     });
 });
 
@@ -131,7 +131,7 @@ when('Running asynchronous tests with beforeEachAsync', function(){
             count *= 10;
         }, 1);
         whenDone(function(){
-            equal(count, 100, 'before the asynchronous tests are called ');
+            equal(count, 100, 'before asynchronous tests are called ');
         });
     });
 });
