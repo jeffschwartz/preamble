@@ -4,7 +4,7 @@
 
 /* 
  *This script uses BDD-like semantics. If you prefer TDD 
- *semantics, then please see javascripts\sample2-test.js.
+ *semantics, then please see javascripts\sample-test.js.
  */ 
 
 configure({
