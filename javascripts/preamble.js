@@ -1311,7 +1311,7 @@
         //Record how many assertions failed.
         queue.totAssertionsFailed = queue.reduce(function(prevValue, group){
             var t = group.tests.reduce(function(prevValue, test){
-                return test.totFailed ? prevValue + test.totFailed : 0;
+                return test.totFailed ? prevValue + test.totFailed : prevValue;
             }, 0);
             return prevValue + t;
         }, 0);
