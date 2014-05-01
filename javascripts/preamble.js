@@ -687,7 +687,7 @@
 
     function noteIsTrueAssertion(value, label){
         if(arguments.length !== 2){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+            throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
@@ -700,7 +700,7 @@
 
     function noteIsTruthyAssertion(value, label){
         if(arguments.length !== 2){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+            throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
@@ -713,7 +713,7 @@
 
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+            throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
@@ -728,7 +728,7 @@
 
     function noteIsFalseAssertion(value, label){
         if(arguments.length !== 2){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+            throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
@@ -741,7 +741,7 @@
 
     function noteIsNotTruthyAssertion(value, label){
         if(arguments.length !== 2){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+            throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
