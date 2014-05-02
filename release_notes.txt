@@ -72,3 +72,4 @@ and "whenAsyncDone", respectively.
 TDD "group", "test" and "asyncTest", respectively. This is experimental and most 
 likely will see changes. User feedback are welcomed and appreciated.
 
+16) Added snoop, a replacement for proxy, which is now deprecated.
