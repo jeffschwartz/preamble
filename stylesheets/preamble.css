@@ -1,18 +1,18 @@
 html,
 body {
   font-family: Monaco, "Lucida Console", monospace;
-  font-size: 14px;
+  font-size: 11px;
   margin: 0;
   background-color: #fdf6e3;
   color: #aaaaaa;
 }
 h1 {
   margin: 0;
-  font-size: 14px;
+  font-size: 11px;
   color: #657b83;
 }
 h1 + small {
-  font-size: 14px;
+  font-size: 11px;
   color: #aaaaaa;
 }
 header {
@@ -108,7 +108,7 @@ section:first-child {
   padding-right: 10px;
   padding-bottom: 10px;
   font-weight: bold;
-  font-size: .85rem;
+  font-size: 1rem;
   line-height: 1rem;
 }
 /*.group-container:first-child {*/
