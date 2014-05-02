@@ -15,44 +15,44 @@ configure({
 group('When runnig a test', function(){
     test('and it passes', function(){
         var hw = 'Hello World!';
-        isTrue(hw === 'Hello World!', 'it looks like this');
+        isTrue(hw === 'Hello World!');
     });
     test('and it fails', function(){
-        isTrue(false, 'it looks like this');
+        isTrue(false);
     });
 });
 
 group('When evaluating boolean assertions', function(){
     test('bollean true', function(){
-        isTrue(true, 'is true');
+        isTrue(true);
     });
     test('boolean false', function(){
-        isFalse(false, 'is false');
+        isFalse(false);
     });
 });
 
 group('When evaluating truthy assertions', function(){
     test('undefined', function(){
         var undef;
-        isNotTruthy(undef, 'is not truthy');
+        isNotTruthy(undef);
     });
     test('objects', function(){
         var def = {};
-        isTruthy(def, 'are truthy');
+        isTruthy(def);
     });
     test('numeric values other than 0', function(){
         var one = 1;
-        isTruthy(one, 'are truthy');
+        isTruthy(one);
     });
     test('numeric vaules that are 0', function(){
         var zero = 0;
-        isNotTruthy(zero, 'are not truthy');
+        isNotTruthy(zero);
     });
     test('non empty strings', function(){
-        isTruthy('not empty string', 'are truthy');
+        isTruthy('not empty string');
     });
     test('empty strings', function(){
-        isNotTruthy('', 'are not truthy');
+        isNotTruthy('');
     });
 });
 
@@ -62,16 +62,16 @@ group('When evaluating strict, deep recursive comparison assertions', function()
     var b = {a: 'a', b: b};
     var c = {a: 'a', b: 'b'};
     test('2 objects with exactly the same properties and property values', function(){
-        equal(a, c, 'are equal');
+        equal(a, c);
     });
     test('2 objects with different properties or property values', function(){
-        notEqual(a, b, 'are not equal');
+        notEqual(a, b);
     });
     test('2 value types whose values are the same', function(){
-        equal(char, 'b', 'are equal');
+        equal(char, 'b');
     });
     test('2 value types whose values are  not the same', function(){
-        notEqual(char, 'a', 'are not equal');
+        notEqual(char, 'a');
     });
 });
 
@@ -81,7 +81,7 @@ group('When running a synchronous test with beforeEachTest', function(){
         count = 100;
     });
     test('beforeEachTest is called', function(){
-        equal(count, 100, 'before test is called');
+        equal(count, 100);
     });
 });
 
@@ -90,7 +90,7 @@ group('When passing a value from beforeEachTest to test', function(){
         valObj.value = 10;
     });
     test('the test', function(valObj){
-        equal(valObj.value, 10, 'can access the value');
+        equal(valObj.value, 10);
     });
 });
 
@@ -100,10 +100,10 @@ group('When running a synchronous test with afterEachTest', function(){
         count = 100;
     });
     test('the first test', function(){
-        equal(count, 0, 'is not afftected');
+        equal(count, 0);
     });
     test('but subsequent tests', function(){
-        equal(count, 100, 'are affected');
+        equal(count, 100);
     });
 });
 
@@ -114,7 +114,7 @@ group('When running an asynchronous test', function(){
             count = 100;
         }, 1);
         whenAsyncDone(function(){
-            equal(count, 100, 'causes the whenAsyncDone callback function to be called when the asynchronous test has ended');
+            equal(count, 100);
         });
     });
 });
@@ -131,7 +131,7 @@ group('When running an asynchronous tests with asyncBeforeEachTest', function(){
             count *= 10;
         }, 1);
         whenAsyncDone(function(){
-            equal(count, 100, 'before asyncTest is called ');
+            equal(count, 100);
         });
     });
 });
@@ -147,7 +147,7 @@ group('When passing a value from asyncBeforeEachTest to asyncTest', function(){
             //some asynchronous process...
         }, 1);
         whenAsyncDone(function(){
-            equal(valObj.value, 10, 'can access the value');
+            equal(valObj.value, 10);
         });
     });
 });
@@ -164,7 +164,7 @@ group('When running an asynchronous tests with asyncAfterEachTest', function(){
             count = 10;
         }, 1);
         whenAsyncDone(function(){
-            isTrue(count === 10, 'is not affected');
+            isTrue(count === 10);
         });
     });
     asyncTest('but subsequent asyncTests', 1, function(){
@@ -172,7 +172,7 @@ group('When running an asynchronous tests with asyncAfterEachTest', function(){
             count *= 100;
         }, 1);
         whenAsyncDone(function(){
-            isTrue(count === 100, 'are affected');
+            isTrue(count === 100);
         });
     });
 });
@@ -186,21 +186,21 @@ group('When proxy wraps a function and that function is called', function(){
         val.fn = fn;
     });
     test('then calling wasCalled(number) on that function', function(val){
-        isTrue(val.fn.wasCalled(1), 'returns true if it was called that number times');
-        isFalse(val.fn.wasCalled(2), 'and returns false if it was not called that number of times');
+        isTrue(val.fn.wasCalled(1));
+        isFalse(val.fn.wasCalled(2));
     });
     test('then calling getCalledCount() on that function', function(val){
-        equal(val.fn.getCalledCount(), 1, 'returns the number of times it was called');
+        equal(val.fn.getCalledCount(), 1);
     });
     test('then calling getData(n) on that function', function(val){
         var info = val.fn.getData(0);
-        notEqual(info, undefined, 'returns an object');
+        notEqual(info, undefined);
     });
     test('and the object that getData(n) returns exposes and api', function(val){
         var info = val.fn.getData(0);
-        equal(info.argsPassed[0], 'Tell me something about JavaScript', 'and calling argsPassed[n] returns the arguments that were passed to the function');
-        equal(info.returned, 'JavaScript is amazing!', 'and calling returned() returns what the function returned');
-        isTrue(info.context === undefined, 'and calling context() returns the context the function was called with');
+        equal(info.argsPassed[0], 'Tell me something about JavaScript');
+        equal(info.returned, 'JavaScript is amazing!');
+        equal(info.context, undefined);
     });
 });
 
@@ -216,21 +216,21 @@ group('When proxy wraps a method and that function is called', function(){
         val.someObject = someObject;
     });
     test('then calling wasCalled(number) on that method', function(val){
-        isTrue(val.someObject.someMethod.wasCalled(1), 'returns true if it was called that number times');
-        isFalse(val.someObject.someMethod.wasCalled(2), 'and returns false if it was not called that number of times');
+        isTrue(val.someObject.someMethod.wasCalled(1));
+        isFalse(val.someObject.someMethod.wasCalled(2));
     });
     test('then calling getCalledCount() on that method', function(val){
-        equal(val.someObject.someMethod.getCalledCount(), 1, 'returns the number of times it was called');
+        equal(val.someObject.someMethod.getCalledCount(), 1);
     });
     test('then calling getData(n) on that method', function(val){
         var info = val.someObject.someMethod.getData(0);
-        notEqual(info, undefined, 'returns an object');
+        notEqual(info, undefined);
     });
     test('and the object that getData(n) returns exposes and api', function(val){
         var info = val.someObject.someMethod.getData(0);
-        equal(info.argsPassed[0], 'Tell me something about JavaScript', 'and calling argsPassed[n] returns the arguments that were passed to the method');
-        equal(info.returned, 'JavaScript is amazing!', 'and calling returned() returns what the function returned');
-        isTrue(info.context === val.someObject, 'and calling context() returns the context the function was called with');
+        equal(info.argsPassed[0], 'Tell me something about JavaScript');
+        equal(info.returned, 'JavaScript is amazing!');
+        equal(info.context, val.someObject);
     });
 });
 
@@ -246,45 +246,45 @@ group('When snooping on a method', function(){
         var foo = val.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        isTrue(foo.someFn.wasCalled(), 'returns true');
+        isTrue(foo.someFn.wasCalled());
     });
     test('then querying how many times the method was called', function(val){
         var foo = val.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        equal(foo.someFn.called(), 1, 'returns the number of times method was called');
+        equal(foo.someFn.called(), 1);
     });
     test('then querying if the method was called n times', function(val){
         var foo = val.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        isTrue(foo.someFn.wasCalled.nTimes(1), 'returns true if called n times');
-        isFalse(foo.someFn.wasCalled.nTimes(2), 'returns false if not called n times');
+        isTrue(foo.someFn.wasCalled.nTimes(1));
+        isFalse(foo.someFn.wasCalled.nTimes(2));
     });
     test('then querying the context the method was called with', function(val){
         var foo = val.foo,
             bar = {};
         snoop(foo, 'someFn');
         foo.someFn();
-        equal(foo.someFn.contextCalledWith(), foo, 'returns it was called with foo');
-        notEqual(foo.someFn.contextCalledWith(), bar, 'returns it was not called with bar');
+        equal(foo.someFn.contextCalledWith(), foo);
+        notEqual(foo.someFn.contextCalledWith(), bar);
     });
     test('then querying for the arguments that the method was called with', function(val){
         var foo = val.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
         foo.someFn(arg);
-        equal(foo.someFn.args.getArgument(0), arg, 'confirms it was passed "Preamble rocks!"');
-        notEqual(foo.someFn.args.getArgument(0), arg + '!', 'confirms it was not passed "Preamble rocks!!"');
-        isNotTruthy(foo.someFn.args.getArgument(1), 'confirms that 2 arguments were not passed to the method');
+        equal(foo.someFn.args.getArgument(0), arg);
+        notEqual(foo.someFn.args.getArgument(0), arg + '!');
+        isNotTruthy(foo.someFn.args.getArgument(1));
     });
     test('then we can query for what the method returned', function(val){
         var foo = val.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
         foo.someFn(arg);
-        equal(foo.someFn.returned(), arg, 'confirms it returned arg');
-        notEqual(foo.someFn.returned(), arg + '!', 'confirms it did not return arg + "!"');
+        equal(foo.someFn.returned(), arg);
+        notEqual(foo.someFn.returned(), arg + '!');
     });
 });
 
@@ -300,9 +300,9 @@ group('When a snooped method throws', function(){
         var foo = val.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        isTrue(foo.someFn.threw(), 'it did throw');
-        isTrue(foo.someFn.threw.withMessage('Holy Batman!'), 'has a specific message');
-        isFalse(foo.someFn.threw.withMessage('Holy Batman!!'), 'does not have a specific message');
+        isTrue(foo.someFn.threw());
+        isTrue(foo.someFn.threw.withMessage('Holy Batman!'));
+        isFalse(foo.someFn.threw.withMessage('Holy Batman!!'));
     });
 });
 
@@ -327,12 +327,12 @@ group('When snooping on more than one method', function(){
         foo.someFn('Is Preamble great?');
         bar.someFn('Yes it is!');
         foo.someFn('You got that right!');
-        isTrue(foo.someFn.wasCalled(), 'foo.someFn was called');
-        isTrue(foo.someFn.wasCalled.nTimes(2), 'foo.someFn was called n times');
-        isFalse(foo.someFn.wasCalled.nTimes(1), 'foo.someFn was not called n times');
-        isTrue(bar.someFn.wasCalled(), 'bar.someFn was called');
-        isTrue(bar.someFn.wasCalled.nTimes(1), 'bar.someFn was called n times');
-        isFalse(bar.someFn.wasCalled.nTimes(2), 'bar.someFn was not called n times');
+        isTrue(foo.someFn.wasCalled());
+        isTrue(foo.someFn.wasCalled.nTimes(2));
+        isFalse(foo.someFn.wasCalled.nTimes(1));
+        isTrue(bar.someFn.wasCalled());
+        isTrue(bar.someFn.wasCalled.nTimes(1));
+        isFalse(bar.someFn.wasCalled.nTimes(2));
     });
 });
 
@@ -351,21 +351,21 @@ group('When the "calls" api is used', function(){
         foo.someFn(i) ;
     }
     test('then count() returns', function(){
-        equal(foo.someFn.calls.count(), n, 'the correct count');
+        equal(foo.someFn.calls.count(), n);
     });
     test('then all() returns', function(){
-        equal(foo.someFn.calls.all().length, n, 'an array with the right number of elements');
+        equal(foo.someFn.calls.all().length, n);
     });
     test('then forCall(n) returns the correct element', function(){
         for(i = 0; i < n; i++){
             aCall = foo.someFn.calls.forCall(i);
-            equal(aCall.context, foo, 'context is foo');
-            notEqual(aCall.context, bar, 'context is bar');
-            equal(aCall.args[0], i, 'args[0] is ' + i);
-            notEqual(aCall.args[0], n, 'args[0] is ' + n);
-            isNotTruthy(aCall.error, 'there was no error');
-            equal(aCall.returned, i, 'returned ' + i);
-            notEqual(aCall.returned, n, 'returned ' + n);
+            equal(aCall.context, foo);
+            notEqual(aCall.context, bar);
+            equal(aCall.args[0], i);
+            notEqual(aCall.args[0], n);
+            isNotTruthy(aCall.error);
+            equal(aCall.returned, i);
+            notEqual(aCall.returned, n);
         }
     });
 });
