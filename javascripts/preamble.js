@@ -192,9 +192,6 @@
                     return runtimeFilter.group === labels.group;
                 case 'test':
                     return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test);
-                case 'assertion':
-                    return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test) && 
-                        (runtimeFilter.assertion === '' || runtimeFilter.assertion === labels.assertion);
             }
         }else{
             switch(level){
@@ -205,11 +202,6 @@
                 case 'test':
                     return config.filters.some(function(fltr){
                         return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test);
-                    });
-                case 'assertion':
-                    return config.filters.some(function(fltr){
-                        return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test) && 
-                            (fltr.assertion === '*' || fltr.assertion === labels.assertion);
                     });
             }
         }
@@ -240,9 +232,8 @@
          *
          *hideAssertions: (default: true) - set to false to show assertions.
          *
-         *filters: (default: []) - set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
-         *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
-         *all tests and/or all assertions, respectively, should be included in the filter.
+         *filters: (default: []) - set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel}.
+         *You can also use the wildcard '*' character for test to specify that all tests should be included in the filter.
          *
          *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
          *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
@@ -271,7 +262,7 @@
         queue.totTests = 0;
         queue.totAssertions = 0;
         //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
-        runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test'), assertion: loadPageVar('assertion')};
+        runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test')};
         //Capture exception's stack trace property.
         setStackTraceProperty();
         //Handle global errors.
@@ -420,7 +411,6 @@
             //Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
-            assertionTitle = 'title="Click here to filter by this assertion."',
             as,
             i,
             len;
@@ -462,8 +452,7 @@
                 //    result.assertionLabel + '" (' + result.displayAssertionName +
                 //    ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
                 html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
+                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed"' + '>Error: "' +
                     result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
                 if(!config.hideAssertions){
@@ -472,8 +461,7 @@
                     //    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
                     //    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</a></div>';
                     html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                        '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
-                        '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
+                        '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed"' + '>' +
                         result.explain + ' passed</div></div>';
                 }
             }
@@ -707,8 +695,7 @@
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
         })){
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
             pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
@@ -722,8 +709,7 @@
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
         })){
             pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
         }
@@ -735,8 +721,7 @@
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
         })){
             pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
         }
@@ -748,8 +733,7 @@
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
         })){
             //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
             pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
@@ -763,8 +747,7 @@
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
         })){
             pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
         }
@@ -776,8 +759,7 @@
         }
         if(filter('assertion', {
             group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
+            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
         })){
             pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
         }
