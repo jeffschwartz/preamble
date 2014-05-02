@@ -81,3 +81,7 @@ TDD "group", "test" and "asyncTest", respectively. This is experimental and most
 likely will see changes. User feedback are welcomed and appreciated.
 
 16) Added snoop, a replacement for proxy, which is now deprecated.
+
+17) Removing the reporting of totals for groups and assertion. Assertions 
+are now only shown for failed tests. Assertion labels are no longer supported.
+Filtering on assertions is no longer supported.
