@@ -316,6 +316,7 @@
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
             window.proxy = proxy;
+            window.snoop = snoop;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -337,7 +338,8 @@
                 whenDone: whenAsyncDone,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
-                proxy: proxy
+                proxy: proxy,
+                snoop: snoop
             };
             //Functions to "note" assertions are passed as the
             //1st parameter to each test's callback function.
@@ -1070,6 +1072,85 @@
         };
         //Convert arguments to an array, call factory and returns its value to the caller.
         return proxyFactory.apply(null, [].slice.call(arguments));
+    }
+
+    function snoop(argObject, argProperty){
+        var targetFn,
+            snoopster,
+            calls = [];
+        window.calls = calls;
+        function argsToArray(argArguments){
+            return [].slice.call(argArguments, 0);
+        }
+        if(arguments.length !== 2){
+            throw new Error('snoop requires 2 arguments, an object and a property name');
+        }
+        if(!arguments[0].hasOwnProperty([arguments[1]])){
+            throw new Error('object does not have property name "' + arguments[1] + '"');
+        }
+        function Args(args){
+            this.args = argsToArray(args);
+        }
+        Args.prototype.getArgument = function(i){
+            return i >= this.args.length ? null : this.args[i];
+        };
+        function ACall(context, args, error, returned){
+            this.context = context;
+            this.args = args;
+            this.error = error;
+            this.returned = returned;
+        }
+        targetFn = argObject[argProperty];
+        //tracking
+        snoopster = function(){
+            var aArgs = arguments.length && argsToArray(arguments) || [];
+            var error = null;
+            var returned;
+            try{
+                returned = targetFn.apply(this, aArgs);
+            }catch(er){
+                error = er;
+            }
+            snoopster.args = new Args(aArgs);
+            calls.push(new ACall(this, aArgs, error, returned));
+        };
+        //api
+        snoopster.called = function(){
+            return calls.length;
+        };
+        snoopster.wasCalled = function(){
+            return !!calls.length;
+        };
+        snoopster.wasCalled.nTimes = function(count){
+            if(arguments.length !== 1){
+                throw new Error('wasCalled.nTimes expects to be called with an integer');
+            }
+            return calls.length === count;
+        };
+        snoopster.contextCalledWith = function(){
+            return snoopster.wasCalled() && calls[calls.length - 1].context;
+        };
+        snoopster.returned = function(){
+            return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
+        };
+        snoopster.threw = function(){
+            return snoopster.wasCalled() && !!calls[calls.length - 1].error;
+        };
+        snoopster.threw.withMessage = function(message){
+            return snoopster.wasCalled() && calls[calls.length - 1].error.message === message;
+        };
+        snoopster.calls = {
+            count: function(){
+                return calls.length;
+            },
+            forCall: function(i){
+                return i >= 0 && i < calls.length && calls[i] || undefined;
+            },
+            all: function(){
+                return calls;
+            }
+        };
+        argObject[argProperty] = snoopster;
     }
 
     function showCoverage(){
