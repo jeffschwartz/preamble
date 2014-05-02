@@ -464,8 +464,7 @@
                 html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
                     '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
-                    result.assertionLabel + '" (' + result.displayAssertionName +
-                    ')  failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
+                    result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
                 if(!config.hideAssertions){
                     //html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
@@ -475,7 +474,7 @@
                     html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
                         '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
                         '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
-                        result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</div></div>';
+                        result.explain + ' passed</div></div>';
                 }
             }
         });
@@ -599,51 +598,67 @@
 
     //"strict" a === b
     function assertEqual(a, b){
-        return a_equals_b(a, b);
+        //return a_equals_b(a, b);
+        var result = a_equals_b(a, b);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to equal ' + JSON.stringify(b)};
     }
-    assertEqual._desc = 'to equal';
+    //assertEqual._desc = 'to equal';
 
     //"strict" a === true, simple boolean test
     function assertIsTrue(a){
-        return a_equals_true(a);
+        //return a_equals_true(a);
+        var result = a_equals_true(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
     }
-    assertIsTrue._desc = 'to be true';
+    //assertIsTrue._desc = 'to be true';
 
     //"non strict" a == true, simple boolean test
     function assertIsTruthy(a){
-        return a_is_truthy(a);
+        //return a_is_truthy(a);
+        var result = a_is_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
     }
-    assertIsTruthy._desc = 'to be truthy';
+    //assertIsTruthy._desc = 'to be truthy';
 
     //"strict" a !== b
     function assertNotEqual(a, b){
-        return a_notequals_b(a, b);
+        //return a_notequals_b(a, b);
+        var result = a_notequals_b(a, b);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not equal ' + JSON.stringify(b)};
     }
-    assertNotEqual._desc = 'to not equal';
+    //assertNotEqual._desc = 'to not equal';
 
     //"strict" a === false, simple boolean test
     function assertIsFalse(a){
-        return a_equals_false(a);
+        //return a_equals_false(a);
+        var result = a_equals_false(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
     }
-    assertIsFalse._desc = 'to be false';
+    //assertIsFalse._desc = 'to be false';
 
     //"non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
-        return a_is_not_truthy(a);
+        //return a_is_not_truthy(a);
+        var result = a_is_not_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
-    assertIsNotTruthy._desc = 'to not to be truthy';
+    //assertIsNotTruthy._desc = 'to not to be truthy';
 
     function runAssertions(test){
         var assertionsQueue = test.assertions,
             i,
             len,
-            item;
+            item,
+            result;
         test.totFailed = 0;
         //Iterate over the assertionsQueue, running each item's assertion.
         for (i = 0, len = assertionsQueue.length; i < len; i++) {
             item = assertionsQueue[i];
-            item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-            item.displayAssertionName = item.assertion._desc;
+            //item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            item.result = result.result;
+            item.explain = result.explain;
+            //item.displayAssertionName = item.assertion._desc;
             if(config.shortCircuit && !item.result){
                 isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
                 return;
@@ -1327,8 +1342,9 @@
                         testDuration: test.duration,
                         testResult: test.result,
                         result: assertion.result,
+                        explain: assertion.explain,
                         assertionLabel: assertion.assertionLabel,
-                        displayAssertionName: assertion.displayAssertionName,
+                        //displayAssertionName: assertion.displayAssertionName,
                         stackTrace: assertion.stackTrace
                     });
                 });
