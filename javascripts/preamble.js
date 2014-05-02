@@ -356,11 +356,7 @@
     function showResultsSummary(){
         var html,
             el,
-            s,
-            totGroups = queue.length,
-            totGroupsPassed = queue.length - queue.totGroupsFailed,
-            totTestsPassed = queue.totTests - queue.totTestsFailed,
-            totAssertionsPassed = queue.totAssertions - queue.totAssertionsFailed;
+            s;
         
         el = document.getElementById('time');
         s = el.innerHTML;
@@ -370,20 +366,9 @@
         el.style.display = 'block';
         showCoverage();
         if(queue.result){
-            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + totGroups +
-                pluralize(' group', totGroups) + '/' + queue.totTests+ pluralize(' test', queue.totTests) + '/' +
-                queue.totAssertions + pluralize(' assertion', queue.totAssertions) + ' passed' + '</div>';
-        }else if(totAssertionsPassed === 0){
-            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + queue.totGroupsFailed +
-                pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) + '/' +
-                queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</div>';
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + queue.totTests+ pluralize(' test', queue.totTests) + ' passed' + '</div>';
         }else{
-            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + totGroupsPassed +
-                pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +
-                totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) +
-                ' passed.</div><div id="preamble-results-summary-failed" class="summary-failed">' + queue.totGroupsFailed +
-                pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) +
-                '/' + queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</div>';
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) + ' failed.</div>';
         }
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     }
@@ -446,20 +431,11 @@
             //This is because result.result isn't restricted to boolean true/false, and can be any valid JavaScript primitive or object.
             //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
             if(!result.result){
-                //html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                //    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
-                //    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
-                //    result.assertionLabel + '" (' + result.displayAssertionName +
-                //    ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
                 html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
                     '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed"' + '>Error: "' +
                     result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
                 if(!config.hideAssertions){
-                    //html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    //    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
-                    //    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
-                    //    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</a></div>';
                     html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
                         '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed"' + '>' +
                         result.explain + ' passed</div></div>';
@@ -590,7 +566,6 @@
         var result = a_equals_b(a, b);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to equal ' + JSON.stringify(b)};
     }
-    //assertEqual._desc = 'to equal';
 
     //"strict" a === true, simple boolean test
     function assertIsTrue(a){
@@ -598,7 +573,6 @@
         var result = a_equals_true(a);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
     }
-    //assertIsTrue._desc = 'to be true';
 
     //"non strict" a == true, simple boolean test
     function assertIsTruthy(a){
@@ -606,7 +580,6 @@
         var result = a_is_truthy(a);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
     }
-    //assertIsTruthy._desc = 'to be truthy';
 
     //"strict" a !== b
     function assertNotEqual(a, b){
@@ -614,7 +587,6 @@
         var result = a_notequals_b(a, b);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not equal ' + JSON.stringify(b)};
     }
-    //assertNotEqual._desc = 'to not equal';
 
     //"strict" a === false, simple boolean test
     function assertIsFalse(a){
@@ -622,7 +594,6 @@
         var result = a_equals_false(a);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
     }
-    //assertIsFalse._desc = 'to be false';
 
     //"non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
@@ -630,7 +601,6 @@
         var result = a_is_not_truthy(a);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
-    //assertIsNotTruthy._desc = 'to not to be truthy';
 
     function runAssertions(test){
         var assertionsQueue = test.assertions,
@@ -1137,16 +1107,14 @@
     function showCoverage(){
         var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
             elStatusContainer = document.getElementById('preamble-status-container'),
-            coverage = '<div id="coverage">' + show + ' {{tg}}/{{tt}}/{{ta}}' +
+            coverage = '<div id="coverage">' + show + ' {{tt}}' +
                 '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
                 '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
                 ' - <a id="runAll" href="?"> run all</a>' +
                 '</div>',
             hpt;
         //Show groups and tests coverage in the header.
-        coverage = coverage.replace(/{{tg}}/, queue.length + pluralize(' group', queue.length));
         coverage = coverage.replace(/{{tt}}/, queue.totTests + pluralize(' test', queue.totTests));
-        coverage = coverage.replace(/{{ta}}/, queue.totAssertions + pluralize(' assertion', queue.totAssertions));
         hpt = loadPageVar('hpt');
         hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
         coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
