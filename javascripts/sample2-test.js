@@ -1,6 +1,6 @@
 /*jslint eqeq: true*/
 /*jshint strict: false*/
-/*global configure, when, beforeEach, beforeEachAsync, afterEach, afterEachAsync, then, thenAsync, whenDone, -getUiTestContainerElement, -getUiTestContainerElementId, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+/*global configure, when, beforeEach, beforeEachAsync, afterEach, afterEachAsync, then, thenAsync, whenDone, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
 /* 
  *This script uses BDD-like semantics. If you prefer TDD 
@@ -233,3 +233,141 @@ when('Proxy wraps a method and that function is called', function(){
         isTrue(info.context === val.someObject, 'and calling context() returns the context the function was called with');
     });
 });
+
+when('snooping on a method', function(){
+    beforeEach(function(val){
+        val.foo = {
+            someFn: function(arg){
+                return arg;
+            }
+        };
+    });
+    then('we can query if the method was called', function(val){
+        var foo = val.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        isTrue(foo.someFn.wasCalled(), 'it was called');
+    });
+    then('we can query how many times the method was called', function(val){
+        var foo = val.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        equal(foo.someFn.called(), 1, 'returns the number of times method was called');
+    });
+    then('we can query the method was called n times', function(val){
+        var foo = val.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        isTrue(foo.someFn.wasCalled.nTimes(1), 'return true if called n times');
+        isFalse(foo.someFn.wasCalled.nTimes(2), 'return false if not called n times');
+    });
+    then('we can query the context the method was called with', function(val){
+        var foo = val.foo,
+            bar = {};
+        snoop(foo, 'someFn');
+        foo.someFn();
+        equal(foo.someFn.contextCalledWith(), foo, 'was called with foo');
+        notEqual(foo.someFn.contextCalledWith(), bar, 'was not called with bar');
+    });
+    then('we can query for the arguments that the method was called with', function(val){
+        var foo = val.foo,
+            arg = 'Preamble rocks!';
+        snoop(foo, 'someFn');
+        foo.someFn(arg);
+        equal(foo.someFn.args.getArgument(0), arg, 'was Preamble rocks!');
+        notEqual(foo.someFn.args.getArgument(0), arg + '!', 'was not Preamble rocks!!');
+        isNotTruthy(foo.someFn.args.getArgument(1), 'asking for an argument that was not passed');
+    });
+    then('we can query for what the method returned', function(val){
+        var foo = val.foo,
+            arg = 'Preamble rocks!';
+        snoop(foo, 'someFn');
+        foo.someFn(arg);
+        equal(foo.someFn.returned(), arg, 'returned arg');
+        notEqual(foo.someFn.returned(), arg + '!', 'did not return arg + "!"');
+    });
+});
+
+when('a snooped method throws', function(){
+    beforeEach(function(val){
+        val.foo = {
+            someFn: function(){
+                throw new Error('Holy Batman!');
+            }
+        };
+    });
+    then('we can query the method if threw', function(val){
+        var foo = val.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        isTrue(foo.someFn.threw(), 'it did throw');
+        isTrue(foo.someFn.threw.withMessage('Holy Batman!'), 'with message');
+        isFalse(foo.someFn.threw.withMessage('Holy Batman!!'), 'not with message');
+    });
+});
+
+when('snooping on more than one method', function(){
+    beforeEach(function(val){
+        val.foo = {
+            someFn: function(arg){
+                return arg;
+            }
+        };
+        val.bar = {
+            someFn: function(arg){
+                return arg;
+            }
+        };
+    });
+
+    then('snoops are isolated and there are no side effects', function(val){
+        var foo = val.foo,
+            bar = val.bar;
+        snoop(foo, 'someFn');
+        snoop(bar, 'someFn');
+        foo.someFn('Is Preamble great?');
+        bar.someFn('Yes it is!');
+        foo.someFn('You got that right!');
+        isTrue(foo.someFn.wasCalled(), 'foo.someFn was called');
+        isTrue(foo.someFn.wasCalled.nTimes(2), 'foo.someFn was called n times');
+        isFalse(foo.someFn.wasCalled.nTimes(1), 'foo.someFn was not called n times');
+        isTrue(bar.someFn.wasCalled(), 'bar.someFn was called');
+        isTrue(bar.someFn.wasCalled.nTimes(1), 'bar.someFn was called n times');
+        isFalse(bar.someFn.wasCalled.nTimes(2), 'bar.someFn was not called n times');
+    });
+});
+
+when('the calls api is used', function(){
+    var i, 
+        foo = {
+            someFn: function(arg){
+                return arg;
+            }
+        },
+        bar ={},
+        n = 3,
+        aCall;
+    snoop(foo, 'someFn');
+    for(i = 0; i < n; i++){
+        foo.someFn(i) ;
+    }
+    then('count() returns the right count', function(){
+        equal(foo.someFn.calls.count(), n, 'count is correct');
+    });
+    then('all() returns an array with the right number of elements', function(){
+        equal(foo.someFn.calls.all().length, n, 'all returns 10 elements');
+    });
+    then('forCall(n) returns the correct element', function(){
+        for(i = 0; i < n; i++){
+            aCall = foo.someFn.calls.forCall(i);
+            equal(aCall.context, foo, 'context is foo');
+            notEqual(aCall.context, bar, 'context is bar');
+            equal(aCall.args[0], i, 'args[0] is ' + i);
+            notEqual(aCall.args[0], n, 'args[0] is ' + n);
+            isNotTruthy(aCall.error, 'there was no error');
+            equal(aCall.returned, i, 'returned ' + i);
+            notEqual(aCall.returned, n, 'returned ' + n);
+        }
+    });
+});
+
