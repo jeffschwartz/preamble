@@ -690,8 +690,8 @@
     }
 
     function noteEqualAssertion(value, expectation, label){
-        if(arguments.length !== 3){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        if(arguments.length < 2){
+            throwException('Assertion "equal" requires 2 arguments, found ' + arguments.length);
         }
         //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
         pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
@@ -699,22 +699,22 @@
     }
 
     function noteIsTrueAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
         }
         pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
     }
 
     function noteIsTruthyAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isTruthy" requires 1 argument, found ' + arguments.length);
         }
         pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
     }
 
     function noteNotEqualAssertion(value, expectation, label){
-        if(arguments.length !== 3){
-            throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
+        if(arguments.length < 2){
+            throwException('Assertion "notEqual" requires 2 arguments, found ' + arguments.length);
         }
         //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
         pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
@@ -722,15 +722,15 @@
     }
 
     function noteIsFalseAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isFalse" requires 1 argument, found ' + arguments.length);
         }
         pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
     }
 
     function noteIsNotTruthyAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isNotTruthy" requires 1 argument, found ' + arguments.length);
         }
         pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
