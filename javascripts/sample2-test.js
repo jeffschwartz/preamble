@@ -9,7 +9,8 @@
 
 configure({
     name: 'Sample Test Suite (BDD-Like)',
-    hidePassedTests: true
+    hidePassedTests: true,
+    hideAssertions: false
 });
 
 when('Runnig a test', function(){

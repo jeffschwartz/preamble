@@ -238,6 +238,8 @@
          *
          *hidePassedTests: (default: false) - set to true to hide passed tests.
          *
+         *hideAssertions: (default: true) - set to false to show assertions.
+         *
          *filters: (default: []) - set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
          *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
          *all tests and/or all assertions, respectively, should be included in the filter.
@@ -253,6 +255,7 @@
                 name: 'Test', 
                 uiTestContainerId: 'ui-test-container', 
                 hidePassedTests: false,
+                hideAssertions: true,
                 filters: [],
                 autoStart: true
             },
@@ -443,7 +446,7 @@
             }
             if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
                 html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
-                    '" ' + 'data-passed="' + result.testResult + '"><a class="test' + (!result.testResult ? ' failed' : '') + '" href="?group=' +
+                    '" ' + 'data-passed="' + result.testResult + '"><a class="' + (!result.testResult ? ' failed' : 'passed') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
                     ' (' + result.testDuration + 'ms)' + '</a>';
                 testLabel = result.testLabel;
@@ -453,16 +456,27 @@
             //This is because result.result isn't restricted to boolean true/false, and can be any valid JavaScript primitive or object.
             //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
             if(!result.result){
+                //html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+                //    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
+                //    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
+                //    result.assertionLabel + '" (' + result.displayAssertionName +
+                //    ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
                 html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
+                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
                     '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
                     result.assertionLabel + '" (' + result.displayAssertionName +
-                    ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
+                    ')  failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
-                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
-                    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</a></div>';
+                if(!config.hideAssertions){
+                    //html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+                    //    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
+                    //    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
+                    //    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</a></div>';
+                    html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+                        '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
+                        '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
+                        result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</div></div>';
+                }
             }
         });
         html += '</div></div>';
@@ -587,37 +601,37 @@
     function assertEqual(a, b){
         return a_equals_b(a, b);
     }
-    assertEqual._desc = 'equal';
+    assertEqual._desc = 'to equal';
 
     //"strict" a === true, simple boolean test
     function assertIsTrue(a){
         return a_equals_true(a);
     }
-    assertIsTrue._desc = 'isTrue';
+    assertIsTrue._desc = 'to be true';
 
     //"non strict" a == true, simple boolean test
     function assertIsTruthy(a){
         return a_is_truthy(a);
     }
-    assertIsTruthy._desc = 'isTruthy';
+    assertIsTruthy._desc = 'to be truthy';
 
     //"strict" a !== b
     function assertNotEqual(a, b){
         return a_notequals_b(a, b);
     }
-    assertNotEqual._desc = 'notEqual';
+    assertNotEqual._desc = 'to not equal';
 
     //"strict" a === false, simple boolean test
     function assertIsFalse(a){
         return a_equals_false(a);
     }
-    assertIsFalse._desc = 'isFalse';
+    assertIsFalse._desc = 'to be false';
 
     //"non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
         return a_is_not_truthy(a);
     }
-    assertIsNotTruthy._desc = 'isNotTruthy';
+    assertIsNotTruthy._desc = 'to not to be truthy';
 
     function runAssertions(test){
         var assertionsQueue = test.assertions,
