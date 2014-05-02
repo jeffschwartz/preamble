@@ -693,76 +693,46 @@
         if(arguments.length !== 3){
             throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
-        })){
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
+        //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+        pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
-        }
     }
 
     function noteIsTrueAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
-        })){
-            pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
     }
 
     function noteIsTruthyAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
-        })){
-            pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
     }
 
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length !== 3){
             throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
-        })){
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
+        //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+        pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
-        }
     }
 
     function noteIsFalseAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
-        })){
-            pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
     }
 
     function noteIsNotTruthyAssertion(value, label){
         if(arguments.length !== 2){
             throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel
-        })){
-            pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
 
     //Starts the timer for an async test. When the timeout is triggered it calls
