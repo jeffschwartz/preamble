@@ -1,10 +1,11 @@
 @import 'prefixer.less';
 @bg-color: #fdf6e3;
 @font-size: 11px;
-@normal-color: #aaa;
+@normal-color: rgb(51, 51, 51);
 @darker-color: #657b83;
 @passed-color: rgb(60, 179, 113);
 @failed-color: rgb(255,69,0);
+@groups-tests-color: rgb(51, 51, 51);
 html, body{
     font-family: Monaco, "Lucida Console", monospace;
     font-size: @font-size;
@@ -15,7 +16,7 @@ html, body{
 h1{
     margin: 0;
     font-size: @font-size;
-    color: @darker-color;
+    color: @normal-color;
 }
 h1 + small{
     font-size: @font-size;
@@ -48,8 +49,9 @@ header{
 }
 #coverage{
     .summary;
-    color: @darker-color;
-    background-color: #eee;
+    color: @normal-color;
+    background-color: #ebdfc0;
+    line-height: 18px;
 }
 #coverage a{
     color: @normal-color;
@@ -116,7 +118,7 @@ section:first-child{
     text-decoration: underline;
 }
 .group {
-    color: #888;
+    color: @groups-tests-color;
 }
 .tests-container{
     padding: 5px 20px 0 20px;
@@ -128,7 +130,7 @@ section:first-child{
     text-decoration: underline;
 }
 .test{
-    color: #888;
+    color: @groups-tests-color;
 }
 .assertion-container{
     padding: 5px 20px 0 20px;

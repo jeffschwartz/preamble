@@ -192,9 +192,6 @@
                     return runtimeFilter.group === labels.group;
                 case 'test':
                     return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test);
-                case 'assertion':
-                    return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test) && 
-                        (runtimeFilter.assertion === '' || runtimeFilter.assertion === labels.assertion);
             }
         }else{
             switch(level){
@@ -205,11 +202,6 @@
                 case 'test':
                     return config.filters.some(function(fltr){
                         return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test);
-                    });
-                case 'assertion':
-                    return config.filters.some(function(fltr){
-                        return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test) && 
-                            (fltr.assertion === '*' || fltr.assertion === labels.assertion);
                     });
             }
         }
@@ -238,9 +230,10 @@
          *
          *hidePassedTests: (default: false) - set to true to hide passed tests.
          *
-         *filters: (default: []) - set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel, 
-         *assertion: assertionLabel}.You can also use the wildcard '*' character for test and/or assertions to specify that 
-         *all tests and/or all assertions, respectively, should be included in the filter.
+         *hideAssertions: (default: true) - set to false to show assertions.
+         *
+         *filters: (default: []) - set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel}.
+         *You can also use the wildcard '*' character for test to specify that all tests should be included in the filter.
          *
          *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
          *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
@@ -253,6 +246,7 @@
                 name: 'Test', 
                 uiTestContainerId: 'ui-test-container', 
                 hidePassedTests: false,
+                hideAssertions: true,
                 filters: [],
                 autoStart: true
             },
@@ -268,7 +262,7 @@
         queue.totTests = 0;
         queue.totAssertions = 0;
         //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
-        runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test'), assertion: loadPageVar('assertion')};
+        runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test')};
         //Capture exception's stack trace property.
         setStackTraceProperty();
         //Handle global errors.
@@ -362,11 +356,7 @@
     function showResultsSummary(){
         var html,
             el,
-            s,
-            totGroups = queue.length,
-            totGroupsPassed = queue.length - queue.totGroupsFailed,
-            totTestsPassed = queue.totTests - queue.totTestsFailed,
-            totAssertionsPassed = queue.totAssertions - queue.totAssertionsFailed;
+            s;
         
         el = document.getElementById('time');
         s = el.innerHTML;
@@ -376,20 +366,9 @@
         el.style.display = 'block';
         showCoverage();
         if(queue.result){
-            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + totGroups +
-                pluralize(' group', totGroups) + '/' + queue.totTests+ pluralize(' test', queue.totTests) + '/' +
-                queue.totAssertions + pluralize(' assertion', queue.totAssertions) + ' passed' + '</div>';
-        }else if(totAssertionsPassed === 0){
-            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + queue.totGroupsFailed +
-                pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) + '/' +
-                queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</div>';
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + queue.totTests+ pluralize(' test', queue.totTests) + ' passed' + '</div>';
         }else{
-            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + totGroupsPassed +
-                pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +
-                totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) +
-                ' passed.</div><div id="preamble-results-summary-failed" class="summary-failed">' + queue.totGroupsFailed +
-                pluralize(' group', queue.totGroupsFailed) + '/' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) +
-                '/' + queue.totAssertionsFailed + pluralize(' assertion', queue.totAssertionsFailed) + ' failed.</div>';
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + queue.totTestsFailed + pluralize(' test', queue.totTestsFailed) + ' failed.</div>';
         }
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     }
@@ -417,7 +396,6 @@
             //Titles for anchor tags.
             groupTile = 'title="Click here to filter by this group."',
             testTitle = 'title="Click here to filter by this test."',
-            assertionTitle = 'title="Click here to filter by this assertion."',
             as,
             i,
             len;
@@ -443,7 +421,7 @@
             }
             if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
                 html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
-                    '" ' + 'data-passed="' + result.testResult + '"><a class="test' + (!result.testResult ? ' failed' : '') + '" href="?group=' +
+                    '" ' + 'data-passed="' + result.testResult + '"><a class="' + (!result.testResult ? ' failed' : 'passed') + '" href="?group=' +
                     encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
                     ' (' + result.testDuration + 'ms)' + '</a>';
                 testLabel = result.testLabel;
@@ -454,15 +432,14 @@
             //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
             if(!result.result){
                 html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>Error: "' +
-                    result.assertionLabel + '" (' + result.displayAssertionName +
-                    ')  failed:</a></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
+                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed"' + '>Error: "' +
+                    result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
             }else{
-                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + !!result.result + '"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) +
-                    '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '" ' + assertionTitle + '>' +
-                    result.assertionLabel + ' (' + result.displayAssertionName + ')  passed</a></div>';
+                if(!config.hideAssertions){
+                    html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+                        '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed"' + '>' +
+                        result.explain + ' passed</div></div>';
+                }
             }
         });
         html += '</div></div>';
@@ -585,51 +562,61 @@
 
     //"strict" a === b
     function assertEqual(a, b){
-        return a_equals_b(a, b);
+        //return a_equals_b(a, b);
+        var result = a_equals_b(a, b);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to equal ' + JSON.stringify(b)};
     }
-    assertEqual._desc = 'equal';
 
     //"strict" a === true, simple boolean test
     function assertIsTrue(a){
-        return a_equals_true(a);
+        //return a_equals_true(a);
+        var result = a_equals_true(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
     }
-    assertIsTrue._desc = 'isTrue';
 
     //"non strict" a == true, simple boolean test
     function assertIsTruthy(a){
-        return a_is_truthy(a);
+        //return a_is_truthy(a);
+        var result = a_is_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
     }
-    assertIsTruthy._desc = 'isTruthy';
 
     //"strict" a !== b
     function assertNotEqual(a, b){
-        return a_notequals_b(a, b);
+        //return a_notequals_b(a, b);
+        var result = a_notequals_b(a, b);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not equal ' + JSON.stringify(b)};
     }
-    assertNotEqual._desc = 'notEqual';
 
     //"strict" a === false, simple boolean test
     function assertIsFalse(a){
-        return a_equals_false(a);
+        //return a_equals_false(a);
+        var result = a_equals_false(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
     }
-    assertIsFalse._desc = 'isFalse';
 
     //"non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
-        return a_is_not_truthy(a);
+        //return a_is_not_truthy(a);
+        var result = a_is_not_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
-    assertIsNotTruthy._desc = 'isNotTruthy';
 
     function runAssertions(test){
         var assertionsQueue = test.assertions,
             i,
             len,
-            item;
+            item,
+            result;
         test.totFailed = 0;
         //Iterate over the assertionsQueue, running each item's assertion.
         for (i = 0, len = assertionsQueue.length; i < len; i++) {
             item = assertionsQueue[i];
-            item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-            item.displayAssertionName = item.assertion._desc;
+            //item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            item.result = result.result;
+            item.explain = result.explain;
+            //item.displayAssertionName = item.assertion._desc;
             if(config.shortCircuit && !item.result){
                 isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
                 return;
@@ -673,85 +660,49 @@
     }
 
     function noteEqualAssertion(value, expectation, label){
-        if(arguments.length !== 3){
-            throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
+        if(arguments.length < 2){
+            throwException('Assertion "equal" requires 2 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
-        })){
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
+        //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+        pushOntoAssertions(assertEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
-        }
     }
 
     function noteIsTrueAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
-        })){
-            pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
     }
 
     function noteIsTruthyAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isTruthy" requires 1 argument, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
-        })){
-            pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
     }
 
     function noteNotEqualAssertion(value, expectation, label){
-        if(arguments.length !== 3){
-            throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
+        if(arguments.length < 2){
+            throwException('Assertion "notEqual" requires 2 arguments, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
-        })){
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
+        //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
+        pushOntoAssertions(assertNotEqual, label, currentTestHash.isAsync ? deepCopy(value) : value,
                 currentTestHash.isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
-        }
     }
 
     function noteIsFalseAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isFalse" requires 1 argument, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
-        })){
-            pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
     }
 
     function noteIsNotTruthyAssertion(value, label){
-        if(arguments.length !== 2){
-            throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
+        if(arguments.length < 1){
+            throwException('Assertion "isNotTruthy" requires 1 argument, found ' + arguments.length);
         }
-        if(filter('assertion', {
-            group: queue[currentGroupIndex].groupLabel, 
-            test: queue[currentGroupIndex].tests[currentTestIndex].testLabel, 
-            assertion: label
-        })){
-            pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
-        }
+        pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
 
     //Starts the timer for an async test. When the timeout is triggered it calls
@@ -1156,16 +1107,14 @@
     function showCoverage(){
         var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
             elStatusContainer = document.getElementById('preamble-status-container'),
-            coverage = '<div id="coverage">' + show + ' {{tg}}/{{tt}}/{{ta}}' +
+            coverage = '<div id="coverage">' + show + ' {{tt}}' +
                 '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
                 '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
                 ' - <a id="runAll" href="?"> run all</a>' +
                 '</div>',
             hpt;
         //Show groups and tests coverage in the header.
-        coverage = coverage.replace(/{{tg}}/, queue.length + pluralize(' group', queue.length));
         coverage = coverage.replace(/{{tt}}/, queue.totTests + pluralize(' test', queue.totTests));
-        coverage = coverage.replace(/{{ta}}/, queue.totAssertions + pluralize(' assertion', queue.totAssertions));
         hpt = loadPageVar('hpt');
         hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
         coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
@@ -1313,8 +1262,9 @@
                         testDuration: test.duration,
                         testResult: test.result,
                         result: assertion.result,
+                        explain: assertion.explain,
                         assertionLabel: assertion.assertionLabel,
-                        displayAssertionName: assertion.displayAssertionName,
+                        //displayAssertionName: assertion.displayAssertionName,
                         stackTrace: assertion.stackTrace
                     });
                 });
