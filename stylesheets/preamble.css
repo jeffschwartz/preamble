@@ -46,7 +46,8 @@ header {
   padding: 10px 10px;
   font-weight: bold;
   color: #333333;
-  background-color: #eee;
+  background-color: #ebdfc0;
+  line-height: 18px;
 }
 #coverage a {
   color: #333333;
