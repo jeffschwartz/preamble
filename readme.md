@@ -66,10 +66,7 @@ required in order to support in-line configuration. See item 1 above.
 12) Added display timings for groups and tests in details report.
 
 13) Added 'passing' values from beforeEachTest and asyncBeforeEachTest to
-test and asyncTest, respectively. An object is now passed as an argument to both
-beforeEachTest and asyncBeforeEachTest callbacks. Properties can be set on this 
-object. This same object is also passed to test and asyncTest which can access
-any properties that have been set on it. See item 2 above.
+test and asyncTest, respectively using 'this'. See item 2 above.
 
 14) Added abbreviated/rephrased semantic alternatives "beforeEach", 
 "beforeEachAsync", "afterEach", "afterEachAsync" and "whenDone" for 

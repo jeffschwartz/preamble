@@ -87,11 +87,11 @@ when('Running synchronous tests with beforeEach', function(){
 });
 
 when('Passing a value from beforeEach to tests', function(){
-    beforeEach(function(valObj){
-        valObj.value = 10;
+    beforeEach(function(){
+        this.value = 10;
     });
-    then('the tests', function(valObj){
-        equal(valObj.value, 10);
+    then('the tests', function(){
+        equal(this.value, 10);
     });
 });
 
@@ -138,17 +138,19 @@ when('Running asynchronous tests with beforeEachAsync', function(){
 });
 
 when('Passing a value from beforeEachAsync to asynchronous tests', function(){
-    beforeEachAsync(1, function(valObj){
+    beforeEachAsync(1, function(){
+        var self = this;
         setTimeout(function(){
-            valObj.value = 10;
+            self.value = 10;
         }, 1);
     });
-    thenAsync('the asynchronous tests', 1, function(valObj){
+    thenAsync('the asynchronous tests', 1, function(){
+        var self = this;
         setTimeout(function(){
             //some asynchronous process...
         }, 1);
         whenDone(function(){
-            equal(valObj.value, 10);
+            equal(self.value, 10);
         });
     });
 });
@@ -179,26 +181,26 @@ when('Running asynchronous tests with afterEachAsync', function(){
 });
 
 when('Proxy wraps a function and that function is called', function(){
-    beforeEach(function(val){
+    beforeEach(function(){
         var fn = proxy(function(){
             return 'JavaScript is amazing!';
         });
         fn('Tell me something about JavaScript');
-        val.fn = fn;
+        this.fn = fn;
     });
-    then('calling wasCalled(number) on that function', function(val){
-        isTrue(val.fn.wasCalled(1));
-        isFalse(val.fn.wasCalled(2));
+    then('calling wasCalled(number) on that function', function(){
+        isTrue(this.fn.wasCalled(1));
+        isFalse(this.fn.wasCalled(2));
     });
-    then('calling getCalledCount() on that function', function(val){
-        equal(val.fn.getCalledCount(), 1);
+    then('calling getCalledCount() on that function', function(){
+        equal(this.fn.getCalledCount(), 1);
     });
-    then('calling getData(n) on that function', function(val){
-        var info = val.fn.getData(0);
+    then('calling getData(n) on that function', function(){
+        var info = this.fn.getData(0);
         notEqual(info, undefined);
     });
-    then('and the object that getData(n) returns exposes and api', function(val){
-        var info = val.fn.getData(0);
+    then('and the object that getData(n) returns exposes and api', function(){
+        var info = this.fn.getData(0);
         equal(info.argsPassed[0], 'Tell me something about JavaScript');
         equal(info.returned, 'JavaScript is amazing!');
         equal(info.context, undefined);
@@ -206,7 +208,7 @@ when('Proxy wraps a function and that function is called', function(){
 });
 
 when('Proxy wraps a method and that function is called', function(){
-    beforeEach(function(val){
+    beforeEach(function(){
         var someObject = {
             someMethod: function(){
                 return 'JavaScript is amazing!';
@@ -214,64 +216,64 @@ when('Proxy wraps a method and that function is called', function(){
         };
         proxy(someObject, 'someMethod');
         someObject.someMethod('Tell me something about JavaScript');
-        val.someObject = someObject;
+        this.someObject = someObject;
     });
-    then('calling wasCalled(number) on that method', function(val){
-        isTrue(val.someObject.someMethod.wasCalled(1));
-        isFalse(val.someObject.someMethod.wasCalled(2));
+    then('calling wasCalled(number) on that method', function(){
+        isTrue(this.someObject.someMethod.wasCalled(1));
+        isFalse(this.someObject.someMethod.wasCalled(2));
     });
-    then('calling getCalledCount() on that method', function(val){
-        equal(val.someObject.someMethod.getCalledCount(), 1);
+    then('calling getCalledCount() on that method', function(){
+        equal(this.someObject.someMethod.getCalledCount(), 1);
     });
-    then('calling getData(n) on that method', function(val){
-        var info = val.someObject.someMethod.getData(0);
+    then('calling getData(n) on that method', function(){
+        var info = this.someObject.someMethod.getData(0);
         notEqual(info, undefined);
     });
-    then('and the object that getData(n) returns exposes and api', function(val){
-        var info = val.someObject.someMethod.getData(0);
+    then('and the object that getData(n) returns exposes and api', function(){
+        var info = this.someObject.someMethod.getData(0);
         equal(info.argsPassed[0], 'Tell me something about JavaScript');
         equal(info.returned, 'JavaScript is amazing!');
-        equal(info.context, val.someObject);
+        equal(info.context, this.someObject);
     });
 });
 
 when('snooping on a method', function(){
-    beforeEach(function(val){
-        val.foo = {
+    beforeEach(function(){
+        this.foo = {
             someFn: function(arg){
                 return arg;
             }
         };
     });
-    then('we can query if the method was called', function(val){
-        var foo = val.foo;
+    then('we can query if the method was called', function(){
+        var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
         isTrue(foo.someFn.wasCalled());
     });
-    then('we can query how many times the method was called', function(val){
-        var foo = val.foo;
+    then('we can query how many times the method was called', function(){
+        var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
         equal(foo.someFn.called(), 1);
     });
-    then('we can query the method was called n times', function(val){
-        var foo = val.foo;
+    then('we can query the method was called n times', function(){
+        var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
         isTrue(foo.someFn.wasCalled.nTimes(1));
         isFalse(foo.someFn.wasCalled.nTimes(2));
     });
-    then('we can query the context the method was called with', function(val){
-        var foo = val.foo,
+    then('we can query the context the method was called with', function(){
+        var foo = this.foo,
             bar = {};
         snoop(foo, 'someFn');
         foo.someFn();
         equal(foo.someFn.contextCalledWith(), foo);
         notEqual(foo.someFn.contextCalledWith(), bar);
     });
-    then('we can query for the arguments that the method was called with', function(val){
-        var foo = val.foo,
+    then('we can query for the arguments that the method was called with', function(){
+        var foo = this.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
         foo.someFn(arg);
@@ -279,8 +281,8 @@ when('snooping on a method', function(){
         notEqual(foo.someFn.args.getArgument(0), arg + '!');
         isNotTruthy(foo.someFn.args.getArgument(1));
     });
-    then('we can query for what the method returned', function(val){
-        var foo = val.foo,
+    then('we can query for what the method returned', function(){
+        var foo = this.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
         foo.someFn(arg);
@@ -290,15 +292,15 @@ when('snooping on a method', function(){
 });
 
 when('a snooped method throws', function(){
-    beforeEach(function(val){
-        val.foo = {
+    beforeEach(function(){
+        this.foo = {
             someFn: function(){
                 throw new Error('Holy Batman!');
             }
         };
     });
-    then('we can query the method if threw', function(val){
-        var foo = val.foo;
+    then('we can query the method if threw', function(){
+        var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
         isTrue(foo.someFn.threw());
@@ -308,22 +310,22 @@ when('a snooped method throws', function(){
 });
 
 when('snooping on more than one method', function(){
-    beforeEach(function(val){
-        val.foo = {
+    beforeEach(function(){
+        this.foo = {
             someFn: function(arg){
                 return arg;
             }
         };
-        val.bar = {
+        this.bar = {
             someFn: function(arg){
                 return arg;
             }
         };
     });
 
-    then('snoops are isolated and there are no side effects', function(val){
-        var foo = val.foo,
-            bar = val.bar;
+    then('snoops are isolated and there are no side effects', function(){
+        var foo = this.foo,
+            bar = this.bar;
         snoop(foo, 'someFn');
         snoop(bar, 'someFn');
         foo.someFn('Is Preamble great?');

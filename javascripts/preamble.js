@@ -721,9 +721,9 @@
     function runAsyncTest(){
         var rv = queue[currentGroupIndex].beforeEachReturnedValue || {};
         if(config.windowGlobals){
-            currentTestHash.testCallback(rv);
+            currentTestHash.testCallback.call(rv);
         }else{
-            currentTestHash.testCallback(assert, rv);
+            currentTestHash.testCallback.call(rv, assert);
         }
     }
 
@@ -733,9 +733,9 @@
     function runSyncTest(){
         var rv = queue[currentGroupIndex].beforeEachReturnedValue || {};
         if(config.windowGlobals){
-            currentTestHash.testCallback(rv);
+            currentTestHash.testCallback.call(rv);
         }else{
-            currentTestHash.testCallback(assert, rv);
+            currentTestHash.testCallback.call(rv, assert);
         }
         currentTestStep++;
         runTest();
@@ -744,7 +744,7 @@
     //Runs setup synchronously for each test.
     function runBeforeEachSync(){
         var value = queue[currentGroupIndex].beforeEachReturnedValue = {};
-        queue[currentGroupIndex].beforeEachTest(value);
+        queue[currentGroupIndex].beforeEachTest.call(value);
         currentTestStep++;
         runTest();
     }
@@ -752,7 +752,7 @@
     //Runs setup asynchronously for each test.
     function runBeforeEachAsync(){
         var value = queue[currentGroupIndex].beforeEachReturnedValue = {};
-        queue[currentGroupIndex].asyncBeforeEachTest(value);
+        queue[currentGroupIndex].asyncBeforeEachTest.call(value);
         setTimeout(function(){
             currentTestStep++;
             runTest();
