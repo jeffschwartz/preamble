@@ -1,6 +1,6 @@
 /*jslint eqeq: true*/
 /*jshint strict: false*/
-/*global configure, when, beforeEach, beforeEachAsync, afterEach, afterEachAsync, then, thenAsync, whenDone, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+/*global configure, when, beforeEach, afterEach, then, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
 /* 
  *This script uses BDD-like semantics. If you prefer TDD 
@@ -13,12 +13,62 @@ configure({
     hideAssertions: true
 });
 
+//when('A simple test', function(){
+//    then('of equality', function(){
+//        equal(1,1);
+//    });
+//});
+
+when('Nested specs', function(){
+    beforeEach(function(){
+        this.value = 10;
+    });
+    afterEach(function(){
+        this.isCrazy = true;
+    });
+    when('Nested spec 1', function(){
+        then('nested spec 1: test 1', function(){
+            equal(this.value, 10);
+        });
+        then('isCrazy is true', function(){
+            isTrue(typeof(this.isCrazy) === 'undefined');
+        })
+    });
+    when('Nested spec 2', function(){
+        beforeEach(function(){
+            this.foo = 'bar';
+        });
+        afterEach(function(){
+            this.xx = 'xx';
+        });
+        then('nested spec 2: test 1', function(){
+            equal(this.value, 10);
+            equal(this.foo, 'bar');
+        });
+        then('nested spec 2: test 2', function(){
+            equal(this.value, 10);
+            equal(this.foo, 'bar');
+            isTrue(typeof(this.xx) === 'undefined');
+        });
+        when('Nested spec 3', function(){
+            beforeEach(function(){
+                this.flim = 'flam';
+            });
+            then('nested spec 3: test 1', function(){
+                equal(this.value, 10);
+                equal(this.foo, 'bar');
+                equal(this.flim, 'flam');
+            });
+        });
+    });
+});
+
 when('Runnig a test', function(){
-    then('if it passes', function(){
+    then('and it passes it looks like this', function(){
         var hw = 'Hello World!';
         isTrue(hw === 'Hello World!');
     });
-    then('if it fails', function(){
+    then('and if it fails it looks like this', function(){
         isTrue(false);
     });
 });
@@ -110,73 +160,75 @@ when('Running synchronous tests with afterEachTest', function(){
 
 when('Running asynchronous tests', function(){
     var count = 0;
-    thenAsync('calling whenDone', 1, function(){
+    then('calling whenDone', function(done){
         setTimeout(function(){
             count = 100;
+            done(function(){
+                equal(count, 100);
+            });
         }, 1);
-        whenDone(function(){
-            equal(count, 100);
-        });
     });
 });
 
 when('Running asynchronous tests with beforeEachAsync', function(){
     var count = 0;
-    beforeEachAsync(1, function(){
+    beforeEach(function(done){
         setTimeout(function(){
             count = 10;
+            done();
         }, 1);
     });
-    thenAsync('beforeEachAsync is called', 1, function(){
+    then('beforeEachAsync is called', function(done){
         setTimeout(function(){
             count *= 10;
+            done(function(){
+                equal(count, 100);
+            });
         }, 1);
-        whenDone(function(){
-            equal(count, 100);
-        });
     });
 });
 
 when('Passing a value from beforeEachAsync to asynchronous tests', function(){
-    beforeEachAsync(1, function(){
+    beforeEach(function(done){
         var self = this;
         setTimeout(function(){
             self.value = 10;
+            done();
         }, 1);
     });
-    thenAsync('the asynchronous tests', 1, function(){
-        var self = this;
+    then('the asynchronous tests', function(done){
         setTimeout(function(){
             //some asynchronous process...
+            done(function(){
+                equal(this.value, 10);
+            });
         }, 1);
-        whenDone(function(){
-            equal(self.value, 10);
-        });
     });
 });
 
 when('Running asynchronous tests with afterEachAsync', function(){
     var count = 0;
-    afterEachAsync(1, function(){
+    afterEach(function(done){
         setTimeout(function(){
             count = 1;
+            done();
         }, 1);
     });
-    thenAsync('the first asynchronous test', 1, function(){
+    then('the first asynchronous test', function(done){
         setTimeout(function(){
             count = 10;
+            done(function(){
+                isTrue(count === 10);
+            });
         }, 1);
-        whenDone(function(){
-            isTrue(count === 10);
-        });
     });
-    thenAsync('but subsequent asynchronous tests', 1, function(){
+    then('but subsequent asynchronous tests', function(done){
         setTimeout(function(){
             count *= 100;
+            done(function(){
+                isTrue(count === 100);
+            });
         }, 1);
-        whenDone(function(){
-            isTrue(count === 100);
-        });
     });
 });
 
@@ -340,7 +392,7 @@ when('snooping on more than one method', function(){
     });
 });
 
-when('the calls api is used', function(){
+when('using snoop\'s "calls" api', function(){
     var i, 
         foo = {
             someFn: function(arg){

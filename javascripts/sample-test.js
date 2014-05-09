@@ -12,6 +12,19 @@ configure({
     hidePassedTests: true
 });
 
+group('Nested specs', function(){
+    group('Nested spec 1', function(){
+        test('nested spec 1: test 1', function(){
+            isTrue(1);
+        });
+    });
+    group('Nested spec 2', function(){
+        test('nested spec 1: test 1', function(){
+            isTrue(1);
+        });
+    });
+});
+
 group('When runnig a test', function(){
     test('and it passes', function(){
         var hw = 'Hello World!';

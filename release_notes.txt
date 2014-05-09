@@ -74,3 +74,6 @@ likely will see changes. User feedback are welcomed and appreciated.
 17) Removing the reporting of totals for groups and assertion. Assertions 
 are now only shown for failed tests. Assertion labels are no longer supported.
 Filtering on assertions is no longer supported.
+
+18) Added nested groups/whens and their contexts are derived from their parent
+groups.
