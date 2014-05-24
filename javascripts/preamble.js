@@ -28,7 +28,9 @@
         currentTestIndex,
         queueIterator,
         groupsIterator,
-        queueBuilder;
+        queueBuilder,
+        tests,
+        testsIterator;
 
     //Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
    //Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
@@ -79,19 +81,149 @@
      * @param {[Group]} - parentGroups
      * @param {string} - path
      * @param {string} - label
+     * @param {integer} - asyncTestDelay
      * @param {function} - callback
      * @param {boolean} - bypass
      */
-    function Test(parentGroups, path, label, callback, bypass){
+    function Test(parentGroups, path, label, asyncTestDelay, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
         this.path = path;
         this.label = label;
+        this.asyncTestDelay = asyncTestDelay;
         this.callback = callback;
         this.bypass = bypass;
         this.assertions = []; //contains assertions
         this.duration = 0;
+        this.befores = []; //the befores to call prior to running this test
+        this.afters = []; //the afters to call prior to running this test
+        this.context = {}; //the context used to call befores and afters
+
+        //gather befores and afters for easy traversal
+        this.parentGroups.forEach(function(g){
+            if(g.beforeEachTest){
+                //bind each before callback to this.context
+                this.befores.push(g.beforeEachTest.bind(this.context));
+            }
+            if(g.afterEachTest){
+                //bind each after callback to this.context
+                this.afters.push(g.afterEachTest.bind(this.context));
+            }
+        }, this);
     }
+
+    /**
+     * Test runner
+     * @param {function} - callback e.g. fn(err, value)
+     */
+    Test.prototype.run = function(callback){
+        var beforesIterator = iteratorFactory(this.befores),
+            aftersIterator = iteratorFactory(this.afters),
+            self = this;
+
+        //run a before
+        function runBefore(callback){
+            var before = beforesIterator.getNext();
+            if(before.length){
+                //call it asynchronously.
+                before(function(){
+                    callback();
+                });
+            }else{
+                setTimeout(function(){
+                    before();
+                    callback();
+                }, 0);
+            }
+        }
+        
+        //run befores
+        function runBefores(callback){
+            if(beforesIterator.hasNext()){
+                runBefore(function(){
+                    runBefores(callback);
+                });
+            }else{
+                callback();
+            }
+        }
+
+        //run the test
+        function runTest(callback){
+            if(self.callback.length){
+                self.callback.call(self.context, function(){
+                    if(arguments.length && typeof(arguments[0] === 'function')){
+                        arguments[0].call(self.context);
+                    }
+                    self.runAssertions();
+                    callback();
+                });
+            }else{
+                self.callback.call(self.context);
+                self.runAssertions();
+                callback();
+            }
+        }
+
+        //run an after
+        function runAfter(callback){
+            var after = aftersIterator.getNext();
+            if(after.length){
+                //call it asynchronously.
+                after(function(){
+                    callback();
+                });
+            }else{
+                setTimeout(function(){
+                    after();
+                    callback();
+                }, 0);
+            }
+        }
+        
+        //run the afters
+        function runAfters(callback){
+            if(aftersIterator.hasNext()){
+                runAfter(function(){
+                    runAfters(callback);
+                });
+            }else{
+                callback();
+            }
+        }
+        
+        //run befores, test and afters
+        setTimeout(function(){
+            runBefores(function(){
+                runTest(function(){
+                    runAfters(function(){
+                        callback();
+                    });
+                });
+            });
+        }, 0);
+    };
+
+    Test.prototype.runAssertions = function(){
+        var i,
+            len,
+            item,
+            result;
+        this.totFailed = 0;
+        for (i = 0, len = this.assertions.length; i < len; i++) {
+            item = this.assertions[i];
+            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            item.result = result.result;
+            this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
+            item.explain = result.explain;
+            //TODO(Jeff): Implement short circuit as this will not work.
+            if(config.shortCircuit && !item.result){
+                isShortCircuited = this.isShortCircuited = item.isShortCircuited = true;
+                return;
+            }
+        }
+        emit('runAfters');
+    };
 
     queueBuilder = (function(queue, throwException){
 
@@ -210,16 +342,20 @@
         //    queue.push(tst);
         //};
 
-        runner.test = function(label, callback){
+        runner.test = function(label, timeLimit, callback){
             var tst,
                 parentGroup,
-                path;
-            if(arguments.length !== 2){
-                throwException('requires 2 arguments, found ' + arguments.length);
+                path,
+                tl,
+                cb;
+            if(arguments.length < 2){
+                throwException('requires 2 or 3 arguments, found ' + arguments.length);
             }
+            tl = arguments.length === 3 && timeLimit || config.asyncTestDelay;
+            cb = arguments.length === 3 && callback || arguments[1];
             parentGroup = groupStack[groupStack.length - 1];
             path = groupStack.getPath();
-            tst = new Test(groupStack, path, label, callback, !filter('test', {group: path, test: label}));
+            tst = new Test(groupStack, path, label, tl, cb, !filter('test', {group: path, test: label}));
             queue.push(tst);
         };
 
@@ -254,9 +390,9 @@
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
 
-    function deepCopy(arg){
-        return JSON.parse(JSON.stringify(arg));
-    }
+    //function deepCopy(arg){
+    //    return JSON.parse(JSON.stringify(arg));
+    //}
 
     //function combine(){
     //    var result = {},
@@ -801,14 +937,13 @@
     }
 
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
-        queueIterator.get().assertions.push({
+        testsIterator.get().assertions.push({
             assertion: assertion, 
             assertionLabel: assertionLabel, 
             value: value, 
             expectation: expectation, 
             stackTrace: stackTrace
         });
-        //queue.totAssertions++;
     }
 
     function setStackTraceProperty(){
@@ -835,9 +970,7 @@
         if(arguments.length < 2){
             throwException('Assertion "equal" requires 2 arguments, found ' + arguments.length);
         }
-        //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-        pushOntoAssertions(assertEqual, label, queueIterator.get().isAsync ? deepCopy(value) : value,
-                queueIterator.get().isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
+        pushOntoAssertions(assertEqual, label, value, expectation, stackTraceFromError());
     }
 
     function noteIsTrueAssertion(value, label){
@@ -858,9 +991,7 @@
         if(arguments.length < 2){
             throwException('Assertion "notEqual" requires 2 arguments, found ' + arguments.length);
         }
-        //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-        pushOntoAssertions(assertNotEqual, label, queueIterator.get().isAsync ? deepCopy(value) : value,
-                queueIterator.get().isAsync ? deepCopy(expectation) : expectation, stackTraceFromError());
+        pushOntoAssertions(assertNotEqual, label, value, expectation, stackTraceFromError());
     }
 
     function noteIsFalseAssertion(value, label){
@@ -1104,7 +1235,7 @@
                 getCalledCount = function(){
                     return xCalled;
                 },
-                //If n is within bounds returns the context used on the nth
+                //If n is within bounds returns the after used on the nth
                 //call to the wrapped function, otherwise returns undefined.
                 getContext = function(n){
                     if(n >= 0 && n < xCalled){
@@ -1364,7 +1495,7 @@
             if(subscribers.hasOwnProperty(topic)){
                 for(token in subscribers[topic] ){
                     if(subscribers[topic].hasOwnProperty(token)){
-                        if(data){
+                        if(arguments.length > 1){
                             subscribers[topic][token](data);
                         } else{
                             subscribers[topic][token]();
@@ -1510,138 +1641,158 @@
 
     //Initialize.
     on('start', function(){
-        //Overall passed/failed.
-        queue.result = true;
-        //Total failed groups.
-        //queue.totGroupsFailed = 0;
-        //Total failed tests.
-        queue.totTestsFailed = 0;
-        //Total failed assertions.
-        //queue.totAssertionsFailed = 0;
-        currentQueueIndex = -1;
-        queueIterator = iteratorFactory(queue);
-        if(queueIterator.hasNext()){
-            emit('runQueue');
+        tests = queue.filter(function(item){
+            return item instanceof Test;
+        });
+        tests.result = true;
+        tests.totTestsFailed = 0;
+        if(tests.length){
+            emit('runQueue', function(){
+                emit('end');
+            });
         }else{
             //TODO(Jeff): this should throw with a message that there are no tests to run.
             emit('end');
         }
     });
 
-    //Walks the queue and processes each element according to its class type.
-    on('runQueue', function(){
-        var queueItem = queueIterator.getNext();
-        if(!queueItem){
-            emit('end');
-        }else{
-            if(queueItem instanceof Group){
-                emit('runQueue');
+    on('runQueue', function(topic, callback){
+        testsIterator = iteratorFactory(tests);
+
+        function runTest(test, callback){
+            test.run(function(){
+                callback();
+            });
+        }
+
+        function runTests(callback){
+            if(testsIterator.hasNext()){
+                runTest(testsIterator.getNext(), function(){
+                    runTests(callback);
+                });
             }else{
-                emit('runBefores');
+                callback();
             }
         }
+
+        runTests(function(){
+            callback();
+        });
     });
 
-    ////Runs a single group.
-    //on('runGroup', function(){
-    //    emit('runQueue');
+    ////Walks the queue and processes each element according to its class type.
+    //on('runQueue', function(){
+    //    var queueItem = queueIterator.getNext();
+    //    if(!queueItem){
+    //        emit('end');
+    //    }else{
+    //        if(queueItem instanceof Group){
+    //            emit('runQueue');
+    //        }else{
+    //            emit('runBefores');
+    //        }
+    //    }
     //});
 
-    //Walk through the test's ancestor groups and run their befores.
-    on('runBefores', function(){
-        var test = queueIterator.get();
-        //Create an iterator for this test's parent groups
-        groupsIterator = iteratorFactory(test.parentGroups);
-        //and assign it aa property which will be used as the context for calling the befores
-        groupsIterator.context = {};
-        //and for each parent, if it has a before call it.
-        emit('runBefore');
-    });
+    //////Runs a single group.
+    ////on('runGroup', function(){
+    ////    emit('runQueue');
+    ////});
 
-    //Runs a grpup's before.
-    on('runBefore', function(){
-        var ancestorGroup = groupsIterator.getNext();
-        if(ancestorGroup){
-            if(ancestorGroup.beforeEachTest && ancestorGroup.beforeEachTest.length){
-                ancestorGroup.beforeEachTest.call(groupsIterator.context, beforeDone);
-            }else if(ancestorGroup.beforeEachTest){
-                ancestorGroup.beforeEachTest.call(groupsIterator.context);
-                emit('runBefore');
-            }else{
-                emit('runBefore');
-            }
-        }else{
-            emit('runTest');
-        }
-    });
+    ////Walk through the test's ancestor groups and run their befores.
+    //on('runBefores', function(){
+    //    var test = queueIterator.get();
+    //    //Create an iterator for this test's parent groups
+    //    groupsIterator = iteratorFactory(test.parentGroups);
+    //    //and assign it aa property which will be used as the context for calling the befores
+    //    groupsIterator.context = {};
+    //    //and for each parent, if it has a before call it.
+    //    emit('runBefore');
+    //});
 
-    //Run the test.
-    on('runTest', function(){
-        var test = queueIterator.get();
-        if(test.callback.length){
-            test.callback.call(groupsIterator.context, testDone.bind(groupsIterator.context));
-        }else{
-            test.callback.call(groupsIterator.context);
-            emit('runAssertions');
-        }
-    });
+    ////Runs a grpup's before.
+    //on('runBefore', function(){
+    //    var ancestorGroup = groupsIterator.getNext();
+    //    if(ancestorGroup){
+    //        if(ancestorGroup.beforeEachTest && ancestorGroup.beforeEachTest.length){
+    //            ancestorGroup.beforeEachTest.call(groupsIterator.context, beforeDone);
+    //        }else if(ancestorGroup.beforeEachTest){
+    //            ancestorGroup.beforeEachTest.call(groupsIterator.context);
+    //            emit('runBefore');
+    //        }else{
+    //            emit('runBefore');
+    //        }
+    //    }else{
+    //        emit('runTest');
+    //    }
+    //});
 
-    on('runAssertions', function(){
-        var test = queueIterator.get(),
-            i,
-            len,
-            item,
-            result;
-        test.totFailed = 0;
-        for (i = 0, len = test.assertions.length; i < len; i++) {
-            item = test.assertions[i];
-            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-            item.result = result.result;
-            test.totFailed = item.result ? test.totFailed : test.totFailed += 1;
-            item.explain = result.explain;
-            //TODO(Jeff): Implement short circuit as this will not work.
-            if(config.shortCircuit && !item.result){
-                isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
-                return;
-            }
-        }
-        emit('runAfters');
-    });
+    ////Run the test.
+    //on('runTest', function(){
+    //    var test = queueIterator.get();
+    //    if(test.callback.length){
+    //        test.callback.call(groupsIterator.context, testDone.bind(groupsIterator.context));
+    //    }else{
+    //        test.callback.call(groupsIterator.context);
+    //        emit('runAssertions');
+    //    }
+    //});
 
-    //Walk through the test's ancestor groups and run their afters.
-    on('runAfters', function(){
-        var test = queueIterator.get();
-        //Create an iterator for this test's parent groups
-        groupsIterator = iteratorFactory(test.parentGroups);
-        //and assign it aa property which will be used as the context for calling the afters
-        groupsIterator.context = {};
-        //and for each parent, if it has an after call it.
-        emit('runAfter');
-    });
+    //on('runAssertions', function(){
+    //    var test = queueIterator.get(),
+    //        i,
+    //        len,
+    //        item,
+    //        result;
+    //    test.totFailed = 0;
+    //    for (i = 0, len = test.assertions.length; i < len; i++) {
+    //        item = test.assertions[i];
+    //        result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+    //        item.result = result.result;
+    //        test.totFailed = item.result ? test.totFailed : test.totFailed += 1;
+    //        item.explain = result.explain;
+    //        //TODO(Jeff): Implement short circuit as this will not work.
+    //        if(config.shortCircuit && !item.result){
+    //            isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
+    //            return;
+    //        }
+    //    }
+    //    emit('runAfters');
+    //});
 
-    //Run a group's after
-    on('runAfter', function(){
-        var ancestorGroup = groupsIterator.getNext();
-        if(ancestorGroup){
-            if(ancestorGroup.afterEachTest && ancestorGroup.afterEachTest.length){
-                ancestorGroup.afterEachTest.call(groupsIterator.context, afterDone);
-            }else if(ancestorGroup.afterEachTest){
-                ancestorGroup.afterEachTest.call(groupsIterator.context);
-                emit('runAfter');
-            }else{
-                emit('runAfter');
-            }
-        }else{
-            emit('runQueue');
-        }
-    });
+    ////Walk through the test's ancestor groups and run their afters.
+    //on('runAfters', function(){
+    //    var test = queueIterator.get();
+    //    //Create an iterator for this test's parent groups
+    //    groupsIterator = iteratorFactory(test.parentGroups);
+    //    //and assign it aa property which will be used as the context for calling the afters
+    //    groupsIterator.context = {};
+    //    //and for each parent, if it has an after call it.
+    //    emit('runAfter');
+    //});
+
+    ////Run a group's after
+    //on('runAfter', function(){
+    //    var ancestorGroup = groupsIterator.getNext();
+    //    if(ancestorGroup){
+    //        if(ancestorGroup.afterEachTest && ancestorGroup.afterEachTest.length){
+    //            ancestorGroup.afterEachTest.call(groupsIterator.context, afterDone);
+    //        }else if(ancestorGroup.afterEachTest){
+    //            ancestorGroup.afterEachTest.call(groupsIterator.context);
+    //            emit('runAfter');
+    //        }else{
+    //            emit('runAfter');
+    //        }
+    //    }else{
+    //        emit('runQueue');
+    //    }
+    //});
 
     //All groups ran.
     on('end', function(){
-        var tests;
-        //Map the queue to just tests.
-        tests = queue.filter(function(item){
-            return item instanceof Test;
+        window.tests = tests;
+        window.failedTests = tests.filter(function(t){
+            return t.totFailed;
         });
         //Record how many tests failed.
         tests.totTestsFailed = tests.reduce(function(prevValue, t){
