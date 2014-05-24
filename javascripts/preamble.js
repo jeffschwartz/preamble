@@ -1673,7 +1673,7 @@
         tests.result = true;
         tests.totTestsFailed = 0;
         if(tests.length){
-            emit('runQueue', function(){
+            emit('runTests', function(){
                 emit('end');
             });
         }else{
@@ -1682,7 +1682,7 @@
         }
     });
 
-    on('runQueue', function(topic, callback){
+    on('runTests', function(topic, callback){
         testsIterator = iteratorFactory(tests);
 
         function runTest(test, callback){
@@ -1706,115 +1706,6 @@
         });
     });
 
-    ////Walks the queue and processes each element according to its class type.
-    //on('runQueue', function(){
-    //    var queueItem = queueIterator.getNext();
-    //    if(!queueItem){
-    //        emit('end');
-    //    }else{
-    //        if(queueItem instanceof Group){
-    //            emit('runQueue');
-    //        }else{
-    //            emit('runBefores');
-    //        }
-    //    }
-    //});
-
-    //////Runs a single group.
-    ////on('runGroup', function(){
-    ////    emit('runQueue');
-    ////});
-
-    ////Walk through the test's ancestor groups and run their befores.
-    //on('runBefores', function(){
-    //    var test = queueIterator.get();
-    //    //Create an iterator for this test's parent groups
-    //    groupsIterator = iteratorFactory(test.parentGroups);
-    //    //and assign it aa property which will be used as the context for calling the befores
-    //    groupsIterator.context = {};
-    //    //and for each parent, if it has a before call it.
-    //    emit('runBefore');
-    //});
-
-    ////Runs a grpup's before.
-    //on('runBefore', function(){
-    //    var ancestorGroup = groupsIterator.getNext();
-    //    if(ancestorGroup){
-    //        if(ancestorGroup.beforeEachTest && ancestorGroup.beforeEachTest.length){
-    //            ancestorGroup.beforeEachTest.call(groupsIterator.context, beforeDone);
-    //        }else if(ancestorGroup.beforeEachTest){
-    //            ancestorGroup.beforeEachTest.call(groupsIterator.context);
-    //            emit('runBefore');
-    //        }else{
-    //            emit('runBefore');
-    //        }
-    //    }else{
-    //        emit('runTest');
-    //    }
-    //});
-
-    ////Run the test.
-    //on('runTest', function(){
-    //    var test = queueIterator.get();
-    //    if(test.callback.length){
-    //        test.callback.call(groupsIterator.context, testDone.bind(groupsIterator.context));
-    //    }else{
-    //        test.callback.call(groupsIterator.context);
-    //        emit('runAssertions');
-    //    }
-    //});
-
-    //on('runAssertions', function(){
-    //    var test = queueIterator.get(),
-    //        i,
-    //        len,
-    //        item,
-    //        result;
-    //    test.totFailed = 0;
-    //    for (i = 0, len = test.assertions.length; i < len; i++) {
-    //        item = test.assertions[i];
-    //        result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-    //        item.result = result.result;
-    //        test.totFailed = item.result ? test.totFailed : test.totFailed += 1;
-    //        item.explain = result.explain;
-    //        //TODO(Jeff): Implement short circuit as this will not work.
-    //        if(config.shortCircuit && !item.result){
-    //            isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
-    //            return;
-    //        }
-    //    }
-    //    emit('runAfters');
-    //});
-
-    ////Walk through the test's ancestor groups and run their afters.
-    //on('runAfters', function(){
-    //    var test = queueIterator.get();
-    //    //Create an iterator for this test's parent groups
-    //    groupsIterator = iteratorFactory(test.parentGroups);
-    //    //and assign it aa property which will be used as the context for calling the afters
-    //    groupsIterator.context = {};
-    //    //and for each parent, if it has an after call it.
-    //    emit('runAfter');
-    //});
-
-    ////Run a group's after
-    //on('runAfter', function(){
-    //    var ancestorGroup = groupsIterator.getNext();
-    //    if(ancestorGroup){
-    //        if(ancestorGroup.afterEachTest && ancestorGroup.afterEachTest.length){
-    //            ancestorGroup.afterEachTest.call(groupsIterator.context, afterDone);
-    //        }else if(ancestorGroup.afterEachTest){
-    //            ancestorGroup.afterEachTest.call(groupsIterator.context);
-    //            emit('runAfter');
-    //        }else{
-    //            emit('runAfter');
-    //        }
-    //    }else{
-    //        emit('runQueue');
-    //    }
-    //});
-
-    //All groups ran.
     on('end', function(){
         window.tests = tests;
         window.failedTests = tests.filter(function(t){
