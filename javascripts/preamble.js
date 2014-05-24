@@ -88,7 +88,7 @@
     function Test(parentGroups, path, label, asyncTestDelay, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
-        this.path = path;
+        this.path = path + '/' + label;
         this.label = label;
         this.asyncTestDelay = asyncTestDelay;
         this.callback = callback;
@@ -192,16 +192,42 @@
             }
         }
         
-        //run befores, test and afters
-        setTimeout(function(){
-            runBefores(function(){
-                runTest(function(){
-                    runAfters(function(){
-                        callback();
+        (function(test){
+            //Set a timer for the test and fail it if it isn't completed in time.
+            //Note to self: Since this can fire after the test it is timing has 
+            //completed it is possible that "self" no longer refers to the original
+            //test. To insure that when this fires it always refers to the test
+            //it was timing, the test is captured via closure uaing the module
+            //pattern and passing "self" as an argument.
+            setTimeout(function(){
+                if(!test.completed){
+                    console.log('"' + test.path + '" timed out at:', Date.now());
+                    //mark test failed
+                    test.timedOut = true;
+                    callback();
+                }
+            }, self.asyncTestDelay);
+
+            //Run the before callbacks, test callback and after callbacks.
+            //Note to self: Since this can fire after the test has already timed 
+            //out and failed, it is possible that "self" no longer refers to the 
+            //original test. To insure that when this fires it always refers to 
+            //the test it was running, the test is captured via closure uaing the 
+            //module pattern and passing "self" as an argument.
+            setTimeout(function(){
+                runBefores(function(){
+                    runTest(function(){
+                        runAfters(function(){
+                            if(!test.timedOut){
+                                console.log('"' + test.path + '" completed at:', Date.now());
+                                test.completed = true;
+                                callback();
+                            }
+                        });
                     });
                 });
-            });
-        }, 0);
+            }, 0);
+        }(self));
     };
 
     Test.prototype.runAssertions = function(){
@@ -217,10 +243,10 @@
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             item.explain = result.explain;
             //TODO(Jeff): Implement short circuit as this will not work.
-            if(config.shortCircuit && !item.result){
-                isShortCircuited = this.isShortCircuited = item.isShortCircuited = true;
-                return;
-            }
+            //if(config.shortCircuit && !item.result){
+            //    isShortCircuited = this.isShortCircuited = item.isShortCircuited = true;
+            //    return;
+            //}
         }
         emit('runAfters');
     };
@@ -1792,11 +1818,11 @@
     on('end', function(){
         window.tests = tests;
         window.failedTests = tests.filter(function(t){
-            return t.totFailed;
+            return t.totFailed || t.timedOut;
         });
         //Record how many tests failed.
         tests.totTestsFailed = tests.reduce(function(prevValue, t){
-            return t.totFailed ? prevValue + 1 : prevValue;
+            return t.timedOut || t.totFailed ? prevValue + 1 : prevValue;
         }, 0);
         tests.result = tests.totTestsFailed === 0;
         queue.end = Date.now();
