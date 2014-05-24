@@ -14,18 +14,42 @@ configure({
     asyncTestDelay: 500
 });
 
-when('A long running test', function(){
+/**
+ * This test will take 1000 miliseconds to run but the test will
+ * time out and fail because asyncTestDelay is set above to 500. 
+ */
+when('A long running test that fails to complete on time', function(){
     var count = 0;
-    then('will time out and fail', function(done){
+    then('will time out and marked as having failed', function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
-                equal(count, 600);
+                equal(count, 100);
             });
-        }, 9000);
+        }, 1000);
     });
 });
 
+/**
+ * This is the same test as above but here the tests sets its
+ * time out interval to 1010 miliseconds to prevent it from 
+ * timing out and failing.
+ * This is a very good way to fine tune individual test but...
+ * IMPORTANT: you can override asyncTestDelay in your in-line
+ * configuration or in your configuration file and it will
+ * apply to all tests.
+ */
+when('A long running test can change how long its timeout interval is', function(){
+    var count = 0;
+    then('so it will not time out and fail.', 1010, function(done){
+        setTimeout(function(){
+            count = 100;
+            done(function(){
+                equal(count, 100);
+            });
+        }, 1000);
+    });
+});
 
 when('A simple test', function(){
     then('of equality', function(){
