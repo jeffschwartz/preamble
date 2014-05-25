@@ -9,16 +9,15 @@
         //Merged configuration options.
         config = {},
         queue=[],
-        //Can only be true if config.shortCircuit is true and an assertion has failed.
-        isShortCircuited = false,
-        assert,
+        isShortCircuited = false, //Can only be true if config.shortCircuit is true and an assertion has failed.
         prevQueueCount = 0,
         queueStableCount = 0,
         queueStableInterval = 1,
+        reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
+        assert,
         intervalId,
         runtimeFilter,
         stackTraceProperty,
-        reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
         queueBuilder,
         tests,
         testsIterator;
