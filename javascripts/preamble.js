@@ -23,7 +23,7 @@
         testsIterator;
 
     //Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-   //Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
+    //Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
     //TODO(Jeff): remove polyfil once phantomjs supports bind!
     if (!Function.prototype.bind) {
         Function.prototype.bind = function (oThis) {
