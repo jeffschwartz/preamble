@@ -14,6 +14,66 @@ configure({
     asyncTestDelay: 500
 });
 
+when('A long running asynchronous before process that fails to complete on time', function(){
+    beforeEach(function(done){
+        var self = this;
+        setTimeout(function(){
+            self.count = 100;
+            done();
+        }, 1000);
+    });
+    then('will time out and the test will be marked as having failed', function(){
+        equal(this.count, 100);
+    });
+});
+
+when('A test can configure long running asynchronous before processes not to time out and fail', function(){
+    beforeEach(function(done){
+        var self = this;
+        setTimeout(function(){
+            self.count = 100;
+            done();
+        }, 1000);
+    });
+    then('by passing a time out interval', 1010, function(){
+        equal(this.count, 100);
+    });
+});
+
+when('A long running asynchronous after process that fails to complete on time', function(){
+    beforeEach(function(){
+        this.count = 100;
+    });
+    afterEach(function(done){
+        setTimeout(function(){
+            done();
+        }, 1000);
+    });
+    then('will time out and the test will be marked as having failed', function(){
+        equal(this.count, 100);
+    });
+    then('count should be reset to 0', function(){
+        equal(this.count, 1010101010101010100);
+    });
+});
+
+when('A test can configure long running asynchronous after processes not to time out and fail', function(){
+    beforeEach(function(){
+        this.count = 100;
+    });
+    afterEach(function(done){
+        setTimeout(function(){
+            done();
+        }, 1000);
+    });
+    then('will time out and the test will be marked as having failed', 1010, function(){
+        equal(this.count, 100);
+    });
+    then('count should be reset to 0', 1010, function(){
+        equal(this.count, 100);
+    });
+});
+
 /**
  * This test will take 1000 miliseconds to run but the test will
  * time out and fail because asyncTestDelay is set above to 500. 
@@ -70,7 +130,7 @@ when('Nested specs', function(){
         });
         then('isCrazy is true', function(){
             isTrue(typeof(this.isCrazy) === 'undefined');
-        })
+        });
     });
     when('Nested spec 2', function(){
         beforeEach(function(){
