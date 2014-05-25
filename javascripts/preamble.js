@@ -11,23 +11,14 @@
         queue=[],
         //Can only be true if config.shortCircuit is true and an assertion has failed.
         isShortCircuited = false,
-        currentTestHash,
         assert,
         prevQueueCount = 0,
         queueStableCount = 0,
         queueStableInterval = 1,
         intervalId,
-        currentTestStep,
-        //Run-time filter
         runtimeFilter,
-        //The stack trace property used by the browser.
         stackTraceProperty,
-        //RegEx for getting file from stack trace.
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
-        currentQueueIndex,
-        currentTestIndex,
-        queueIterator,
-        groupsIterator,
         queueBuilder,
         tests,
         testsIterator;
@@ -88,7 +79,7 @@
     function Test(parentGroups, path, label, asyncTestDelay, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
-        this.path = path;
+        this.path = path + '/' + label;
         this.label = label;
         this.asyncTestDelay = asyncTestDelay;
         this.callback = callback;
@@ -192,16 +183,42 @@
             }
         }
         
-        //run befores, test and afters
-        setTimeout(function(){
-            runBefores(function(){
-                runTest(function(){
-                    runAfters(function(){
-                        callback();
+        (function(test){
+            //Set a timer for the test and fail it if it isn't completed in time.
+            //Note to self: Since this can fire after the test it is timing has 
+            //completed it is possible that "self" no longer refers to the original
+            //test. To insure that when this fires it always refers to the test
+            //it was timing, the test is captured via closure uaing the module
+            //pattern and passing "self" as an argument.
+            setTimeout(function(){
+                if(!test.completed){
+                    console.log('"' + test.path + '" timed out at:', Date.now());
+                    //mark test failed
+                    test.timedOut = true;
+                    callback();
+                }
+            }, self.asyncTestDelay);
+
+            //Run the before callbacks, test callback and after callbacks.
+            //Note to self: Since this can fire after the test has already timed 
+            //out and failed, it is possible that "self" no longer refers to the 
+            //original test. To insure that when this fires it always refers to 
+            //the test it was running, the test is captured via closure uaing the 
+            //module pattern and passing "self" as an argument.
+            setTimeout(function(){
+                runBefores(function(){
+                    runTest(function(){
+                        runAfters(function(){
+                            if(!test.timedOut){
+                                console.log('"' + test.path + '" completed at:', Date.now());
+                                test.completed = true;
+                                callback();
+                            }
+                        });
                     });
                 });
-            });
-        }, 0);
+            }, 0);
+        }(self));
     };
 
     Test.prototype.runAssertions = function(){
@@ -217,10 +234,10 @@
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             item.explain = result.explain;
             //TODO(Jeff): Implement short circuit as this will not work.
-            if(config.shortCircuit && !item.result){
-                isShortCircuited = this.isShortCircuited = item.isShortCircuited = true;
-                return;
-            }
+            //if(config.shortCircuit && !item.result){
+            //    isShortCircuited = this.isShortCircuited = item.isShortCircuited = true;
+            //    return;
+            //}
         }
         emit('runAfters');
     };
@@ -262,21 +279,6 @@
             groupStack.pop();
         };
 
-        //runner.beforeEachTest = function(callback){
-        //    var parentGroup = groupStack[groupStack.length - 1];
-        //    parentGroup.beforeEachTest = callback;
-        //};
-
-        //runner.asyncBeforeEachTest = function(callback){
-        //    var parentGroup = groupStack[groupStack.length - 1];
-        //    if(arguments.length === 2){
-        //        parentGroup.asyncBeforeTestInterval = arguments[0];
-        //        parentGroup.asyncBeforeEachTest = arguments[1];
-        //    }else{
-        //        parentGroup.asyncBeforeEachTest = callback;
-        //    }
-        //};
-
         runner.beforeEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
             //if(arguments.length === 2){
@@ -288,21 +290,6 @@
             parentGroup.beforeEachTest = callback;
         };
 
-        //runner.afterEachTest = function(callback){
-        //    var parentGroup = groupStack[groupStack.length - 1];
-        //    parentGroup.afterEachTest = callback;
-        //};
-
-        //runner.asyncAfterEachTest = function(callback){
-        //    var parentGroup = groupStack[groupStack.length - 1];
-        //    if(arguments.length === 2){
-        //        parentGroup.asyncAfterTestInterval = arguments[0];
-        //        parentGroup.asyncAfterEachTest = arguments[1];
-        //    }else{
-        //        parentGroup.asyncAfterEachTest = callback;
-        //    }
-        //};
-        
         runner.afterEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
             //if(arguments.length === 2){
@@ -313,34 +300,6 @@
             //}
             parentGroup.afterEachTest = callback;
         };
-
-        //runner.test = function(label, callback){
-        //    var tst,
-        //        path;
-        //    if(arguments.length !== 2){
-        //        throwException('requires 2 arguments, found ' + arguments.length);
-        //    }
-        //    path = groupStack.getPath();
-        //    tst = new Test(groupStack, path, label, callback, false, null, !filter('test', {group: path, test: label}));
-        //    queue.push(tst);
-        //};
-
-        //runner.asyncTest = function(label){
-        //    var tst,
-        //        parentGroup,
-        //        path,
-        //        callback,
-        //        interval;
-        //    if(arguments.length < 2){
-        //        throwException('requires 2 or 3 arguments, found ' + arguments.length);
-        //    }
-        //    callback = arguments.length === 3 ? arguments[2] : arguments[1];
-        //    interval = arguments.length === 3 ? arguments[1] : config.asyncTestDelay;
-        //    parentGroup = groupStack[groupStack.length - 1];
-        //    path = groupStack.getPath();
-        //    tst = new Test(groupStack, path, label, callback, true, interval, !filter('test', {group: path, test: label}));
-        //    queue.push(tst);
-        //};
 
         runner.test = function(label, timeLimit, callback){
             var tst,
@@ -389,24 +348,6 @@
         var pluralizer = arguments === 2 ? arguments[1] : 's';
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
-
-    //function deepCopy(arg){
-    //    return JSON.parse(JSON.stringify(arg));
-    //}
-
-    //function combine(){
-    //    var result = {},
-    //        sources = [].slice.call(arguments, 0);
-    //    sources.forEach(function(source){
-    //        var prop;
-    //        for(prop in source){
-    //            if(source.hasOwnProperty(prop)){
-    //                result[prop] = source[prop];
-    //            }
-    //        }
-    //    });
-    //    return result;
-    //}
 
     function merge(){
         var result = {},
@@ -914,28 +855,6 @@
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
 
-    function runAssertions(test){
-        var assertionsQueue = test.assertions,
-            i,
-            len,
-            item,
-            result;
-        test.totFailed = 0;
-        //Iterate over the assertionsQueue, running each item's assertion.
-        for (i = 0, len = assertionsQueue.length; i < len; i++) {
-            item = assertionsQueue[i];
-            //item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-            item.result = result.result;
-            item.explain = result.explain;
-            //item.displayAssertionName = item.assertion._desc;
-            if(config.shortCircuit && !item.result){
-                isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
-                return;
-            }
-        }
-    }
-
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         testsIterator.get().assertions.push({
             assertion: assertion, 
@@ -1007,200 +926,6 @@
         }
         pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
-
-    ////Starts the timer for an async test. When the timeout is triggered it calls
-    ////callback allowing client to run their assertions. When the callback returns
-    ////the processing of the next test is set by incrementing testQueueIndex and
-    ////runTests is called to continue processing the testsQueue.
-    //function whenAsyncDone(callback){
-    //    setTimeout(function(){
-    //        callback();
-    //        currentTestStep++;
-    //        runTest();
-    //    }, queueIterator.get().asyncInterval || config.asyncTestDelay);
-    //}
-
-    ////Runs the current test asynchronously which will call whenAsyncDone (see above).
-    //function runAsyncTest(){
-    //    var rv = queue[currentQueueIndex].beforeEachReturnedValue || {};
-    //    if(config.windowGlobals){
-    //        queueIterator.get().testCallback.call(rv);
-    //    }else{
-    //        queueIterator.get().testCallback.call(rv, assert);
-    //    }
-    //}
-
-    ////Runs the current test synchronously. When the callback returns the
-    ////processing of the next test is set by incrementing testQueueIndex and
-    ////runTests is called to continue processing the testsQueue.
-    //function runSyncTest(){
-    //    var rv = queue[currentQueueIndex].beforeEachReturnedValue || {};
-    //    if(config.windowGlobals){
-    //        queueIterator.get().testCallback.call(rv);
-    //    }else{
-    //        queueIterator.get().testCallback.call(rv, assert);
-    //    }
-    //    currentTestStep++;
-    //    runTest();
-    //}
-
-    ////Runs setup synchronously for each test.
-    //function runBeforeEachSync(){
-    //    var value = queue[currentQueueIndex].beforeEachReturnedValue = {};
-    //    queue[currentQueueIndex].beforeEachTest.call(value);
-    //    currentTestStep++;
-    //    runTest();
-    //}
-
-    ////Runs setup asynchronously for each test.
-    //function runBeforeEachAsync(){
-    //    var value = queue[currentQueueIndex].beforeEachReturnedValue = {};
-    //    queue[currentQueueIndex].asyncBeforeEachTest.call(value);
-    //    setTimeout(function(){
-    //        currentTestStep++;
-    //        runTest();
-    //    }, queueIterator.get().asyncBeforeTestInterval || config.asyncBeforeAfterTestDelay);
-    //}
-
-    ////Runs tear down synchronously for each test.
-    //function runAfterEachSync(){
-    //    queue[currentQueueIndex].afterEachTest();
-    //    currentTestStep++;
-    //    runTest();
-    //}
-
-    ////Runs tear down asynchronously for each test.
-    //function runAfterEachAsync(){
-    //    queue[currentQueueIndex].asyncAfterEachTest();
-    //    setTimeout(function(){
-    //        currentTestStep++;
-    //        runTest();
-    //    }, queueIterator.get().asyncAfterTestInterval || config.asyncBeforeAfterTestDelay);
-    //}
-
-    ////Runs the 5 steps of a test's life cycle: 1. before each test, 2. test, 3. after each test,
-    ////4. run assertions, 5. setup next test. The current test is the one pointed to by currentTestHash.
-    //function runTest(){
-    //    switch(currentTestStep){
-    //        case 0: //Runs beforeEach.
-    //            queueIterator.get().start = Date.now();
-    //            if(queue[currentQueueIndex].beforeEachTest){
-    //                runBeforeEachSync();
-    //            }else if(queue[currentQueueIndex].asyncBeforeEachTest){
-    //                runBeforeEachAsync();
-    //            }else{
-    //                currentTestStep++;
-    //                runTest();
-    //            }
-    //            break;
-    //        case 1: //Runs the test.
-    //            if(queueIterator.get().isAsync){
-    //                runAsyncTest();
-    //            }else{
-    //                runSyncTest();
-    //            }
-    //            break;
-    //        case 2: //Runs afterEach.
-    //            if(queue[currentQueueIndex].afterEachTest){
-    //                runAfterEachSync();
-    //            }else if(queue[currentQueueIndex].asyncAfterEachTest){
-    //                runAfterEachAsync();
-    //            }else{
-    //                currentTestStep++;
-    //                runTest();
-    //            }
-    //            break;
-    //        case 3: //Run assertions.
-    //            runAssertions(queueIterator.get());
-    //            queueIterator.get().end = Date.now();
-    //            currentTestStep++;
-    //            runTest();
-    //            break;
-    //        case 4: //Sets up the processing of the next test to be run.
-    //            emit('runTest');
-    //            break;
-    //    }
-    //}
-
-    ////Note runBeforeEach.
-    //function beforeEachTest(callback){
-    //    var cgqi = queue[queue.length - 1];
-    //    cgqi.beforeEachTest = callback;
-    //}
-
-    ////Note asyncRunBeforeEach.
-    //function asyncBeforeEachTest(callback){
-    //    var cgqi = queue[queue.length - 1];
-    //    if(arguments.length === 2){
-    //        cgqi.asyncBeforeTestInterval = arguments[0];
-    //        cgqi.asyncBeforeEachTest = arguments[1];
-    //    }else{
-    //        cgqi.asyncBeforeEachTest = callback;
-    //    }
-    //}
-
-    ////Note runAfterEach.
-    //function afterEachTest(callback){
-    //    var cgqi = queue[queue.length - 1];
-    //    cgqi.afterEachTest = callback;
-    //}
-
-    ////Note asyncRunAfterEach.
-    //function asyncAfterEachTest(callback){
-    //    var cgqi = queue[queue.length - 1];
-    //    if(arguments.length === 2){
-    //        cgqi.asyncAfterTestInterval = arguments[0];
-    //        cgqi.asyncAfterEachTest = arguments[1];
-    //    }else{
-    //        cgqi.asyncAfterEachTest = callback;
-    //    }
-    //}
-
-    ////Provides closure and a label to a group of tests.
-    //function group(label, callback){
-    //    var start,
-    //        end;
-    //    if(arguments.length !== 2){
-    //        throwException('group requires 2 arguments, found ' + arguments.length);
-    //    }
-    //    if(filter('group', {group: label})){
-    //        queue.push({groupLabel: label, callback: callback, tests: []});
-    //        start = Date.now();
-    //        callback(); //will call function test/asyncTest.
-    //        end = Date.now();
-    //        queue[queue.length - 1].duration = end - start;
-    //    }
-    //}
-
-    ////Provides closure and a label to a synchronous test
-    ////and registers its callback in its testsQueue item.
-    //function test(label, callback){
-    //    var cgqi = queue[queue.length - 1];
-    //    if(arguments.length !== 2){
-    //        throwException('test requires 2 arguments, found ' + arguments.length);
-    //    }
-    //    if(filter('test', {group: cgqi.groupLabel, test: label})){
-    //        cgqi.tests.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false, assertions: []}));
-    //        queue.totTests++;
-    //    }
-    //}
-
-    ////Provides closure and a label to an asynchronous test
-    ////and registers its callback in its testsQueue item.
-    ////Form: asyncTest(label[, interval], callback).
-    //function asyncTest(label){
-    //    var cgqi = queue[queue.length - 1];
-    //    if(arguments.length < 2){
-    //        throwException('asynTest requires 2 or 3 arguments, found ' + arguments.length);
-    //    }
-    //    if(filter('test', {group: cgqi.groupLabel, test: label})){
-    //        cgqi.tests.push(combine(currentTestHash, {
-    //            testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1],
-    //            isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay, assertions: []}));
-    //        queue.totTests++;
-
-    //    }
-    //}
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
@@ -1544,38 +1269,6 @@
         pubsub.emit(topic, data);
     }
 
-    ////Returns the duration for a group by reducing it's 'tests' durations.
-    //function duration(collection) {
-    //    return collection.reduce(function(prevValue, curValue){
-    //        return prevValue + curValue.duration;
-    //    }, 0);
-    //}
-
-    //Flattens queue to an array of results that can be easily reported.
-    //function mapGroupsToResults(){
-    //    var results = [];
-    //    queue.forEach(function(group){
-    //        group.tests.forEach(function(test){
-    //            test.assertions.forEach(function(assertion){
-    //                results.push({
-    //                    groupLabel: group.groupLabel,
-    //                    groupDuration: group.duration,
-    //                    groupResult: group.result,
-    //                    testLabel: test.testLabel,
-    //                    testDuration: test.duration,
-    //                    testResult: test.result,
-    //                    result: assertion.result,
-    //                    explain: assertion.explain,
-    //                    assertionLabel: assertion.assertionLabel,
-    //                    //displayAssertionName: assertion.displayAssertionName,
-    //                    stackTrace: assertion.stackTrace
-    //                });
-    //            });
-    //        });
-    //    });
-    //    return results;
-    //}
-
     function iteratorFactory(argArray){
         var currentIndex = -1;
         if(!Array.isArray(argArray)){
@@ -1623,22 +1316,6 @@
         return iterator;
     }
 
-    function beforeDone(){
-        emit('runBefore');
-    }
-
-    function testDone(){
-        /* jshint validthis: true */
-        if(arguments.length && typeof(arguments[0] === 'function')){
-            arguments[0].call(this);
-        }
-        emit('runAssertions');
-    }
-
-    function afterDone(){
-        emit('runAfter');
-    }
-
     //Initialize.
     on('start', function(){
         tests = queue.filter(function(item){
@@ -1647,7 +1324,7 @@
         tests.result = true;
         tests.totTestsFailed = 0;
         if(tests.length){
-            emit('runQueue', function(){
+            emit('runTests', function(){
                 emit('end');
             });
         }else{
@@ -1656,7 +1333,7 @@
         }
     });
 
-    on('runQueue', function(topic, callback){
+    on('runTests', function(topic, callback){
         testsIterator = iteratorFactory(tests);
 
         function runTest(test, callback){
@@ -1680,123 +1357,14 @@
         });
     });
 
-    ////Walks the queue and processes each element according to its class type.
-    //on('runQueue', function(){
-    //    var queueItem = queueIterator.getNext();
-    //    if(!queueItem){
-    //        emit('end');
-    //    }else{
-    //        if(queueItem instanceof Group){
-    //            emit('runQueue');
-    //        }else{
-    //            emit('runBefores');
-    //        }
-    //    }
-    //});
-
-    //////Runs a single group.
-    ////on('runGroup', function(){
-    ////    emit('runQueue');
-    ////});
-
-    ////Walk through the test's ancestor groups and run their befores.
-    //on('runBefores', function(){
-    //    var test = queueIterator.get();
-    //    //Create an iterator for this test's parent groups
-    //    groupsIterator = iteratorFactory(test.parentGroups);
-    //    //and assign it aa property which will be used as the context for calling the befores
-    //    groupsIterator.context = {};
-    //    //and for each parent, if it has a before call it.
-    //    emit('runBefore');
-    //});
-
-    ////Runs a grpup's before.
-    //on('runBefore', function(){
-    //    var ancestorGroup = groupsIterator.getNext();
-    //    if(ancestorGroup){
-    //        if(ancestorGroup.beforeEachTest && ancestorGroup.beforeEachTest.length){
-    //            ancestorGroup.beforeEachTest.call(groupsIterator.context, beforeDone);
-    //        }else if(ancestorGroup.beforeEachTest){
-    //            ancestorGroup.beforeEachTest.call(groupsIterator.context);
-    //            emit('runBefore');
-    //        }else{
-    //            emit('runBefore');
-    //        }
-    //    }else{
-    //        emit('runTest');
-    //    }
-    //});
-
-    ////Run the test.
-    //on('runTest', function(){
-    //    var test = queueIterator.get();
-    //    if(test.callback.length){
-    //        test.callback.call(groupsIterator.context, testDone.bind(groupsIterator.context));
-    //    }else{
-    //        test.callback.call(groupsIterator.context);
-    //        emit('runAssertions');
-    //    }
-    //});
-
-    //on('runAssertions', function(){
-    //    var test = queueIterator.get(),
-    //        i,
-    //        len,
-    //        item,
-    //        result;
-    //    test.totFailed = 0;
-    //    for (i = 0, len = test.assertions.length; i < len; i++) {
-    //        item = test.assertions[i];
-    //        result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-    //        item.result = result.result;
-    //        test.totFailed = item.result ? test.totFailed : test.totFailed += 1;
-    //        item.explain = result.explain;
-    //        //TODO(Jeff): Implement short circuit as this will not work.
-    //        if(config.shortCircuit && !item.result){
-    //            isShortCircuited = test.isShortCircuited = item.isShortCircuited = true;
-    //            return;
-    //        }
-    //    }
-    //    emit('runAfters');
-    //});
-
-    ////Walk through the test's ancestor groups and run their afters.
-    //on('runAfters', function(){
-    //    var test = queueIterator.get();
-    //    //Create an iterator for this test's parent groups
-    //    groupsIterator = iteratorFactory(test.parentGroups);
-    //    //and assign it aa property which will be used as the context for calling the afters
-    //    groupsIterator.context = {};
-    //    //and for each parent, if it has an after call it.
-    //    emit('runAfter');
-    //});
-
-    ////Run a group's after
-    //on('runAfter', function(){
-    //    var ancestorGroup = groupsIterator.getNext();
-    //    if(ancestorGroup){
-    //        if(ancestorGroup.afterEachTest && ancestorGroup.afterEachTest.length){
-    //            ancestorGroup.afterEachTest.call(groupsIterator.context, afterDone);
-    //        }else if(ancestorGroup.afterEachTest){
-    //            ancestorGroup.afterEachTest.call(groupsIterator.context);
-    //            emit('runAfter');
-    //        }else{
-    //            emit('runAfter');
-    //        }
-    //    }else{
-    //        emit('runQueue');
-    //    }
-    //});
-
-    //All groups ran.
     on('end', function(){
         window.tests = tests;
         window.failedTests = tests.filter(function(t){
-            return t.totFailed;
+            return t.totFailed || t.timedOut;
         });
         //Record how many tests failed.
         tests.totTestsFailed = tests.reduce(function(prevValue, t){
-            return t.totFailed ? prevValue + 1 : prevValue;
+            return t.timedOut || t.totFailed ? prevValue + 1 : prevValue;
         }, 0);
         tests.result = tests.totTestsFailed === 0;
         queue.end = Date.now();
