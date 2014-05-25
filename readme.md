@@ -85,3 +85,5 @@ Filtering on assertions is no longer supported.
 
 18) Added nested groups/whens and their contexts are derived from their parent
 groups.
+
+19) Added graceful timing out of tests that fail to complete on time.
