@@ -65,6 +65,7 @@
         this.callback = callback;
         this.bypass = bypass;
         this.duration = 0;
+        this.passed = true;
     }
 
     /**
@@ -240,6 +241,7 @@
             result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
+            this.parentGroup.passed = this.totFailed ? false : this.parentGroup.passed;
             item.explain = result.explain;
             //TODO(Jeff): Implement short circuit as this will not work.
             //if(config.shortCircuit && !item.result){
@@ -248,6 +250,19 @@
             //}
         }
         emit('runAfters');
+    };
+
+    /**
+     * Returns an array of paths.
+     */
+    Test.prototype.getPaths = function(){
+        var paths,
+            ancestors;
+        paths = this.path.split('/');
+        ancestors = paths.filter(function(v, i, a){
+            return i !== 0 && i !== a.length - 1;
+        });
+        return ancestors;
     };
 
     /**
@@ -363,10 +378,99 @@
     };
 
     /**
-     * Show details
+     * Show details.
+     * @param {array} tests An array of Tests.
      */
-    HtmlReporter.prototype.details = function(){
+    HtmlReporter.prototype.details = function(queue){
+        var rc = document.getElementById('preamble-results-container'),
+            groupContainerMarkup = '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
+            groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
+            testContainerMarkup = '<ul class="test-container" data-passed="{{passed}}"></ul>',
+            testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
+            html = '',
+            parentGroup,
+            s,
+            el;
+        queue.forEach(function(item){
+            if(item instanceof(Group)){
+                //Add groups to the DOM.
+                s = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed ? 'passed' : 'failed').replace(/{{id}}/, item.path);
+                s = s.slice(0, -5) + groupAnchorMarkup.
+                    replace(/{{passed}}/, item.passed ? '' : ' failed').
+                    replace('{{path}}', item.path).
+                    replace(/{{label}}/, item.label) + s.slice(-5);
+                html = s; 
+                if(!item.parentGroups.length){
+                    rc.insertAdjacentHTML('beforeend', html);
+                }else{
+                    parentGroup = item.parentGroups[item.parentGroups.length - 1];
+                    el = document.getElementById(parentGroup.path);
+                    el.insertAdjacentHTML('beforeend', html);
+                }
+            }else{
+                //Add tests to the DOM.
+                s = '' + testContainerMarkup.replace(/{{passed}}/, item.passed ? 'paassed' : 'failed');
+                s = s.slice(0, -5) + testAnchorMarkup.
+                    replace(/{{passed}}/, item.passed ? '' : ' failed').
+                    replace('{{path}}', item.path).
+                    replace(/{{label}}/, item.label) + s.slice(-5);
+                    //parentGroup = item.parentGroups[item.parentGroups.length - 1];
+                    el = document.getElementById(item.parentGroup.path);
+                    el.insertAdjacentHTML('beforeend', html);
+            }    
+        });
+        //rc.innerHTML = html;
+        //var queueIterator = iteratorFactory(queue),
+        //    groupStack = [],
+        //    groupContainerMarkup = '<div class="group-container" data-passed="{{passed}}"></div>',
+        //    groupAnchorMarkup = '<a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}} ({{duration}})</a>',
+        //    testMarkup,
+        //    ancestors,
+        //    groupHtml,
+        //    html = '',
+        //    parentGroup;
 
+        //function group(g, callback){
+        //    groupStack.push(g);
+        //    groupHtml = groupContainerMarkup.replace(/{{passed}}/, g.passed);
+        //    groupHtml += html.slice(0, -6) + groupAnchorMarkup.replace(/{{passed}}/, g.passed ? '' : ' failed') + html.slice(-6).replace(/{{label}}/, g.label);
+        //    html += groupHtml;
+        //    callback();
+        //    groupStack.pop();
+        //}
+
+        //function test(t, callback){
+
+        //}
+
+        //function runDetailsReport(){
+        //    while(qi = queueIterator.getNext()){
+        //        if(qi instanceof(Group)){
+        //            group(qi, function(){
+        //                runDetailsReport();
+        //            });
+        //        }else{
+        //            test(qi, function(){
+        //            });
+        //        }
+        //    }
+        //}
+        
+        //groupMarkup = '<div class="group-container" data-passed="{{passed}}"></div>';
+        //queue.forEach(function(qi){
+        //    if(qi instanceof(Group)){
+        //        groupStack.push(qi.path);
+        //        html = groupMarkup;
+        //        html = html.replace(/{{passed}}/, qi.passed);
+        //    }else{
+        //        html = html.slice(0, -6) + groupAnchorMarkup + html.slice(-6);
+        //    }
+        //    ////Get the paths.
+        //    //ancestors = qi.getPaths();
+        //    ////Get the parent from the paths.
+        //    //parent = ancestors[ancestors.length - 1];
+
+        //});
     };
 
     /**
@@ -479,6 +583,8 @@
 
     //Initialize.
     on('start', function(){
+        //TODO(Jeff): comment out next line.
+        window.queue = queue;
         tests = queue.filter(function(item){
             return item instanceof Test;
         });
@@ -519,7 +625,9 @@
     });
 
     on('end', function(){
+        //TODO(Jeff): comment out next line.
         window.tests = tests;
+        //TODO(Jeff): comment out next line.
         window.failedTests = tests.filter(function(t){
             return t.totFailed || t.timedOut;
         });
@@ -532,7 +640,7 @@
         tests.duration = queue.end - queue.start;
         reporter.coverage(tests);
         reporter.summary(tests);
-        //showResultsDetails(mapGroupsToResults());
+        reporter.details(queue);
     });
 
     /**
@@ -595,6 +703,7 @@
 
         var runner = {};
         var groupStack = [];
+        var uniqueId = 1;
 
         groupStack.getPath = function(){
             var result = this.reduce(function(prevValue, group){
@@ -915,70 +1024,70 @@
         }, '');
     }
 
-    function showResultsDetails(results){
-        var groupLabel = '',
-            testLabel = '',
-            html = '', 
-            //Hide passed tests.
-            hidePassed = document.getElementById('hidePassedTests').checked,
-            //Titles for anchor tags.
-            groupTile = 'title="Click here to filter by this group."',
-            testTitle = 'title="Click here to filter by this test."',
-            as,
-            i,
-            len;
-        document.getElementById('preamble-results-container').style.display = 'block';
-        results.forEach(function(result){
-            //Concat group and label when comparing to avoid collisions with the previous test should it have the same label.
-            if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
-                if(html.length){
-                    html += '</div>';
-                }
-            }
-            if(result.groupLabel !== groupLabel){
-                if(html.length){
-                    html += '</div>';
-                }
-            }
-            if(result.groupLabel !== groupLabel){
-                html += '<div class="group-container' + (hidePassed && result.groupResult ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
-                    encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
-                groupLabel = result.groupLabel;
-                testLabel = '';
-            }
-            if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
-                html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
-                    '" ' + 'data-passed="' + result.testResult + '"><a class="' + (!result.testResult ? ' failed' : 'passed') + '" href="?group=' +
-                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
-                    ' (' + result.testDuration + 'ms)' + '</a>';
-                testLabel = result.testLabel;
-            }
-            //When evaluating and using result.result here, it first has to be converted into a boolean using either !result.result or !!result.result.
-            //(Using '!!', a.k.a. the double bang, converts result.result into a boolean value via result.result's truthyness.)
-            //This is because result.result isn't restricted to boolean true/false, and can be any valid JavaScript primitive or object.
-            //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
-            if(!result.result){
-                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed"' + '>Error: "' +
-                    result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
-            }else{
-                if(!config.hideAssertions){
-                    html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                        '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed"' + '>' +
-                        result.explain + ' passed</div></div>';
-                }
-            }
-        });
-        html += '</div></div>';
-        document.getElementById('preamble-results-container').innerHTML = html;
-        domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
-        //TODO(Jeff): Should use event delegation here!
-        as = document.getElementsByTagName('a');
-        for(i = 0, len = as.length; i < len; i++){
-            domAddEventHandler(as[i], 'click', runClickHandler);
-        }
-    }
+    //function showResultsDetails(results){
+    //    var groupLabel = '',
+    //        testLabel = '',
+    //        html = '', 
+    //        //Hide passed tests.
+    //        hidePassed = document.getElementById('hidePassedTests').checked,
+    //        //Titles for anchor tags.
+    //        groupTile = 'title="Click here to filter by this group."',
+    //        testTitle = 'title="Click here to filter by this test."',
+    //        as,
+    //        i,
+    //        len;
+    //    document.getElementById('preamble-results-container').style.display = 'block';
+    //    results.forEach(function(result){
+    //        //Concat group and label when comparing to avoid collisions with the previous test should it have the same label.
+    //        if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
+    //            if(html.length){
+    //                html += '</div>';
+    //            }
+    //        }
+    //        if(result.groupLabel !== groupLabel){
+    //            if(html.length){
+    //                html += '</div>';
+    //            }
+    //        }
+    //        if(result.groupLabel !== groupLabel){
+    //            html += '<div class="group-container' + (hidePassed && result.groupResult ? ' hidden' : '') + 
+    //                '" ' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
+    //                encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
+    //            groupLabel = result.groupLabel;
+    //            testLabel = '';
+    //        }
+    //        if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
+    //            html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
+    //                '" ' + 'data-passed="' + result.testResult + '"><a class="' + (!result.testResult ? ' failed' : 'passed') + '" href="?group=' +
+    //                encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
+    //                ' (' + result.testDuration + 'ms)' + '</a>';
+    //            testLabel = result.testLabel;
+    //        }
+    //        //When evaluating and using result.result here, it first has to be converted into a boolean using either !result.result or !!result.result.
+    //        //(Using '!!', a.k.a. the double bang, converts result.result into a boolean value via result.result's truthyness.)
+    //        //This is because result.result isn't restricted to boolean true/false, and can be any valid JavaScript primitive or object.
+    //        //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
+    //        if(!result.result){
+    //            html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+    //                '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed"' + '>Error: "' +
+    //                result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
+    //        }else{
+    //            if(!config.hideAssertions){
+    //                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
+    //                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed"' + '>' +
+    //                    result.explain + ' passed</div></div>';
+    //            }
+    //        }
+    //    });
+    //    html += '</div></div>';
+    //    document.getElementById('preamble-results-container').innerHTML = html;
+    //    domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
+    //    //TODO(Jeff): Should use event delegation here!
+    //    as = document.getElementsByTagName('a');
+    //    for(i = 0, len = as.length; i < len; i++){
+    //        domAddEventHandler(as[i], 'click', runClickHandler);
+    //    }
+    //}
 
     function compareArrays(a, b){
         var i,

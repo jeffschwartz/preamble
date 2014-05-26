@@ -14,6 +14,17 @@ configure({
     asyncTestDelay: 500
 });
 
+when('1', function(){
+    when('2', function(){
+        then('2.1',function(){
+            isTrue(true);
+        });
+    });
+    then('1.1', function(){
+        isTrue(true);
+    });
+});
+
 when('A long running asynchronous before process that fails to complete on time', function(){
     beforeEach(function(done){
         var self = this;
