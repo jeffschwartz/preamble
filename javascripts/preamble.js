@@ -264,13 +264,6 @@
      * Add structure to the DOM/show the header.
      */
     HtmlReporter.prototype.init = function(){
-        //Add markup structure to the DOM and show the header.
-        //var s = '<header>' + 
-        //    '<div class="banner"><h1><span id="name">{{name}}</span> - <span><i>Preamble</i><span> <span><i id="version">{{version}}</i></span></h1></div>' + 
-        //    '<div id="time"><span>Completed in <span title="total test time/total elapsed time">{{tt}}ms/{{et}}ms</span></div>' +
-        //    '</header>' +
-        //    '<div class="container">' + '<section id="preamble-status-container">' + '<div class="summary">Building queue. Please wait...</div>' + '</section>' + 
-        //    '<section id="preamble-results-container"></section></div>';
         var s = '<header>' + 
                     '<div class="banner">' + 
                         '<h1>' + 
@@ -599,12 +592,6 @@
         var runner = {};
         var groupStack = [];
 
-        //runner.totGroups = 0;
-        //runner.totFilteredGroups = 0;
-        //runner.totTests = 0;
-        //runner.totFilteredTests = 0;
-        //runner.totAssertions = 0;
-
         groupStack.getPath = function(){
             var result = this.reduce(function(prevValue, group){
                 return prevValue + '/' + group.label;
@@ -633,23 +620,11 @@
 
         runner.beforeEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
-            //if(arguments.length === 2){
-            //    //parentGroup.asyncBeforeTestInterval = arguments[0];
-            //    parentGroup.beforeEachTest = arguments[1];
-            //}else{
-            //    parentGroup.beforeEachTest = callback;
-            //}
             parentGroup.beforeEachTest = callback;
         };
 
         runner.afterEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
-            //if(arguments.length === 2){
-            //    //parentGroup.asyncAfterTestInterval = arguments[0];
-            //    parentGroup.afterEachTest = arguments[1];
-            //}else{
-            //    parentGroup.afterEachTest = callback;
-            //}
             parentGroup.afterEachTest = callback;
         };
 
@@ -862,9 +837,6 @@
         }
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
-        //Totals
-        //queue.totTests = 0;
-        //queue.totAssertions = 0;
         //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
         runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test')};
         //Capture exception's stack trace property.
@@ -877,20 +849,10 @@
             window.configure = configure;
             window.group = queueBuilder.group;
             window.when = queueBuilder.group;
-            //window.beforeEachTest = queueBuilder.beforeEachTest;
             window.beforeEach = queueBuilder.beforeEachTest;
-            //window.asyncBeforeEachTest = queueBuilder.asyncBeforeEachTest;
-            //window.beforeEachAsync = queueBuilder.asyncBeforeEachTest;
-            //window.afterEachTest = queueBuilder.afterEachTest;
             window.afterEach = queueBuilder.afterEachTest;
-            //window.asyncAfterEachTest = queueBuilder.asyncAfterEachTest;
-            //window.afterEachAsync = queueBuilder.asyncAfterEachTest;
             window.test = queueBuilder.test;
             window.then = queueBuilder.test;
-            //window.asyncTest = queueBuilder.asyncTest;
-            //window.thenAsync= queueBuilder.asyncTest;
-            //window.whenAsyncDone = whenAsyncDone;
-            //window.whenDone = whenAsyncDone;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -906,20 +868,10 @@
                 configure: configure,
                 group: queueBuilder.group,
                 when: queueBuilder.group,
-                //beforeEachTest: queueBuilder.beforeEachTest,
                 beforeEach: queueBuilder.beforeEachTest,
-                //asyncBeforeEachTest: queueBuilder.asyncBeforeEachTest,
-                //beforeEachAsync: queueBuilder.asyncBeforeEachTest,
-                //afterEachTest: queueBuilder.afterEachTest,
                 afterEach: queueBuilder.afterEachTest,
-                //asyncAfterEachTest: queueBuilder.asyncAfterEachTest,
-                //afterEachAsync: queueBuilder.asyncAfterEachTest,
                 test: queueBuilder.test,
                 then: queueBuilder.test,
-                //asyncTest: queueBuilder.asyncTest,
-                //thenAsync: queueBuilder.asyncTest,
-                //whenAsyncDone: whenAsyncDone,
-                //whenDone: whenAsyncDone,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
                 proxy: proxy,
@@ -944,26 +896,6 @@
         //publish config event.
         emit('configchanged', {name: config.name, uiTestContainerId: config.uiTestContainerId});
     }
-
-    //function showResultsSummary(tests){
-    //    var html,
-    //        el,
-    //        s;
-        
-    //    el = document.getElementById('time');
-    //    s = el.innerHTML;
-    //    s = s.replace(/{{tt}}/, tests.duration);
-    //    s = s.replace(/{{et}}/, tests.duration);
-    //    el.innerHTML = s;
-    //    el.style.display = 'block';
-    //    showCoverage(tests);
-    //    if(tests.result){
-    //        html = '<div id="preamble-results-summary-passed" class="summary-passed">' + tests.length + pluralize(' test', tests.length ) + ' passed' + '</div>';
-    //    }else{
-    //        html = '<div id="preamble-results-summary-failed" class="summary-failed">' + tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
-    //    }
-    //    document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
-    //}
 
     //Returns the "line" in the stack trace that points to the failed assertion.
     function stackTrace(st) {
@@ -1471,31 +1403,8 @@
         argObject[argProperty] = snoopster;
     }
 
-    //function showCoverage(tests){
-    //    var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
-    //        elStatusContainer = document.getElementById('preamble-status-container'),
-    //        coverage = '<div id="coverage">' + show + ' {{tt}}' +
-    //            '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
-    //            '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
-    //            ' - <a id="runAll" href="?"> run all</a>' +
-    //            '</div>',
-    //        hpt;
-    //    //Show groups and tests coverage in the header.
-    //    coverage = coverage.replace(/{{tt}}/, tests.length + pluralize(' test', tests.length));
-    //    hpt = loadPageVar('hpt');
-    //    hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
-    //    coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
-    //    //Preserve error message that replaces 'Building queue. Please wait...'.
-    //    if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
-    //        elStatusContainer.innerHTML = coverage;
-    //    }else{
-    //        elStatusContainer.innerHTML += coverage;
-    //    }
-    //    document.getElementById('coverage').style.display = 'block';
-    //}
-
     /**
-     * It all starts here!!!
+     * It all starts here!
      */
 
     //Record the start time.
