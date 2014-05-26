@@ -207,12 +207,16 @@
             //the test it was running, the test is captured via closure uaing the 
             //module pattern and passing "self" as an argument.
             setTimeout(function(){
+                var start = Date.now();
+                var d;
                 runBefores(function(){
                     runTest(function(){
                         runAfters(function(){
                             if(!test.timedOut){
                                 console.log('"' + test.path + '" completed at:', Date.now());
                                 test.completed = true;
+                                d = Date.now() - start;
+                                test.duration = d > 0 && d || 1;
                                 callback();
                             }
                         });
