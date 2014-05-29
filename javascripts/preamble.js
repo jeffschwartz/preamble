@@ -306,8 +306,8 @@
                     '</div>' + 
                     '<div id="time">' + 
                         '<span>Completed in ' + 
-                            '<span title="total test time/total elapsed time">' + 
-                                '{{tt}}ms/{{et}}ms' + 
+                            '<span title="total time to completion">' + 
+                                '{{tt}}ms' + 
                             '</span>' + 
                         '</span>' + 
                     '</div>' + 
@@ -374,7 +374,6 @@
         el = document.getElementById('time');
         s = el.innerHTML;
         s = s.replace(/{{tt}}/, tests.duration);
-        s = s.replace(/{{et}}/, tests.duration);
         el.innerHTML = s;
         el.style.display = 'block';
         if(tests.result){
@@ -392,9 +391,9 @@
     HtmlReporter.prototype.details = function(queue){
         var rc = document.getElementById('preamble-results-container'),
             hidePassed = document.getElementById('hidePassedTests').checked,
-            groupContainerMarkup = '<ul class="group-container{{hiden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
+            groupContainerMarkup = '<ul class="group-container{{hidden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
-            testContainerMarkup = '<ul class="tests-container" data-passed="{{passed}}"></ul>',
+            testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
             testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
             html = '',
             parentGroup,
@@ -403,7 +402,7 @@
             if(item instanceof(Group)){
                 //Add groups to the DOM.
                 html = '' + groupContainerMarkup.
-                    replace(/{{hiden}}/, hidePassed && item.passed && ' hidden' || '').
+                    replace(/{{hidden}}/, hidePassed && item.passed && ' hidden' || '').
                     replace(/{{passed}}/, item.passed).
                     replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.
@@ -420,7 +419,9 @@
                 }
             }else{
                 //Add tests to the DOM.
-                html = '' + testContainerMarkup.replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
+                html = '' + testContainerMarkup.
+                    replace(/{{hidden}}/, hidePassed && item.totFailed === 0 ? ' hidden' : '').
+                    replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.
                     replace(/{{passed}}/, item.totFailed ? 'failed' : 'passed').
                     replace('{{path}}', item.path).
