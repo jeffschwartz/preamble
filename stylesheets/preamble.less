@@ -103,11 +103,13 @@ section:first-child{
 .group-container{
     padding-left: 10px;
     padding-right: 10px;
-    padding-bottom: 10px;
     font-weight: bold;
     font-size: 1rem;
     line-height: 1rem;
     list-style: none;
+}
+.group-container:first-child{
+    padding-bottom: 10px;
 }
 /*.group-container:first-child {*/
 /*    padding-top: 0;*/
@@ -122,8 +124,16 @@ section:first-child{
     color: @groups-tests-color;
 }
 .tests-container{
-    padding: 5px 20px 0 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1rem;
+    list-style: none;
 }
+/*.tests-container:first-child{*/
+/*    padding-bottom: 10px;*/
+/*}*/
 .tests-container a{
     text-decoration: none;
 }
@@ -158,5 +168,5 @@ section:first-child{
     top: -10000px;
     left: -10000px;
     width: 1000px;
-    height: 1000px
+    height: 1000px;
 }

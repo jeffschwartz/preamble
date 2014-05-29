@@ -58,8 +58,9 @@
      * @param {function} callback
      * @param {boolean} bypass
      */
-    function Group(parentGroups, path, label, callback, bypass){
+    function Group(parentGroups, id, path, label, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
+        this.id = id;
         this.path = path;
         this.label = label; 
         this.callback = callback;
@@ -78,10 +79,11 @@
      * @param {function} callback
      * @param {boolean} bypass
      */
-    function Test(parentGroups, path, label, asyncTestDelay, callback, bypass){
+    function Test(parentGroups, id, path, label, asyncTestDelay, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
-        this.path = path + '/' + label;
+        this.id = id;
+        this.path = path;
         this.label = label;
         this.asyncTestDelay = asyncTestDelay;
         this.callback = callback;
@@ -197,9 +199,11 @@
                     console.log('"' + test.path + '" timed out at:', Date.now());
                     //mark test failed
                     test.timedOut = true;
-                    callback();
+                    //test.totFailed = -1;
+                    //test.parentGroup.passed = false;
+                    //callback();
                 }
-            }, self.asyncTestDelay);
+            }, test.asyncTestDelay);
 
             //Run the before callbacks, test callback and after callbacks.
             //Note to self: Since this can fire after the test has already timed 
@@ -213,13 +217,17 @@
                 runBefores(function(){
                     runTest(function(){
                         runAfters(function(){
-                            if(!test.timedOut){
+                            if(test.timedOut){
+                                test.totFailed = -1;
+                                test.parentGroup.passed = false;
+                            }else{
                                 console.log('"' + test.path + '" completed at:', Date.now());
                                 test.completed = true;
                                 d = Date.now() - start;
                                 test.duration = d > 0 && d || 1;
-                                callback();
+                                //callback();
                             }
+                            callback();
                         });
                     });
                 });
@@ -385,21 +393,20 @@
         var rc = document.getElementById('preamble-results-container'),
             groupContainerMarkup = '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
-            testContainerMarkup = '<ul class="test-container" data-passed="{{passed}}"></ul>',
+            testContainerMarkup = '<ul class="tests-container" data-passed="{{passed}}"></ul>',
             testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
             html = '',
             parentGroup,
-            s,
             el;
         queue.forEach(function(item){
             if(item instanceof(Group)){
                 //Add groups to the DOM.
-                s = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed ? 'passed' : 'failed').replace(/{{id}}/, item.path);
-                s = s.slice(0, -5) + groupAnchorMarkup.
+                html = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed).replace(/{{id}}/, item.path);
+                html = html.slice(0, -5) + groupAnchorMarkup.
                     replace(/{{passed}}/, item.passed ? '' : ' failed').
                     replace('{{path}}', item.path).
-                    replace(/{{label}}/, item.label) + s.slice(-5);
-                html = s; 
+                    replace(/{{label}}/, item.label) + html.slice(-5);
+                html = html; 
                 if(!item.parentGroups.length){
                     rc.insertAdjacentHTML('beforeend', html);
                 }else{
@@ -409,11 +416,11 @@
                 }
             }else{
                 //Add tests to the DOM.
-                s = '' + testContainerMarkup.replace(/{{passed}}/, item.passed ? 'paassed' : 'failed');
-                s = s.slice(0, -5) + testAnchorMarkup.
-                    replace(/{{passed}}/, item.passed ? '' : ' failed').
+                html = '' + testContainerMarkup.replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
+                html = html.slice(0, -5) + testAnchorMarkup.
+                    replace(/{{passed}}/, item.totFailed ? 'failed' : 'passed').
                     replace('{{path}}', item.path).
-                    replace(/{{label}}/, item.label) + s.slice(-5);
+                    replace(/{{label}}/, item.label) + html.slice(-5);
                     //parentGroup = item.parentGroups[item.parentGroups.length - 1];
                     el = document.getElementById(item.parentGroup.path);
                     el.insertAdjacentHTML('beforeend', html);
@@ -701,13 +708,18 @@
      */
     queueBuilder = (function(queue, throwException){
 
-        var runner = {};
-        var groupStack = [];
-        var uniqueId = 1;
+        var runner = {},
+            groupStack = [],
+            uniqueId = (function(){
+                var i = 0;
+                return function(){
+                    return i += 1;
+                };
+            }());
 
         groupStack.getPath = function(){
             var result = this.reduce(function(prevValue, group){
-                return prevValue + '/' + group.label;
+                return prevValue + '/' + group.id;
             }, '');
             return result;
         };
@@ -718,13 +730,14 @@
 
         runner.group = function(label, callback){
             var grp,
+                id,
                 path;
             if(arguments.length !== 2){
                 throwException('requires 2 arguments, found ' + arguments.length);
             }
-            path = groupStack.getPath();
-            path +=  '/' + label;
-            grp = new Group(groupStack, path, label, callback, !filter('group', {group: label}));
+            id = uniqueId();
+            path = groupStack.getPath() + '/' + id;
+            grp = new Group(groupStack, id, path, label, callback, !filter('group', {group: label}));
             queue.push(grp);
             groupStack.push(grp);
             grp.callback();
@@ -744,6 +757,7 @@
         runner.test = function(label, timeLimit, callback){
             var tst,
                 parentGroup,
+                id,
                 path,
                 tl,
                 cb;
@@ -753,8 +767,9 @@
             tl = arguments.length === 3 && timeLimit || config.asyncTestDelay;
             cb = arguments.length === 3 && callback || arguments[1];
             parentGroup = groupStack[groupStack.length - 1];
-            path = groupStack.getPath();
-            tst = new Test(groupStack, path, label, tl, cb, !filter('test', {group: path, test: label}));
+            id = uniqueId();
+            path = groupStack.getPath() + '/' + id;
+            tst = new Test(groupStack, id, path, label, tl, cb, !filter('test', {group: path, test: label}));
             queue.push(tst);
         };
 
