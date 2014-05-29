@@ -394,7 +394,7 @@
             groupContainerMarkup = '<ul class="group-container{{hidden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
-            testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
+            testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this test.">{{label}}</a></li>',
             html = '',
             parentGroup,
             el,
