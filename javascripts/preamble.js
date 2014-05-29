@@ -397,7 +397,10 @@
             testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
             html = '',
             parentGroup,
-            el;
+            el,
+            as,
+            i,
+            len;
         queue.forEach(function(item){
             if(item instanceof(Group)){
                 //Add groups to the DOM.
@@ -434,10 +437,10 @@
         document.getElementById('preamble-results-container').style.display = 'block';
         domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
         ////TODO(Jeff): Should use event delegation here!
-        //as = document.getElementsByTagName('a');
-        //for(i = 0, len = as.length; i < len; i++){
-        //    domAddEventHandler(as[i], 'click', runClickHandler);
-        //}
+        as = document.getElementsByTagName('a');
+        for(i = 0, len = as.length; i < len; i++){
+            domAddEventHandler(as[i], 'click', runClickHandler);
+        }
     };
 
     /**
