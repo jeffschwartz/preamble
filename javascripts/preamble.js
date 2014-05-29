@@ -391,7 +391,8 @@
      */
     HtmlReporter.prototype.details = function(queue){
         var rc = document.getElementById('preamble-results-container'),
-            groupContainerMarkup = '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
+            hidePassed = document.getElementById('hidePassedTests').checked,
+            groupContainerMarkup = '<ul class="group-container{{hiden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup = '<ul class="tests-container" data-passed="{{passed}}"></ul>',
             testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
@@ -401,7 +402,10 @@
         queue.forEach(function(item){
             if(item instanceof(Group)){
                 //Add groups to the DOM.
-                html = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed).replace(/{{id}}/, item.path);
+                html = '' + groupContainerMarkup.
+                    replace(/{{hiden}}/, hidePassed && item.passed && ' hidden' || '').
+                    replace(/{{passed}}/, item.passed).
+                    replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.
                     replace(/{{passed}}/, item.passed ? '' : ' failed').
                     replace('{{path}}', item.path).
@@ -426,58 +430,13 @@
                     el.insertAdjacentHTML('beforeend', html);
             }    
         });
-        //rc.innerHTML = html;
-        //var queueIterator = iteratorFactory(queue),
-        //    groupStack = [],
-        //    groupContainerMarkup = '<div class="group-container" data-passed="{{passed}}"></div>',
-        //    groupAnchorMarkup = '<a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}} ({{duration}})</a>',
-        //    testMarkup,
-        //    ancestors,
-        //    groupHtml,
-        //    html = '',
-        //    parentGroup;
-
-        //function group(g, callback){
-        //    groupStack.push(g);
-        //    groupHtml = groupContainerMarkup.replace(/{{passed}}/, g.passed);
-        //    groupHtml += html.slice(0, -6) + groupAnchorMarkup.replace(/{{passed}}/, g.passed ? '' : ' failed') + html.slice(-6).replace(/{{label}}/, g.label);
-        //    html += groupHtml;
-        //    callback();
-        //    groupStack.pop();
+        document.getElementById('preamble-results-container').style.display = 'block';
+        domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
+        ////TODO(Jeff): Should use event delegation here!
+        //as = document.getElementsByTagName('a');
+        //for(i = 0, len = as.length; i < len; i++){
+        //    domAddEventHandler(as[i], 'click', runClickHandler);
         //}
-
-        //function test(t, callback){
-
-        //}
-
-        //function runDetailsReport(){
-        //    while(qi = queueIterator.getNext()){
-        //        if(qi instanceof(Group)){
-        //            group(qi, function(){
-        //                runDetailsReport();
-        //            });
-        //        }else{
-        //            test(qi, function(){
-        //            });
-        //        }
-        //    }
-        //}
-        
-        //groupMarkup = '<div class="group-container" data-passed="{{passed}}"></div>';
-        //queue.forEach(function(qi){
-        //    if(qi instanceof(Group)){
-        //        groupStack.push(qi.path);
-        //        html = groupMarkup;
-        //        html = html.replace(/{{passed}}/, qi.passed);
-        //    }else{
-        //        html = html.slice(0, -6) + groupAnchorMarkup + html.slice(-6);
-        //    }
-        //    ////Get the paths.
-        //    //ancestors = qi.getPaths();
-        //    ////Get the parent from the paths.
-        //    //parent = ancestors[ancestors.length - 1];
-
-        //});
     };
 
     /**
@@ -798,7 +757,11 @@
         document.getElementById('preamble-status-container').innerHTML = html;
     }
 
-    //Makes words plural if their counts are 0 or greater than 1.
+    /**
+     * Makes words plural if their counts are 0 or greater than 1.
+     * @param {string} word A word to be pluralized.
+     * @param {integer} count An integer used to decide if word is to be pluralized.
+     */
     function pluralize(word, count){
         var pluralizer = arguments === 2 ? arguments[1] : 's';
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
@@ -819,7 +782,9 @@
         return result;
     }
 
-    //Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+    /**
+     * Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+     */
     function domAddEventHandler(el, event, handler){
         if( el.addEventListener){
             el.addEventListener(event, handler);
@@ -828,9 +793,11 @@
         }
     }
 
-    //Click event handler for the hidePassedTests checkbox.
+    /**
+     * Click handler for the hide passed tests checkbox.
+     */
     function hptClickHandler(){
-        var elDivs = document.getElementsByTagName('div'),
+        var elUls = document.getElementsByTagName('ul'),
             i,
             ii,
             l,
@@ -838,13 +805,13 @@
             attributes,
             elContainers = [],
             classes = '';
-        for(i = 0, l= elDivs.length; i < l; i++){
-            attributes = elDivs[i].getAttribute('class');
+        for(i = 0, l= elUls.length; i < l; i++){
+            attributes = elUls[i].getAttribute('class');
             if(attributes && attributes.length){
                 attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
                     if(attributes[ii] === 'group-container' || attributes[ii] === 'tests-container' || attributes[ii] === 'assertion-container'){
-                        elContainers.push(elDivs[i]);
+                        elContainers.push(elUls[i]);
                     }
                 }
             }
