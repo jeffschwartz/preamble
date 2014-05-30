@@ -160,7 +160,16 @@ section:first-child {
   font-weight: bold;
 }
 .stacktrace-container {
-  padding: 0 20px 0 40px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1rem;
+  list-style: none;
+}
+.stacktrace-container p {
+  padding: 0;
+  line-height: 1rem;
 }
 .stacktrace {
   margin: 0;

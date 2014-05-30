@@ -404,7 +404,9 @@
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
             testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this test.">{{label}}</a></li>',
+            testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
+            failed = '',
             parentGroup,
             el,
             as,
@@ -438,9 +440,19 @@
                     replace(/{{passed}}/, item.totFailed ? 'failed' : 'passed').
                     replace('{{path}}', item.path).
                     replace(/{{label}}/, item.label) + html.slice(-5);
-                    //parentGroup = item.parentGroups[item.parentGroups.length - 1];
-                    el = document.getElementById(item.parentGroup.path);
-                    el.insertAdjacentHTML('beforeend', html);
+                //Show failed assertions and their stacks.
+                if(item.totFailed > 0){
+                    item.assertions.forEach(function(assertion){
+                        if(!assertion.result){
+                            failed = testFailureMarkup.
+                                replace(/{{explain}}/, assertion.explain).
+                                replace(/{{stacktrace}}/, stackTrace(assertion.stackTrace));
+                        }
+                    });
+                    html = html.slice(0, -5) + failed + html.slice(-5);
+                }
+                el = document.getElementById(item.parentGroup.path);
+                el.insertAdjacentHTML('beforeend', html);
             }    
         });
         document.getElementById('preamble-results-container').style.display = 'block';
@@ -1012,7 +1024,7 @@
         //... and filter out all references to preamble.js.
         return matches.reduce(function(previousValue, currentValue){
             if(currentValue.search(/preamble.js/) === -1){
-                return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
+                return previousValue + '<p class="stacktrace">' + currentValue + '</p>';
             }else{
                 return previousValue;
             }
