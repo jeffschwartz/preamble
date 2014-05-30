@@ -196,7 +196,7 @@
             //pattern and passing "self" as an argument.
             setTimeout(function(){
                 if(!test.completed){
-                    console.log('"' + test.path + '" timed out at:', Date.now());
+                    //console.log('"' + test.path + '" timed out at:', Date.now());
                     //mark test failed
                     test.timedOut = true;
                     //test.totFailed = -1;
@@ -221,7 +221,7 @@
                                 test.totFailed = -1;
                                 test.parentGroup.passed = false;
                             }else{
-                                console.log('"' + test.path + '" completed at:', Date.now());
+                                //console.log('"' + test.path + '" completed at:', Date.now());
                                 test.completed = true;
                                 d = Date.now() - start;
                                 test.duration = d > 0 && d || 1;

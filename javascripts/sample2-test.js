@@ -63,8 +63,8 @@ when('A long running asynchronous after process that fails to complete on time',
     then('will time out and the test will be marked as having failed', function(){
         equal(this.count, 100);
     });
-    then('count should be reset to 0', function(){
-        equal(this.count, 1010101010101010100);
+    then('count should still be 100', function(){
+        equal(this.count, 100);
     });
 });
 
@@ -77,10 +77,10 @@ when('A test can configure long running asynchronous after processes not to time
             done();
         }, 1000);
     });
-    then('will time out and the test will be marked as having failed', 1010, function(){
+    then('by passing a time out interval', 1010, function(){
         equal(this.count, 100);
     });
-    then('count should be reset to 0', 1010, function(){
+    then('count should be reset to 100', 1010, function(){
         equal(this.count, 100);
     });
 });
