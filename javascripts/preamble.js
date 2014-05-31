@@ -9,16 +9,18 @@
         //Merged configuration options.
         config = {},
         queue=[],
-        isShortCircuited = false, //Can only be true if config.shortCircuit is true and an assertion has failed.
+        isShortCircuited = false, //Can only be true if config.shortCircuit is true and a test has failed.
         prevQueueCount = 0,
         queueStableCount = 0,
         queueStableInterval = 1,
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
+        reporter,
         assert,
         intervalId,
         runtimeFilter,
         stackTraceProperty,
         queueBuilder,
+        pubsub,
         tests,
         testsIterator;
 
@@ -50,36 +52,40 @@
     /**
      * A group.
      * @constructor
-     * @param {[Group]} - parentGroups
-     * @param {string} - path
-     * @param {string} - label
-     * @param {function} - callback
-     * @param {boolean} - bypass
+     * @param {[Group]} parentGroups
+     * @param {string} path
+     * @param {string} label
+     * @param {function} callback
+     * @param {boolean} bypass
      */
-    function Group(parentGroups, path, label, callback, bypass){
+    function Group(parentGroups, id, path, label, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
+        this.id = id;
         this.path = path;
         this.label = label; 
         this.callback = callback;
         this.bypass = bypass;
         this.duration = 0;
+        this.passed = true;
     }
 
     /**
      * A test.
      * @constructor
-     * @param {[Group]} - parentGroups
-     * @param {string} - path
-     * @param {string} - label
-     * @param {integer} - asyncTestDelay
-     * @param {function} - callback
-     * @param {boolean} - bypass
+     * @param {[Group] parentGroups
+     * @param {string} path
+     * @param {string} label
+     * @param {integer} asyncTestDelay
+     * @param {function} callback
+     * @param {boolean} bypass
      */
-    function Test(parentGroups, path, label, asyncTestDelay, callback, bypass){
+    function Test(parentGroups, id, path, label, stackTrace, asyncTestDelay, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
-        this.path = path + '/' + label;
+        this.id = id;
+        this.path = path;
         this.label = label;
+        this.stackTrace = stackTrace;
         this.asyncTestDelay = asyncTestDelay;
         this.callback = callback;
         this.bypass = bypass;
@@ -103,8 +109,17 @@
     }
 
     /**
+     * Sets all parent groups' passed property to false.
+     */
+    Test.prototype.markParentGroupsFailed = function(){
+        this.parentGroups.forEach(function(pg){
+            pg.passed = false;
+        });
+    };
+
+    /**
      * Test runner
-     * @param {function} - callback e.g. fn(err, value)
+     * @param {function} callback e.g. fn(err, value)
      */
     Test.prototype.run = function(callback){
         var beforesIterator = iteratorFactory(this.befores),
@@ -191,12 +206,13 @@
             //pattern and passing "self" as an argument.
             setTimeout(function(){
                 if(!test.completed){
-                    console.log('"' + test.path + '" timed out at:', Date.now());
                     //mark test failed
                     test.timedOut = true;
-                    callback();
+                    //test.totFailed = -1;
+                    //test.parentGroup.passed = false;
+                    //callback();
                 }
-            }, self.asyncTestDelay);
+            }, test.asyncTestDelay);
 
             //Run the before callbacks, test callback and after callbacks.
             //Note to self: Since this can fire after the test has already timed 
@@ -205,14 +221,23 @@
             //the test it was running, the test is captured via closure uaing the 
             //module pattern and passing "self" as an argument.
             setTimeout(function(){
+                var start = Date.now();
+                var d;
                 runBefores(function(){
                     runTest(function(){
                         runAfters(function(){
-                            if(!test.timedOut){
-                                console.log('"' + test.path + '" completed at:', Date.now());
+                            if(test.timedOut){
+                                test.totFailed = -1;
+                                test.markParentGroupsFailed();
+                            }else{
                                 test.completed = true;
-                                callback();
+                                d = Date.now() - start;
+                                test.duration = d > 0 && d || 1;
+                                if(test.totFailed){
+                                    test.markParentGroupsFailed();
+                                }
                             }
+                            callback();
                         });
                     });
                 });
@@ -220,6 +245,9 @@
         }(self));
     };
 
+    /**
+     * Runs assertions
+     */
     Test.prototype.runAssertions = function(){
         var i,
             len,
@@ -231,6 +259,7 @@
             result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
+            //this.parentGroup.passed = this.totFailed ? false : this.parentGroup.passed;
             item.explain = result.explain;
             //TODO(Jeff): Implement short circuit as this will not work.
             //if(config.shortCircuit && !item.result){
@@ -241,20 +270,446 @@
         emit('runAfters');
     };
 
+    /**
+     * Returns an array of paths.
+     */
+    Test.prototype.getPaths = function(){
+        var paths,
+            ancestors;
+        paths = this.path.split('/');
+        ancestors = paths.filter(function(v, i, a){
+            return i !== 0 && i !== a.length - 1;
+        });
+        return ancestors;
+    };
+
+    /**
+     * HtmlReporter
+     * @constructor
+     */
+    function HtmlReporter(){
+        this.preambleTestContainer = document.getElementById('preamble-test-container');
+        this.preambleUiContainer = document.getElementById('preamble-ui-container');
+        this.init();
+        on('configchanged', function(topic, args){
+            //Add structure to the document and show the header.
+            this.updateHeader(args.name, version, args.uiTestContainerId);
+        }, this);
+    }
+
+    /**
+     * Add structure to the DOM/show the header.
+     */
+    HtmlReporter.prototype.init = function(){
+        var s = '<header>' + 
+                    '<div class="banner">' + 
+                        '<h1>' + 
+                            '<span id="name">Test</span> - ' + 
+                            '<span>' + 
+                                '<span> ' + 
+                                    '<span>' + 
+                                        '<i id="version">{{version}}</i>' + 
+                                    '</span>' + 
+                                '</span>' + 
+                            '</span>' + 
+                        '</h1>' + 
+                    '</div>' + 
+                    '<div id="time">' + 
+                        '<span>Completed in ' + 
+                            '<span title="total time to completion">' + 
+                                '{{tt}}ms' + 
+                            '</span>' + 
+                        '</span>' + 
+                    '</div>' + 
+                '</header>' +
+                '<div class="container">' + 
+                    '<section id="preamble-status-container">' + 
+                        '<div class="summary">Building queue. Please wait...</div>' + 
+                    '</section>' + 
+                    '<section id="preamble-results-container"></section>' + 
+                '</div>';
+
+        s = s.replace(/{{version}}/, version);
+        this.preambleTestContainer.innerHTML = s;
+    };
+
+    /**
+     * Updates the header.
+     * @param {string} name
+     * @param {string} version
+     * @param {string} uiTestContainerId
+     */
+    HtmlReporter.prototype.updateHeader = function(name, version, uiTestContainerId){
+        document.getElementById('name').innerHTML = name;
+        document.getElementById('version').innerHTML = version;
+        this.preambleUiContainer.innerHTML = '<div id="{{id}}" class="ui-test-container"></div>'.
+            replace(/{{id}}/, uiTestContainerId);
+    };
+
+    /**
+     * Shows coverage or filtered information.
+     * @param {array} tests An array of Tests.
+     */
+    HtmlReporter.prototype.coverage = function(tests){
+        var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
+            elStatusContainer = document.getElementById('preamble-status-container'),
+            coverage = '<div id="coverage">' + show + ' {{tt}}' +
+                '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
+                '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
+                ' - <a id="runAll" href="?"> run all</a>' +
+                '</div>',
+            hpt;
+        //Show groups and tests coverage in the header.
+        coverage = coverage.replace(/{{tt}}/, tests.length + pluralize(' test', tests.length));
+        hpt = loadPageVar('hpt');
+        hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
+        coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
+        //Preserve error message that replaces 'Building queue. Please wait...'.
+        if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
+            elStatusContainer.innerHTML = coverage;
+        }else{
+            elStatusContainer.innerHTML += coverage;
+        }
+        document.getElementById('coverage').style.display = 'block';
+    };
+
+    /**
+     * Show summary information.
+     * @param {array} tests An array containing only Tests.
+     */
+    HtmlReporter.prototype.summary = function(tests){
+        var html,
+            el,
+            s;
+        el = document.getElementById('time');
+        s = el.innerHTML;
+        s = s.replace(/{{tt}}/, tests.duration);
+        el.innerHTML = s;
+        el.style.display = 'block';
+        if(tests.result){
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + tests.length + pluralize(' test', tests.length ) + ' passed' + '</div>';
+        }else{
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
+        }
+        document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
+    };
+
+    /**
+     * Show details.
+     * @param {array} tests An array of Tests.
+     */
+    HtmlReporter.prototype.details = function(queue){
+        var rc = document.getElementById('preamble-results-container'),
+            hidePassed = document.getElementById('hidePassedTests').checked,
+            groupContainerMarkup = '<ul class="group-container{{hidden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
+            groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
+            testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
+            testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this test.">{{label}}</a></li>',
+            testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
+            html = '',
+            failed = '',
+            parentGroup,
+            el,
+            as,
+            i,
+            len;
+        queue.forEach(function(item){
+            if(item instanceof(Group)){
+                //Add groups to the DOM.
+                html = '' + groupContainerMarkup.
+                    replace(/{{hidden}}/, hidePassed && item.passed && ' hidden' || '').
+                    replace(/{{passed}}/, item.passed).
+                    replace(/{{id}}/, item.path);
+                html = html.slice(0, -5) + groupAnchorMarkup.
+                    replace(/{{passed}}/, item.passed ? '' : ' failed').
+                    replace('{{path}}', item.path).
+                    replace(/{{label}}/, item.label) + html.slice(-5);
+                html = html; 
+                if(!item.parentGroups.length){
+                    rc.insertAdjacentHTML('beforeend', html);
+                }else{
+                    parentGroup = item.parentGroups[item.parentGroups.length - 1];
+                    el = document.getElementById(parentGroup.path);
+                    el.insertAdjacentHTML('beforeend', html);
+                }
+            }else{
+                //Add tests to the DOM.
+                html = '' + testContainerMarkup.
+                    replace(/{{hidden}}/, hidePassed && item.totFailed === 0 ? ' hidden' : '').
+                    replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
+                html = html.slice(0, -5) + testAnchorMarkup.
+                    replace(/{{passed}}/, item.totFailed ? 'failed' : 'passed').
+                    replace('{{path}}', item.path).
+                    replace(/{{label}}/, item.label) + html.slice(-5);
+                //Show failed assertions and their stacks.
+                if(item.totFailed > 0){
+                    item.assertions.forEach(function(assertion){
+                        if(!assertion.result){
+                            failed = testFailureMarkup.
+                                replace(/{{explain}}/, assertion.explain).
+                                replace(/{{stacktrace}}/, stackTrace(assertion.stackTrace));
+                        }
+                    });
+                    html = html.slice(0, -5) + failed + html.slice(-5);
+                }else if(item.totFailed === -1){
+                    failed = testFailureMarkup.
+                        replace(/{{explain}}/, 'test timed out').
+                        replace(/{{stacktrace}}/, stackTrace(item.stackTrace));
+                    html = html.slice(0, -5) + failed + html.slice(-5);
+                }
+                el = document.getElementById(item.parentGroup.path);
+                el.insertAdjacentHTML('beforeend', html);
+            }    
+        });
+        document.getElementById('preamble-results-container').style.display = 'block';
+        domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
+        //TODO(Jeff): Should use event delegation here!
+        as = document.getElementsByTagName('a');
+        for(i = 0, len = as.length; i < len; i++){
+            domAddEventHandler(as[i], 'click', runClickHandler);
+        }
+    };
+
+    /**
+     * Events - publish/subscribe.
+     */
+    pubsub = (function(){
+        //subscribers is a hash of hashes:
+        //{'some topic': {'some token': callbackfunction, 'some token': callbackfunction, . etc. }, . etc }
+        var subscribers = {}, totalSubscribers = 0, lastToken = 0;
+        //Generates a unique token.
+        function getToken(){
+            return lastToken += 1;
+        }
+        //Returns a function bound to a context.
+        function bindTo(fArg, context){
+            return fArg.bind(context);
+        }
+        //Returns a function which wraps subscribers callback in a setTimeout callback.
+        function makeAsync(topic, callback){
+            return function(data){
+                setTimeout(function(){
+                    callback(topic, data);
+                }, 1);
+            };
+        }
+        //Adds a subscriber for a topic with a callback
+        //and returns a token to allow unsubscribing.
+        function on(topic, handler, context){
+            var token = getToken(),
+                boundAsyncHandler;
+                boundAsyncHandler = context && makeAsync(topic, bindTo(handler, context)) || makeAsync(topic, handler);
+            //Add topic to subscribers if it doesn't already have it.
+            if(!subscribers.hasOwnProperty(topic)){
+                subscribers[topic] = {};
+            }
+            //Add subscriber to subscribers.
+            subscribers[topic][token] = boundAsyncHandler;
+            //Maintain a count of total subscribers.
+            totalSubscribers++;
+            //Return the token to the caller so it can unsubscribe.
+            return token;
+        }
+        //Removes a subscriber for a topic.
+        function off(topic, token){
+            if(subscribers.hasOwnProperty(topic)){
+                if(subscribers[topic].hasOwnProperty(token)){
+                    delete subscribers[topic][token];
+                    totalSubscribers--;
+                }
+            }
+        }
+        //Publishes an event for a topic with optional data.
+        function emit(topic, data){
+            var token;
+            if(subscribers.hasOwnProperty(topic)){
+                for(token in subscribers[topic] ){
+                    if(subscribers[topic].hasOwnProperty(token)){
+                        if(arguments.length > 1){
+                            subscribers[topic][token](data);
+                        } else{
+                            subscribers[topic][token]();
+                        }
+                    }
+                }
+            }
+        }
+        //Returns the total subscribers count.
+        function getCountOfSubscribers(){
+            return totalSubscribers;
+        }
+        //Returns the subscriber count by topic.
+        function getCountOfSubscribersByTopic(topic){
+            var prop, count = 0;
+            if(subscribers.hasOwnProperty(topic)){
+                for(prop in subscribers[topic]){
+                    if(subscribers[topic].hasOwnProperty(prop)){
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+        //Returns the object that exposes the pubsub API.
+        return {
+            on: on,
+            off: off,
+            emit: emit,
+            getCountOfSubscribers: getCountOfSubscribers,
+            getCountOfSubscribersByTopic: getCountOfSubscribersByTopic
+        };
+    }());
+
+    //Convenience method for registering handlers.
+    function on(topic, handler, context){
+        pubsub.on(topic, handler, context);
+    }
+
+    //Convenience method for emiting and event.
+    function emit(topic, data){
+        if(data){
+            pubsub.emit(topic, data);
+        }else{
+            pubsub.emit(topic);
+        }
+    }
+
+    /**
+     * Internal event handling.
+     */
+
+    //Initialize.
+    on('start', function(){
+        //TODO(Jeff): comment out next line.
+        window.queue = queue;
+        tests = queue.filter(function(item){
+            return item instanceof Test;
+        });
+        tests.result = true;
+        tests.totTestsFailed = 0;
+        if(tests.length){
+            emit('runTests', function(){
+                emit('end');
+            });
+        }else{
+            //TODO(Jeff): this should throw with a message that there are no tests to run.
+            emit('end');
+        }
+    });
+
+    on('runTests', function(topic, callback){
+        testsIterator = iteratorFactory(tests);
+
+        function runTest(test, callback){
+            test.run(function(){
+                callback();
+            });
+        }
+
+        function runTests(callback){
+            if(testsIterator.hasNext()){
+                runTest(testsIterator.getNext(), function(){
+                    runTests(callback);
+                });
+            }else{
+                callback();
+            }
+        }
+
+        runTests(function(){
+            callback();
+        });
+    });
+
+    on('end', function(){
+        //TODO(Jeff): comment out next line.
+        window.tests = tests;
+        //TODO(Jeff): comment out next line.
+        window.failedTests = tests.filter(function(t){
+            return t.totFailed || t.timedOut;
+        });
+        //Record how many tests failed.
+        tests.totTestsFailed = tests.reduce(function(prevValue, t){
+            return t.timedOut || t.totFailed ? prevValue + 1 : prevValue;
+        }, 0);
+        tests.result = tests.totTestsFailed === 0;
+        queue.end = Date.now();
+        tests.duration = queue.end - queue.start;
+        reporter.coverage(tests);
+        reporter.summary(tests);
+        reporter.details(queue);
+    });
+
+    /**
+     * An iterator for iterating over arrays.
+     * @param {array} argArray The array to be iterated over.
+     */
+    function iteratorFactory(argArray){
+        var currentIndex = -1;
+        if(!Array.isArray(argArray)){
+            throw new Error('iteratorFactory expects an array.');
+        }
+        function hasNext(){
+            if(argArray.length && currentIndex + 1 < argArray.length){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        function next(){
+            if(hasNext()){
+                currentIndex++;
+                return true;
+            }else{
+                return false;
+            }
+        }
+        function get(){
+            return argArray.length && currentIndex >= 0 && currentIndex < argArray.length && argArray[currentIndex];
+        }
+        function getNext(){
+            if(next()){
+                return get();
+            }
+        }
+        function peekForward(){
+            if(currentIndex + 1 < argArray.length){
+                return argArray[currentIndex + 1];
+            }
+        }
+        function peekBackward() {
+            return argArray[currentIndex - 1];
+        }
+        var iterator = {
+            hasNext: hasNext,
+            next: next,
+            get: get,
+            getNext: getNext,
+            peekForward: peekForward,
+            peekBackward: peekBackward
+        };
+        return iterator;
+    }
+
+    /**
+     * Process for building the queue.
+     * @param {array} - queue, filled with Groups and Tests.
+     * @param {function} - trhowException, a function called to throw an exception.
+     */
     queueBuilder = (function(queue, throwException){
 
-        var runner = {};
-        var groupStack = [];
-
-        //runner.totGroups = 0;
-        //runner.totFilteredGroups = 0;
-        //runner.totTests = 0;
-        //runner.totFilteredTests = 0;
-        //runner.totAssertions = 0;
+        var runner = {},
+            groupStack = [],
+            uniqueId = (function(){
+                var i = 0;
+                return function(){
+                    return i += 1;
+                };
+            }());
 
         groupStack.getPath = function(){
             var result = this.reduce(function(prevValue, group){
-                return prevValue + '/' + group.label;
+                return prevValue + '/' + group.id;
             }, '');
             return result;
         };
@@ -265,13 +720,14 @@
 
         runner.group = function(label, callback){
             var grp,
+                id,
                 path;
             if(arguments.length !== 2){
                 throwException('requires 2 arguments, found ' + arguments.length);
             }
-            path = groupStack.getPath();
-            path +=  '/' + label;
-            grp = new Group(groupStack, path, label, callback, !filter('group', {group: label}));
+            id = uniqueId();
+            path = groupStack.getPath() + '/' + id;
+            grp = new Group(groupStack, id, path, label, callback, !filter('group', {group: label}));
             queue.push(grp);
             groupStack.push(grp);
             grp.callback();
@@ -280,40 +736,32 @@
 
         runner.beforeEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
-            //if(arguments.length === 2){
-            //    //parentGroup.asyncBeforeTestInterval = arguments[0];
-            //    parentGroup.beforeEachTest = arguments[1];
-            //}else{
-            //    parentGroup.beforeEachTest = callback;
-            //}
             parentGroup.beforeEachTest = callback;
         };
 
         runner.afterEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
-            //if(arguments.length === 2){
-            //    //parentGroup.asyncAfterTestInterval = arguments[0];
-            //    parentGroup.afterEachTest = arguments[1];
-            //}else{
-            //    parentGroup.afterEachTest = callback;
-            //}
             parentGroup.afterEachTest = callback;
         };
 
         runner.test = function(label, timeLimit, callback){
             var tst,
                 parentGroup,
+                id,
                 path,
                 tl,
-                cb;
+                cb,
+                stackTrace;
             if(arguments.length < 2){
                 throwException('requires 2 or 3 arguments, found ' + arguments.length);
             }
             tl = arguments.length === 3 && timeLimit || config.asyncTestDelay;
             cb = arguments.length === 3 && callback || arguments[1];
             parentGroup = groupStack[groupStack.length - 1];
-            path = groupStack.getPath();
-            tst = new Test(groupStack, path, label, tl, cb, !filter('test', {group: path, test: label}));
+            id = uniqueId();
+            path = groupStack.getPath() + '/' + id;
+            stackTrace = stackTraceFromError();
+            tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, !filter('test', {group: path, test: label}));
             queue.push(tst);
         };
 
@@ -342,7 +790,11 @@
         document.getElementById('preamble-status-container').innerHTML = html;
     }
 
-    //Makes words plural if their counts are 0 or greater than 1.
+    /**
+     * Makes words plural if their counts are 0 or greater than 1.
+     * @param {string} word A word to be pluralized.
+     * @param {integer} count An integer used to decide if word is to be pluralized.
+     */
     function pluralize(word, count){
         var pluralizer = arguments === 2 ? arguments[1] : 's';
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
@@ -363,7 +815,9 @@
         return result;
     }
 
-    //Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+    /**
+     * Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+     */
     function domAddEventHandler(el, event, handler){
         if( el.addEventListener){
             el.addEventListener(event, handler);
@@ -372,9 +826,11 @@
         }
     }
 
-    //Click event handler for the hidePassedTests checkbox.
+    /**
+     * Click handler for the hide passed tests checkbox.
+     */
     function hptClickHandler(){
-        var elDivs = document.getElementsByTagName('div'),
+        var elUls = document.getElementsByTagName('ul'),
             i,
             ii,
             l,
@@ -382,13 +838,13 @@
             attributes,
             elContainers = [],
             classes = '';
-        for(i = 0, l= elDivs.length; i < l; i++){
-            attributes = elDivs[i].getAttribute('class');
+        for(i = 0, l= elUls.length; i < l; i++){
+            attributes = elUls[i].getAttribute('class');
             if(attributes && attributes.length){
                 attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
                     if(attributes[ii] === 'group-container' || attributes[ii] === 'tests-container' || attributes[ii] === 'assertion-container'){
-                        elContainers.push(elDivs[i]);
+                        elContainers.push(elUls[i]);
                     }
                 }
             }
@@ -502,57 +958,29 @@
                 filters: [],
                 autoStart: true
             },
-            configArg = arguments && arguments[0],
-            s;
+            configArg = arguments && arguments[0];
         //Ignore configuration once testing has started.
         if(configArg && queue.length){
             return;
         }
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
-        //Totals
-        //queue.totTests = 0;
-        //queue.totAssertions = 0;
         //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
         runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test')};
         //Capture exception's stack trace property.
         setStackTraceProperty();
         //Handle global errors.
         window.onerror = errorHandler;
-        //Add markup structure to the DOM.
-        s = '<header>' + 
-            '<div class="banner"><h1><span id="name">{{name}}</span> - <span><i>Preamble</i><span> <span><i id="version">{{version}}</i></span></h1></div>' + 
-            '<div id="time"><span>Completed in <span title="total test time/total elapsed time">{{tt}}ms/{{et}}ms</span></div>' +
-            '</header>' +
-            '<div class="container">' + '<section id="preamble-status-container">' + '<div class="summary">Building queue. Please wait...</div>' + '</section>' + 
-            '<section id="preamble-results-container"></section></div>';
-        //Set the config name.
-        s = s.replace(/{{name}}/, config.name);
-        //Set the version.
-        s = s.replace(/{{version}}/, version);
-        document.getElementById('preamble-test-container').innerHTML = s;
-        //Append the ui test container.
-        document.getElementById('preamble-ui-container').innerHTML = '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>';
         //If the windowGlabals config option is false then window globals will
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
             window.configure = configure;
             window.group = queueBuilder.group;
             window.when = queueBuilder.group;
-            //window.beforeEachTest = queueBuilder.beforeEachTest;
             window.beforeEach = queueBuilder.beforeEachTest;
-            //window.asyncBeforeEachTest = queueBuilder.asyncBeforeEachTest;
-            //window.beforeEachAsync = queueBuilder.asyncBeforeEachTest;
-            //window.afterEachTest = queueBuilder.afterEachTest;
             window.afterEach = queueBuilder.afterEachTest;
-            //window.asyncAfterEachTest = queueBuilder.asyncAfterEachTest;
-            //window.afterEachAsync = queueBuilder.asyncAfterEachTest;
             window.test = queueBuilder.test;
             window.then = queueBuilder.test;
-            //window.asyncTest = queueBuilder.asyncTest;
-            //window.thenAsync= queueBuilder.asyncTest;
-            //window.whenAsyncDone = whenAsyncDone;
-            //window.whenDone = whenAsyncDone;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -568,20 +996,10 @@
                 configure: configure,
                 group: queueBuilder.group,
                 when: queueBuilder.group,
-                //beforeEachTest: queueBuilder.beforeEachTest,
                 beforeEach: queueBuilder.beforeEachTest,
-                //asyncBeforeEachTest: queueBuilder.asyncBeforeEachTest,
-                //beforeEachAsync: queueBuilder.asyncBeforeEachTest,
-                //afterEachTest: queueBuilder.afterEachTest,
                 afterEach: queueBuilder.afterEachTest,
-                //asyncAfterEachTest: queueBuilder.asyncAfterEachTest,
-                //afterEachAsync: queueBuilder.asyncAfterEachTest,
                 test: queueBuilder.test,
                 then: queueBuilder.test,
-                //asyncTest: queueBuilder.asyncTest,
-                //thenAsync: queueBuilder.asyncTest,
-                //whenAsyncDone: whenAsyncDone,
-                //whenDone: whenAsyncDone,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
                 proxy: proxy,
@@ -603,26 +1021,8 @@
         window.Preamble.__ext__ = {};
         //Expose config options to external processes.
         window.Preamble.__ext__.config = config;
-    }
-
-    function showResultsSummary(tests){
-        var html,
-            el,
-            s;
-        
-        el = document.getElementById('time');
-        s = el.innerHTML;
-        s = s.replace(/{{tt}}/, tests.duration);
-        s = s.replace(/{{et}}/, tests.duration);
-        el.innerHTML = s;
-        el.style.display = 'block';
-        showCoverage(tests);
-        if(tests.result){
-            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + tests.length + pluralize(' test', tests.length ) + ' passed' + '</div>';
-        }else{
-            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
-        }
-        document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
+        //publish config event.
+        emit('configchanged', {name: config.name, uiTestContainerId: config.uiTestContainerId});
     }
 
     //Returns the "line" in the stack trace that points to the failed assertion.
@@ -632,76 +1032,11 @@
         //... and filter out all references to preamble.js.
         return matches.reduce(function(previousValue, currentValue){
             if(currentValue.search(/preamble.js/) === -1){
-                return previousValue + '<p class="stacktrace">at ' + currentValue + '</p>';
+                return previousValue + '<p class="stacktrace">' + currentValue + '</p>';
             }else{
                 return previousValue;
             }
         }, '');
-    }
-
-    function showResultsDetails(results){
-        var groupLabel = '',
-            testLabel = '',
-            html = '', 
-            //Hide passed tests.
-            hidePassed = document.getElementById('hidePassedTests').checked,
-            //Titles for anchor tags.
-            groupTile = 'title="Click here to filter by this group."',
-            testTitle = 'title="Click here to filter by this test."',
-            as,
-            i,
-            len;
-        document.getElementById('preamble-results-container').style.display = 'block';
-        results.forEach(function(result){
-            //Concat group and label when comparing to avoid collisions with the previous test should it have the same label.
-            if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
-                if(html.length){
-                    html += '</div>';
-                }
-            }
-            if(result.groupLabel !== groupLabel){
-                if(html.length){
-                    html += '</div>';
-                }
-            }
-            if(result.groupLabel !== groupLabel){
-                html += '<div class="group-container' + (hidePassed && result.groupResult ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
-                    encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
-                groupLabel = result.groupLabel;
-                testLabel = '';
-            }
-            if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
-                html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
-                    '" ' + 'data-passed="' + result.testResult + '"><a class="' + (!result.testResult ? ' failed' : 'passed') + '" href="?group=' +
-                    encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
-                    ' (' + result.testDuration + 'ms)' + '</a>';
-                testLabel = result.testLabel;
-            }
-            //When evaluating and using result.result here, it first has to be converted into a boolean using either !result.result or !!result.result.
-            //(Using '!!', a.k.a. the double bang, converts result.result into a boolean value via result.result's truthyness.)
-            //This is because result.result isn't restricted to boolean true/false, and can be any valid JavaScript primitive or object.
-            //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
-            if(!result.result){
-                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed"' + '>Error: "' +
-                    result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
-            }else{
-                if(!config.hideAssertions){
-                    html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-                        '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed"' + '>' +
-                        result.explain + ' passed</div></div>';
-                }
-            }
-        });
-        html += '</div></div>';
-        document.getElementById('preamble-results-container').innerHTML = html;
-        domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
-        //TODO(Jeff): Should use event delegation here!
-        as = document.getElementsByTagName('a');
-        for(i = 0, len = as.length; i < len; i++){
-            domAddEventHandler(as[i], 'click', runClickHandler);
-        }
     }
 
     function compareArrays(a, b){
@@ -1131,251 +1466,22 @@
         argObject[argProperty] = snoopster;
     }
 
-    function showCoverage(tests){
-        var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
-            elStatusContainer = document.getElementById('preamble-status-container'),
-            coverage = '<div id="coverage">' + show + ' {{tt}}' +
-                '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
-                '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
-                ' - <a id="runAll" href="?"> run all</a>' +
-                '</div>',
-            hpt;
-        //Show groups and tests coverage in the header.
-        coverage = coverage.replace(/{{tt}}/, tests.length + pluralize(' test', tests.length));
-        hpt = loadPageVar('hpt');
-        hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
-        coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
-        //Preserve error message that replaces 'Building queue. Please wait...'.
-        if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
-            elStatusContainer.innerHTML = coverage;
-        }else{
-            elStatusContainer.innerHTML += coverage;
-        }
-        document.getElementById('coverage').style.display = 'block';
-    }
-
     /**
-     * It all starts here!!!
+     * It all starts here!
      */
 
     //Record the start time.
     queue.start = Date.now();
 
+    //Create a reporter.
+    reporter = new HtmlReporter();
+
     //Configure the runtime environment.
     configure();
 
     /**
-     * Events - publish/subscribe.
-     */
-
-    var pubsub = window.Preamble.__ext__.pubsub = (function(){
-        //subscribers is a hash of hashes:
-        //{'some topic': {'some token': callbackfunction, 'some token': callbackfunction, . etc. }, . etc }
-        var subscribers = {}, totalSubscribers = 0, lastToken = 0;
-        //Generates a unique token.
-        function getToken(){
-            return lastToken += 1;
-        }
-        //Returns a function bound to a context.
-        function bindTo(fArg, context){
-            return fArg.bind(context);
-        }
-        //Returns a function which wraps subscribers callback in a setTimeout callback.
-        function makeAsync(topic, callback){
-            return function(data){
-                setTimeout(function(){
-                    callback(topic, data);
-                }, 1);
-            };
-        }
-        //Adds a subscriber for a topic with a callback
-        //and returns a token to allow unsubscribing.
-        function on(topic, handler){
-            var token = getToken(),
-                boundAsyncHandler = makeAsync(topic, bindTo(handler, window.Preamble.__ext__));
-            //Add topic to subscribers if it doesn't already have it.
-            if(!subscribers.hasOwnProperty(topic)){
-                subscribers[topic] = {};
-            }
-            //Add subscriber to subscribers.
-            subscribers[topic][token] = boundAsyncHandler;
-            //Maintain a count of total subscribers.
-            totalSubscribers++;
-            //Return the token to the caller so it can unsubscribe.
-            return token;
-        }
-        //Removes a subscriber for a topic.
-        function off(topic, token){
-            if(subscribers.hasOwnProperty(topic)){
-                if(subscribers[topic].hasOwnProperty(token)){
-                    delete subscribers[topic][token];
-                    totalSubscribers--;
-                }
-            }
-        }
-        //Publishes an event for a topic with optional data.
-        function emit(topic, data){
-            var token;
-            if(subscribers.hasOwnProperty(topic)){
-                for(token in subscribers[topic] ){
-                    if(subscribers[topic].hasOwnProperty(token)){
-                        if(arguments.length > 1){
-                            subscribers[topic][token](data);
-                        } else{
-                            subscribers[topic][token]();
-                        }
-                    }
-                }
-            }
-        }
-        //Returns the total subscribers count.
-        function getCountOfSubscribers(){
-            return totalSubscribers;
-        }
-        //Returns the subscriber count by topic.
-        function getCountOfSubscribersByTopic(topic){
-            var prop, count = 0;
-            if(subscribers.hasOwnProperty(topic)){
-                for(prop in subscribers[topic]){
-                    if(subscribers[topic].hasOwnProperty(prop)){
-                        count++;
-                    }
-                }
-            }
-            return count;
-        }
-        //Returns the object that exposes the pubsub API.
-        return {
-            on: on,
-            off: off,
-            emit: emit,
-            getCountOfSubscribers: getCountOfSubscribers,
-            getCountOfSubscribersByTopic: getCountOfSubscribersByTopic
-        };
-    }());
-
-    /**
-     * Internal event handling.
-     */
-
-    //Convenience method for registering handlers.
-    function on(topic, handler){
-        pubsub.on(topic, handler);
-    }
-
-    //Convenience method for emiting and event.
-    function emit(topic, data){
-        pubsub.emit(topic, data);
-    }
-
-    function iteratorFactory(argArray){
-        var currentIndex = -1;
-        if(!Array.isArray(argArray)){
-            throw new Error('iteratorFactory expects an array.');
-        }
-        function hasNext(){
-            if(argArray.length && currentIndex + 1 < argArray.length){
-                return true;
-            }else{
-                return false;
-            }
-        }
-        function next(){
-            if(hasNext()){
-                currentIndex++;
-                return true;
-            }else{
-                return false;
-            }
-        }
-        function get(){
-            return argArray.length && currentIndex >= 0 && currentIndex < argArray.length && argArray[currentIndex];
-        }
-        function getNext(){
-            if(next()){
-                return get();
-            }
-        }
-        function peekForward(){
-            if(currentIndex + 1 < argArray.length){
-                return argArray[currentIndex + 1];
-            }
-        }
-        function peekBackward() {
-            return argArray[currentIndex - 1];
-        }
-        var iterator = {
-            hasNext: hasNext,
-            next: next,
-            get: get,
-            getNext: getNext,
-            peekForward: peekForward,
-            peekBackward: peekBackward
-        };
-        return iterator;
-    }
-
-    //Initialize.
-    on('start', function(){
-        tests = queue.filter(function(item){
-            return item instanceof Test;
-        });
-        tests.result = true;
-        tests.totTestsFailed = 0;
-        if(tests.length){
-            emit('runTests', function(){
-                emit('end');
-            });
-        }else{
-            //TODO(Jeff): this should throw with a message that there are no tests to run.
-            emit('end');
-        }
-    });
-
-    on('runTests', function(topic, callback){
-        testsIterator = iteratorFactory(tests);
-
-        function runTest(test, callback){
-            test.run(function(){
-                callback();
-            });
-        }
-
-        function runTests(callback){
-            if(testsIterator.hasNext()){
-                runTest(testsIterator.getNext(), function(){
-                    runTests(callback);
-                });
-            }else{
-                callback();
-            }
-        }
-
-        runTests(function(){
-            callback();
-        });
-    });
-
-    on('end', function(){
-        window.tests = tests;
-        window.failedTests = tests.filter(function(t){
-            return t.totFailed || t.timedOut;
-        });
-        //Record how many tests failed.
-        tests.totTestsFailed = tests.reduce(function(prevValue, t){
-            return t.timedOut || t.totFailed ? prevValue + 1 : prevValue;
-        }, 0);
-        tests.result = tests.totTestsFailed === 0;
-        queue.end = Date.now();
-        tests.duration = queue.end - queue.start;
-        showResultsSummary(tests);
-        //showResultsDetails(mapGroupsToResults());
-    });
-
-    /**
      * Wait while the queue is loaded.
      */
-
     //Catch errors.
     try{
         //Wait while the queue is built as scripts call group function.

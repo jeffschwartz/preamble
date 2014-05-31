@@ -103,15 +103,15 @@ section:first-child{
 .group-container{
     padding-left: 10px;
     padding-right: 10px;
-    padding-bottom: 10px;
     font-weight: bold;
     font-size: 1rem;
     line-height: 1rem;
+    list-style: none;
 }
-/*.group-container:first-child {*/
-/*    padding-top: 0;*/
-/*}*/
-.group-container a{
+.group-container li{
+    padding-top: 5px;
+}
+.group-container li a{
     text-decoration: none;
 }
 .group-container a:hover{
@@ -121,8 +121,16 @@ section:first-child{
     color: @groups-tests-color;
 }
 .tests-container{
-    padding: 5px 20px 0 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1rem;
+    list-style: none;
 }
+/*.tests-container:first-child{*/
+/*    padding-bottom: 10px;*/
+/*}*/
 .tests-container a{
     text-decoration: none;
 }
@@ -145,7 +153,16 @@ section:first-child{
     font-weight: bold;
 }
 .stacktrace-container {
-    padding: 0 20px 0 40px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1rem;
+    list-style: none;
+}
+.stacktrace-container p {
+    padding: 0;
+    line-height: 1rem;
 }
 .stacktrace {
     margin: 0;
@@ -157,5 +174,5 @@ section:first-child{
     top: -10000px;
     left: -10000px;
     width: 1000px;
-    height: 1000px
+    height: 1000px;
 }
