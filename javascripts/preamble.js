@@ -405,7 +405,7 @@
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
             testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this test.">{{label}}</a></li>',
-            testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed</li><li class="failed bold">{{stacktrace}}</li></ul>',
+            testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
             failed = '',
             parentGroup,
