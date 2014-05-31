@@ -112,12 +112,6 @@ section:first-child {
   line-height: 1rem;
   list-style: none;
 }
-.group-container:first-child {
-  padding-bottom: 10px;
-}
-/*.group-container:first-child {*/
-/*    padding-top: 0;*/
-/*}*/
 .group-container li a {
   text-decoration: none;
 }

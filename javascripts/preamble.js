@@ -79,12 +79,13 @@
      * @param {function} callback
      * @param {boolean} bypass
      */
-    function Test(parentGroups, id, path, label, asyncTestDelay, callback, bypass){
+    function Test(parentGroups, id, path, label, stackTrace, asyncTestDelay, callback, bypass){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
         this.id = id;
         this.path = path;
         this.label = label;
+        this.stackTrace = stackTrace;
         this.asyncTestDelay = asyncTestDelay;
         this.callback = callback;
         this.bypass = bypass;
@@ -450,6 +451,11 @@
                         }
                     });
                     html = html.slice(0, -5) + failed + html.slice(-5);
+                }else if(item.totFailed === -1){
+                    failed = testFailureMarkup.
+                        replace(/{{explain}}/, 'test timed out').
+                        replace(/{{stacktrace}}/, stackTrace(item.stackTrace));
+                    html = html.slice(0, -5) + failed + html.slice(-5);
                 }
                 el = document.getElementById(item.parentGroup.path);
                 el.insertAdjacentHTML('beforeend', html);
@@ -744,7 +750,8 @@
                 id,
                 path,
                 tl,
-                cb;
+                cb,
+                stackTrace;
             if(arguments.length < 2){
                 throwException('requires 2 or 3 arguments, found ' + arguments.length);
             }
@@ -753,7 +760,8 @@
             parentGroup = groupStack[groupStack.length - 1];
             id = uniqueId();
             path = groupStack.getPath() + '/' + id;
-            tst = new Test(groupStack, id, path, label, tl, cb, !filter('test', {group: path, test: label}));
+            stackTrace = stackTraceFromError();
+            tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, !filter('test', {group: path, test: label}));
             queue.push(tst);
         };
 
