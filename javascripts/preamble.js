@@ -25,7 +25,7 @@
         testsIterator;
 
     //Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-   //Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
+    //Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
     //TODO(Jeff): remove polyfil once phantomjs supports bind!
     if (!Function.prototype.bind) {
         Function.prototype.bind = function (oThis) {
@@ -463,7 +463,7 @@
         });
         document.getElementById('preamble-results-container').style.display = 'block';
         domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
-        ////TODO(Jeff): Should use event delegation here!
+        //TODO(Jeff): Should use event delegation here!
         as = document.getElementsByTagName('a');
         for(i = 0, len = as.length; i < len; i++){
             domAddEventHandler(as[i], 'click', runClickHandler);
@@ -1038,71 +1038,6 @@
             }
         }, '');
     }
-
-    //function showResultsDetails(results){
-    //    var groupLabel = '',
-    //        testLabel = '',
-    //        html = '', 
-    //        //Hide passed tests.
-    //        hidePassed = document.getElementById('hidePassedTests').checked,
-    //        //Titles for anchor tags.
-    //        groupTile = 'title="Click here to filter by this group."',
-    //        testTitle = 'title="Click here to filter by this test."',
-    //        as,
-    //        i,
-    //        len;
-    //    document.getElementById('preamble-results-container').style.display = 'block';
-    //    results.forEach(function(result){
-    //        //Concat group and label when comparing to avoid collisions with the previous test should it have the same label.
-    //        if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
-    //            if(html.length){
-    //                html += '</div>';
-    //            }
-    //        }
-    //        if(result.groupLabel !== groupLabel){
-    //            if(html.length){
-    //                html += '</div>';
-    //            }
-    //        }
-    //        if(result.groupLabel !== groupLabel){
-    //            html += '<div class="group-container' + (hidePassed && result.groupResult ? ' hidden' : '') + 
-    //                '" ' + 'data-passed="' + result.groupResult + '"><a class="group' + (!result.groupResult ? ' failed' : '') + '" href="?group=' +
-    //                encodeURI(result.groupLabel) + '" ' + groupTile + '>' + result.groupLabel + ' (' + result.groupDuration + 'ms)' + '</a>';
-    //            groupLabel = result.groupLabel;
-    //            testLabel = '';
-    //        }
-    //        if(result.groupLabel + result.testLabel !== groupLabel + testLabel){
-    //            html += '<div class="tests-container' + (hidePassed && result.testResult ? ' hidden' : '') +
-    //                '" ' + 'data-passed="' + result.testResult + '"><a class="' + (!result.testResult ? ' failed' : 'passed') + '" href="?group=' +
-    //                encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '" ' + testTitle + '>' + result.testLabel + 
-    //                ' (' + result.testDuration + 'ms)' + '</a>';
-    //            testLabel = result.testLabel;
-    //        }
-    //        //When evaluating and using result.result here, it first has to be converted into a boolean using either !result.result or !!result.result.
-    //        //(Using '!!', a.k.a. the double bang, converts result.result into a boolean value via result.result's truthyness.)
-    //        //This is because result.result isn't restricted to boolean true/false, and can be any valid JavaScript primitive or object.
-    //        //For example, result.result is an object and not a boolen when isTruthy({},..) is called.
-    //        if(!result.result){
-    //            html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-    //                '" ' + 'data-passed="' + !!result.result + '"><div class="assertion failed"' + '>Error: "' +
-    //                result.explain + '" failed:</div></div><div class="stacktrace-container failed bold">' + stackTrace(result.stackTrace) + '</div>';
-    //        }else{
-    //            if(!config.hideAssertions){
-    //                html += '<div class="assertion-container' + (hidePassed && !!result.result ? ' hidden' : '') + 
-    //                    '" ' + 'data-passed="' + !!result.result + '"><div class="assertion passed"' + '>' +
-    //                    result.explain + ' passed</div></div>';
-    //            }
-    //        }
-    //    });
-    //    html += '</div></div>';
-    //    document.getElementById('preamble-results-container').innerHTML = html;
-    //    domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
-    //    //TODO(Jeff): Should use event delegation here!
-    //    as = document.getElementsByTagName('a');
-    //    for(i = 0, len = as.length; i < len; i++){
-    //        domAddEventHandler(as[i], 'click', runClickHandler);
-    //    }
-    //}
 
     function compareArrays(a, b){
         var i,
