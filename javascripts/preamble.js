@@ -56,18 +56,33 @@
      * @param {string} path
      * @param {string} label
      * @param {function} callback
-     * @param {boolean} bypass
      */
-    function Group(parentGroups, id, path, label, callback, bypass){
+    function Group(parentGroups, id, path, label, callback){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.id = id;
         this.path = path;
         this.label = label; 
         this.callback = callback;
-        this.bypass = bypass;
         this.duration = 0;
         this.passed = true;
     }
+
+    /**
+     * Returns the concatenated labels from all parent groups. 
+     * @param {array} parents An array of parent groups.
+     */
+    Group.prototype.pathFromParentGroupLabels = function pathFromParentGroupLabels(){
+        /* jshint validthis: true */
+        var path;
+        if(!this.parentGroups.length){
+            return this.label;
+        }else{
+            path = this.parentGroups.reduce(function(prev, current){
+                return prev === '' && current.label || prev + ' ' + current.label;
+            }, '');
+            return path + ' ' + this.label;
+        }
+    };
 
     /**
      * A test.
@@ -77,9 +92,8 @@
      * @param {string} label
      * @param {integer} asyncTestDelay
      * @param {function} callback
-     * @param {boolean} bypass
      */
-    function Test(parentGroups, id, path, label, stackTrace, asyncTestDelay, callback, bypass){
+    function Test(parentGroups, id, path, label, stackTrace, asyncTestDelay, callback){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
         this.id = id;
@@ -88,7 +102,6 @@
         this.stackTrace = stackTrace;
         this.asyncTestDelay = asyncTestDelay;
         this.callback = callback;
-        this.bypass = bypass;
         this.assertions = []; //contains assertions
         this.duration = 0;
         this.befores = []; //the befores to call prior to running this test
@@ -402,9 +415,9 @@
         var rc = document.getElementById('preamble-results-container'),
             hidePassed = document.getElementById('hidePassedTests').checked,
             groupContainerMarkup = '<ul class="group-container{{hidden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
-            groupAnchorMarkup = '<li><a class="group{{passed}}" href="{{path}}" title="Click here to filter by this group.">{{label}}</a></li>',
+            groupAnchorMarkup = '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
-            testAnchorMarkup = '<li><a class="{{passed}}" href="{{path}}" title="Click here to filter by this test.">{{label}}</a></li>',
+            testAnchorMarkup = '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
             testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
             failed = '',
@@ -422,7 +435,7 @@
                     replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.
                     replace(/{{passed}}/, item.passed ? '' : ' failed').
-                    replace('{{path}}', item.path).
+                    replace('{{grouphref}}', encodeURI(item.pathFromParentGroupLabels())).
                     replace(/{{label}}/, item.label) + html.slice(-5);
                 html = html; 
                 if(!item.parentGroups.length){
@@ -439,7 +452,8 @@
                     replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.
                     replace(/{{passed}}/, item.totFailed ? 'failed' : 'passed').
-                    replace('{{path}}', item.path).
+                    replace('{{groupheref}}', encodeURI(item.parentGroup.pathFromParentGroupLabels())).
+                    replace('{{testhref}}', encodeURI(item.label)).
                     replace(/{{label}}/, item.label) + html.slice(-5);
                 //Show failed assertions and their stacks.
                 if(item.totFailed > 0){
@@ -601,9 +615,13 @@
         testsIterator = iteratorFactory(tests);
 
         function runTest(test, callback){
-            test.run(function(){
+            if(test.bypass){
                 callback();
-            });
+            }else{
+                test.run(function(){
+                    callback();
+                });
+            }
         }
 
         function runTests(callback){
@@ -714,10 +732,36 @@
             return result;
         };
 
-        function filter(arg1, arg2){
-            return true;
+        /**
+         * Returns true if there is no run time filter
+         * or if obj matches the run time filter.
+         * Returns false otherwise.
+         * @param {object} obj, either a Test or a Group.
+         */
+        function filter(obj){
+            var path = '',
+                 s;
+            if(!runtimeFilter.group){
+                return true;
+            }else{
+                if(obj instanceof(Group)){
+                    path = obj.pathFromParentGroupLabels();
+                    s = path.substr(0, runtimeFilter.group.length);
+                    return s === runtimeFilter.group;
+                }else{
+                    path = obj.parentGroup.pathFromParentGroupLabels();
+                    s = path.substr(0, runtimeFilter.group.length);
+                    return s === runtimeFilter.group && runtimeFilter.test === '' || 
+                        s === runtimeFilter.group && runtimeFilter.test === obj.label;
+                }
+            }
         }
 
+        /**
+         * Registers a group.
+         * @param {string} label, describes the group/suite.
+         * @param {function} callback,  called to run befores, test and afters.
+         */
         runner.group = function(label, callback){
             var grp,
                 id,
@@ -727,13 +771,18 @@
             }
             id = uniqueId();
             path = groupStack.getPath() + '/' + id;
-            grp = new Group(groupStack, id, path, label, callback, !filter('group', {group: label}));
+            grp = new Group(groupStack, id, path, label, callback);
+            grp.bypass = !filter(grp);
             queue.push(grp);
             groupStack.push(grp);
             grp.callback();
             groupStack.pop();
         };
 
+        /**
+         * Registers a before each test process.
+         * @param {function} callback,  called before running a test. 
+         */
         runner.beforeEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
             parentGroup.beforeEachTest = callback;
@@ -744,6 +793,13 @@
             parentGroup.afterEachTest = callback;
         };
 
+        /**
+         * Registers a test.
+         * @param {string} label, describes the test/spec.
+         * @param {integer} timeLimit, optional, the amount of time
+         * the test is allowed to run before timing out the test.
+         * @param {function} callback, called to run the test.
+         */
         runner.test = function(label, timeLimit, callback){
             var tst,
                 parentGroup,
@@ -761,7 +817,8 @@
             id = uniqueId();
             path = groupStack.getPath() + '/' + id;
             stackTrace = stackTraceFromError();
-            tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, !filter('test', {group: path, test: label}));
+            tst = new Test(groupStack, id, path, label, stackTrace, tl, cb);
+            tst.bypass = !filter(tst);
             queue.push(tst);
         };
 
@@ -887,33 +944,33 @@
         }
     }
 
-    //Filtering.
-    function filter(level, labels){
-        //If there are no runtime and configuration filters then return true.
-        if(!runtimeFilter.group && !config.filters.length){
-            return true;
-        }
-        //Check if there is a run-time filter first, because it takes precendence over configuration filters
-        if(runtimeFilter.group){
-            switch(level){
-                case 'group':
-                    return runtimeFilter.group === labels.group;
-                case 'test':
-                    return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test);
-            }
-        }else{
-            switch(level){
-                case 'group':
-                    return config.filters.some(function(fltr){
-                        return fltr.group === labels.group;
-                    });
-                case 'test':
-                    return config.filters.some(function(fltr){
-                        return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test);
-                    });
-            }
-        }
-    }
+    ////Filtering.
+    //function filter(level, labels){
+    //    //If there are no runtime and configuration filters then return true.
+    //    if(!runtimeFilter.group && !config.filters.length){
+    //        return true;
+    //    }
+    //    //Check if there is a run-time filter first, because it takes precendence over configuration filters
+    //    if(runtimeFilter.group){
+    //        switch(level){
+    //            case 'group':
+    //                return runtimeFilter.group === labels.group;
+    //            case 'test':
+    //                return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test);
+    //        }
+    //    }else{
+    //        switch(level){
+    //            case 'group':
+    //                return config.filters.some(function(fltr){
+    //                    return fltr.group === labels.group;
+    //                });
+    //            case 'test':
+    //                return config.filters.some(function(fltr){
+    //                    return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test);
+    //                });
+    //        }
+    //    }
+    //}
 
     //Configuration is called once internally but may be called again if test script employs in-line configuration.
     function configure(){
