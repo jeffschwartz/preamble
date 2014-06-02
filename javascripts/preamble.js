@@ -364,7 +364,7 @@
      * @param {array} tests An array of Tests.
      */
     HtmlReporter.prototype.coverage = function(tests){
-        var show = runtimeFilter.group || config.filters.length ? 'Filtered' : 'Covered',
+        var show = runtimeFilter.group ? 'Filtered' : 'Covered',
             elStatusContainer = document.getElementById('preamble-status-container'),
             coverage = '<div id="coverage">' + show + ' {{tt}}' +
                 '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
@@ -997,9 +997,6 @@
          *
          *hideAssertions: (default: true) - set to false to show assertions.
          *
-         *filters: (default: []) - set 1 or more filters by adding hashes, e.g. {group: groupLabel, test: testLabel}.
-         *You can also use the wildcard '*' character for test to specify that all tests should be included in the filter.
-         *
          *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
          *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
          */
@@ -1012,7 +1009,6 @@
                 uiTestContainerId: 'ui-test-container', 
                 hidePassedTests: false,
                 hideAssertions: true,
-                filters: [],
                 autoStart: true
             },
             configArg = arguments && arguments[0];
@@ -1022,7 +1018,7 @@
         }
         config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
         config = configArg ? merge(config, configArg) : config;
-        //Capture run-time filters, if any. Run-time filters take precedent over configuration filters.
+        //Capture run-time filters, if any.
         runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test')};
         //Capture exception's stack trace property.
         setStackTraceProperty();
