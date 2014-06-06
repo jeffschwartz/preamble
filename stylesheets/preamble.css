@@ -83,6 +83,9 @@ header input:first-child {
 .failed {
   color: #ff4500;
 }
+.bypassed {
+  color: #d3d3d3;
+}
 p:last-child {
   margin-bottom: 0;
 }

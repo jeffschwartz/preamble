@@ -5,6 +5,7 @@
 @darker-color: #657b83;
 @passed-color: rgb(60, 179, 113);
 @failed-color: rgb(255,69,0);
+@bypassed-color: #d3d3d3;
 @groups-tests-color: rgb(51, 51, 51);
 html, body{
     font-family: Monaco, "Lucida Console", monospace;
@@ -82,6 +83,9 @@ header input:first-child {
 }
 .failed{
     color: @failed-color;
+}
+.bypassed{
+    color: @bypassed-color;
 }
 p:last-child{
     margin-bottom: 0;

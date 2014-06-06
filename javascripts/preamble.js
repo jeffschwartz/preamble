@@ -434,7 +434,7 @@
                     replace(/{{passed}}/, item.passed).
                     replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.
-                    replace(/{{passed}}/, item.passed ? '' : ' failed').
+                    replace(/{{passed}}/, item.bypass ? ' bypassed' : item.passed ? '' : ' failed').
                     replace('{{grouphref}}', encodeURI(item.pathFromParentGroupLabels())).
                     replace(/{{label}}/, item.label) + html.slice(-5);
                 html = html; 
@@ -452,7 +452,7 @@
                     replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.
                     replace(/{{passed}}/, item.totFailed ? 'failed' : 'passed').
-                    replace('{{groupheref}}', encodeURI(item.parentGroup.pathFromParentGroupLabels())).
+                    replace('{{grouphref}}', encodeURI(item.parentGroup.pathFromParentGroupLabels())).
                     replace('{{testhref}}', encodeURI(item.label)).
                     replace(/{{label}}/, item.label) + html.slice(-5);
                 //Show failed assertions and their stacks.
@@ -943,34 +943,6 @@
             window.location = href + lastChar + 'hpt=' + checked;
         }
     }
-
-    ////Filtering.
-    //function filter(level, labels){
-    //    //If there are no runtime and configuration filters then return true.
-    //    if(!runtimeFilter.group && !config.filters.length){
-    //        return true;
-    //    }
-    //    //Check if there is a run-time filter first, because it takes precendence over configuration filters
-    //    if(runtimeFilter.group){
-    //        switch(level){
-    //            case 'group':
-    //                return runtimeFilter.group === labels.group;
-    //            case 'test':
-    //                return runtimeFilter.group === labels.group && (runtimeFilter.test === '' || runtimeFilter.test === labels.test);
-    //        }
-    //    }else{
-    //        switch(level){
-    //            case 'group':
-    //                return config.filters.some(function(fltr){
-    //                    return fltr.group === labels.group;
-    //                });
-    //            case 'test':
-    //                return config.filters.some(function(fltr){
-    //                    return fltr.group === labels.group && (fltr.test === '*' || fltr.test === labels.test);
-    //                });
-    //        }
-    //    }
-    //}
 
     //Configuration is called once internally but may be called again if test script employs in-line configuration.
     function configure(){
