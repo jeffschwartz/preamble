@@ -132,16 +132,13 @@ section:first-child {
   line-height: 1rem;
   list-style: none;
 }
-/*.tests-container:first-child{*/
-/*    padding-bottom: 10px;*/
-/*}*/
 .tests-container a {
   text-decoration: none;
 }
 .tests-container a:hover {
   text-decoration: underline;
 }
-.test {
+.test-bypassed {
   color: #333333;
 }
 .assertion-container {
