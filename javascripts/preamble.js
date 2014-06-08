@@ -451,7 +451,7 @@
                     replace(/{{hidden}}/, hidePassed && item.totFailed === 0 ? ' hidden' : '').
                     replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.
-                    replace(/{{passed}}/, item.totFailed ? 'failed' : 'passed').
+                    replace(/{{passed}}/, item.bypass ? 'test-bypassed' : item.totFailed ? 'failed' : 'passed').
                     replace('{{grouphref}}', encodeURI(item.parentGroup.pathFromParentGroupLabels())).
                     replace('{{testhref}}', encodeURI(item.label)).
                     replace(/{{label}}/, item.label) + html.slice(-5);
