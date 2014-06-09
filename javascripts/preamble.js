@@ -1507,7 +1507,6 @@
     /**
      * Wait while the queue is loaded.
      */
-    //Catch errors.
     try{
         //Wait while the queue is built as scripts call group function.
         //Keep checking the queue's length until it is 'stable'.
