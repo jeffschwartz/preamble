@@ -930,7 +930,11 @@
         }
     }
 
-    //When the anchor tag "run all" is clicked, persist the hidePassedTests checkbox state as a query parameter.
+    /**
+     * When an anchor tag is clicked, persist the hidePassedTests checkbox 
+     * state as a query parameter and set the window location accordingly.
+     * @param {object} evt A DOM event object.
+     */
     function runClickHandler(evt){
         var checked = document.getElementById('hidePassedTests').checked,
             lastChar,
