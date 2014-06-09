@@ -1296,10 +1296,13 @@
         return config.uiTestContainerId;
     }
 
-    //A factory that creates a proxy wrapper for any function or object method property.
-    //Use it to determine if the wrapped function was called, how many times it was called,
-    //the arguments that were passed to it, the contexts it was called with and what it
-    //returned. Extremely useful for testing synchronous and asynchronous methods.
+    /**
+     * ***Note: deprecated as of v2. Use snoop instead.
+     * A factory that creates a proxy wrapper for any function or object method property.
+     * Use it to determine if the wrapped function was called, how many times it was called,
+     * the arguments that were passed to it, the contexts it was called with and what it
+     * returned. Extremely useful for testing synchronous and asynchronous methods.
+     */
     function proxy(){
         var proxyFactory = function(){
             //The wrapped function to call.
@@ -1412,6 +1415,10 @@
         return proxyFactory.apply(null, [].slice.call(arguments));
     }
 
+    /**
+     * @param {object} argObject Any object.
+     * @param {string} argProperty The name of the property of argObject to be snooped.
+     */
     function snoop(argObject, argProperty){
         var targetFn,
             snoopster,
@@ -1513,9 +1520,9 @@
         //Keep checking that config.autoStart is true.
         //Stable is defined by a time interval during which the length
         //of the queue remains constant, indicating that all groups
-        //have been loaded. Once stable, run the tests.
-        //config.autoStart can only be false if it set by an external
-        //process (e.g. Karma adapter).
+        //have been loaded. Once stable, emit the 'start' event.
+        //***Note: config.autoStart can only be false if it set by an 
+        //external process (e.g. Karma adapter).
         intervalId = setInterval(function(){
             if(queue.length === prevQueueCount){
                 if(queueStableCount > 1 && config.autoStart){
