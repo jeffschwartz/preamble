@@ -595,7 +595,7 @@
     //Initialize.
     on('start', function(){
         //TODO(Jeff): comment out next line.
-        window.queue = queue;
+        //window.queue = queue;
         tests = queue.filter(function(item){
             return item instanceof Test;
         });
@@ -606,7 +606,7 @@
                 emit('end');
             });
         }else{
-            //TODO(Jeff): this should throw with a message that there are no tests to run.
+            //TODO(Jeff): perhaps this should display a message that there are no tests to run.
             emit('end');
         }
     });
@@ -641,11 +641,11 @@
 
     on('end', function(){
         //TODO(Jeff): comment out next line.
-        window.tests = tests;
+        //window.tests = tests;
         //TODO(Jeff): comment out next line.
-        window.failedTests = tests.filter(function(t){
-            return t.totFailed || t.timedOut;
-        });
+        //window.failedTests = tests.filter(function(t){
+        //    return t.totFailed || t.timedOut;
+        //});
         //Record how many tests failed.
         tests.totTestsFailed = tests.reduce(function(prevValue, t){
             return t.timedOut || t.totFailed ? prevValue + 1 : prevValue;
