@@ -1,6 +1,6 @@
 /*jslint eqeq: true*/
 /*jshint strict: false*/
-/*global configure, when, beforeEach, afterEach, then, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
 /* 
  *This script uses BDD-like semantics. If you prefer TDD 
@@ -10,38 +10,38 @@
 configure({
     name: 'Sample Test Suite (BDD-Like)',
     hidePassedTests: true,
-    hideAssertions: true,
+    //hideAssertions: true,
     asyncTestDelay: 500
 });
 
-when('A nested test fails', function(){
-    then('a passing test looks like this', function(){
+describe('A nested test fails', function(){
+    it('a passing test looks like this', function(){
         equal(1, 1);
     });
-    when('and all parent groups are marked as having failed', function(){
-        then('even if they contain passing tests as this one', function(){
+    describe('and all parent groups are marked as having failed', function(){
+        it('even if they contain passing tests as this one', function(){
             equal(1,1);
         });
-        when('it is nested', function(){
-            then('it looks like this', function(){
+        describe('it is nested', function(){
+            it('it looks like this', function(){
                 equal(1, 0);
             });
         });
     });
 });
 
-when('1', function(){
-    when('2', function(){
-        then('2.1',function(){
+describe('1', function(){
+    describe('2', function(){
+        it('2.1',function(){
             isTrue(true);
         });
     });
-    then('1.1', function(){
+    it('1.1', function(){
         isTrue(true);
     });
 });
 
-when('A long running asynchronous before process that fails to complete on time', function(){
+describe('A long running asynchronous before process that fails to complete on time', function(){
     beforeEach(function(done){
         var self = this;
         setTimeout(function(){
@@ -49,12 +49,12 @@ when('A long running asynchronous before process that fails to complete on time'
             done();
         }, 1000);
     });
-    then('will time out and the test will be marked as having failed', function(){
+    it('will time out and the test will be marked as having failed', function(){
         equal(this.count, 100);
     });
 });
 
-when('A test can configure long running asynchronous before processes not to time out and fail', function(){
+describe('A test can configure long running asynchronous before processes not to time out and fail', function(){
     beforeEach(function(done){
         var self = this;
         setTimeout(function(){
@@ -62,12 +62,12 @@ when('A test can configure long running asynchronous before processes not to tim
             done();
         }, 1000);
     });
-    then('by passing a time out interval', 1010, function(){
+    it('by passing a time out interval', 1010, function(){
         equal(this.count, 100);
     });
 });
 
-when('A long running asynchronous after process that fails to complete on time', function(){
+describe('A long running asynchronous after process that fails to complete on time', function(){
     beforeEach(function(){
         this.count = 100;
     });
@@ -76,15 +76,15 @@ when('A long running asynchronous after process that fails to complete on time',
             done();
         }, 1000);
     });
-    then('will time out and the test will be marked as having failed', function(){
+    it('will time out and the test will be marked as having failed', function(){
         equal(this.count, 100);
     });
-    then('count should still be 100', function(){
+    it('count should still be 100', function(){
         equal(this.count, 100);
     });
 });
 
-when('A test can configure long running asynchronous after processes not to time out and fail', function(){
+describe('A test can configure long running asynchronous after processes not to time out and fail', function(){
     beforeEach(function(){
         this.count = 100;
     });
@@ -93,10 +93,10 @@ when('A test can configure long running asynchronous after processes not to time
             done();
         }, 1000);
     });
-    then('by passing a time out interval', 1010, function(){
+    it('by passing a time out interval', 1010, function(){
         equal(this.count, 100);
     });
-    then('count should be reset to 100', 1010, function(){
+    it('count should be reset to 100', 1010, function(){
         equal(this.count, 100);
     });
 });
@@ -105,9 +105,9 @@ when('A test can configure long running asynchronous after processes not to time
  * This test will take 1000 miliseconds to run but the test will
  * time out and fail because asyncTestDelay is set above to 500. 
  */
-when('A long running test that fails to complete on time', function(){
+describe('A long running test that fails to complete on time', function(){
     var count = 0;
-    then('will time out and marked as having failed', function(done){
+    it('will time out and marked as having failed', function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
@@ -126,9 +126,9 @@ when('A long running test that fails to complete on time', function(){
  * configuration or in your configuration file and it will
  * apply to all tests.
  */
-when('A long running test can change how long its timeout interval is', function(){
+describe('A long running test can change how long its timeout interval is', function(){
     var count = 0;
-    then('so it will not time out and fail.', 1010, function(done){
+    it('so it will not time out and fail.', 1010, function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
@@ -138,48 +138,48 @@ when('A long running test can change how long its timeout interval is', function
     });
 });
 
-when('A simple test', function(){
-    then('of equality', function(){
+describe('A simple test', function(){
+    it('of equality', function(){
         equal(1,1);
     });
 });
 
-when('Nested specs', function(){
+describe('Nested specs', function(){
     beforeEach(function(){
         this.value = 10;
     });
     afterEach(function(){
         this.isCrazy = true;
     });
-    when('Nested spec 1', function(){
-        then('nested spec 1: test 1', function(){
+    describe('Nested spec 1', function(){
+        it('nested spec 1: test 1', function(){
             equal(this.value, 10);
         });
-        then('isCrazy is true', function(){
+        it('isCrazy is true', function(){
             isTrue(typeof(this.isCrazy) === 'undefined');
         });
     });
-    when('Nested spec 2', function(){
+    describe('Nested spec 2', function(){
         beforeEach(function(){
             this.foo = 'bar';
         });
         afterEach(function(){
             this.xx = 'xx';
         });
-        then('nested spec 2: test 1', function(){
+        it('nested spec 2: test 1', function(){
             equal(this.value, 10);
             equal(this.foo, 'bar');
         });
-        then('nested spec 2: test 2', function(){
+        it('nested spec 2: test 2', function(){
             equal(this.value, 10);
             equal(this.foo, 'bar');
             isTrue(typeof(this.xx) === 'undefined');
         });
-        when('Nested spec 3', function(){
+        describe('Nested spec 3', function(){
             beforeEach(function(){
                 this.flim = 'flam';
             });
-            then('nested spec 3: test 1', function(){
+            it('nested spec 3: test 1', function(){
                 equal(this.value, 10);
                 equal(this.foo, 'bar');
                 equal(this.flim, 'flam');
@@ -188,104 +188,104 @@ when('Nested specs', function(){
     });
 });
 
-when('Running a test', function(){
-    then('and it passes it looks like this', function(){
+describe('Running a test', function(){
+    it('and it passes it looks like this', function(){
         var hw = 'Hello World!';
         isTrue(hw === 'Hello World!');
     });
-    then('and if it fails it looks like this', function(){
+    it('and if it fails it looks like this', function(){
         isTrue(false);
     });
 });
 
-when('Evaluating boolean assertions', function(){
-    then('bollean true', function(){
+describe('Evaluating boolean assertions', function(){
+    it('bollean true', function(){
         isTrue(true);
     });
-    then('boolean false', function(){
+    it('boolean false', function(){
         isFalse(false);
     });
 });
 
-when('Evaluating truthy assertions', function(){
-    then('undefined', function(){
+describe('Evaluating truthy assertions', function(){
+    it('undefined', function(){
         var undef;
         isNotTruthy(undef);
     });
-    then('objects', function(){
+    it('objects', function(){
         var def = {};
         isTruthy(def);
     });
-    then('numeric values other than 0', function(){
+    it('numeric values other than 0', function(){
         var one = 1;
         isTruthy(one);
     });
-    then('numeric vaules that are 0', function(){
+    it('numeric vaules that are 0', function(){
         var zero = 0;
         isNotTruthy(zero);
     });
-    then('non empty strings', function(){
+    it('non empty strings', function(){
         isTruthy('not empty string');
     });
-    then('empty strings', function(){
+    it('empty strings', function(){
         isNotTruthy('');
     });
 });
 
-when('Evaluating strict, deep recursive comparison assertions', function(){
+describe('Evaluating strict, deep recursive comparison assertions', function(){
     var char = 'b';
     var a = {a: 'a', b: 'b'};
     var b = {a: 'a', b: b};
     var c = {a: 'a', b: 'b'};
-    then('2 objects with exactly the same properties and property values', function(){
+    it('2 objects with exactly the same properties and property values', function(){
         equal(a, c);
     });
-    then('2 objects with different properties or property values', function(){
+    it('2 objects with different properties or property values', function(){
         notEqual(a, b);
     });
-    then('2 value types whose values are the same', function(){
+    it('2 value types whose values are the same', function(){
         equal(char, 'b');
     });
-    then('2 value types whose values are  not the same', function(){
+    it('2 value types whose values are  not the same', function(){
         notEqual(char, 'a');
     });
 });
 
-when('Running synchronous tests with beforeEach', function(){
+describe('Running synchronous tests with beforeEach', function(){
     var count = 0;
     beforeEach(function(){
         count = 100;
     });
-    then('beforeEach is called', function(){
+    it('beforeEach is called', function(){
         equal(count, 100);
     });
 });
 
-when('Passing a value from beforeEach to tests', function(){
+describe('Passing a value from beforeEach to tests', function(){
     beforeEach(function(){
         this.value = 10;
     });
-    then('the tests', function(){
+    it('the tests', function(){
         equal(this.value, 10);
     });
 });
 
-when('Running synchronous tests with afterEachTest', function(){
+describe('Running synchronous tests with afterEachTest', function(){
     var count = 0;
     afterEach(function(){
         count = 100;
     });
-    then('the first test', function(){
+    it('the first test', function(){
         equal(count, 0);
     });
-    then('but subsequent tests', function(){
+    it('but subsequent tests', function(){
         equal(count, 100);
     });
 });
 
-when('Running asynchronous tests', function(){
+describe('Running asynchronous tests', function(){
     var count = 0;
-    then('calling whenDone', function(done){
+    it('calling whenDone', function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
@@ -295,7 +295,7 @@ when('Running asynchronous tests', function(){
     });
 });
 
-when('Running asynchronous tests with beforeEachAsync', function(){
+describe('Running asynchronous tests with beforeEachAsync', function(){
     var count = 0;
     beforeEach(function(done){
         setTimeout(function(){
@@ -303,7 +303,7 @@ when('Running asynchronous tests with beforeEachAsync', function(){
             done();
         }, 1);
     });
-    then('beforeEachAsync is called', function(done){
+    it('beforeEachAsync is called', function(done){
         setTimeout(function(){
             count *= 10;
             done(function(){
@@ -313,7 +313,7 @@ when('Running asynchronous tests with beforeEachAsync', function(){
     });
 });
 
-when('Passing a value from beforeEachAsync to asynchronous tests', function(){
+describe('Passing a value from beforeEachAsync to asynchronous tests', function(){
     beforeEach(function(done){
         var self = this;
         setTimeout(function(){
@@ -321,7 +321,7 @@ when('Passing a value from beforeEachAsync to asynchronous tests', function(){
             done();
         }, 1);
     });
-    then('the asynchronous tests', function(done){
+    it('the asynchronous tests', function(done){
         setTimeout(function(){
             //some asynchronous process...
             done(function(){
@@ -331,7 +331,7 @@ when('Passing a value from beforeEachAsync to asynchronous tests', function(){
     });
 });
 
-when('Running asynchronous tests with afterEachAsync', function(){
+describe('Running asynchronous tests with afterEachAsync', function(){
     var count = 0;
     afterEach(function(done){
         setTimeout(function(){
@@ -339,7 +339,7 @@ when('Running asynchronous tests with afterEachAsync', function(){
             done();
         }, 1);
     });
-    then('the first asynchronous test', function(done){
+    it('the first asynchronous test', function(done){
         setTimeout(function(){
             count = 10;
             done(function(){
@@ -347,7 +347,7 @@ when('Running asynchronous tests with afterEachAsync', function(){
             });
         }, 1);
     });
-    then('but subsequent asynchronous tests', function(done){
+    it('but subsequent asynchronous tests', function(done){
         setTimeout(function(){
             count *= 100;
             done(function(){
@@ -357,7 +357,7 @@ when('Running asynchronous tests with afterEachAsync', function(){
     });
 });
 
-when('Proxy wraps a function and that function is called', function(){
+describe('Proxy wraps a function and that function is called', function(){
     beforeEach(function(){
         var fn = proxy(function(){
             return 'JavaScript is amazing!';
@@ -365,18 +365,18 @@ when('Proxy wraps a function and that function is called', function(){
         fn('Tell me something about JavaScript');
         this.fn = fn;
     });
-    then('calling wasCalled(number) on that function', function(){
+    it('calling wasCalled(number) on that function', function(){
         isTrue(this.fn.wasCalled(1));
         isFalse(this.fn.wasCalled(2));
     });
-    then('calling getCalledCount() on that function', function(){
+    it('calling getCalledCount() on that function', function(){
         equal(this.fn.getCalledCount(), 1);
     });
-    then('calling getData(n) on that function', function(){
+    it('calling getData(n) on that function', function(){
         var info = this.fn.getData(0);
         notEqual(info, undefined);
     });
-    then('and the object that getData(n) returns exposes and api', function(){
+    it('and the object that getData(n) returns exposes and api', function(){
         var info = this.fn.getData(0);
         equal(info.argsPassed[0], 'Tell me something about JavaScript');
         equal(info.returned, 'JavaScript is amazing!');
@@ -384,7 +384,7 @@ when('Proxy wraps a function and that function is called', function(){
     });
 });
 
-when('Proxy wraps a method and that function is called', function(){
+describe('Proxy wraps a method and that function is called', function(){
     beforeEach(function(){
         var someObject = {
             someMethod: function(){
@@ -395,18 +395,18 @@ when('Proxy wraps a method and that function is called', function(){
         someObject.someMethod('Tell me something about JavaScript');
         this.someObject = someObject;
     });
-    then('calling wasCalled(number) on that method', function(){
+    it('calling wasCalled(number) on that method', function(){
         isTrue(this.someObject.someMethod.wasCalled(1));
         isFalse(this.someObject.someMethod.wasCalled(2));
     });
-    then('calling getCalledCount() on that method', function(){
+    it('calling getCalledCount() on that method', function(){
         equal(this.someObject.someMethod.getCalledCount(), 1);
     });
-    then('calling getData(n) on that method', function(){
+    it('calling getData(n) on that method', function(){
         var info = this.someObject.someMethod.getData(0);
         notEqual(info, undefined);
     });
-    then('and the object that getData(n) returns exposes and api', function(){
+    it('and the object that getData(n) returns exposes and api', function(){
         var info = this.someObject.someMethod.getData(0);
         equal(info.argsPassed[0], 'Tell me something about JavaScript');
         equal(info.returned, 'JavaScript is amazing!');
@@ -414,7 +414,7 @@ when('Proxy wraps a method and that function is called', function(){
     });
 });
 
-when('snooping on a method', function(){
+describe('snooping on a method', function(){
     beforeEach(function(){
         this.foo = {
             someFn: function(arg){
@@ -422,26 +422,26 @@ when('snooping on a method', function(){
             }
         };
     });
-    then('we can query if the method was called', function(){
+    it('we can query if the method was called', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
         isTrue(foo.someFn.wasCalled());
     });
-    then('we can query how many times the method was called', function(){
+    it('we can query how many times the method was called', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
         equal(foo.someFn.called(), 1);
     });
-    then('we can query the method was called n times', function(){
+    it('we can query the method was called n times', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
         isTrue(foo.someFn.wasCalled.nTimes(1));
         isFalse(foo.someFn.wasCalled.nTimes(2));
     });
-    then('we can query the context the method was called with', function(){
+    it('we can query the context the method was called with', function(){
         var foo = this.foo,
             bar = {};
         snoop(foo, 'someFn');
@@ -449,7 +449,7 @@ when('snooping on a method', function(){
         equal(foo.someFn.contextCalledWith(), foo);
         notEqual(foo.someFn.contextCalledWith(), bar);
     });
-    then('we can query for the arguments that the method was called with', function(){
+    it('we can query for the arguments that the method was called with', function(){
         var foo = this.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
@@ -458,7 +458,7 @@ when('snooping on a method', function(){
         notEqual(foo.someFn.args.getArgument(0), arg + '!');
         isNotTruthy(foo.someFn.args.getArgument(1));
     });
-    then('we can query for what the method returned', function(){
+    it('we can query for what the method returned', function(){
         var foo = this.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
@@ -468,7 +468,7 @@ when('snooping on a method', function(){
     });
 });
 
-when('a snooped method throws', function(){
+describe('a snooped method throws', function(){
     beforeEach(function(){
         this.foo = {
             someFn: function(){
@@ -476,7 +476,7 @@ when('a snooped method throws', function(){
             }
         };
     });
-    then('we can query the method if threw', function(){
+    it('we can query the method if threw', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
@@ -486,7 +486,7 @@ when('a snooped method throws', function(){
     });
 });
 
-when('snooping on more than one method', function(){
+describe('snooping on more than one method', function(){
     beforeEach(function(){
         this.foo = {
             someFn: function(arg){
@@ -500,7 +500,7 @@ when('snooping on more than one method', function(){
         };
     });
 
-    then('snoops are isolated and there are no side effects', function(){
+    it('snoops are isolated and there are no side effects', function(){
         var foo = this.foo,
             bar = this.bar;
         snoop(foo, 'someFn');
@@ -517,7 +517,7 @@ when('snooping on more than one method', function(){
     });
 });
 
-when('using snoop\'s "calls" api', function(){
+describe('using snoop\'s "calls" api', function(){
     var i, 
         foo = {
             someFn: function(arg){
@@ -531,13 +531,13 @@ when('using snoop\'s "calls" api', function(){
     for(i = 0; i < n; i++){
         foo.someFn(i) ;
     }
-    then('count() returns the right count', function(){
+    it('count() returns the right count', function(){
         equal(foo.someFn.calls.count(), n);
     });
-    then('all() returns an array with the right number of elements', function(){
+    it('all() returns an array with the right number of elements', function(){
         equal(foo.someFn.calls.all().length, n);
     });
-    then('forCall(n) returns the correct element', function(){
+    it('forCall(n) returns the correct element', function(){
         for(i = 0; i < n; i++){
             aCall = foo.someFn.calls.forCall(i);
             equal(aCall.context, foo);

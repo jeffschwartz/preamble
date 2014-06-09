@@ -1001,11 +1001,11 @@
         if(config.windowGlobals){
             window.configure = configure;
             window.group = queueBuilder.group;
-            window.when = queueBuilder.group;
+            window.describe = queueBuilder.group;
             window.beforeEach = queueBuilder.beforeEachTest;
             window.afterEach = queueBuilder.afterEachTest;
             window.test = queueBuilder.test;
-            window.then = queueBuilder.test;
+            window.it = queueBuilder.test;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -1020,11 +1020,11 @@
             window.Preamble = {
                 configure: configure,
                 group: queueBuilder.group,
-                when: queueBuilder.group,
+                describe: queueBuilder.group,
                 beforeEach: queueBuilder.beforeEachTest,
                 afterEach: queueBuilder.afterEachTest,
                 test: queueBuilder.test,
-                then: queueBuilder.test,
+                it: queueBuilder.test,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
                 proxy: proxy,
