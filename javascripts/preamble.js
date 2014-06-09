@@ -367,7 +367,7 @@
         var show = runtimeFilter.group ? 'Filtered' : 'Covered',
             elStatusContainer = document.getElementById('preamble-status-container'),
             coverage = '<div id="coverage">' + show + ' {{tt}}' +
-                '<div class="hptui"><label for="hidePassedTests">Hide passed tests</label>' + 
+                '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' + 
                 '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
                 ' - <a id="runAll" href="?"> run all</a>' +
                 '</div>',
