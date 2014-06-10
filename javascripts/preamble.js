@@ -877,7 +877,7 @@
      */
     function domAddEventHandler(el, event, handler){
         if( el.addEventListener){
-            el.addEventListener(event, handler);
+            el.addEventListener(event, handler, false);
         }else{
             el.attachEvent('on' + event, handler);
         }
