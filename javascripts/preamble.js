@@ -422,10 +422,7 @@
             html = '',
             failed = '',
             parentGroup,
-            el,
-            as,
-            i,
-            len;
+            el;
         queue.forEach(function(item){
             if(item instanceof(Group)){
                 //Add groups to the DOM.
@@ -477,11 +474,8 @@
         });
         document.getElementById('preamble-results-container').style.display = 'block';
         domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
-        //TODO(Jeff): Should use event delegation here!
-        as = document.getElementsByTagName('a');
-        for(i = 0, len = as.length; i < len; i++){
-            domAddEventHandler(as[i], 'click', runClickHandler);
-        }
+        //Delegate all click events to the test container element.
+        domAddEventHandler(document.getElementById('preamble-test-container'), 'click', runClickHandler);
     };
 
     /**
@@ -886,7 +880,7 @@
     /**
      * Click handler for the hide passed tests checkbox.
      */
-    function hptClickHandler(){
+    function hptClickHandler(evt){
         var elUls = document.getElementsByTagName('ul'),
             i,
             ii,
@@ -895,6 +889,7 @@
             attributes,
             elContainers = [],
             classes = '';
+        evt.stopPropagation();
         for(i = 0, l= elUls.length; i < l; i++){
             attributes = elUls[i].getAttribute('class');
             if(attributes && attributes.length){
@@ -931,20 +926,27 @@
     }
 
     /**
+     * Handles all anchor tag click events which are delegated to the 
+     * test container element.
      * When an anchor tag is clicked, persist the hidePassedTests checkbox 
      * state as a query parameter and set the window location accordingly.
      * @param {object} evt A DOM event object.
      */
     function runClickHandler(evt){
-        var checked = document.getElementById('hidePassedTests').checked,
+        var checked,
             lastChar,
             href;
-        if(config.hidePassedTests !== checked){
+        //Only respond to delegated anchor tag click events.
+        if(evt.target.tagName === 'A'){
             evt.preventDefault();
-            href = evt.currentTarget.getAttribute('href');
-            lastChar = href[href.length -1];
-            lastChar = lastChar === '?' ? '' : '&';
-            window.location = href + lastChar + 'hpt=' + checked;
+            evt.stopPropagation();
+            checked = document.getElementById('hidePassedTests').checked;
+            if(config.hidePassedTests !== checked){
+                href = evt.target.getAttribute('href');
+                lastChar = href[href.length -1];
+                lastChar = lastChar === '?' ? '' : '&';
+                window.location = href + lastChar + 'hpt=' + checked;
+            }
         }
     }
 
