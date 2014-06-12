@@ -9,7 +9,6 @@
         //Merged configuration options.
         config = {},
         queue=[],
-        isShortCircuited = false, //Can only be true if config.shortCircuit is true and a test has failed.
         prevQueueCount = 0,
         queueStableCount = 0,
         queueStableInterval = 1,
@@ -90,17 +89,17 @@
      * @param {[Group] parentGroups
      * @param {string} path
      * @param {string} label
-     * @param {integer} asyncTestDelay
+     * @param {integer} testTimeOutInterval
      * @param {function} callback
      */
-    function Test(parentGroups, id, path, label, stackTrace, asyncTestDelay, callback){
+    function Test(parentGroups, id, path, label, stackTrace, testTimeOutInterval, callback){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
         this.id = id;
         this.path = path;
         this.label = label;
         this.stackTrace = stackTrace;
-        this.asyncTestDelay = asyncTestDelay;
+        this.testTimeOutInterval = testTimeOutInterval;
         this.callback = callback;
         this.assertions = []; //contains assertions
         this.duration = 0;
@@ -225,7 +224,7 @@
                     //test.parentGroup.passed = false;
                     //callback();
                 }
-            }, test.asyncTestDelay);
+            }, test.testTimeOutInterval);
 
             //Run the before callbacks, test callback and after callbacks.
             //Note to self: Since this can fire after the test has already timed 
@@ -274,11 +273,6 @@
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             //this.parentGroup.passed = this.totFailed ? false : this.parentGroup.passed;
             item.explain = result.explain;
-            //TODO(Jeff): Implement short circuit as this will not work.
-            //if(config.shortCircuit && !item.result){
-            //    isShortCircuited = this.isShortCircuited = item.isShortCircuited = true;
-            //    return;
-            //}
         }
         emit('runAfters');
     };
@@ -817,7 +811,7 @@
             if(arguments.length < 2){
                 throwException('requires 2 or 3 arguments, found ' + arguments.length);
             }
-            tl = arguments.length === 3 && timeLimit || config.asyncTestDelay;
+            tl = arguments.length === 3 && timeLimit || config.testTimeOutInterval;
             cb = arguments.length === 3 && callback || arguments[1];
             parentGroup = groupStack[groupStack.length - 1];
             id = uniqueId();
@@ -974,19 +968,14 @@
     //Configuration is called once internally but may be called again if test script employs in-line configuration.
     function configure(){
         /**
-         *Default configuration options - override these in your config file (e.g. var preambleConfig = {asyncTestDelay: 20})
+         *Default configuration options - override these in your config file (e.g. var preambleConfig = {testTimeOutInterval: 20})
          *or in-line in your tests.
-         *
-         *shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
          *
          *windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
          *USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
          *
-         *asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous 
+         *testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous 
          *tests to complete.
-         *
-         *asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback 
-         *(asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
          *
          *name: (default 'Test') - set to a meaningful name.
          *
@@ -1000,10 +989,8 @@
          *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
          */
         var defaultConfig = {
-                shortCircuit: false, 
                 windowGlobals: true, 
-                asyncTestDelay: 10, 
-                asyncBeforeAfterTestDelay: 10, 
+                testTimeOutInterval: 10, 
                 name: 'Test', 
                 uiTestContainerId: 'ui-test-container', 
                 hidePassedTests: false,

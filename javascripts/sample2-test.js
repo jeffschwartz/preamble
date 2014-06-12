@@ -11,7 +11,7 @@ configure({
     name: 'Sample Test Suite (BDD-Like)',
     hidePassedTests: true,
     //hideAssertions: true,
-    asyncTestDelay: 500
+    testTimeOutInterval: 500
 });
 
 describe('A nested test fails', function(){
