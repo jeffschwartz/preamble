@@ -414,10 +414,9 @@
      */
     HtmlReporter.prototype.details = function(queue){
         var rc = document.getElementById('preamble-results-container'),
-            hidePassed = document.getElementById('hidePassedTests').checked,
-            groupContainerMarkup = '<ul class="group-container{{hidden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
+            groupContainerMarkup = '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
-            testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
+            testContainerMarkup = '<ul class="tests-container" data-passed="{{passed}}"></ul>',
             testAnchorMarkup = '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
             testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
@@ -428,7 +427,6 @@
             if(item instanceof(Group)){
                 //Add groups to the DOM.
                 html = '' + groupContainerMarkup.
-                    replace(/{{hidden}}/, hidePassed && item.passed && ' hidden' || '').
                     replace(/{{passed}}/, item.passed).
                     replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.
@@ -446,7 +444,6 @@
             }else{
                 //Add tests to the DOM.
                 html = '' + testContainerMarkup.
-                    replace(/{{hidden}}/, hidePassed && item.totFailed === 0 ? ' hidden' : '').
                     replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.
                     replace(/{{passed}}/, item.bypass ? 'test-bypassed' : item.totFailed ? 'failed' : 'passed').
