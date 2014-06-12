@@ -639,6 +639,13 @@
         //window.failedTests = tests.filter(function(t){
         //    return t.totFailed || t.timedOut;
         //});
+        //Record how many tests were bypassed.
+        tests.totBypassed = 0;
+        if(runtimeFilter.group){
+            tests.totBypassed = tests.reduce(function(prevValue, t){
+                return t.bypass ? prevValue + 1 : prevValue; 
+            }, 0);
+        }
         //Record how many tests failed.
         tests.totTestsFailed = tests.reduce(function(prevValue, t){
             return t.timedOut || t.totFailed ? prevValue + 1 : prevValue;
