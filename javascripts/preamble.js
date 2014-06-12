@@ -959,10 +959,10 @@
             href;
         //Only respond to delegated anchor tag click events.
         if(evt.target.tagName === 'A'){
-            //evt.preventDefault();
             evt.stopPropagation();
             checked = document.getElementById('hidePassedTests').checked;
             if(config.hidePassedTests !== checked){
+                evt.preventDefault();
                 href = evt.target.getAttribute('href');
                 lastChar = href[href.length -1];
                 lastChar = lastChar === '?' ? '' : '&';
