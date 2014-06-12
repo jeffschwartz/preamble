@@ -300,9 +300,10 @@
      * HtmlReporter
      * @constructor
      */
-    function HtmlReporter(){
+    function HtmlReporter(fnShowHidePassedTests){
         this.preambleTestContainer = document.getElementById('preamble-test-container');
         this.preambleUiContainer = document.getElementById('preamble-ui-container');
+        this.showHidePassedTests = fnShowHidePassedTests;
         this.init();
         on('configchanged', function(topic, args){
             //Add structure to the document and show the header.
@@ -413,10 +414,9 @@
      */
     HtmlReporter.prototype.details = function(queue){
         var rc = document.getElementById('preamble-results-container'),
-            hidePassed = document.getElementById('hidePassedTests').checked,
-            groupContainerMarkup = '<ul class="group-container{{hidden}}" data-passed="{{passed}}" id="{{id}}"></ul>',
+            groupContainerMarkup = '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup = '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
-            testContainerMarkup = '<ul class="tests-container{{hidden}}" data-passed="{{passed}}"></ul>',
+            testContainerMarkup = '<ul class="tests-container" data-passed="{{passed}}"></ul>',
             testAnchorMarkup = '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
             testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
@@ -427,7 +427,6 @@
             if(item instanceof(Group)){
                 //Add groups to the DOM.
                 html = '' + groupContainerMarkup.
-                    replace(/{{hidden}}/, hidePassed && item.passed && ' hidden' || '').
                     replace(/{{passed}}/, item.passed).
                     replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.
@@ -445,7 +444,6 @@
             }else{
                 //Add tests to the DOM.
                 html = '' + testContainerMarkup.
-                    replace(/{{hidden}}/, hidePassed && item.totFailed === 0 ? ' hidden' : '').
                     replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.
                     replace(/{{passed}}/, item.bypass ? 'test-bypassed' : item.totFailed ? 'failed' : 'passed').
@@ -472,6 +470,7 @@
                 el.insertAdjacentHTML('beforeend', html);
             }    
         });
+        this.showHidePassedTests();
         document.getElementById('preamble-results-container').style.display = 'block';
         domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
         //Delegate all click events to the test container element.
@@ -878,9 +877,9 @@
     }
 
     /**
-     * Click handler for the hide passed tests checkbox.
+     * Hide/show passed tests.
      */
-    function hptClickHandler(evt){
+    function showHidePassedTests(){
         var elUls = document.getElementsByTagName('ul'),
             i,
             ii,
@@ -889,13 +888,12 @@
             attributes,
             elContainers = [],
             classes = '';
-        evt.stopPropagation();
         for(i = 0, l= elUls.length; i < l; i++){
             attributes = elUls[i].getAttribute('class');
             if(attributes && attributes.length){
                 attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
-                    if(attributes[ii] === 'group-container' || attributes[ii] === 'tests-container' || attributes[ii] === 'assertion-container'){
+                    if(attributes[ii] === 'group-container' || attributes[ii] === 'tests-container'){
                         elContainers.push(elUls[i]);
                     }
                 }
@@ -926,6 +924,16 @@
     }
 
     /**
+     * Click handler for the hide passed tests checkbox.
+     * Stops propagation of the event and calls showhidePassedTests
+     * to do the heavy lifting.
+     */
+    function hptClickHandler(evt){
+        evt.stopPropagation();
+        showHidePassedTests();
+    }
+
+    /**
      * Handles all anchor tag click events which are delegated to the 
      * test container element.
      * When an anchor tag is clicked, persist the hidePassedTests checkbox 
@@ -938,7 +946,7 @@
             href;
         //Only respond to delegated anchor tag click events.
         if(evt.target.tagName === 'A'){
-            evt.preventDefault();
+            //evt.preventDefault();
             evt.stopPropagation();
             checked = document.getElementById('hidePassedTests').checked;
             if(config.hidePassedTests !== checked){
@@ -1512,7 +1520,7 @@
     queue.start = Date.now();
 
     //Create a reporter.
-    reporter = new HtmlReporter();
+    reporter = new HtmlReporter(showHidePassedTests);
 
     //Configure the runtime environment.
     configure();
