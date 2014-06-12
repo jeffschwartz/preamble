@@ -365,16 +365,22 @@
      * @param {array} tests An array of Tests.
      */
     HtmlReporter.prototype.coverage = function(tests){
-        var show = runtimeFilter.group ? 'Filtered' : 'Covered',
+        var show = 'Ran {{tt}}',
             elStatusContainer = document.getElementById('preamble-status-container'),
-            coverage = '<div id="coverage">' + show + ' {{tt}}' +
-                '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' + 
-                '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
-                ' - <a id="runAll" href="?"> run all</a>' +
-                '</div>',
+            coverage,
             hpt;
         //Show groups and tests coverage in the header.
-        coverage = coverage.replace(/{{tt}}/, tests.length + pluralize(' test', tests.length));
+        show = show.replace(/{{tt}}/, tests.length - tests.totBypassed);
+        if(runtimeFilter.group){
+            show += runtimeFilter.group && ' of {{tbpt}}';
+            show = show.replace(/{{tbpt}}/, tests.length);
+        }
+        show += pluralize(' test', tests.length);
+        coverage = '<div id="coverage">' + show +
+            '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' + 
+            '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
+            ' - <a id="runAll" href="?"> run all</a>' +
+            '</div>';
         hpt = loadPageVar('hpt');
         hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
         coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
