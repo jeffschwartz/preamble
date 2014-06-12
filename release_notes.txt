@@ -79,3 +79,5 @@ Filtering on assertions is no longer supported.
 groups.
 
 19) Added graceful timing out of tests that fail to complete on time.
+
+20) Removed support for short circuiting of tests for v2.0 release.

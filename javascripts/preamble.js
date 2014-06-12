@@ -974,7 +974,7 @@
          *windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
          *USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
          *
-         *testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous 
+         *testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds wait before a test times out.
          *tests to complete.
          *
          *name: (default 'Test') - set to a meaningful name.
