@@ -23,9 +23,11 @@
         tests,
         testsIterator;
 
-    //Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-    //Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
-    //TODO(Jeff): remove polyfil once phantomjs supports bind!
+    /**
+     * Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+     * Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
+     * TODO(Jeff): remove polyfil once phantomjs supports bind!
+     */
     if (!Function.prototype.bind) {
         Function.prototype.bind = function (oThis) {
             if (typeof this !== 'function') {
@@ -130,7 +132,7 @@
     };
 
     /**
-     * Test runner
+     * Test runner.
      * @param {function} callback e.g. fn(err, value)
      */
     Test.prototype.run = function(callback){
@@ -258,7 +260,7 @@
     };
 
     /**
-     * Runs assertions
+     * Runs assertions.
      */
     Test.prototype.runAssertions = function(){
         var i,
@@ -271,7 +273,6 @@
             result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
-            //this.parentGroup.passed = this.totFailed ? false : this.parentGroup.passed;
             item.explain = result.explain;
         }
         emit('runAfters');
@@ -291,7 +292,7 @@
     };
 
     /**
-     * HtmlReporter
+     * HtmlReporter.
      * @constructor
      */
     function HtmlReporter(fnShowHidePassedTests){
@@ -968,25 +969,25 @@
     //Configuration is called once internally but may be called again if test script employs in-line configuration.
     function configure(){
         /**
-         *Default configuration options - override these in your config file (e.g. var preambleConfig = {testTimeOutInterval: 20})
-         *or in-line in your tests.
+         * Default configuration options - override these in your config file (e.g. var preambleConfig = {testTimeOutInterval: 20})
+         * or in-line in your tests.
          *
-         *windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
-         *USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
+         * windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
+         * USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
          *
-         *testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds wait before a test times out.
-         *tests to complete.
+         * testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds wait before a test times out.
+         * tests to complete.
          *
-         *name: (default 'Test') - set to a meaningful name.
+         * name: (default 'Test') - set to a meaningful name.
          *
-         *uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+         * uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
          *
-         *hidePassedTests: (default: false) - set to true to hide passed tests.
+         * hidePassedTests: (default: false) - set to true to hide passed tests.
          *
-         *hideAssertions: (default: true) - set to false to show assertions.
+         * hideAssertions: (default: true) - set to false to show assertions.
          *
-         *autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
-         *initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
+         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
+         * initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
          */
         var defaultConfig = {
                 windowGlobals: true, 
