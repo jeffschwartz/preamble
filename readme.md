@@ -35,9 +35,6 @@ queue to stabilize and when transitioning between test life-cycle states).
 5) Reduced the latency incurred for determining when the queue has stabilized
 by decreasing the delay from 500 milliseconds to 1 millisecond.
 
-6) Added "Total elapsed time" to the report summary, which includes latency. 
-See item 4 above for more information.
-
 7) Added in-line configuration support. Tests can now configure themselves 
 by including a call to either Preamble.configure or configure with a hash 
 of configuration options, which will override the default configuration as 
@@ -53,17 +50,9 @@ Error objects.
 configuration property, which defaults to "false" and a check box to 
 override the configuration.
 
-10) Added configuration-based filtering. Set 1 or more filters by adding 
-hashes, e.g. {group: groupLabel, test: testLabel, assertion: assertionLabel}. 
-You can also use the wildcard '*' character for test and/or assertions to 
-specify that all tests and/or all assertions, respectively, should be included 
-in the filter.
-
 11) Added outer wrapper div, id "preamble-ui-container", to index.html. Using
 it to wrap <div id="ui-test-container" class="ui-test-container">. This was 
 required in order to support in-line configuration. See item 1 above. 
-
-12) Added display timings for groups and tests in details report.
 
 13) Added 'passing' values from beforeEachTest and asyncBeforeEachTest to
 test and asyncTest, respectively using 'this'. See item 2 above.
@@ -73,9 +62,8 @@ test and asyncTest, respectively using 'this'. See item 2 above.
 "beforeEachTest", "asyncBeforeEachTest", "afterEachTest", "asyncAfterEachTest"
 and "whenAsyncDone", respectively.
 
-15) Added BDD-LIKE semantic alternatives "when", "then" and "thenAsync" for 
-TDD "group", "test" and "asyncTest", respectively. This is experimental and most 
-likely will see changes. User feedback are welcomed and appreciated.
+15) Added BDD semantic alternatives "describe", "it" for "group" and "test"
+respectively.
 
 16) Added snoop, a replacement for proxy, which is now deprecated.
 
@@ -83,9 +71,12 @@ likely will see changes. User feedback are welcomed and appreciated.
 are now only shown for failed tests. Assertion labels are no longer supported.
 Filtering on assertions is no longer supported.
 
-18) Added nested groups/whens and their contexts are derived from their parent
-groups.
+18) Added nested groups/describes.
 
-19) Added graceful timing out of tests that fail to complete on time.
+19) Added graceful timing out of tests that fail to complete on time. Tests
+that fail to complete on time are reported as such along with a stack trace
+if the browser supports them.
 
 20) Removed support for short circuiting of tests for v2.0 release.
+
+21) Removed whenAsyncDone as it is no longer necessary.
