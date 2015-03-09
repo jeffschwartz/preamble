@@ -9,3 +9,7 @@ node_modules
 **/*.log
 xyz.js
 NERD_tree_*
+Gemfile.lock
+*.gem
+.sass-cache
+_site/
