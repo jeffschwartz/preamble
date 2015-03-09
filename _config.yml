@@ -1,0 +1,10 @@
+# Site settings
+title: Preamble
+baseurl: /preamble
+twitter_username: jefftschwartz
+github_username:  jeffschwartz
+
+# Build settings
+markdown: redcarpet
+highlighter: pygments
+exclude: ['README.md']
