@@ -1,30 +1,141 @@
 ---
-layout: default
+layout: index
 ---
 
-<div class="home">
+<div style="width: 100%;">
+    <div style="text-align: center; background-color: rgb(238, 238, 238); padding: 30px; 0; margin-bottom: 20px;">
+        <h1>Welcome to Preamble</h1>
+        <p>JavaScript Testing Framework</p>
+        <img src="{{site.baseurl}}/images/preamble.jpg" alt="Preamble Output"/>
+    </div>
+</div>
 
-    <img src="{{site.baseurl}}/images/preamble.png" alt=""/>
+<div class="wrapper">
+    <div class="home">
 
-    <p class="page-content">Preamble is a powerful JavaScript testing framework that runs in any modern HTML5 compliant browser. Preamble can be run headless via PhantomJS. Preamble has a small footprint. Preamble has no additional dependencies on other libraries or frameworks. Preamble has a fast and powerful testing engine. Preamble supports both TDD and BDD style semantics. Preamble has thorough reporting capabilities through the browser. Preamble makes the task of authoring and running tests easy, intuitive and even fun.</p>
+        <div style="margin-bottom: 20px;">
 
-<!--
-    <h1 class="page-heading">Posts</h1>
+            <div style="display: table; width: 100%;">
 
-    <ul class="post-list">
-        {% for post in site.posts %}
-        <li>
-            <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <img src="{{site.baseurl}}/images/smallfootprint.jpg" alt="small footprint" />
+                </div>
 
-            <h2>
-                <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-            </h2>
-        </li>
-        {% endfor %}
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <h2>Small Footprint</h2>
+                    <p style="word-wrap: break-word;">Has no other dependencies on libraries or frameworks.</p>
+                </div>
+
+            </div>
+
+            <div style="display: table; width: 100%;">
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <h2>Built For Speed</h2>
+                    <p>Has a fast and powerful testing engine.</p>
+                </div>
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <img src="{{site.baseurl}}/images/fastandpowerful.png" alt="fast and powerful" />
+                </div>
+
+            </div>
+
+            <div style="display: table; width: 100%;">
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <img src="{{site.baseurl}}/images/flexibility.png" alt="flexibillity" />
+                </div>
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <h2>Flexibility</h2>
+                    <p style="word-wrap: break-word;">Supports both TDD and BDD style semantics.</p>
+                </div>
+
+            </div>
+
+            <div style="display: table; width: 100%;">
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <h2>Built To Standards</h2>
+                    <p>Runs in any modern HTML5 compliant browser.</p>
+                </div>
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <img src="{{site.baseurl}}/images/HTML5.png" alt="HTML5" />
+                </div>
+
+            </div>
+
+            <div style="display: table; width: 100%;">
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <img src="{{site.baseurl}}/images/phantomjs.png" alt="phantomjs" />
+                </div>
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <h2>Runs Headless In The Terminal</h2>
+                    <p style="word-wrap: break-word;">Run with PhantomJS.</p>
+                </div>
+
+            </div>
+
+            <div style="display: table; width: 100%;">
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <h2>No Nonsense</h2>
+                    <p>Has thorough reporting capabilities through the browser.</p>
+                </div>
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <img src="{{site.baseurl}}/images/reporting.jpg" alt="reporting" />
+                </div>
+
+            </div>
+
+            <div style="display: table; width: 100%;">
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <img src="{{site.baseurl}}/images/rubixcube.jpg" alt="rubix cube" />
+                </div>
+
+                <div style="display: table-cell; vertical-align: middle; width: 50%">
+                    <h2>Workflow</h2>
+                    <p style="word-wrap: break-word;">Authoring and running tests is easy, intuitive and even fun.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    <!--     <ul>
+        <li>Has a small footprint - no dependencies on libraries or frameworks.</li>
+        <li>Has a fast and powerful testing engine.</li>
+        <li>Supports both TDD and BDD style semantics.</li>
+        <li>Runs in any modern HTML5 compliant browser.</li>
+        <li>Can be run headless via PhantomJS.</li>
+        <li>Has thorough reporting capabilities through the browser.</li>
+        <li>Makes the task of authoring and running tests easy, intuitive and even fun.</li>
     </ul>
+     -->
+    <!--
+        <h1 class="page-heading">Posts</h1>
 
-    <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+        <ul class="post-list">
+            {% for post in site.posts %}
+            <li>
+                <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
 
- -->
+                <h2>
+                    <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+                </h2>
+            </li>
+            {% endfor %}
+        </ul>
 
- </div>
+        <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+
+     -->
+
+     </div>
+</div>
