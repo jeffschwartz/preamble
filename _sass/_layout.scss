@@ -283,6 +283,10 @@ border-bottom: 1px solid $grey-color-light;
      background-color: rgb(238, 238, 238);
 }
 
+.index-banner-image {
+    box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 5px;
+ }
+
 .index-content:nth-child(even) {
     background-color: rgb(31, 32, 54);
     color: white;
