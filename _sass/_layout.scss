@@ -2,12 +2,16 @@
  * Site header
  */
 .site-header {
+    background-color: #fff;
     border-top: 5px solid $grey-color-dark;
     border-bottom: 1px solid $grey-color-light;
     min-height: 56px;
 
     // Positioning context for the mobile navigation icon
-    position: relative;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
 .site-title {
