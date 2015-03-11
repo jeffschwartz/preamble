@@ -238,3 +238,41 @@
         }
     }
 }
+
+
+
+/**
+ index page
+ */
+.index-content-container {
+    width: 100%;
+}
+
+.index-content {
+     padding: 80px 0;
+}
+
+.index-content:first-child {
+     margin-top: 63px;
+     background-color: rgb(238, 238, 238);
+}
+
+.index-content:nth-child(even) {
+    background-color: rgb(31, 32, 54);
+    color: white;
+}
+
+.index-content-row {
+    display: table;
+    width: 100%;
+}
+
+.index-content-column {
+    display: table-cell;
+    vertical-align: middle;
+    width: 50%;
+
+    > p {
+        word-wrap: break-word;
+    }
+}
