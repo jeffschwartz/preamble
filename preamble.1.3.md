@@ -1,12 +1,11 @@
 ---
 layout: page
-title: Preabmle v1.3
+title: v1.3 API Developer Guide
 permalink: /preamble/1/3/
 ---
 
 # Introducing Preamble
 
-###### v1.3 - [Join the disucssion at https://groups.google.com/forum/#!forum/preamble-users](https://groups.google.com/forum/#!forum/preamble-users).
 Preamble is a powerful Test Driven Development framework for JavaScript written in JavaScript. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your test scripts interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy, intuitive and fun.
 
 This is an example of a simple synchronous test:
