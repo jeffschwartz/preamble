@@ -2,9 +2,13 @@
 title: Preamble
 baseurl: /preamble
 twitter_username: jefftschwartz
-github_username:  jeffschwartz
+github_username: jeffschwartz
+email: jefftschwartz@gmail.com
 
 # Build settings
 markdown: redcarpet
 highlighter: pygments
 exclude: ['README.md']
+
+# GitHub info
+preamble_version: v2

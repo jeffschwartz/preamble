@@ -2,7 +2,7 @@
  * Site header
  */
 .site-header {
-    /* background-color: #fff; */
+    background-color: #fff;
     background-color: rgb(238, 238, 238);
 /*     border-top: 5px solid $grey-color-dark;
 border-bottom: 1px solid $grey-color-light;
@@ -102,6 +102,7 @@ border-bottom: 1px solid $grey-color-light;
 .site-footer {
     border-top: 1px solid $grey-color-light;
     padding: $spacing-unit 0;
+    background-color: rgb(238, 238, 238);
 }
 
 .footer-heading {
@@ -171,6 +172,7 @@ border-bottom: 1px solid $grey-color-light;
  */
 .page-content {
     padding: $spacing-unit 0;
+    background-color: white;
 }
 
 .page-heading {
@@ -287,6 +289,11 @@ border-bottom: 1px solid $grey-color-light;
     box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 5px;
  }
 
+.index-content:nth-child(odd) {
+    background-color: white;
+    color: black;
+}
+
 .index-content:nth-child(even) {
     background-color: rgb(31, 32, 54);
     color: white;
@@ -305,4 +312,9 @@ border-bottom: 1px solid $grey-color-light;
     > p {
         word-wrap: break-word;
     }
+}
+
+.index-content-link {
+    margin: 20px 0 0 0;
+    background-color: white;
 }
