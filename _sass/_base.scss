@@ -211,3 +211,14 @@ pre {
  .centered {
      text-align: center;
  }
+
+
+/**
+ *
+ */
+ .warning {
+    background-color: $warning-background-color;
+    color: $warning-color;
+    padding: 10px;
+    margin: 10px 0;
+ }
