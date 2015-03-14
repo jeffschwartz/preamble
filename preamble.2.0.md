@@ -8,29 +8,28 @@ permalink: /preamble/2/0/
 
 Preamble is a powerful Test Driven Development framework for JavaScript written in JavaScript. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your test scripts interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy, intuitive and fun.
 
-This is an example of a simple synchronous test:
+This is an example of a simple *synchronous* test:
 
 ```javascript
-group('truthy', function(){
-    test('true === true', function(){
-        isTrue(true === true, 'true === true');
+describe('truthy', function(){
+    it('true === true', function(){
+        isTrue(true);
     });
 });
 ```
 
-And this is an example of a simple asynchronous test:
+And this is an example of a simple *asynchronous* test:
 
 ```javascript
-group('asynchronous', function(){
-    asyncTest('fetch data from database via Ajaax', function(){
-        var promiseDone = proxy(function(){});
-        var promise = db.catsCollection.fetch();
-        promise.done(promiseDone);
-        whenAsyncDone(function(){
-            var promiseDoneInfo = promiseDone.getData();
-            isTrue(promiseDone.wasCalled(1), 'promiseDone was called once');
-            isTrue(promiseDoneInfo.argsPassed[0] !== 'undefined', 'cat collection was fetched');
-        });
+describe('Running asynchronous tests', function(){
+    var count = 0;
+    it('calling "done"', function(done){
+        setTimeout(function(){
+            count = 100;
+            done(function(){
+                equal(count, 100);
+            });
+        }, 1);
     });
 });
 ```
@@ -39,29 +38,40 @@ group('asynchronous', function(){
 Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!
 
 # Run The Sample Test
-After you have cloned the repo you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. All groups, tests and assertions are links and if you click on them Preamble will "drill down" and display details for each, respectively. To repeat the test you can either refresh the browser or click on the **Rerun All Tests** link located near the top of the page. After you have run the sample you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.
+After you have cloned the repo you can then run the sample test script, *javascripts/sample-test.js*, by opening the *index.html file in your browser. The index.html file is located in the repo's root folder.
+
+Running a test script in the browser produces a report showing the results of the tests. All groups and tests are presented as *links* and when you click on them Preamble will run them again and display their details, respectively.
+
+To repeat the test you can either refresh the browser or click on the _**run all** link_ located near the top left of the page.
+
+If you want to filter out passed test, check the _**Hide passed** checkbox_ located in the upper right of the page.
+
+Once you have run the sample test script and familiarized yourself with the report you can then open up the sample script file in your editor and **spy the code** to gain insight on writing your own test scripts.
 
 # index.html
-The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, [Cyreal](http://www.cyreal.org) and Google). If you don't like Lora (but who doesn't like Lora?) feel free to remove the link tag or to use a different web font.
+The only required tags (other than the script tags) are **&lt;div id="preamble-test-container"&gt;&lt;/div&gt;** and **&lt;div id="preamble-ui-container"&gt;&lt;/div&gt;**.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Preamble</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href='http://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+    <title>Preamble</title>
     <link href='stylesheets/preamble.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
-    <!-- This is required. Do not remove or rename the id -->
-    <div id="preamble-container"></div>
+    <!-- These are required. Do not remove them or rename their ids -->
+    <div id="preamble-test-container"></div>
+            <!-- v2.0.0 -->
+    <div id="preamble-ui-container"></div>
 
     <!-- JavaScripts Go Here -->
 
     <!-- Place script tags that your tests depend on here -->
 
     <!-- The preamble-config.js file has to be loaded before preamble.js is loaded!!! -->
+    <!-- Note: You don't need to include this if you are using in-line configuration!!! -->
     <!--
     <script src="javascripts/preamble-config.js"></script>
     -->
@@ -71,10 +81,10 @@ The only required tag (other than the script tags) is &lt;div id="preamble-conta
 
     <!-- Place your test script(s) here, immediately following preamble.js -->
     <script src="javascripts/sample-test.js"></script>
-
 </body>
 </html>
 ```
+
 # API
 Please note that when the **windowGlobals** configuration option is set to false you must preface each API method listed below with "Preamble." (please see **Configuration** below). In addition, test callback functions are passed a single argument, a hash, which you must use to call assertions (please see **Assertions** below).
 
