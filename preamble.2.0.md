@@ -86,7 +86,9 @@ The only required tags (other than the script tags) are **&lt;div id="preamble-t
 ```
 
 ## API
-Please note that when the **windowGlobals** configuration option is set to false you must preface each API method listed below with "Preamble." (please see **Configuration** below). In addition, test callback functions are passed a single argument, a hash, which you must use to call assertions (please see **Assertions** below).
+<p class="warning">
+When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> you must preface each API method listed below with <em>Preamble</em>. (please see <em><strong>Configuration</strong></em> below). In addition, test callback functions are passed a single argument, a hash, which you must use to call assertions (please see <em><strong>Assertions</strong></em> below).
+</p>
 
 ```javascript
 Preamble.test('this is a test', function(assert){
@@ -98,28 +100,201 @@ Preamble.test('this is a test', function(assert){
     assert.isNotTruthy(...);
 });
 ```
+<p class="warning">
+In the documentation that follows descriptions and code examples assume that the <em><strong>windowGlobals</strong></em> configuration option is set to <em>true</em>.
+</p>
 
 ### Grouping Tests
 
-#### group(label, callback(){...})
-#### Preamble.group(label, callback(assert){...})
-group is used to group together one or more tests. **label** is a string used to uniquely identify the group. **callback** is a function which contains one or more tests. Besides containing tests, **callback** also provide closure which you can use to make data and code accessible to the tests.
+#### <small>BDD Style</small> **describe** *describe(label, callback)*
+#### <small>TDD Style</small> **group** *group(label, callback)*
+**describe** and **group** provide structure and *scope* for one or more tests. **label** is a string used to uniquely identify the group. **callback** is a function which contains one or more tests. **callback** also provides *scope* to make data and code accessible to the tests.
+
 
 ```javascript
-group('Does it work?', function(){
+//BDD Styl
+
+describe('Describe a group', function(){
     var hw = 'Hello World!';
-    test('Hello World!', function(){
-        isTrue(hw === 'Hello World!', 'Yes, it works!');
+    it('Hello World!', function(){
+        isTrue(hw === 'Hello World!');
     });
 })
 ```
 
-#### beforeEachTest(callback(){...})
-#### Preamble.beforeEachTest(callback(){...})
-beforeEachTest can be used to perform common initialization synchronously prior to calling each test. If **calback** returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see **Configuration** below). If you need to do both synchronous and asynchronous initialization before each test then use asyncBeforeEachTest (please see asyncBeforeEachTest below).
+```javascript
+//TDD Style
+
+group('Describe a group', function(){
+    var hw = 'Hello World!';
+    test('Hello World!', function(){
+        isTrue(hw === 'Hello World!');
+    });
+})
+```
+Groups can also be _nested_ providing fine grained structure for organinzing tests:
 
 ```javascript
-group('2 slightly convoluted synchronous test with "beforeEachTest".', function(){
+//BDD Style - nested groups
+
+describe('Nested specs', function(){
+    describe('Nested spec 1', function(){
+        it('test 1.1', function(){
+            isTrue(1);
+        });
+    });
+    describe('Nested spec 2', function(){
+        it('test 1.1', function(){
+            isTrue(1);
+        });
+    });
+});
+```
+
+```javascript
+//TDD Style - nested groups
+
+group('Nested specs', function(){
+    group('Nested spec 1', function(){
+        test('test 1.1', function(){
+            isTrue(1);
+        });
+    });
+    group('Nested spec 2', function(){
+        test('test 2.1', function(){
+            isTrue(1);
+        });
+    });
+});
+```
+
+### Tests
+
+#### <small>BDD Style</small> **it** *it(label, [timeout,] callback)*
+#### <small>TDD Style</small> **test** *test(label, [timeout,] callback)*
+**it** and **test** are used to define one or more _assertions_. **label** is a string used to uniquely identify a test within a _group_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a test (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function which contains one or more assertions and it also provide _scope_ to make data and code accessible to assertions.
+
+**done** is a _function_ that is passed as an argument to **it**'s and **test**'s **callback**s and must be called to signal that an _asynchronous_ process has completed. **done**'s '**callback** argument provides scope for one or more assertions.
+
+```javascript
+//BDD Style - a synchronous test
+
+describe('A test', function(){
+    it('Hello World!', function(){
+        var hw = 'Hello World!';
+        isTrue(hw === 'Hello World!');
+    });
+});
+```
+
+```javascript
+//TDD Style - a synchronous test
+
+group('A test', function(){
+    test('Hello World!', function(){
+        var hw = 'Hello World!';
+        isTrue(hw === 'Hello World!');
+    });
+});
+```
+
+```javascript
+//BDD Style - an asynchronous test
+
+describe('When running an asynchronous test', function(){
+    var count = 0;
+    it('calling done signals the asynchronous process has completed ', function(done){
+        setTimeout(function(){
+            count = 100;
+            done(function(){
+                equal(count, 100);
+            });
+        }, 1);
+    });
+});
+```
+
+```javascript
+//TDD Style - an asynchronous test
+
+group('When running an asynchronous test', function(){
+    var count = 0;
+    test('calling done signals the asynchronous process has completed ', function(done){
+        setTimeout(function(){
+            count = 100;
+            done(function(){
+                equal(count, 100);
+            });
+        }, 1);
+    });
+});
+```
+
+```javascript
+//BDD Style - preventing a long running asynchronous test from timing out
+
+describe('When running an asynchronous test', function(){
+    var count = 0;
+    it('calling done signals the asynchronous process has completed ', 100, function(done){
+        setTimeout(function(){
+            count = 100;
+            done(function(){
+                equal(count, 100);
+            });
+        }, 50);
+    });
+});
+```
+
+```javascript
+//TDD Style - preventing a long running asynchronous test from timing out
+
+group('When running an asynchronous test', function(){
+    var count = 0;
+    test('calling done signals the asynchronous process has completed ', 100, function(done){
+        setTimeout(function(){
+            count = 100;
+            done(function(){
+                equal(count, 100);
+            });
+        }, 50);
+    });
+});
+```
+
+### Setup and Teardown
+
+#### **beforeEach** *beforeEach(callback)*
+#### **afterEach** *afterEach(callback)*
+
+**beforeEach** and **afterEach** are used to execute common code _before_ and _after_ each _test_, respectively. Their use enforces the _DRY_ principle. **callback** provides scope for the code that is to be run before or after each test. Values can be passed on to tests by assigning them to **callback**'s context (e.g. this.someValue = someOtherValue).
+
+**done** is a _function_ that is passed as an argument to **callback** and must be called to signal that an _asynchronous_ process has completed.
+
+```javascript
+//BDD Style - using beforeEach to synchronously execute common code before each test
+
+describe('Using beforeEach to synchronously execute common code before each test', function(){
+    var count = 0;
+    beforeEachTest(function(){
+        count = 1;
+    });
+    it('Is count 1?', function(){
+        isFalse(count === 0, 'count doesn\'t equal 0');
+        isTrue(count === 1, 'count does equal 1');
+        isTrue((count += 1) === 2, 'count now equals 2');
+    });
+    it('Is count still 2?', function(){
+        isFalse(count === 2, 'nope, it isn\'t still 2');
+        isTrue(count === 1, 'now count equals 1');
+    });
+});
+```
+
+```javascript
+//TDD Style - Using beforeEach to synchronously execute common code before each test
+
+group('Using beforeEach to synchronously execute common code before each test', function(){
     var count = 0;
     beforeEachTest(function(){
         count = 1;
@@ -136,12 +311,28 @@ group('2 slightly convoluted synchronous test with "beforeEachTest".', function(
 });
 ```
 
-#### afterEachTest(callback(){...})
-#### Preamble.afterEachTest(callback(){...})
-afterEachTest can be used to perform common initialization synchronously after each test is called.  If you need to do both synchronous and asynchronous initialization after each test then use asyncAfterEachTest (please see asyncAfterEachTest below).
+```javascript
+//BDD Style - Using afterEach to synchronously execute common code after each test
+
+describe('Using afterEach to synchronously execute common code after each test', function(){
+    var count = 0;
+    afterEachTest(function(){
+        count = 1;
+    });
+    it('Is count 0?', function(){
+        isTrue(count === 0, 'count does equal 0.');
+    });
+    it('Is count still 0?', function(){
+        isFalse(count === 0, 'count doesn\'t equal 0.');
+        isTrue(count === 1, 'count now equals 1.');
+    });
+});
+```
 
 ```javascript
-group('2 slightly convoluted synchronous test with "afterEachTest".', function(){
+//TDD Style - Using afterEach to synchronously execute common code after each test
+
+group('Using afterEach to synchronously execute common code after each test', function(){
     var count = 0;
     afterEachTest(function(){
         count = 1;
@@ -156,117 +347,161 @@ group('2 slightly convoluted synchronous test with "afterEachTest".', function()
 });
 ```
 
-#### asyncBeforeEachTest([interval,] callback(){...})
-#### Preamble.asyncBeforeEachTest([interval,] callback(){...})
-asyncBeforeEachTest can be used to perform common initialization asynchronously prior to calling each test. **interval** is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the test. If **calback** returns a value it is passed to each test as either its 1st or 2nd parameter (for more information please see **Configuration** below).
-
 ```javascript
-group('2 slightly convoluted asynchronous tests with "asyncBeforeEachTest".', function(){
-    var count = 0;
-    asyncBeforeEachTest(function(){
-        count = 1;
-    });
-    asyncTest('Is count 1?', function(){
-        setTimeout(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isTrue(count === 1, 'count equals 1.');
-            count *= 10;
-        }, 10);
+//BDD Style - Passing a value from Setup/Teardown on to a test
 
-        whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isTrue(count === 10, 'now count equals 10');
-        });
+describe('Passing a value from Setup/Teardown on to a tests', function(){
+    beforeEach(function(){
+        this.value = 10;
     });
-    asyncTest('Is count 10?', function(){
-        isFalse(count === 10, 'count doesn\'t equals 10 anymore.');
-        isTrue(count === 1, 'count now equals 1 again.');
-        setTimeout(function(){
-            count *= 100;
-        }, 10);
-
-        whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isFalse(count === 10, 'count doesn\'t equal 10 anymore');
-            isTrue(count === 100, 'count now equals 100');
-        });
+    it('the tests', function(){
+        equal(this.value, 10);
     });
 });
 ```
 
-#### asyncAfterEachTest([interval,] callback(){...})
-#### Preamble.asyncAfterEachTest([interval,] callback(){...})
-asyncAfterEachTest can be used to perform common initialization asynchronously after each test is called. **interval** is optional and can be used to override the default amount of time expressed in milliseconds that Preamble will wait before running the next test in the group.
+```javascript
+//TDD Style - Passing a value from Setup/Teardown on to a test
+
+group('Passing a value from Setup/Teardown on to a tests', function(){
+    beforeEach(function(){
+        this.value = 10;
+    });
+    test('the tests', function(){
+        equal(this.value, 10);
+    });
+});
+```
 
 ```javascript
-group('2 slightly convoluted asynchronous tests with "asyncAfterEachTest".', function(){
+//BDD Style - Using beforeEach to asynchronously execute common code before each test
+
+describe('Using beforeEach to asynchronously execute common code before each test', function(){
     var count = 0;
-    asyncAfterEachTest(function(){
-        count = 1;
-    });
-    asyncTest('Is count 1?', function(){
+    beforeEach(function(done){
         setTimeout(function(){
             count = 10;
-        }, 10);
-
-        whenAsyncDone(function(){
-            isFalse(count === 0, 'count doesn\'t equal 0 anymore');
-            isFalse(count === 1, 'count doesn\'t equal 1 anymore');
-            isTrue(count === 10, 'now count equals 10');
-        });
+            done();
+        }, 1);
     });
-    asyncTest('Is count still 10?', function(){
-        isFalse(count === 10, 'count doesn\'t equals 10 anymore.');
-        isTrue(count === 1, 'count now equals 1 again.');
+    it('beforeEach is called', function(){
+        equal(count, 10);
+    });
+});
+```
+
+```javascript
+//TDD Style - Using beforeEach to asynchronously execute common code before each test
+
+group('Using beforeEach to asynchronously execute common code before each test', function(){
+    var count = 0;
+    beforeEach(function(done){
+        setTimeout(function(){
+            count = 10;
+            done();
+        }, 1);
+    });
+    test('beforeEachAsync is called', function(){
+        equal(count, 10);
+    });
+});
+```
+
+```javascript
+//BDD Style - Using afterEach to asynchronously execute common code after each test
+
+describe('Using afterEach to asynchronously execute common code after each test', function(){
+    var count = 0;
+    afterEach(function(done){
+        setTimeout(function(){
+            count = 1;
+            done();
+        }, 1);
+    });
+    it('the first asynchronous test', function(done){
+        setTimeout(function(){
+            count = 10;
+            done(function(){
+                isTrue(count === 10);
+            });
+        }, 1);
+    });
+    it('but subsequent asynchronous tests', function(done){
         setTimeout(function(){
             count *= 100;
-        }, 10);
-
-        whenAsyncDone(function(){
-            isTrue(count === 100, 'count now equals 100');
-        });
+            done(function(){
+                isTrue(count === 100);
+            });
+        }, 1);
     });
 });
 ```
 
-### Synchronous Tests
-
-#### test(label, callback([beforeTestValue]){...})
-#### Preamble.test(label, callback(assert[,beforeTestValue]){...})
-test is used to group together one or more assertions that are to be run synchronously. **label** is a string used to uniquely identify a test within a group. **callback** is a function which contains one or more assertions. Besides containing assertions, **callback** can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to **callback** either as the 1st parameter if **windowGlobals** is set to true or as the 2nd parameter if **windowGlobals** is set to false (for more information please see **Configuration** below). **assert** is an object whose properties are the assertion methods (please see Assertions below).
-
 ```javascript
-group('Does it work?', function(){
-    test('Hello World!', function(){
-        var hw = 'Hello World!';
-        isTrue(hw === 'Hello World!', 'Yes, it works!');
-    });
-});
-```
-### Asynchronous Tests
+//TDD Style - Using afterEach to asynchronously execute common code after each test
 
-#### asyncTest(label, [interval,] callback([beforeTestValue]){...})
-#### Preamble.asyncTest(label, [interval,] callback(assert[, beforeTestValue]){...})
-asyncTest is used to group together one or more assertions that are to be run asynchronously. **label** is a string used to uniquely identify a test within a group. **callback** is a function which contains one or more assertions. Besides containing assertions, **callback** can also provide closure which you can use to make data and code accessible to the assertions. If your tests are initialized prior to being called (see beforeEachTest above) and initialization returns a value then Preamble will pass the returned value on to **callback** either as the 1st parameter if **windowGlobals** is set to true or as the 2nd parameter if **windowGlobals** is set to false (for more information please see **Configuration** below). **assert** is an object whose properties are the assertion methods (please see Assertions below).
-
-```javascript
-group('A simple asynchronous test', function(){
-    asyncTest('Isn\'t JavaScript amazing?', function(){
-        var val;
+group('Using afterEach to asynchronously execute common code after each test', function(){
+    var count = 0;
+    afterEach(function(done){
         setTimeout(function(){
-            val = 'Isn\'t JavaScript amazing?';
-        }, 10);
-        whenAsyncDone(function(){
-            isTrue(val === 'Isn\'t JavaScript amazing?', 'Yest it is!');
-        });
+            count = 1;
+            done();
+        }, 1);
+    });
+    test('the first asynchronous test', function(done){
+        setTimeout(function(){
+            count = 10;
+            done(function(){
+                isTrue(count === 10);
+            });
+        }, 1);
+    });
+    test('but subsequent asynchronous tests', function(done){
+        setTimeout(function(){
+            count *= 100;
+            done(function(){
+                isTrue(count === 100);
+            });
+        }, 1);
     });
 });
 ```
-#### whenAsyncDone(callback(){...})
-#### Preamble.whenAsyncDone(callback(){...})
-whenAsynDone starts the timer for an asyncTest. When the timer expires Preamble will then call **callback** to run the assertions for the asyncTest.
+
+```javascript
+//BDD Style - preventing a long running asynchronous Setup/Teardown from timing out a test
+
+describe('Preventing a long running asynchronous Setup/Teardown from timing out a test', function(){
+    var count = 0;
+    beforeEachTest(function(done){
+        setTimeout(function(){
+            done(function(){
+                this.count = 10;
+            });
+        }, 50);
+    });
+    it('this.count should equal 10', 100, function(){
+        equal(this.count, 10);
+    });
+});
+```
+
+```javascript
+//TDD Style - preventing a long running asynchronous Setup/Teardown from timing out a test
+
+group('Preventing a long running asynchronous Setup/Teardown from timing out a test', function(){
+    var count = 0;
+    beforeEachTest(function(done){
+        setTimeout(function(){
+            done(function(){
+                this.count = 10;
+            });
+        }, 50);
+    });
+    test('this.count should equal 10', 100, function(){
+        equal(this.count, 10);
+    });
+});
+```
 
 ### Assertions
 Please note that when the **windowGlobals** configuration option is set to false test callback functions are passed a single argument, a hash, which you must use to call assertions (please see **API** above and **Configuration** below).
