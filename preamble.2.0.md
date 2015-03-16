@@ -87,9 +87,18 @@ The only required tags (other than the script tags) are **&lt;div id="preamble-t
 
 ## API
 <p class="warning">
-When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> you must preface each API method listed below with <em>Preamble</em>. (please see <em><strong>Configuration</strong></em> below). In addition, test callback functions are passed a single argument, a hash, which you must use to call assertions (please see <em><strong>Assertions</strong></em> below).
+When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> the following API functions must be called as properties of the global <em>Preamble</em> object:
 </p>
 
+* describe - _Preamble.describe_
+* group - _Preamble.group_
+* it - _Preamble.it_
+* test - _Preamble.test_
+* beforeEach - _Preamble.beforeEach_
+* afterEach - _Preamble.afterEach_
+
+<p class="warning">In addition to the above, when the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> test callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this paramter <em><strong>assert</em></strong>:
+</p>
 ```javascript
 Preamble.test('this is a test', function(assert){
     assert.equal(...);
@@ -504,8 +513,9 @@ group('Preventing a long running asynchronous Setup/Teardown from timing out a t
 ```
 
 ### Assertions
-Please note that when the **windowGlobals** configuration option is set to false test callback functions are passed a single argument, a hash, which you must use to call assertions (please see **API** above and **Configuration** below).
 
+<p class="warning">When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> test callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this paramter <em><strong>assert</em></strong>:
+</p>
 ```javascript
 Preamble.test('this is a test', function(assert){
     assert.equal(...);
@@ -516,7 +526,6 @@ Preamble.test('this is a test', function(assert){
     assert.isNotTruthy(...);
 });
 ```
-
 #### equal(value, expectation, label)
 A strict deep recursive comparison of **value** and **expection**. **value** and **expectation** can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation && expectation === value then the result will be true. **label** is a string used to uniquely identify the assertion.
 

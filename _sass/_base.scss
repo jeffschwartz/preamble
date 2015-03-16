@@ -217,8 +217,17 @@ pre {
  *
  */
  .warning {
+    border: solid 5px $warning-border-color;
     background-color: $warning-background-color;
     color: $warning-color;
     padding: 10px;
     margin: 10px 0;
+ }
+
+ .warning:before {
+     content: "/* "
+ }
+
+ .warning:after {
+     content: " */"
  }
