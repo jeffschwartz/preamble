@@ -544,99 +544,23 @@ A non strict boolean assertion. Result is true if **value** is truthy. **label**
 #### isNotTruthy(value, label) - added v1.0.7
 A non strict boolean assertion. Result is true if **value** is not truthy. **label** is a string used to uniquely identify the assertion.
 
+### Snoop
+
 ### UI Tests
-Preamble adds a div element to the DOM which can be used for UI tests. This element's ID defaults to **ui-test-container** but can be overridden (please see **Configuration** below).
-
-
-### var pfn = proxy(someFunction)
-### var pfn = proxy(someObject, propertyName)
-### var pfn = Preamble.proxy(someFunction)
-### var pfn = Preamble.proxy(someObject, propertyName)
-proxy is used to **spy** on calls to **someFunction** or to **someObject[propertyName]**, both of which are referred to as the **wrapped function**. proxy notes how many times the wrapped function has been called and for each call to the wrapped function proxy notes the context it was called with, the arguments that were passed to it and what it returns. proxy provides an API for retrieving the information that it has accumulated.
-
-Using proxy to spy on a function...
-
-```javascript
-group('Using proxy on a function', function(){
-    asyncTest('proxy(function) can tell you a lot abut a function', function(){
-        var fn = proxy(function(amount){
-            return amount;
-        });
-        setTimeout(function(){
-            fn(1000);
-        }, 10);
-        whenAsyncDone(function(){
-            isTrue(fn.wasCalled(1), 'If it was called - yes it was called');
-            var fnInfo = fn.getData(0);
-            equal(fnInfo.argsPassed[0], 1000, 'It was passed 1000');
-            isTrue(finInfo.context === undefined, 'Its context was undefined');
-            equal(fnInfo.returned, 1000, 'It returned 1000');
-        });
-    });
-});
-```
-and to spy on a property method.
-
-```javascript
-group('Using proxy on a property method', function(){
-    asyncTest('proxy(someOjbect, propertyName) can tell you a lot abut a method', function(){
-        var someObject = {
-            someMethod: function(amount){
-                return amount;
-            }
-        };
-        proxy(someOjbect, 'someMethod');
-        setTimeout(function(){
-            someOjbect.someMethod(1000);
-        }, 10);
-        whenAsyncDone(function(){
-            isTrue(someOjbect.someMethod.wasCalled(1), 'If it was called - yes it was called');
-            var fnInfo = someOjbect.someMethod.getData(0);
-            equal(fnInfo.argsPassed[0], 1000, 'It was passed 1000');
-            isTrue(finInfo.context === undefined, 'Its context was undefined');
-            equal(fnInfo.returned, 1000, 'It returned 1000');
-        });
-    });
-});
-```
-#### pfn.getCalledCount()
-Returns the total number of times that proxy was called.
-
-#### pfn.getContext(n)
-n represents the nth invocation of the wrapped function. If n is within bounds returns the context used on the nth call to the wrapped function, otherwise returns undefined.
-
-#### pfn.getArgsPassed([n])
-n represents the nth invocation of the wrapped function. If called with 'n' and 'n' is within bounds then returns an array whose elements are the arguments that were passed to the wrapped function. Otherwise, returns an array of arrays whose elements are the arguments that were passed to the wrapped function.
-
-#### pfn.getReturned([n])
-n represents the nth invocation of the wrapped function. If called with 'n' and 'n' is within bounds then returns the value that the wrapped function returned, otherwise returns an array containing all the values the wrapped function returned for all invocations.
-
-#### pfn.getData(n)
-n represents the nth invocation of the wrapped function. If 'n' is within bounds then returns an info object, otherwise returns undefined. An info object's property values reflect what proxy noted for that invocation of the wrapped function and include:
-#### count - a number that represents the nth invocation of the wrapped function.
-#### argsPassed -  an array whose elements are the arguments passed to the wrapped function when it was called.
-#### context - the context used to call the wrapped function.
-#### returned - what the wrapped function returned.
-
-#### pfn.wasCalled([n])
-n represents the nth invocation of the wrapped function. Returns a boolean. If you just want to know if the wrapped function was called then call wasCalled with no arguments. If you want to know if the callback was called n times then pass n as an argument.
-
-#### pfn.dataIterator(callback)
-A higher order function that iterates through the collected data and calls **callback** with an **info** object (see pfn.getData above) for a total of pfn.getCalledCount() times.
+Preamble adds the _div element_ with the default id of _**preamble-ui-container**_ to the DOM. Use of this element is reserved specifically for UI tests and Preamble itself never adds content to it nor does it ever modify its content. This element's _ID_ can be overridden via configuration (please see **Configuration** below).
 
 ### getUiTestContainerElement()
-Returns the UI test container DOM element. This element's ID defaults to **ui-test-container** but can be overridden (please see UI Tests above and **Configuration** below).
+Returns the UI test container DOM element.
 
 ```javascript
-var $uiTestContainerElement = $(getUiTestContainerElement());
+var uiTestContainerElement = getUiTestContainerElement();
 ```
 
 ## getUiTestContainerElementId()
-Returns the id of the UI test container DOM element. This element's ID defaults to **ui-test-container** but can be overridden (please see **UI Tests** above and **Configuration** below).
+Returns the id of the UI test container DOM element.
 
 ```javascript
-var elUiTestContainerElement =
-    document.getElementById(getUiTestContainerElementId());
+var elUiTestContainerElement = document.getElementById(getUiTestContainerElementId());
 ```
 
 ### Configuration
