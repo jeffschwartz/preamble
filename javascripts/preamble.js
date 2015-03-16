@@ -34,8 +34,8 @@
                 // closest thing possible to the ECMAScript 5 internal IsCallable function
                 throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
             }
-            var aArgs = Array.prototype.slice.call(arguments, 1), 
-                fToBind = this, 
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
                 FNOP = function () {},
                 fBound = function () {
                     return fToBind.apply(this instanceof FNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
@@ -62,14 +62,14 @@
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.id = id;
         this.path = path;
-        this.label = label; 
+        this.label = label;
         this.callback = callback;
         this.duration = 0;
         this.passed = true;
     }
 
     /**
-     * Returns the concatenated labels from all parent groups. 
+     * Returns the concatenated labels from all parent groups.
      * @param {array} parents An array of parent groups.
      */
     Group.prototype.pathFromParentGroupLabels = function pathFromParentGroupLabels(){
@@ -155,7 +155,7 @@
                 }, 0);
             }
         }
-        
+
         //run befores
         function runBefores(callback){
             if(beforesIterator.hasNext()){
@@ -169,18 +169,36 @@
 
         //run the test
         function runTest(callback){
-            if(self.callback.length){
-                self.callback.call(self.context, function(){
-                    if(arguments.length && typeof(arguments[0] === 'function')){
-                        arguments[0].call(self.context);
-                    }
+            if(config.windowGlobals){
+                if(self.callback.length){
+                    //Pass done callback as 1st param if configured to use window globals.
+                    self.callback.call(self.context, function(){
+                        if(arguments.length && typeof(arguments[0] === 'function')){
+                            arguments[0].call(self.context);
+                        }
+                        self.runAssertions();
+                        callback();
+                    });
+                }else{
+                    self.callback.call(self.context);
                     self.runAssertions();
                     callback();
-                });
+                }
             }else{
-                self.callback.call(self.context);
-                self.runAssertions();
-                callback();
+                if(self.callback.length === 2){
+                    //Pass done callback as 1st param if configured to use window globals.
+                    self.callback.call(self.context, assert, function(){
+                        if(arguments.length && typeof(arguments[0] === 'function')){
+                            arguments[0].call(self.context);
+                        }
+                        self.runAssertions();
+                        callback();
+                    });
+                }else{
+                    self.callback.call(self.context, assert);
+                    self.runAssertions();
+                    callback();
+                }
             }
         }
 
@@ -199,7 +217,7 @@
                 }, 0);
             }
         }
-        
+
         //run the afters
         function runAfters(callback){
             if(aftersIterator.hasNext()){
@@ -210,10 +228,10 @@
                 callback();
             }
         }
-        
+
         (function(test){
             //Set a timer for the test and fail it if it isn't completed in time.
-            //Note to self: Since this can fire after the test it is timing has 
+            //Note to self: Since this can fire after the test it is timing has
             //completed it is possible that "self" no longer refers to the original
             //test. To insure that when this fires it always refers to the test
             //it was timing, the test is captured via closure uaing the module
@@ -229,10 +247,10 @@
             }, test.testTimeOutInterval);
 
             //Run the before callbacks, test callback and after callbacks.
-            //Note to self: Since this can fire after the test has already timed 
-            //out and failed, it is possible that "self" no longer refers to the 
-            //original test. To insure that when this fires it always refers to 
-            //the test it was running, the test is captured via closure uaing the 
+            //Note to self: Since this can fire after the test has already timed
+            //out and failed, it is possible that "self" no longer refers to the
+            //original test. To insure that when this fires it always refers to
+            //the test it was running, the test is captured via closure uaing the
             //module pattern and passing "self" as an argument.
             setTimeout(function(){
                 var start = Date.now();
@@ -310,32 +328,32 @@
      * Add structure to the DOM/show the header.
      */
     HtmlReporter.prototype.init = function(){
-        var s = '<header>' + 
-                    '<div class="banner">' + 
-                        '<h1>' + 
-                            '<span id="name">Test</span> - ' + 
-                            '<span>' + 
-                                '<span> ' + 
-                                    '<span>' + 
-                                        '<i id="version">{{version}}</i>' + 
-                                    '</span>' + 
-                                '</span>' + 
-                            '</span>' + 
-                        '</h1>' + 
-                    '</div>' + 
-                    '<div id="time">' + 
-                        '<span>Completed in ' + 
-                            '<span title="total time to completion">' + 
-                                '{{tt}}ms' + 
-                            '</span>' + 
-                        '</span>' + 
-                    '</div>' + 
+        var s = '<header>' +
+                    '<div class="banner">' +
+                        '<h1>' +
+                            '<span id="name">Test</span> - ' +
+                            '<span>' +
+                                '<span> ' +
+                                    '<span>' +
+                                        '<i id="version">{{version}}</i>' +
+                                    '</span>' +
+                                '</span>' +
+                            '</span>' +
+                        '</h1>' +
+                    '</div>' +
+                    '<div id="time">' +
+                        '<span>Completed in ' +
+                            '<span title="total time to completion">' +
+                                '{{tt}}ms' +
+                            '</span>' +
+                        '</span>' +
+                    '</div>' +
                 '</header>' +
-                '<div class="container">' + 
-                    '<section id="preamble-status-container">' + 
-                        '<div class="summary">Building queue. Please wait...</div>' + 
-                    '</section>' + 
-                    '<section id="preamble-results-container"></section>' + 
+                '<div class="container">' +
+                    '<section id="preamble-status-container">' +
+                        '<div class="summary">Building queue. Please wait...</div>' +
+                    '</section>' +
+                    '<section id="preamble-results-container"></section>' +
                 '</div>';
 
         s = s.replace(/{{version}}/, version);
@@ -372,7 +390,7 @@
         }
         show += pluralize(' test', tests.length);
         coverage = '<div id="coverage">' + show +
-            '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' + 
+            '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' +
             '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
             ' - <a id="runAll" href="?"> run all</a>' +
             '</div>';
@@ -434,7 +452,7 @@
                     replace(/{{passed}}/, item.bypass ? ' bypassed' : item.passed ? '' : ' failed').
                     replace('{{grouphref}}', encodeURI(item.pathFromParentGroupLabels())).
                     replace(/{{label}}/, item.label) + html.slice(-5);
-                html = html; 
+                html = html;
                 if(!item.parentGroups.length){
                     rc.insertAdjacentHTML('beforeend', html);
                 }else{
@@ -469,7 +487,7 @@
                 }
                 el = document.getElementById(item.parentGroup.path);
                 el.insertAdjacentHTML('beforeend', html);
-            }    
+            }
         });
         this.showHidePassedTests();
         document.getElementById('preamble-results-container').style.display = 'block';
@@ -644,7 +662,7 @@
         tests.totBypassed = 0;
         if(runtimeFilter.group){
             tests.totBypassed = tests.reduce(function(prevValue, t){
-                return t.bypass ? prevValue + 1 : prevValue; 
+                return t.bypass ? prevValue + 1 : prevValue;
             }, 0);
         }
         //Record how many tests failed.
@@ -752,7 +770,7 @@
                 }else{
                     path = obj.parentGroup.pathFromParentGroupLabels();
                     s = path.substr(0, runtimeFilter.group.length);
-                    return s === runtimeFilter.group && runtimeFilter.test === '' || 
+                    return s === runtimeFilter.group && runtimeFilter.test === '' ||
                         s === runtimeFilter.group && runtimeFilter.test === obj.label;
                 }
             }
@@ -782,7 +800,7 @@
 
         /**
          * Registers a before each test process.
-         * @param {function} callback,  called before running a test. 
+         * @param {function} callback,  called before running a test.
          */
         runner.beforeEachTest = function(callback){
             var parentGroup = groupStack[groupStack.length - 1];
@@ -829,7 +847,7 @@
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
-        return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') + 
+        return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') +
             '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
     }
 
@@ -842,7 +860,7 @@
             html = '<p class="failed">' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
         }else{
             //catch(e)
-            html = '<p class="failed">An error occurred,  "' + arguments[0] + 
+            html = '<p class="failed">An error occurred,  "' + arguments[0] +
                 '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
         }
         document.getElementById('preamble-status-container').innerHTML = html;
@@ -942,9 +960,9 @@
     }
 
     /**
-     * Handles all anchor tag click events which are delegated to the 
+     * Handles all anchor tag click events which are delegated to the
      * test container element.
-     * When an anchor tag is clicked, persist the hidePassedTests checkbox 
+     * When an anchor tag is clicked, persist the hidePassedTests checkbox
      * state as a query parameter and set the window location accordingly.
      * @param {object} evt A DOM event object.
      */
@@ -972,7 +990,7 @@
          * Default configuration options - override these in your config file (e.g. var preambleConfig = {testTimeOutInterval: 20})
          * or in-line in your tests.
          *
-         * windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT - 
+         * windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT -
          * USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
          *
          * testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds wait before a test times out.
@@ -986,14 +1004,14 @@
          *
          * hideAssertions: (default: true) - set to false to show assertions.
          *
-         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma, 
+         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma,
          * initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
          */
         var defaultConfig = {
-                windowGlobals: true, 
-                testTimeOutInterval: 10, 
-                name: 'Test', 
-                uiTestContainerId: 'ui-test-container', 
+                windowGlobals: true,
+                testTimeOutInterval: 10,
+                name: 'Test',
+                uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
                 hideAssertions: true,
                 autoStart: true
@@ -1231,10 +1249,10 @@
 
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         testsIterator.get().assertions.push({
-            assertion: assertion, 
-            assertionLabel: assertionLabel, 
-            value: value, 
-            expectation: expectation, 
+            assertion: assertion,
+            assertionLabel: assertionLabel,
+            value: value,
+            expectation: expectation,
             stackTrace: stackTrace
         });
     }
@@ -1536,7 +1554,7 @@
         //Stable is defined by a time interval during which the length
         //of the queue remains constant, indicating that all groups
         //have been loaded. Once stable, emit the 'start' event.
-        //***Note: config.autoStart can only be false if it set by an 
+        //***Note: config.autoStart can only be false if it set by an
         //external process (e.g. Karma adapter).
         intervalId = setInterval(function(){
             if(queue.length === prevQueueCount){
