@@ -179,11 +179,22 @@ group('Nested specs', function(){
 
 ### Tests
 
-#### <small>BDD Style</small> **it** *it(label, [timeout,] callback)*
-#### <small>TDD Style</small> **test** *test(label, [timeout,] callback)*
+#### <small>BDD Style</small> **it** *it(label, [timeout,] callback([assert,] [done]){...})*
+#### <small>TDD Style</small> **test** *test(label, [timeout,] callback([assert,] [done]){...})*
 **it** and **test** are used to define one or more _assertions_. **label** is a string used to uniquely identify a test within a _group_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a test (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function which contains one or more assertions and it also provide _scope_ to make data and code accessible to assertions.
 
-**done** is a _function_ that is passed as an argument to **it**'s and **test**'s **callback**s and must be called to signal that an _asynchronous_ process has completed. **done**'s '**callback** argument provides scope for one or more assertions.
+<p class="warning"><strong>assert</strong> is optional and is a <em>hash</em> that is alwyas passed as the first argument to <strong>it</strong>'s and <strong>test</strong>'s <strong>callback</strong>'s when the configuration option <em><strong>windowGlobals</strong></em> is set to <em>false</em>. It exposes the assertion API. It is common to name this paramter assert.</p>
+```javascript
+Preamble.test('this is a test', function(assert){
+    assert.equal(...);
+    assert.notEqual(...);
+    assert.isTrue(...);
+    assert.isFalse(...);
+    assert.isTruthy(...);
+    assert.isNotTruthy(...);
+});
+```
+**done** is optional and is a _function_ that is passed as an argument to **it**'s and **test**'s **callback**s and must be called to signal that an _asynchronous_ process has completed. **done**'s '**callback** argument provides scope for one or more assertions.
 
 ```javascript
 //BDD Style - a synchronous test
@@ -273,12 +284,12 @@ group('When running an asynchronous test', function(){
 
 ### Setup and Teardown
 
-#### **beforeEach** *beforeEach(callback)*
-#### **afterEach** *afterEach(callback)*
+#### **beforeEach** *beforeEach(callback([done]){...})*
+#### **afterEach** *afterEach(callback([done]){...})*
 
 **beforeEach** and **afterEach** are used to execute common code _before_ and _after_ each _test_, respectively. Their use enforces the _DRY_ principle. **callback** provides scope for the code that is to be run before or after each test. Values can be passed on to tests by assigning them to **callback**'s context (e.g. this.someValue = someOtherValue).
 
-**done** is a _function_ that is passed as an argument to **callback** and must be called to signal that an _asynchronous_ process has completed.
+**done** is optional and is a _function_ that is passed as an argument to **beforeEach**'s and **afterEach**'s **callback**s and must be called to signal that an _asynchronous_ setup/teardown process has completed.
 
 ```javascript
 //BDD Style - using beforeEach to synchronously execute common code before each test
