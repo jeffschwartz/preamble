@@ -294,10 +294,7 @@ A non strict boolean assertion. Result is true if **value** is truthy. **label**
 ### isNotTruthy(value, label) - added v1.0.7
 A non strict boolean assertion. Result is true if **value** is not truthy. **label** is a string used to uniquely identify the assertion.
 
-## UI Tests
-Preamble adds a div element to the DOM which can be used for UI tests. This element's ID defaults to **ui-test-container** but can be overridden (please see **Configuration** below).
-
-
+## proxy
 ## var pfn = proxy(someFunction)
 ## var pfn = proxy(someObject, propertyName)
 ## var pfn = Preamble.proxy(someFunction)
@@ -374,6 +371,9 @@ n represents the nth invocation of the wrapped function. Returns a boolean. If y
 ### pfn.dataIterator(callback)
 A higher order function that iterates through the collected data and calls **callback** with an **info** object (see pfn.getData above) for a total of pfn.getCalledCount() times.
 
+## UI Tests
+Preamble adds a div element to the DOM which can be used for UI tests. This element's ID defaults to **ui-test-container** but can be overridden (please see **Configuration** below).
+
 ## getUiTestContainerElement()
 Returns the UI test container DOM element. This element's ID defaults to **ui-test-container** but can be overridden (please see UI Tests above and **Configuration** below).
 
@@ -404,7 +404,3 @@ Beginning with v1.0.6 you can run tests with Preamble headless using [PhantomJS]
 
 1. Open up a terminal and change to your test's root folder.
 2. From the command line enter "phantomjs javascripts/phantom-runner.js index.html".
-
-```javascript
-proxy(functionToBeProxied);
-```
