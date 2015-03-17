@@ -550,9 +550,31 @@ A non strict boolean assertion. Result is true if **value** is not truthy. **lab
 
 **snoop** is a utility that is used to _spy_ on object methods. _**obj**_ is the object whose method is to be spied on. _**propName**_ is a string, its value is the _name_ of the method to spy on.
 
-Snooping on an object's method:
+### snoop API
+
+ _snoop_ provides a high level API for querying information about a method's invocation history:
+
+#### **wasCalled** *someObj.snoopedMethod.wasCalled()*
+Returns _true_ if snoopedMethod was called, _false_ if it wasn't called.
+
+#### **called** *someObj.snoopedMethod.called()*
+Returns the _number_ of times that snoopedMethod was called.
+
+#### **wasCalled.nTimes** *someObj.snoopedMethod.wasCalled.nTimes(n)*
+Returns _true_ if snoopedMethod was called _n_ times.
+
+#### **contextCalledWith** *someObj.snoopedMethod.contextCalledWith()*
+Returns the _context_ that snoopedMethod was called with.
+
+#### **args.getArgument** *someObj.snoopedMethod.args.getArgument(nth)*
+Returns the _nth_ argument passed to snoopedMethod.
+
+#### **returned** *someObj.snoopedMethod.returned()*
+Returns what snoopedMethod _returned_.
 
 ```javascript
+//Snooping on an object's method
+
 describe('snooping on a method', function(){
     beforeEach(function(){
         this.foo = {
@@ -608,9 +630,9 @@ describe('snooping on a method', function(){
 });
 ```
 
-Snooping on multiple object methods:
-
 ```javascript
+//Snooping on multiple object methods
+
 describe('snooping on more than one method', function(){
     beforeEach(function(){
         this.foo = {
@@ -643,9 +665,15 @@ describe('snooping on more than one method', function(){
 });
 ```
 
-Snooping if a method throws an exception:
+#### **threw** *someObj.snoopedMethod.threw()*
+Returns _true_ if snoopedMethod _threw_ an exception.
+
+#### **threw.withMessage** *someObj.snoopedMethod.threw.withMessage()*
+Returns the message associated with the exception.
 
 ```javascript
+//Snooping if a method threw an exception and for the exception's message
+
 describe('a snooped method throws', function(){
     beforeEach(function(){
         this.foo = {
@@ -665,7 +693,7 @@ describe('a snooped method throws', function(){
 });
 ```
 
-###snoop.calls API###
+### snoop.calls API
 
 _**snoop.calls**_ is a low level API that provides access to the _accumulated information_ about a method's invocation history. Each invocation's information is stored in an _ACall_ hash, and has the following properties:
 
