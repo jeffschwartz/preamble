@@ -95,10 +95,12 @@ When the <em><strong>windowGlobals</strong></em> configuration option is set to 
 * beforeEach - _Preamble.beforeEach_
 * afterEach - _Preamble.afterEach_
 
-<p class="warning">In addition to the above, when the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> test callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this paramter <em><strong>assert</em></strong>:
+<p class="warning">In addition to the above, when the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> test callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this parameter <em><strong>assert</em></strong>:
 </p>
+
 ```javascript
-Preamble.test('this is a test', function(assert){
+
+Preamble.it('this is a test', function(assert){
     assert.equal(...);
     assert.notEqual(...);
     assert.isTrue(...);
@@ -115,7 +117,6 @@ In the documentation that follows descriptions and code examples assume that the
 
 #### **describe** *describe(label, callback)*
 **describe** provide structure and *scope* for one or more tests. **label** is a string used to uniquely identify the group. **callback** is a function which contains one or more tests. **callback** also provides *scope* to make data and code accessible to the tests.
-
 
 ```javascript
 
@@ -150,10 +151,10 @@ describe('Nested specs', function(){
 #### **it** *it(label, [timeout,] callback([assert,] [done]){...})*
 **it** is used to define one or more _assertions_. **label** is a string used to uniquely identify a test within a _group_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a test (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function which contains one or more assertions and it also provide _scope_ to make data and code accessible to assertions.
 
-<p class="warning"><strong>assert</strong> is optional and is a <em>hash</em> that is alwyas passed as the first argument to <strong>it</strong>'s and <strong>test</strong>'s <strong>callback</strong>'s when the configuration option <em><strong>windowGlobals</strong></em> is set to <em>false</em>. It exposes the assertion API. It is common to name this paramter assert.</p>
+<p class="warning"><strong>assert</strong> is optional and is a <em>hash</em> that is alwyas passed as the first argument to <strong>it</strong>'s and <strong>test</strong>'s <strong>callback</strong>'s when the configuration option <em><strong>windowGlobals</strong></em> is set to <em>false</em>. It exposes the assertion API. It is common to name this parameter assert.</p>
 
 ```javascript
-Preamble.test('this is a test', function(assert){
+Preamble.it('this is a test', function(assert){
     assert.equal(...);
     assert.notEqual(...);
     assert.isTrue(...);
@@ -325,10 +326,11 @@ describe('Preventing a long running asynchronous Setup/Teardown from timing out 
 
 ### Assertions
 
-<p class="warning">When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> test callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this paramter <em><strong>assert</em></strong>:
+<p class="warning">When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> test callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this parameter <em><strong>assert</em></strong>:
 </p>
+
 ```javascript
-Preamble.test('this is a test', function(assert){
+Preamble.it('this is a test', function(assert){
     assert.equal(...);
     assert.notEqual(...);
     assert.isTrue(...);
