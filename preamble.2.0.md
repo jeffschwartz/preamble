@@ -769,31 +769,56 @@ describe('using snoop\'s "calls" api', function(){
 ```
 
 ### UI Tests
-Preamble adds the _div element_ with the default id of _**preamble-ui-container**_ to the DOM. Use of this element is reserved specifically for UI tests and Preamble itself never adds content to it nor does it ever modify its content. This element's _ID_ can be overridden via configuration (please see **Configuration** below).
+Preamble adds the _div element_ with the default id of _**ui-test-container**_ to the DOM. Use of this element is reserved specifically for UI tests and Preamble itself never adds content to it nor does it ever modify its content. This element's _ID_ can be overridden via configuration (please see **Configuration** below).
 
-### getUiTestContainerElement()
+#### getUiTestContainerElement()
 Returns the UI test container DOM element.
 
 ```javascript
 var uiTestContainerElement = getUiTestContainerElement();
 ```
 
-## getUiTestContainerElementId()
+#### getUiTestContainerElementId()
 Returns the id of the UI test container DOM element.
 
 ```javascript
 var elUiTestContainerElement = document.getElementById(getUiTestContainerElementId());
 ```
 
-### Configuration
-The following configuration options can be overridden in the preamble-config.js file located in the javascripts folder:
+### Configuration Using preamble-config.js
+The following configuration options can be overridden in the _**preamble-config.js**_ file located in the _javascripts_ folder:
 
-#### shortCircuit: Default value = false. Set to true to terminate upon first failure.
-#### windowGlobals: Default value = true. Set to false if you don't want to pollute the global name space and instead use the two global vars 'Preamble' and 'assert'.
-#### asyncTestDelay: Default value = 10 milliseconds. Set the value used to wait before calling whenAsyncDone's callback.
-#### asyncBeforeAfterTestDelay: Default value = 10 milliseconds. Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest).
-#### name: Default value = 'Test'. Override this to display a meaningful name for your tests.
-#### uiTestContainerId: Default value = 'ui-test-container'. Override this to use a different ID for the UI test container DOM element.
+#### **windowGlobals**
+Default value = true. Set to false if you don't want to pollute the global name space and instead use the two global vars 'Preamble' and 'assert'.
+#### **testTimeOutInterval**
+Default value = 10 milliseconds. This is the value Preamble uses to wait before it times out a test. This value includes the time allocated to setup (beforeEach), teardown (afterEach) and the actual test (it or test).
+#### **name**
+Default value = 'Test'. Override this to display a meaningful name for your tests.
+#### **uiTestContainerId**
+Default value = 'ui-test-container'. Override this to use a different ID for the UI test container DOM element.
+#### **hidePassedTests**
+Default value = false. Set it to true to hide passed tests.
+
+### In-line Configuration
+Begining with v2.0, you can call _**configure**_ directly from within your test scripts.:
+
+#### **configure** *configure(hash)*
+Call _**configure**_ passing a _**hash**_ containing _properties_ and their associated _values_ for the configuration options to be overriden.
+<p class="warning">Place the call to <em>configure</em> at the very <strong><em>top</em></strong> of your test script file.</p>
+
+```javascript
+//Your test script file
+
+configure({
+    name: 'Sample Test Suite (BDD-Like)',
+    hidePassedTests: true,
+    testTimeOutInterval: 100
+});
+
+.
+.
+.
+```
 
 ### Running Headless
 Beginning with v1.0.6 you can run tests with Preamble headless using [PhantomJS](http://phantomjs.org). The following example assumes that you already have PhantomJS installed and that it can be found on the path.
