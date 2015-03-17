@@ -1,14 +1,14 @@
 /*jslint eqeq: true*/
 /*jshint strict: false*/
-/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, proxy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
-/* 
- *This script uses BDD-like semantics. If you prefer TDD 
- *semantics, then please see javascripts\sample-test.js.
- */ 
+/*
+ *This script uses BDD-like semantics.
+ *IMPORTANT: Please note that for the purpose of providing examples 6 tests intentionally fail.
+ */
 
 configure({
-    name: 'Sample Test Suite (BDD-Like)',
+    name: 'Sample Test Suite (BDD-Style)',
     hidePassedTests: true,
     //hideAssertions: true,
     testTimeOutInterval: 500
@@ -103,7 +103,7 @@ describe('A test can configure long running asynchronous after processes not to 
 
 /**
  * This test will take 1000 miliseconds to run but the test will
- * time out and fail because asyncTestDelay is set above to 500. 
+ * time out and fail because asyncTestDelay is set above to 500.
  */
 describe('A long running test that fails to complete on time', function(){
     var count = 0;
@@ -119,7 +119,7 @@ describe('A long running test that fails to complete on time', function(){
 
 /**
  * This is the same test as above but here the tests sets its
- * time out interval to 1010 miliseconds to prevent it from 
+ * time out interval to 1010 miliseconds to prevent it from
  * timing out and failing.
  * This is a very good way to fine tune individual test but...
  * IMPORTANT: you can override asyncTestDelay in your in-line
@@ -518,7 +518,7 @@ describe('snooping on more than one method', function(){
 });
 
 describe('using snoop\'s "calls" api', function(){
-    var i, 
+    var i,
         foo = {
             someFn: function(arg){
                 return arg;
@@ -550,4 +550,3 @@ describe('using snoop\'s "calls" api', function(){
         }
     });
 });
-
