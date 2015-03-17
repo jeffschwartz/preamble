@@ -1,3 +1,4 @@
 *.lock
 _site
 .*-cache
+node_modules
