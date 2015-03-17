@@ -357,63 +357,6 @@ describe('Running asynchronous tests with afterEachAsync', function(){
     });
 });
 
-describe('Proxy wraps a function and that function is called', function(){
-    beforeEach(function(){
-        var fn = proxy(function(){
-            return 'JavaScript is amazing!';
-        });
-        fn('Tell me something about JavaScript');
-        this.fn = fn;
-    });
-    it('calling wasCalled(number) on that function', function(){
-        isTrue(this.fn.wasCalled(1));
-        isFalse(this.fn.wasCalled(2));
-    });
-    it('calling getCalledCount() on that function', function(){
-        equal(this.fn.getCalledCount(), 1);
-    });
-    it('calling getData(n) on that function', function(){
-        var info = this.fn.getData(0);
-        notEqual(info, undefined);
-    });
-    it('and the object that getData(n) returns exposes and api', function(){
-        var info = this.fn.getData(0);
-        equal(info.argsPassed[0], 'Tell me something about JavaScript');
-        equal(info.returned, 'JavaScript is amazing!');
-        equal(info.context, undefined);
-    });
-});
-
-describe('Proxy wraps a method and that function is called', function(){
-    beforeEach(function(){
-        var someObject = {
-            someMethod: function(){
-                return 'JavaScript is amazing!';
-            }
-        };
-        proxy(someObject, 'someMethod');
-        someObject.someMethod('Tell me something about JavaScript');
-        this.someObject = someObject;
-    });
-    it('calling wasCalled(number) on that method', function(){
-        isTrue(this.someObject.someMethod.wasCalled(1));
-        isFalse(this.someObject.someMethod.wasCalled(2));
-    });
-    it('calling getCalledCount() on that method', function(){
-        equal(this.someObject.someMethod.getCalledCount(), 1);
-    });
-    it('calling getData(n) on that method', function(){
-        var info = this.someObject.someMethod.getData(0);
-        notEqual(info, undefined);
-    });
-    it('and the object that getData(n) returns exposes and api', function(){
-        var info = this.someObject.someMethod.getData(0);
-        equal(info.argsPassed[0], 'Tell me something about JavaScript');
-        equal(info.returned, 'JavaScript is amazing!');
-        equal(info.context, this.someObject);
-    });
-});
-
 describe('snooping on a method', function(){
     beforeEach(function(){
         this.foo = {

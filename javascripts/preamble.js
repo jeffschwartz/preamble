@@ -1002,8 +1002,6 @@
          *
          * hidePassedTests: (default: false) - set to true to hide passed tests.
          *
-         * hideAssertions: (default: true) - set to false to show assertions.
-         *
          * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma,
          * initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
          */
@@ -1013,7 +1011,6 @@
                 name: 'Test',
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
-                hideAssertions: true,
                 autoStart: true
             },
             configArg = arguments && arguments[0];
@@ -1033,11 +1030,9 @@
         //not be used and the one Preamble name space will be used instead.
         if(config.windowGlobals){
             window.configure = configure;
-            window.group = queueBuilder.group;
             window.describe = queueBuilder.group;
             window.beforeEach = queueBuilder.beforeEachTest;
             window.afterEach = queueBuilder.afterEachTest;
-            window.test = queueBuilder.test;
             window.it = queueBuilder.test;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
@@ -1047,20 +1042,16 @@
             window.isNotTruthy = noteIsNotTruthyAssertion;
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
-            window.proxy = proxy;
             window.snoop = snoop;
         }else{
             window.Preamble = {
                 configure: configure,
-                group: queueBuilder.group,
                 describe: queueBuilder.group,
                 beforeEach: queueBuilder.beforeEachTest,
                 afterEach: queueBuilder.afterEachTest,
-                test: queueBuilder.test,
                 it: queueBuilder.test,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
-                proxy: proxy,
                 snoop: snoop
             };
             //Functions to "note" assertions are passed as the
@@ -1327,125 +1318,6 @@
     //Returns the id of the ui test container element.
     function getUiTestContainerElementId(){
         return config.uiTestContainerId;
-    }
-
-    /**
-     * ***Note: deprecated as of v2. Use snoop instead.
-     * A factory that creates a proxy wrapper for any function or object method property.
-     * Use it to determine if the wrapped function was called, how many times it was called,
-     * the arguments that were passed to it, the contexts it was called with and what it
-     * returned. Extremely useful for testing synchronous and asynchronous methods.
-     */
-    function proxy(){
-        var proxyFactory = function(){
-            //The wrapped function to call.
-            var fnToCall = arguments.length === 2 ? arguments[0][arguments[1]] : arguments[0],
-                //A counter used to note how many times proxy has been called.
-                xCalled = 0,
-                //An array whose elements note the context used to call the wrapped function.
-                contexts = [],
-                //An array of arrays used to note the arguments that were passed to proxy.
-                argsPassed = [],
-                //An array whose elements note what the wrapped function returned.
-                returned = [],
-                //
-                //Privileged functions used by API
-                //
-                //Returns the number of times the wrapped function was called.
-                getCalledCount = function(){
-                    return xCalled;
-                },
-                //If n is within bounds returns the after used on the nth
-                //call to the wrapped function, otherwise returns undefined.
-                getContext = function(n){
-                    if(n >= 0 && n < xCalled){
-                        return contexts[n];
-                    }
-                },
-                //If called with 'n' and 'n' is within bounds then returns the
-                //array found at argsPassed[n], otherwise returns argsPassed.
-                getArgsPassed = function(){
-                    if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < argsPassed.length){
-                        return argsPassed[arguments[0]];
-                    }else{
-                        return argsPassed;
-                    }
-                },
-                //value found at returned[n], otherwise returns returned.
-                getReturned = function(){
-                    if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < returned.length){
-                        return returned[arguments[0]];
-                    }else{
-                        return returned;
-                    }
-                },
-                //If 'n' is within bounds then returns an
-                //info object, otherwise returns undefined.
-                getData= function(n){
-                    var args,
-                        context,
-                        ret;
-                    if(n >= 0 && n < xCalled){
-                        args = getArgsPassed(n);
-                        context = getContext(n);
-                        ret = getReturned(n);
-                        return {
-                            count: n + 1,
-                            argsPassed: args,
-                            context: context,
-                            returned: ret
-                        };
-                    }
-                },
-                //If you just want to know if the wrapped function was called
-                //then call wasCalled with no args. If you want to know if the
-                //callback was called n times, pass n as an argument.
-                wasCalled = function(){
-                    return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
-                },
-                //A higher order function - iterates through the collected data and
-                //returns the information collected for each invocation of proxy.
-                dataIterator = function(callback){
-                    var i;
-                    for(i = 0; i < xCalled; i++){
-                        callback(getData(i));
-                    }
-                },
-                //The function that is returned to the caller.
-                fn = function(){
-                    var args,
-                        ret;
-                    //Note the context that the proxy was called with.
-                    contexts.push(this);
-                    //Note the arguments that were passed for this invocation.
-                    args = [].slice.call(arguments);
-                    argsPassed.push(args.length ? args : []);
-                    //Increment the called count for this invocation.
-                    xCalled += 1;
-                    //Call the wrapped function noting what it returns.
-                    ret = fnToCall.apply(this, args);
-                    returned.push(ret);
-                    //Return what the wrapped function returned to the caller.
-                    return ret;
-                };
-            //Exposed lovwer level API - see Privileged functions used by API above.
-            fn.getCalledCount = getCalledCount;
-            fn.getContext = getContext;
-            fn.getArgsPassed = getArgsPassed;
-            fn.getReturned = getReturned;
-            fn.getData = getData;
-            //Exposed Higher Order API - see Privileged functions used by API above.
-            fn.wasCalled = wasCalled;
-            fn.dataIterator = dataIterator;
-            //Replaces object's method property with proxy's fn.
-            if(arguments.length === 2){
-                arguments[0][arguments[1]] = fn;
-            }
-            //Return fn to the caller.
-            return fn;
-        };
-        //Convert arguments to an array, call factory and returns its value to the caller.
-        return proxyFactory.apply(null, [].slice.call(arguments));
     }
 
     /**
