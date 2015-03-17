@@ -91,9 +91,7 @@ When the <em><strong>windowGlobals</strong></em> configuration option is set to 
 </p>
 
 * describe - _Preamble.describe_
-* group - _Preamble.group_
 * it - _Preamble.it_
-* test - _Preamble.test_
 * beforeEach - _Preamble.beforeEach_
 * afterEach - _Preamble.afterEach_
 
@@ -115,13 +113,11 @@ In the documentation that follows descriptions and code examples assume that the
 
 ### Grouping Tests
 
-#### <small>BDD Style</small> **describe** *describe(label, callback)*
-#### <small>TDD Style</small> **group** *group(label, callback)*
-**describe** and **group** provide structure and *scope* for one or more tests. **label** is a string used to uniquely identify the group. **callback** is a function which contains one or more tests. **callback** also provides *scope* to make data and code accessible to the tests.
+#### **describe** *describe(label, callback)*
+**describe** provide structure and *scope* for one or more tests. **label** is a string used to uniquely identify the group. **callback** is a function which contains one or more tests. **callback** also provides *scope* to make data and code accessible to the tests.
 
 
 ```javascript
-//BDD Styl
 
 describe('Describe a group', function(){
     var hw = 'Hello World!';
@@ -131,20 +127,9 @@ describe('Describe a group', function(){
 })
 ```
 
-```javascript
-//TDD Style
-
-group('Describe a group', function(){
-    var hw = 'Hello World!';
-    test('Hello World!', function(){
-        isTrue(hw === 'Hello World!');
-    });
-})
-```
-Groups can also be _nested_ providing fine grained structure for organinzing tests:
+Groups can also be _nested_ providing fine grained structure for organizing tests:
 
 ```javascript
-//BDD Style - nested groups
 
 describe('Nested specs', function(){
     describe('Nested spec 1', function(){
@@ -160,30 +145,13 @@ describe('Nested specs', function(){
 });
 ```
 
-```javascript
-//TDD Style - nested groups
-
-group('Nested specs', function(){
-    group('Nested spec 1', function(){
-        test('test 1.1', function(){
-            isTrue(1);
-        });
-    });
-    group('Nested spec 2', function(){
-        test('test 2.1', function(){
-            isTrue(1);
-        });
-    });
-});
-```
-
 ### Tests
 
-#### <small>BDD Style</small> **it** *it(label, [timeout,] callback([assert,] [done]){...})*
-#### <small>TDD Style</small> **test** *test(label, [timeout,] callback([assert,] [done]){...})*
-**it** and **test** are used to define one or more _assertions_. **label** is a string used to uniquely identify a test within a _group_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a test (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function which contains one or more assertions and it also provide _scope_ to make data and code accessible to assertions.
+#### **it** *it(label, [timeout,] callback([assert,] [done]){...})*
+**it** is used to define one or more _assertions_. **label** is a string used to uniquely identify a test within a _group_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a test (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function which contains one or more assertions and it also provide _scope_ to make data and code accessible to assertions.
 
 <p class="warning"><strong>assert</strong> is optional and is a <em>hash</em> that is alwyas passed as the first argument to <strong>it</strong>'s and <strong>test</strong>'s <strong>callback</strong>'s when the configuration option <em><strong>windowGlobals</strong></em> is set to <em>false</em>. It exposes the assertion API. It is common to name this paramter assert.</p>
+
 ```javascript
 Preamble.test('this is a test', function(assert){
     assert.equal(...);
@@ -197,7 +165,6 @@ Preamble.test('this is a test', function(assert){
 **done** is optional and is a _function_ that is passed as an argument to **it**'s and **test**'s **callback**s and must be called to signal that an _asynchronous_ process has completed. **done**'s '**callback** argument provides scope for one or more assertions.
 
 ```javascript
-//BDD Style - a synchronous test
 
 describe('A test', function(){
     it('Hello World!', function(){
@@ -208,18 +175,6 @@ describe('A test', function(){
 ```
 
 ```javascript
-//TDD Style - a synchronous test
-
-group('A test', function(){
-    test('Hello World!', function(){
-        var hw = 'Hello World!';
-        isTrue(hw === 'Hello World!');
-    });
-});
-```
-
-```javascript
-//BDD Style - an asynchronous test
 
 describe('When running an asynchronous test', function(){
     var count = 0;
@@ -235,43 +190,10 @@ describe('When running an asynchronous test', function(){
 ```
 
 ```javascript
-//TDD Style - an asynchronous test
-
-group('When running an asynchronous test', function(){
-    var count = 0;
-    test('calling done signals the asynchronous process has completed ', function(done){
-        setTimeout(function(){
-            count = 100;
-            done(function(){
-                equal(count, 100);
-            });
-        }, 1);
-    });
-});
-```
-
-```javascript
-//BDD Style - preventing a long running asynchronous test from timing out
 
 describe('When running an asynchronous test', function(){
     var count = 0;
     it('calling done signals the asynchronous process has completed ', 100, function(done){
-        setTimeout(function(){
-            count = 100;
-            done(function(){
-                equal(count, 100);
-            });
-        }, 50);
-    });
-});
-```
-
-```javascript
-//TDD Style - preventing a long running asynchronous test from timing out
-
-group('When running an asynchronous test', function(){
-    var count = 0;
-    test('calling done signals the asynchronous process has completed ', 100, function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
@@ -289,10 +211,9 @@ group('When running an asynchronous test', function(){
 
 **beforeEach** and **afterEach** are used to execute common code _before_ and _after_ each _test_, respectively. Their use enforces the _DRY_ principle. **callback** provides scope for the code that is to be run before or after each test. Values can be passed on to tests by assigning them to **callback**'s context (e.g. this.someValue = someOtherValue).
 
-**done** is optional and is a _function_ that is passed as an argument to **beforeEach**'s and **afterEach**'s **callback**s and must be called to signal that an _asynchronous_ setup/teardown process has completed.
+**done** is optional and is a _function_ that is passed as an argument to the **callbacks** of **beforeEach** and **afterEach** and must be called to signal that an _asynchronous_ setup/teardown process has completed.
 
 ```javascript
-//BDD Style - using beforeEach to synchronously execute common code before each test
 
 describe('Using beforeEach to synchronously execute common code before each test', function(){
     var count = 0;
@@ -312,27 +233,6 @@ describe('Using beforeEach to synchronously execute common code before each test
 ```
 
 ```javascript
-//TDD Style - Using beforeEach to synchronously execute common code before each test
-
-group('Using beforeEach to synchronously execute common code before each test', function(){
-    var count = 0;
-    beforeEachTest(function(){
-        count = 1;
-    });
-    test('Is count 1?', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0');
-        isTrue(count === 1, 'count does equal 1');
-        isTrue((count += 1) === 2, 'count now equals 2');
-    });
-    test('Is count still 2?', function(){
-        isFalse(count === 2, 'nope, it isn\'t still 2');
-        isTrue(count === 1, 'now count equals 1');
-    });
-});
-```
-
-```javascript
-//BDD Style - Using afterEach to synchronously execute common code after each test
 
 describe('Using afterEach to synchronously execute common code after each test', function(){
     var count = 0;
@@ -350,25 +250,6 @@ describe('Using afterEach to synchronously execute common code after each test',
 ```
 
 ```javascript
-//TDD Style - Using afterEach to synchronously execute common code after each test
-
-group('Using afterEach to synchronously execute common code after each test', function(){
-    var count = 0;
-    afterEachTest(function(){
-        count = 1;
-    });
-    test('Is count 0?', function(){
-        isTrue(count === 0, 'count does equal 0.');
-    });
-    test('Is count still 0?', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0.');
-        isTrue(count === 1, 'count now equals 1.');
-    });
-});
-```
-
-```javascript
-//BDD Style - Passing a value from Setup/Teardown on to a test
 
 describe('Passing a value from Setup/Teardown on to a tests', function(){
     beforeEach(function(){
@@ -381,20 +262,6 @@ describe('Passing a value from Setup/Teardown on to a tests', function(){
 ```
 
 ```javascript
-//TDD Style - Passing a value from Setup/Teardown on to a test
-
-group('Passing a value from Setup/Teardown on to a tests', function(){
-    beforeEach(function(){
-        this.value = 10;
-    });
-    test('the tests', function(){
-        equal(this.value, 10);
-    });
-});
-```
-
-```javascript
-//BDD Style - Using beforeEach to asynchronously execute common code before each test
 
 describe('Using beforeEach to asynchronously execute common code before each test', function(){
     var count = 0;
@@ -411,24 +278,6 @@ describe('Using beforeEach to asynchronously execute common code before each tes
 ```
 
 ```javascript
-//TDD Style - Using beforeEach to asynchronously execute common code before each test
-
-group('Using beforeEach to asynchronously execute common code before each test', function(){
-    var count = 0;
-    beforeEach(function(done){
-        setTimeout(function(){
-            count = 10;
-            done();
-        }, 1);
-    });
-    test('beforeEachAsync is called', function(){
-        equal(count, 10);
-    });
-});
-```
-
-```javascript
-//BDD Style - Using afterEach to asynchronously execute common code after each test
 
 describe('Using afterEach to asynchronously execute common code after each test', function(){
     var count = 0;
@@ -458,37 +307,6 @@ describe('Using afterEach to asynchronously execute common code after each test'
 ```
 
 ```javascript
-//TDD Style - Using afterEach to asynchronously execute common code after each test
-
-group('Using afterEach to asynchronously execute common code after each test', function(){
-    var count = 0;
-    afterEach(function(done){
-        setTimeout(function(){
-            count = 1;
-            done();
-        }, 1);
-    });
-    test('the first asynchronous test', function(done){
-        setTimeout(function(){
-            count = 10;
-            done(function(){
-                isTrue(count === 10);
-            });
-        }, 1);
-    });
-    test('but subsequent asynchronous tests', function(done){
-        setTimeout(function(){
-            count *= 100;
-            done(function(){
-                isTrue(count === 100);
-            });
-        }, 1);
-    });
-});
-```
-
-```javascript
-//BDD Style - preventing a long running asynchronous Setup/Teardown from timing out a test
 
 describe('Preventing a long running asynchronous Setup/Teardown from timing out a test', function(){
     var count = 0;
@@ -500,24 +318,6 @@ describe('Preventing a long running asynchronous Setup/Teardown from timing out 
         }, 50);
     });
     it('this.count should equal 10', 100, function(){
-        equal(this.count, 10);
-    });
-});
-```
-
-```javascript
-//TDD Style - preventing a long running asynchronous Setup/Teardown from timing out a test
-
-group('Preventing a long running asynchronous Setup/Teardown from timing out a test', function(){
-    var count = 0;
-    beforeEachTest(function(done){
-        setTimeout(function(){
-            done(function(){
-                this.count = 10;
-            });
-        }, 50);
-    });
-    test('this.count should equal 10', 100, function(){
         equal(this.count, 10);
     });
 });
@@ -810,7 +610,7 @@ Call _**configure**_ passing a _**hash**_ containing _properties_ and their asso
 //Your test script file
 
 configure({
-    name: 'Sample Test Suite (BDD-Like)',
+    name: 'Sample Test Suite',
     hidePassedTests: true,
     testTimeOutInterval: 100
 });
