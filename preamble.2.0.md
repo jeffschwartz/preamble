@@ -526,25 +526,208 @@ Preamble.test('this is a test', function(assert){
     assert.isNotTruthy(...);
 });
 ```
-#### equal(value, expectation, label)
+#### **equal** *equal(value, expectation, label)*
 A strict deep recursive comparison of **value** and **expection**. **value** and **expectation** can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation && expectation === value then the result will be true. **label** is a string used to uniquely identify the assertion.
 
-#### notEqual(value, expectation, label)
+#### **notEqual** *notEqual(value, expectation, label)*
 A strict deep recursive comparison of **value** and **expection**. **value** and **expectation** can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation && expectation !== value then the result will be true. **label** is a string used to uniquely identify the assertion.
 
-#### isTrue(value, label)
+#### **isTrue** *isTrue(value, label)*
 A strict boolean assertion. Result is true if **value** is true. **label** is a string used to uniquely identify the assertion.
 
-#### isFalse(value, label)
+#### **isFalse** *isFalse(value, label)*
 A strict boolean assertion. Result is true if **value** is false. **label** is a string used to uniquely identify the assertion.
 
-#### isTruthy(value, label) - added v1.0.7
+#### **isTruthy** *isTruthy(value, label)*
 A non strict boolean assertion. Result is true if **value** is truthy. **label** is a string used to uniquely identify the assertion.
 
-#### isNotTruthy(value, label) - added v1.0.7
+#### **isNotTruthy** *isNotTruthy(value, label)*
 A non strict boolean assertion. Result is true if **value** is not truthy. **label** is a string used to uniquely identify the assertion.
 
-### Snoop
+### snoop
+
+#### **snoop** *snoop(obj, propName)*
+
+**snoop** is a utility that is used to _spy_ on object methods. _**obj**_ is the object whose method is to be spied on. _**propName**_ is a string, its value is the _name_ of the method to spy on.
+
+Snooping on an object's method:
+
+```javascript
+describe('snooping on a method', function(){
+    beforeEach(function(){
+        this.foo = {
+            someFn: function(arg){
+                return arg;
+            }
+        };
+    });
+    it('we can query if the method was called', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        isTrue(foo.someFn.wasCalled());
+    });
+    it('we can query how many times the method was called', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        equal(foo.someFn.called(), 1);
+    });
+    it('we can query the method was called n times', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        isTrue(foo.someFn.wasCalled.nTimes(1));
+        isFalse(foo.someFn.wasCalled.nTimes(2));
+    });
+    it('we can query the context the method was called with', function(){
+        var foo = this.foo,
+            bar = {};
+        snoop(foo, 'someFn');
+        foo.someFn();
+        equal(foo.someFn.contextCalledWith(), foo);
+        notEqual(foo.someFn.contextCalledWith(), bar);
+    });
+    it('we can query for the arguments that the method was called with', function(){
+        var foo = this.foo,
+            arg = 'Preamble rocks!';
+        snoop(foo, 'someFn');
+        foo.someFn(arg);
+        equal(foo.someFn.args.getArgument(0), arg);
+        notEqual(foo.someFn.args.getArgument(0), arg + '!');
+        isNotTruthy(foo.someFn.args.getArgument(1));
+    });
+    it('we can query for what the method returned', function(){
+        var foo = this.foo,
+            arg = 'Preamble rocks!';
+        snoop(foo, 'someFn');
+        foo.someFn(arg);
+        equal(foo.someFn.returned(), arg);
+        notEqual(foo.someFn.returned(), arg + '!');
+    });
+});
+```
+
+Snooping on multiple object methods:
+
+```javascript
+describe('snooping on more than one method', function(){
+    beforeEach(function(){
+        this.foo = {
+            someFn: function(arg){
+                return arg;
+            }
+        };
+        this.bar = {
+            someFn: function(arg){
+                return arg;
+            }
+        };
+    });
+
+    it('snoops are isolated and there are no side effects', function(){
+        var foo = this.foo,
+            bar = this.bar;
+        snoop(foo, 'someFn');
+        snoop(bar, 'someFn');
+        foo.someFn('Is Preamble great?');
+        bar.someFn('Yes it is!');
+        foo.someFn('You got that right!');
+        isTrue(foo.someFn.wasCalled());
+        isTrue(foo.someFn.wasCalled.nTimes(2));
+        isFalse(foo.someFn.wasCalled.nTimes(1));
+        isTrue(bar.someFn.wasCalled());
+        isTrue(bar.someFn.wasCalled.nTimes(1));
+        isFalse(bar.someFn.wasCalled.nTimes(2));
+    });
+});
+```
+
+Snooping if a method throws an exception:
+
+```javascript
+describe('a snooped method throws', function(){
+    beforeEach(function(){
+        this.foo = {
+            someFn: function(){
+                throw new Error('Holy Batman!');
+            }
+        };
+    });
+    it('we can query if the method threw', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        isTrue(foo.someFn.threw());
+        isTrue(foo.someFn.threw.withMessage('Holy Batman!'));
+        isFalse(foo.someFn.threw.withMessage('Holy Batman!!'));
+    });
+});
+```
+
+###snoop.calls API###
+
+_**snoop.calls**_ is a low level API that provides access to the _accumulated information_ about a method's invocation history. Each invocation's information is stored in an _ACall_ hash, and has the following properties:
+
+#### **context**
+The context used (its "this").
+
+#### **args**
+The _arguments_ passed to the method.
+
+#### **error**
+If an exception was thrown when called this contains the exception's message.
+
+#### **returned**
+What the method returnd.
+
+_**snoop.calls**_ API is defined as follows:
+
+#### **count** *calls.count()*
+Returns the total number of times the method was called.
+
+#### **forCall** *calls.forCall(n)*
+Returns a hash of information for the _nth_ call to the method. The hash has the following properties:
+
+#### **all** *calls.all()*
+Returns an array of _ACall_ hashes, one for each method invocation.
+
+
+```javascript
+describe('using snoop\'s "calls" api', function(){
+    var i,
+        foo = {
+            someFn: function(arg){
+                return arg;
+            }
+        },
+        bar ={},
+        n = 3,
+        aCall;
+    snoop(foo, 'someFn');
+    for(i = 0; i < n; i++){
+        foo.someFn(i) ;
+    }
+    it('count() returns the right count', function(){
+        equal(foo.someFn.calls.count(), n);
+    });
+    it('all() returns an array with the right number of elements', function(){
+        equal(foo.someFn.calls.all().length, n);
+    });
+    it('forCall(n) returns the correct element', function(){
+        for(i = 0; i < n; i++){
+            aCall = foo.someFn.calls.forCall(i);
+            equal(aCall.context, foo);
+            notEqual(aCall.context, bar);
+            equal(aCall.args[0], i);
+            notEqual(aCall.args[0], n);
+            isNotTruthy(aCall.error);
+            equal(aCall.returned, i);
+            notEqual(aCall.returned, n);
+        }
+    });
+});
+```
 
 ### UI Tests
 Preamble adds the _div element_ with the default id of _**preamble-ui-container**_ to the DOM. Use of this element is reserved specifically for UI tests and Preamble itself never adds content to it nor does it ever modify its content. This element's _ID_ can be overridden via configuration (please see **Configuration** below).
