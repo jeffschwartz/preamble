@@ -624,8 +624,8 @@ configure({
 
 ### Running Headless With PhantomJS
 
-<p class="warning">Please note that Preamble requires PhantomJS v2.0.0 or better.</p>
-<p class="warning">Please note that if you are installing the PhantomJS v2 _binary_ distribution on a Mac you may need to follow the directions given <a href="https://github.com/ariya/phantomjs/issues/12900#issuecomment-74073057" target="_blank">here</a>.</p>
+<p class="warning">Please note that Preamble v2 requires PhantomJS v2.0.0 or better.</p>
+<p class="warning">Please note that if you are installing the PhantomJS v2 <em>binary distribution</em> on a Mac you may need to follow the directions given <a href="https://github.com/ariya/phantomjs/issues/12900#issuecomment-74073057" target="_blank">here</a>.</p>
 Beginning with v2 you can run _headless_ tests with Preamble using <a href="http://phantomjs.org" target="_blank">PhantomJS</a> v2. The following example assumes that you already have PhantomJS installed and that it can be found on the path.
 
 1. Open up a terminal and change to your test's root folder.
