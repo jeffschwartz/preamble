@@ -1,11 +1,11 @@
 //Preamble 2.0.0 (Ramoth)
-//(c) 2013 Jeffrey Schwartz
+//(c) 2013 - 2015 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v2.0.0 (Ramoth) RC',
+    var version = 'v2.0.0 (Ramoth)',
         //Merged configuration options.
         config = {},
         queue=[],
@@ -320,7 +320,7 @@
         this.init();
         on('configchanged', function(topic, args){
             //Add structure to the document and show the header.
-            this.updateHeader(args.name, version, args.uiTestContainerId);
+            this.updateHeader(args.name, 'Preamble ' + version, args.uiTestContainerId);
         }, this);
     }
 
