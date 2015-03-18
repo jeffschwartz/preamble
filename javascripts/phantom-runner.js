@@ -1,6 +1,15 @@
  /*globals phantom*/
+
+ /**
+  * Preamble's phantom-runner script.
+  * Requires phantomjs v2.x.
+  */
+
 (function(phantom){
     'use strict';
+
+    var system = require('system');
+
     /**
      * Wait until the test condition is true or a timeout occurs. Useful for waiting
      * on a server response or for a ui change (fadeIn, etc.) to occur.
@@ -14,7 +23,7 @@
      * @param timeOutMillis the max amount of time to wait. If not specified, 3 sec is used.
      */
     function waitFor(testFx, onReady, timeOutMillis) {
-        var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 30001, //< Default Max Timout is 3s
+        var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 30001, //< Default Max Timout is 30s
             start = new Date().getTime(),
             condition = false,
             interval = setInterval(function() {
@@ -36,8 +45,7 @@
             }, 100); //< repeat check every 100ms
     }
 
-
-    if (phantom.args.length === 0 || phantom.args.length > 2) {
+    if (system.args.length === 0 || system.args.length > 2) {
         console.log('Usage: phantom-runner.js URL');
         phantom.exit(1);
     }
@@ -49,7 +57,7 @@
         console.log(msg);
     };
 
-    page.open(phantom.args[0], function(status){
+    page.open(system.args[1], function(status){
         if (status !== 'success') {
             console.log('Unable to access network');
             phantom.exit(1);

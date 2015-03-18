@@ -3,12 +3,12 @@
 /*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
 /*
- *This script uses BDD-like semantics.
- *IMPORTANT: Please note that for the purpose of providing examples 6 tests intentionally fail.
+ *IMPORTANT: Please note that for the purpose of providing
+ *thoughtful examples 6 tests are coded to intentionally fail.
  */
 
 configure({
-    name: 'Sample Test Suite (BDD-Style)',
+    name: 'Sample Test Suite',
     hidePassedTests: true,
     //hideAssertions: true,
     testTimeOutInterval: 500
