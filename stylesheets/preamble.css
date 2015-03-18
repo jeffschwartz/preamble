@@ -1,94 +1,179 @@
-html, body{
-    font-family: 'Lora', serif;
-    font-size: 11px;
-    margin: 0 0 300px 0;
-    color: #aaa;
+html,
+body {
+  font-family: Monaco, "Lucida Console", monospace;
+  font-size: 11px;
+  margin: 0;
+  background-color: #fdf6e3;
+  color: #333333;
 }
-h1{
-    margin: 0;
-    font-size: 2.5rem;
-    color: #888;
+h1 {
+  margin: 0;
+  font-size: 11px;
+  color: #333333;
 }
-h1 + small{
-    font-size: 1rem;
-    color: #AAA;
+h1 + small {
+  font-size: 11px;
+  color: #333333;
 }
-header{
-    background-color: #FFF;
-    position: fixed;
-    top: 0;
-    z-index: 10000;
-    width: 100%;
-    padding: 10px 0 10px 20px;
-    opacity: 1;
-    border-bottom: solid 1px #CCC;
-    box-sizing: border-box;
+header {
+  background-color: #fdf6e3;
+  width: 100%;
+  padding: 10px 30px;
+  border-bottom: solid 1px #CCC;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: auto;
 }
-.container{
-    margin: 61px 0 0 0;
-    width: 100%;
-    box-sizing: border-box;
+.hidden {
+  display: none;
 }
-p:last-child{
-    margin-bottom: 0;
+.banner {
+  float: left;
 }
-#preamble-results-container{
-    font-size: 1rem;
-    display: none;
+#version {
+  font-size: .8rem;
 }
-section{
-    padding: 10px 20px;
-    width: 100%;
-    box-sizing: border-box;
-    border-bottom: solid 1px #CCC;
-    font-size: 1rem;
+#time {
+  display: none;
+  float: right;
 }
-.group-container{
-    padding-top: 15px;
+.summary {
+  padding: 10px 10px;
+  font-weight: bold;
 }
-.group-container:first-child {
-    padding-top: 0;
+#coverage {
+  padding: 10px 10px;
+  font-weight: bold;
+  color: #333333;
+  background-color: #ebdfc0;
+  line-height: 18px;
 }
-.group-container a{
-    text-decoration: none;
+#coverage a {
+  color: #333333;
 }
-.group-container a:hover{
-    text-decoration: underline;
+.hptui {
+  float: right;
 }
-.group {
-    color: #888;
+header input:first-child {
+  margin-left: 0;
 }
-.tests-container{
-    padding: 5px 20px 0 20px;
+.container {
+  margin: 10px 0 0 0;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
-.tests-container a{
-    text-decoration: none;
+.summary-passed {
+  padding: 10px 10px;
+  font-weight: bold;
+  background-color: #3cb371;
+  color: #fff;
 }
-.tests-container a:hover{
-    text-decoration: underline;
-}
-.test{
-    color: #888;
-}
-.assertion-container{
-    padding: 5px 20px 0 20px;
-}
-.assertion-container a{
-    text-decoration: none;
-}
-.assertion-container a:hover{
-    text-decoration: underline;
+.summary-failed {
+  padding: 10px 10px;
+  font-weight: bold;
+  background-color: #ff4500;
+  color: #fff;
 }
 .passed {
-    color: #008400;
+  color: #3cb371;
 }
 .failed {
-    color: #f40000;
+  color: #ff4500;
 }
-.ui-test-container{
-    position: absolute;
-    top: -10000px;
-    left: -10000px;
-    width: 1000px;
-    height: 1000px
+p:last-child {
+  margin-bottom: 0;
+}
+#preamble-results-container {
+  font-size: 1rem;
+  display: none;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+section {
+  padding: 10px 20px;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+section:first-child {
+  padding: 5px 20px;
+}
+.group-container {
+  padding-left: 10px;
+  padding-right: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1rem;
+  list-style: none;
+}
+.group-container li {
+  padding-top: 5px;
+}
+.group-container li a {
+  text-decoration: none;
+}
+.group-container a:hover {
+  text-decoration: underline;
+}
+.group {
+  color: #333333;
+}
+.tests-container {
+  padding-left: 10px;
+  padding-right: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1rem;
+  list-style: none;
+}
+.tests-container a {
+  text-decoration: none;
+}
+.tests-container a:hover {
+  text-decoration: underline;
+}
+.test-bypassed {
+  color: #333333;
+}
+.assertion-container {
+  padding: 5px 20px 0 20px;
+}
+.assertion-container a {
+  text-decoration: none;
+}
+.assertion-container a:hover {
+  text-decoration: underline;
+}
+.bold {
+  font-weight: bold;
+}
+.stacktrace-container {
+  padding-left: 10px;
+  padding-right: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1rem;
+  list-style: none;
+}
+.stacktrace-container p {
+  padding: 0;
+  line-height: 1rem;
+}
+.stacktrace {
+  margin: 0;
+  padding: 5px 20px 0 0;
+  color: #ff4500;
+}
+.ui-test-container {
+  position: absolute;
+  top: -10000px;
+  left: -10000px;
+  width: 1000px;
+  height: 1000px;
 }

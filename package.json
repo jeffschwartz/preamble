@@ -1,25 +1,31 @@
 {
   "name": "preamble",
-  "version": "0.1.0",
-  "description": "JavaScript testing framework",
-  "main": "preamble.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "title": "Preamble",
+  "description": "A powerful JavaScript testing framework backed by a powerful assertion engine that your test scripts interface with through a simple to use but powerful API. Preamble makes the task of authoring tests easy, intuitive and even fun.",
+  "version": "2.0.0",
+  "author": {
+    "name": "Jeffrey Schwartz",
+    "email": "jefftschwartz@gmail.com",
+    "url": "http://adoseofjavascript.com/about/"
   },
+  "homepage": "http://jeffschwartz.github.io/preamble/",
   "repository": {
     "type": "git",
-    "url": "https://jeffschwartz:pchIst1!@bitbucket.org/jeffschwartz/preamble.git"
+    "url": "https://github.com/jeffschwartz/preamble"
+  },
+  "license": {
+    "name": "MIT",
+    "url": "http://www.opensource.org/licenses/mit-license.php"
   },
   "keywords": [
-    "preamble"
+    "preamble",
+    "javascript",
+    "testing",
+    "framework"
   ],
-  "author": "Jeffrey Schwartz",
-  "license": "MIT",
-  "gitHead": "e9264619e12a464baf69db08cc88214ed539a617",
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-uglify": "~0.2.4",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-contrib-copy": "~0.4.1"
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-less": "~0.11.0",
+    "grunt-contrib-jshint": "~0.10.0"
   }
 }

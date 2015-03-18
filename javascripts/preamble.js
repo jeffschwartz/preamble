@@ -1,110 +1,885 @@
-/*global preambleConfig*/
-//Preamble 1.3.0
+//Preamble 2.0.0 (Ramoth)
 //(c) 2013 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v1.3.0';
-    //Targeted DOM elements.
-    var elPreambleContainer = document.getElementById('preamble-container');
-    var elHeader;
-    var elStatusContainer;
-    var elResults;
-    var elUiTestContainer;
-    //Default configuration options. Override these in your config file (e.g. var preambleConfig = {asynTestDelay: 20}).
-    //shortCircuit: (default false) - set to true to terminate further testing on the first assertion failure.
-    //windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment).
-    //asyncTestDelay: (default 10 milliseconds) - set to some other number of milliseconds used to wait for asynchronous tests to complete.
-    //asyncBeforeAfterTestDelay: (default 10 milliseconds) Set the value used to wait before calling the test's callback (asyncBeforeEachTest) and when calling the next test's callback (asyncAfterEachTest), respectively.
-    //name: (default 'Test') - set to a meaningful name.
-    //uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
-    var defaultConfig = {shortCircuit: false, windowGlobals: true, asyncTestDelay: 10, asyncBeforeAfterTestDelay: 10, name: 'Test', uiTestContainerId: 'ui-test-container'};
-    //Merged configuration options.
-    var config = {};
-    var currentTestHash;
-    var assertionsQueue = [];//Array of assertions. Calls are sequential. TODO support async.
-    var testsQueue = [];//Array of test to be run. It is the first queue to be built!
-    var results = [];//Array of results.
-    var assert;
-    var testsQueueCount = 0;
-    var testsQueueStableCount = 0;
-    var testsQueueStableInterval = 500;
-    var intervalId;
-    var totGroups = 0;
-    var totGroupsPassed = 0;
-    var totGroupsFailed = 0;
-    var totTests = 0;
-    var totTestsPassed = 0;
-    var totTestsFailed = 0;
-    var totAssertionsPassed = 0;
-    var totAssertionsFailed = 0;
-    var isProcessAborted = false;
-    var testsQueueIndex = 0;
-    var testIsRunning = false;
-    var timerStart;
-    var timerEnd;
-    //Filters.
-    var currentTestStep;
-    var groupFilter;
-    var testFilter;
-    var assertionFilter;
+    var version = 'v2.0.0 (Ramoth) RC',
+        //Merged configuration options.
+        config = {},
+        queue=[],
+        prevQueueCount = 0,
+        queueStableCount = 0,
+        queueStableInterval = 1,
+        reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
+        reporter,
+        assert,
+        intervalId,
+        runtimeFilter,
+        stackTraceProperty,
+        queueBuilder,
+        pubsub,
+        tests,
+        testsIterator;
+
+    /**
+     * Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+     * Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
+     * TODO(Jeff): remove polyfil once phantomjs supports bind!
+     */
+    if (!Function.prototype.bind) {
+        Function.prototype.bind = function (oThis) {
+            if (typeof this !== 'function') {
+                // closest thing possible to the ECMAScript 5 internal IsCallable function
+                throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+            }
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                FNOP = function () {},
+                fBound = function () {
+                    return fToBind.apply(this instanceof FNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
+                };
+            FNOP.prototype = this.prototype;
+            fBound.prototype = new FNOP();
+            return fBound;
+        };
+    }
+
+    function throwException(errMessage){
+        throw new Error(errMessage);
+    }
+
+    /**
+     * A group.
+     * @constructor
+     * @param {[Group]} parentGroups
+     * @param {string} path
+     * @param {string} label
+     * @param {function} callback
+     */
+    function Group(parentGroups, id, path, label, callback){
+        this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
+        this.id = id;
+        this.path = path;
+        this.label = label;
+        this.callback = callback;
+        this.duration = 0;
+        this.passed = true;
+    }
+
+    /**
+     * Returns the concatenated labels from all parent groups.
+     * @param {array} parents An array of parent groups.
+     */
+    Group.prototype.pathFromParentGroupLabels = function pathFromParentGroupLabels(){
+        /* jshint validthis: true */
+        var path;
+        if(!this.parentGroups.length){
+            return this.label;
+        }else{
+            path = this.parentGroups.reduce(function(prev, current){
+                return prev === '' && current.label || prev + ' ' + current.label;
+            }, '');
+            return path + ' ' + this.label;
+        }
+    };
+
+    /**
+     * A test.
+     * @constructor
+     * @param {[Group] parentGroups
+     * @param {string} path
+     * @param {string} label
+     * @param {integer} testTimeOutInterval
+     * @param {function} callback
+     */
+    function Test(parentGroups, id, path, label, stackTrace, testTimeOutInterval, callback){
+        this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
+        this.parentGroup = parentGroups[parentGroups.length - 1];
+        this.id = id;
+        this.path = path;
+        this.label = label;
+        this.stackTrace = stackTrace;
+        this.testTimeOutInterval = testTimeOutInterval;
+        this.callback = callback;
+        this.assertions = []; //contains assertions
+        this.duration = 0;
+        this.befores = []; //the befores to call prior to running this test
+        this.afters = []; //the afters to call prior to running this test
+        this.context = {}; //the context used to call befores and afters
+
+        //gather befores and afters for easy traversal
+        this.parentGroups.forEach(function(g){
+            if(g.beforeEachTest){
+                //bind each before callback to this.context
+                this.befores.push(g.beforeEachTest.bind(this.context));
+            }
+            if(g.afterEachTest){
+                //bind each after callback to this.context
+                this.afters.push(g.afterEachTest.bind(this.context));
+            }
+        }, this);
+    }
+
+    /**
+     * Sets all parent groups' passed property to false.
+     */
+    Test.prototype.markParentGroupsFailed = function(){
+        this.parentGroups.forEach(function(pg){
+            pg.passed = false;
+        });
+    };
+
+    /**
+     * Test runner.
+     * @param {function} callback e.g. fn(err, value)
+     */
+    Test.prototype.run = function(callback){
+        var beforesIterator = iteratorFactory(this.befores),
+            aftersIterator = iteratorFactory(this.afters),
+            self = this;
+
+        //run a before
+        function runBefore(callback){
+            var before = beforesIterator.getNext();
+            if(before.length){
+                //call it asynchronously.
+                before(function(){
+                    callback();
+                });
+            }else{
+                setTimeout(function(){
+                    before();
+                    callback();
+                }, 0);
+            }
+        }
+
+        //run befores
+        function runBefores(callback){
+            if(beforesIterator.hasNext()){
+                runBefore(function(){
+                    runBefores(callback);
+                });
+            }else{
+                callback();
+            }
+        }
+
+        //run the test
+        function runTest(callback){
+            if(config.windowGlobals){
+                if(self.callback.length){
+                    //Pass done callback as 1st param if configured to use window globals.
+                    self.callback.call(self.context, function(){
+                        if(arguments.length && typeof(arguments[0] === 'function')){
+                            arguments[0].call(self.context);
+                        }
+                        self.runAssertions();
+                        callback();
+                    });
+                }else{
+                    self.callback.call(self.context);
+                    self.runAssertions();
+                    callback();
+                }
+            }else{
+                if(self.callback.length === 2){
+                    //Pass done callback as 1st param if configured to use window globals.
+                    self.callback.call(self.context, assert, function(){
+                        if(arguments.length && typeof(arguments[0] === 'function')){
+                            arguments[0].call(self.context);
+                        }
+                        self.runAssertions();
+                        callback();
+                    });
+                }else{
+                    self.callback.call(self.context, assert);
+                    self.runAssertions();
+                    callback();
+                }
+            }
+        }
+
+        //run an after
+        function runAfter(callback){
+            var after = aftersIterator.getNext();
+            if(after.length){
+                //call it asynchronously.
+                after(function(){
+                    callback();
+                });
+            }else{
+                setTimeout(function(){
+                    after();
+                    callback();
+                }, 0);
+            }
+        }
+
+        //run the afters
+        function runAfters(callback){
+            if(aftersIterator.hasNext()){
+                runAfter(function(){
+                    runAfters(callback);
+                });
+            }else{
+                callback();
+            }
+        }
+
+        (function(test){
+            //Set a timer for the test and fail it if it isn't completed in time.
+            //Note to self: Since this can fire after the test it is timing has
+            //completed it is possible that "self" no longer refers to the original
+            //test. To insure that when this fires it always refers to the test
+            //it was timing, the test is captured via closure uaing the module
+            //pattern and passing "self" as an argument.
+            setTimeout(function(){
+                if(!test.completed){
+                    //mark test failed
+                    test.timedOut = true;
+                    //test.totFailed = -1;
+                    //test.parentGroup.passed = false;
+                    //callback();
+                }
+            }, test.testTimeOutInterval);
+
+            //Run the before callbacks, test callback and after callbacks.
+            //Note to self: Since this can fire after the test has already timed
+            //out and failed, it is possible that "self" no longer refers to the
+            //original test. To insure that when this fires it always refers to
+            //the test it was running, the test is captured via closure uaing the
+            //module pattern and passing "self" as an argument.
+            setTimeout(function(){
+                var start = Date.now();
+                var d;
+                runBefores(function(){
+                    runTest(function(){
+                        runAfters(function(){
+                            if(test.timedOut){
+                                test.totFailed = -1;
+                                test.markParentGroupsFailed();
+                            }else{
+                                test.completed = true;
+                                d = Date.now() - start;
+                                test.duration = d > 0 && d || 1;
+                                if(test.totFailed){
+                                    test.markParentGroupsFailed();
+                                }
+                            }
+                            callback();
+                        });
+                    });
+                });
+            }, 0);
+        }(self));
+    };
+
+    /**
+     * Runs assertions.
+     */
+    Test.prototype.runAssertions = function(){
+        var i,
+            len,
+            item,
+            result;
+        this.totFailed = 0;
+        for (i = 0, len = this.assertions.length; i < len; i++) {
+            item = this.assertions[i];
+            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            item.result = result.result;
+            this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
+            item.explain = result.explain;
+        }
+        emit('runAfters');
+    };
+
+    /**
+     * Returns an array of paths.
+     */
+    Test.prototype.getPaths = function(){
+        var paths,
+            ancestors;
+        paths = this.path.split('/');
+        ancestors = paths.filter(function(v, i, a){
+            return i !== 0 && i !== a.length - 1;
+        });
+        return ancestors;
+    };
+
+    /**
+     * HtmlReporter.
+     * @constructor
+     */
+    function HtmlReporter(fnShowHidePassedTests){
+        this.preambleTestContainer = document.getElementById('preamble-test-container');
+        this.preambleUiContainer = document.getElementById('preamble-ui-container');
+        this.showHidePassedTests = fnShowHidePassedTests;
+        this.init();
+        on('configchanged', function(topic, args){
+            //Add structure to the document and show the header.
+            this.updateHeader(args.name, version, args.uiTestContainerId);
+        }, this);
+    }
+
+    /**
+     * Add structure to the DOM/show the header.
+     */
+    HtmlReporter.prototype.init = function(){
+        var s = '<header>' +
+                    '<div class="banner">' +
+                        '<h1>' +
+                            '<span id="name">Test</span> - ' +
+                            '<span>' +
+                                '<span> ' +
+                                    '<span>' +
+                                        '<i id="version">{{version}}</i>' +
+                                    '</span>' +
+                                '</span>' +
+                            '</span>' +
+                        '</h1>' +
+                    '</div>' +
+                    '<div id="time">' +
+                        '<span>Completed in ' +
+                            '<span title="total time to completion">' +
+                                '{{tt}}ms' +
+                            '</span>' +
+                        '</span>' +
+                    '</div>' +
+                '</header>' +
+                '<div class="container">' +
+                    '<section id="preamble-status-container">' +
+                        '<div class="summary">Building queue. Please wait...</div>' +
+                    '</section>' +
+                    '<section id="preamble-results-container"></section>' +
+                '</div>';
+
+        s = s.replace(/{{version}}/, version);
+        this.preambleTestContainer.innerHTML = s;
+    };
+
+    /**
+     * Updates the header.
+     * @param {string} name
+     * @param {string} version
+     * @param {string} uiTestContainerId
+     */
+    HtmlReporter.prototype.updateHeader = function(name, version, uiTestContainerId){
+        document.getElementById('name').innerHTML = name;
+        document.getElementById('version').innerHTML = version;
+        this.preambleUiContainer.innerHTML = '<div id="{{id}}" class="ui-test-container"></div>'.
+            replace(/{{id}}/, uiTestContainerId);
+    };
+
+    /**
+     * Shows coverage or filtered information.
+     * @param {array} tests An array of Tests.
+     */
+    HtmlReporter.prototype.coverage = function(tests){
+        var show = 'Ran {{tt}}',
+            elStatusContainer = document.getElementById('preamble-status-container'),
+            coverage,
+            hpt;
+        //Show groups and tests coverage in the header.
+        show = show.replace(/{{tt}}/, tests.length - tests.totBypassed);
+        if(runtimeFilter.group){
+            show += runtimeFilter.group && ' of {{tbpt}}';
+            show = show.replace(/{{tbpt}}/, tests.length);
+        }
+        show += pluralize(' test', tests.length);
+        coverage = '<div id="coverage">' + show +
+            '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' +
+            '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
+            ' - <a id="runAll" href="?"> run all</a>' +
+            '</div>';
+        hpt = loadPageVar('hpt');
+        hpt = hpt === '' && config.hidePassedTests || hpt === 'true' && true || hpt === 'false' && false;
+        coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
+        //Preserve error message that replaces 'Building queue. Please wait...'.
+        if(elStatusContainer.innerHTML === '<div class="summary">Building queue. Please wait...</div>'){
+            elStatusContainer.innerHTML = coverage;
+        }else{
+            elStatusContainer.innerHTML += coverage;
+        }
+        document.getElementById('coverage').style.display = 'block';
+    };
+
+    /**
+     * Show summary information.
+     * @param {array} tests An array containing only Tests.
+     */
+    HtmlReporter.prototype.summary = function(tests){
+        var html,
+            el,
+            s;
+        el = document.getElementById('time');
+        s = el.innerHTML;
+        s = s.replace(/{{tt}}/, tests.duration);
+        el.innerHTML = s;
+        el.style.display = 'block';
+        if(tests.result){
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + tests.length + pluralize(' test', tests.length ) + ' passed' + '</div>';
+        }else{
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
+        }
+        document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
+    };
+
+    /**
+     * Show details.
+     * @param {array} tests An array of Tests.
+     */
+    HtmlReporter.prototype.details = function(queue){
+        var rc = document.getElementById('preamble-results-container'),
+            groupContainerMarkup = '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
+            groupAnchorMarkup = '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
+            testContainerMarkup = '<ul class="tests-container" data-passed="{{passed}}"></ul>',
+            testAnchorMarkup = '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
+            testFailureMarkup = '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
+            html = '',
+            failed = '',
+            parentGroup,
+            el;
+        queue.forEach(function(item){
+            if(item instanceof(Group)){
+                //Add groups to the DOM.
+                html = '' + groupContainerMarkup.
+                    replace(/{{passed}}/, item.passed).
+                    replace(/{{id}}/, item.path);
+                html = html.slice(0, -5) + groupAnchorMarkup.
+                    replace(/{{passed}}/, item.bypass ? ' bypassed' : item.passed ? '' : ' failed').
+                    replace('{{grouphref}}', encodeURI(item.pathFromParentGroupLabels())).
+                    replace(/{{label}}/, item.label) + html.slice(-5);
+                html = html;
+                if(!item.parentGroups.length){
+                    rc.insertAdjacentHTML('beforeend', html);
+                }else{
+                    parentGroup = item.parentGroups[item.parentGroups.length - 1];
+                    el = document.getElementById(parentGroup.path);
+                    el.insertAdjacentHTML('beforeend', html);
+                }
+            }else{
+                //Add tests to the DOM.
+                html = '' + testContainerMarkup.
+                    replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
+                html = html.slice(0, -5) + testAnchorMarkup.
+                    replace(/{{passed}}/, item.bypass ? 'test-bypassed' : item.totFailed ? 'failed' : 'passed').
+                    replace('{{grouphref}}', encodeURI(item.parentGroup.pathFromParentGroupLabels())).
+                    replace('{{testhref}}', encodeURI(item.label)).
+                    replace(/{{label}}/, item.label) + html.slice(-5);
+                //Show failed assertions and their stacks.
+                if(item.totFailed > 0){
+                    item.assertions.forEach(function(assertion){
+                        if(!assertion.result){
+                            failed = testFailureMarkup.
+                                replace(/{{explain}}/, assertion.explain).
+                                replace(/{{stacktrace}}/, stackTrace(assertion.stackTrace));
+                        }
+                    });
+                    html = html.slice(0, -5) + failed + html.slice(-5);
+                }else if(item.totFailed === -1){
+                    failed = testFailureMarkup.
+                        replace(/{{explain}}/, 'test timed out').
+                        replace(/{{stacktrace}}/, stackTrace(item.stackTrace));
+                    html = html.slice(0, -5) + failed + html.slice(-5);
+                }
+                el = document.getElementById(item.parentGroup.path);
+                el.insertAdjacentHTML('beforeend', html);
+            }
+        });
+        this.showHidePassedTests();
+        document.getElementById('preamble-results-container').style.display = 'block';
+        domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
+        //Delegate all click events to the test container element.
+        domAddEventHandler(document.getElementById('preamble-test-container'), 'click', runClickHandler);
+    };
+
+    /**
+     * Events - publish/subscribe.
+     */
+    pubsub = (function(){
+        //subscribers is a hash of hashes:
+        //{'some topic': {'some token': callbackfunction, 'some token': callbackfunction, . etc. }, . etc }
+        var subscribers = {}, totalSubscribers = 0, lastToken = 0;
+        //Generates a unique token.
+        function getToken(){
+            return lastToken += 1;
+        }
+        //Returns a function bound to a context.
+        function bindTo(fArg, context){
+            return fArg.bind(context);
+        }
+        //Returns a function which wraps subscribers callback in a setTimeout callback.
+        function makeAsync(topic, callback){
+            return function(data){
+                setTimeout(function(){
+                    callback(topic, data);
+                }, 1);
+            };
+        }
+        //Adds a subscriber for a topic with a callback
+        //and returns a token to allow unsubscribing.
+        function on(topic, handler, context){
+            var token = getToken(),
+                boundAsyncHandler;
+                boundAsyncHandler = context && makeAsync(topic, bindTo(handler, context)) || makeAsync(topic, handler);
+            //Add topic to subscribers if it doesn't already have it.
+            if(!subscribers.hasOwnProperty(topic)){
+                subscribers[topic] = {};
+            }
+            //Add subscriber to subscribers.
+            subscribers[topic][token] = boundAsyncHandler;
+            //Maintain a count of total subscribers.
+            totalSubscribers++;
+            //Return the token to the caller so it can unsubscribe.
+            return token;
+        }
+        //Removes a subscriber for a topic.
+        function off(topic, token){
+            if(subscribers.hasOwnProperty(topic)){
+                if(subscribers[topic].hasOwnProperty(token)){
+                    delete subscribers[topic][token];
+                    totalSubscribers--;
+                }
+            }
+        }
+        //Publishes an event for a topic with optional data.
+        function emit(topic, data){
+            var token;
+            if(subscribers.hasOwnProperty(topic)){
+                for(token in subscribers[topic] ){
+                    if(subscribers[topic].hasOwnProperty(token)){
+                        if(arguments.length > 1){
+                            subscribers[topic][token](data);
+                        } else{
+                            subscribers[topic][token]();
+                        }
+                    }
+                }
+            }
+        }
+        //Returns the total subscribers count.
+        function getCountOfSubscribers(){
+            return totalSubscribers;
+        }
+        //Returns the subscriber count by topic.
+        function getCountOfSubscribersByTopic(topic){
+            var prop, count = 0;
+            if(subscribers.hasOwnProperty(topic)){
+                for(prop in subscribers[topic]){
+                    if(subscribers[topic].hasOwnProperty(prop)){
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+        //Returns the object that exposes the pubsub API.
+        return {
+            on: on,
+            off: off,
+            emit: emit,
+            getCountOfSubscribers: getCountOfSubscribers,
+            getCountOfSubscribersByTopic: getCountOfSubscribersByTopic
+        };
+    }());
+
+    //Convenience method for registering handlers.
+    function on(topic, handler, context){
+        pubsub.on(topic, handler, context);
+    }
+
+    //Convenience method for emiting and event.
+    function emit(topic, data){
+        if(data){
+            pubsub.emit(topic, data);
+        }else{
+            pubsub.emit(topic);
+        }
+    }
+
+    /**
+     * Internal event handling.
+     */
+
+    //Initialize.
+    on('start', function(){
+        //TODO(Jeff): comment out next line.
+        //window.queue = queue;
+        tests = queue.filter(function(item){
+            return item instanceof Test;
+        });
+        tests.result = true;
+        tests.totTestsFailed = 0;
+        if(tests.length){
+            emit('runTests', function(){
+                emit('end');
+            });
+        }else{
+            //TODO(Jeff): perhaps this should display a message that there are no tests to run.
+            emit('end');
+        }
+    });
+
+    on('runTests', function(topic, callback){
+        testsIterator = iteratorFactory(tests);
+
+        function runTest(test, callback){
+            if(test.bypass){
+                callback();
+            }else{
+                test.run(function(){
+                    callback();
+                });
+            }
+        }
+
+        function runTests(callback){
+            if(testsIterator.hasNext()){
+                runTest(testsIterator.getNext(), function(){
+                    runTests(callback);
+                });
+            }else{
+                callback();
+            }
+        }
+
+        runTests(function(){
+            callback();
+        });
+    });
+
+    on('end', function(){
+        //TODO(Jeff): comment out next line.
+        //window.tests = tests;
+        //TODO(Jeff): comment out next line.
+        //window.failedTests = tests.filter(function(t){
+        //    return t.totFailed || t.timedOut;
+        //});
+        //Record how many tests were bypassed.
+        tests.totBypassed = 0;
+        if(runtimeFilter.group){
+            tests.totBypassed = tests.reduce(function(prevValue, t){
+                return t.bypass ? prevValue + 1 : prevValue;
+            }, 0);
+        }
+        //Record how many tests failed.
+        tests.totTestsFailed = tests.reduce(function(prevValue, t){
+            return t.timedOut || t.totFailed ? prevValue + 1 : prevValue;
+        }, 0);
+        tests.result = tests.totTestsFailed === 0;
+        queue.end = Date.now();
+        tests.duration = queue.end - queue.start;
+        reporter.coverage(tests);
+        reporter.summary(tests);
+        reporter.details(queue);
+    });
+
+    /**
+     * An iterator for iterating over arrays.
+     * @param {array} argArray The array to be iterated over.
+     */
+    function iteratorFactory(argArray){
+        var currentIndex = -1;
+        if(!Array.isArray(argArray)){
+            throw new Error('iteratorFactory expects an array.');
+        }
+        function hasNext(){
+            if(argArray.length && currentIndex + 1 < argArray.length){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        function next(){
+            if(hasNext()){
+                currentIndex++;
+                return true;
+            }else{
+                return false;
+            }
+        }
+        function get(){
+            return argArray.length && currentIndex >= 0 && currentIndex < argArray.length && argArray[currentIndex];
+        }
+        function getNext(){
+            if(next()){
+                return get();
+            }
+        }
+        function peekForward(){
+            if(currentIndex + 1 < argArray.length){
+                return argArray[currentIndex + 1];
+            }
+        }
+        function peekBackward() {
+            return argArray[currentIndex - 1];
+        }
+        var iterator = {
+            hasNext: hasNext,
+            next: next,
+            get: get,
+            getNext: getNext,
+            peekForward: peekForward,
+            peekBackward: peekBackward
+        };
+        return iterator;
+    }
+
+    /**
+     * Process for building the queue.
+     * @param {array} - queue, filled with Groups and Tests.
+     * @param {function} - trhowException, a function called to throw an exception.
+     */
+    queueBuilder = (function(queue, throwException){
+
+        var runner = {},
+            groupStack = [],
+            uniqueId = (function(){
+                var i = 0;
+                return function(){
+                    return i += 1;
+                };
+            }());
+
+        groupStack.getPath = function(){
+            var result = this.reduce(function(prevValue, group){
+                return prevValue + '/' + group.id;
+            }, '');
+            return result;
+        };
+
+        /**
+         * Returns true if there is no run time filter
+         * or if obj matches the run time filter.
+         * Returns false otherwise.
+         * @param {object} obj, either a Test or a Group.
+         */
+        function filter(obj){
+            var path = '',
+                 s;
+            if(!runtimeFilter.group){
+                return true;
+            }else{
+                if(obj instanceof(Group)){
+                    path = obj.pathFromParentGroupLabels();
+                    s = path.substr(0, runtimeFilter.group.length);
+                    return s === runtimeFilter.group;
+                }else{
+                    path = obj.parentGroup.pathFromParentGroupLabels();
+                    s = path.substr(0, runtimeFilter.group.length);
+                    return s === runtimeFilter.group && runtimeFilter.test === '' ||
+                        s === runtimeFilter.group && runtimeFilter.test === obj.label;
+                }
+            }
+        }
+
+        /**
+         * Registers a group.
+         * @param {string} label, describes the group/suite.
+         * @param {function} callback,  called to run befores, test and afters.
+         */
+        runner.group = function(label, callback){
+            var grp,
+                id,
+                path;
+            if(arguments.length !== 2){
+                throwException('requires 2 arguments, found ' + arguments.length);
+            }
+            id = uniqueId();
+            path = groupStack.getPath() + '/' + id;
+            grp = new Group(groupStack, id, path, label, callback);
+            grp.bypass = !filter(grp);
+            queue.push(grp);
+            groupStack.push(grp);
+            grp.callback();
+            groupStack.pop();
+        };
+
+        /**
+         * Registers a before each test process.
+         * @param {function} callback,  called before running a test.
+         */
+        runner.beforeEachTest = function(callback){
+            var parentGroup = groupStack[groupStack.length - 1];
+            parentGroup.beforeEachTest = callback;
+        };
+
+        runner.afterEachTest = function(callback){
+            var parentGroup = groupStack[groupStack.length - 1];
+            parentGroup.afterEachTest = callback;
+        };
+
+        /**
+         * Registers a test.
+         * @param {string} label, describes the test/spec.
+         * @param {integer} timeLimit, optional, the amount of time
+         * the test is allowed to run before timing out the test.
+         * @param {function} callback, called to run the test.
+         */
+        runner.test = function(label, timeLimit, callback){
+            var tst,
+                parentGroup,
+                id,
+                path,
+                tl,
+                cb,
+                stackTrace;
+            if(arguments.length < 2){
+                throwException('requires 2 or 3 arguments, found ' + arguments.length);
+            }
+            tl = arguments.length === 3 && timeLimit || config.testTimeOutInterval;
+            cb = arguments.length === 3 && callback || arguments[1];
+            parentGroup = groupStack[groupStack.length - 1];
+            id = uniqueId();
+            path = groupStack.getPath() + '/' + id;
+            stackTrace = stackTraceFromError();
+            tst = new Test(groupStack, id, path, label, stackTrace, tl, cb);
+            tst.bypass = !filter(tst);
+            queue.push(tst);
+        };
+
+        //Return the module, exposing the runner.
+        return runner;
+    }(queue, throwException));
 
     //Get URL query string param...thanks MDN.
     function loadPageVar (sVar) {
-      return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') + '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
+        return decodeURI(window.location.search.replace(new RegExp('^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') +
+            '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
     }
 
     //Display caught errors to the browser.
     function errorHandler(){
         var html;
-        isProcessAborted = true;
+        //isProcessAborted = true;
         if(arguments.length === 3){
             //window.onerror
-            html = '<p>' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
+            html = '<p class="failed">' + arguments[0] + '</p><p>File: ' + arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
         }else{
             //catch(e)
-            html = '<p>An error occurred,  "' + arguments[0] + '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+            html = '<p class="failed">An error occurred,  "' + arguments[0] +
+                '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
         }
-        elStatusContainer.innerHTML = html;
+        document.getElementById('preamble-status-container').innerHTML = html;
     }
 
-    //Makes words plural if their counts are 0 or greater than 1.
+    /**
+     * Makes words plural if their counts are 0 or greater than 1.
+     * @param {string} word A word to be pluralized.
+     * @param {integer} count An integer used to decide if word is to be pluralized.
+     */
     function pluralize(word, count){
         var pluralizer = arguments === 2 ? arguments[1] : 's';
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
 
-    function showTotalsToBeRun(){
-        setTimeout(function(){
-            var html = '<p>Queues built.</p><p>Running ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) +'/' + assertionsQueue.length + pluralize(' assertion', assertionsQueue.length) + '...</p>';
-            elStatusContainer.insertAdjacentHTML('beforeend', html);
-        }, 1);
-    }
-
-    function deepCopy(arg){
-        return JSON.parse(JSON.stringify(arg));
-    }
-
-    function combine(){
-        var result = {};
-        var sources = [].slice.call(arguments, 0);
-        sources.forEach(function(source){
-            var prop;
-            for(prop in source){
-                if(source.hasOwnProperty(prop)){
-                    result[prop] = source[prop];
-                }
-            }
-        });
-        return result;
-    }
-
     function merge(){
-        var result = {};
-        var target = arguments[0];
-        var sources = [].slice.call(arguments, 1);
+        var result = {},
+            target = arguments[0],
+            sources = [].slice.call(arguments, 1);
         sources.forEach(function(source){
             var prop;
             for(prop in target){
@@ -116,90 +891,201 @@
         return result;
     }
 
-    //Configuration
-    function configure(){
-        config = window.preambleConfig ? merge(defaultConfig, preambleConfig) : defaultConfig;
-    }
-
-    function showResultsSummary(){
-        var html;
-        //Show elapsed time.
-        html = '<p id="preamble-elapsed-time">Tests completed in ' + (timerEnd - timerStart) + ' milliseconds.</p>';
-        //Show a summary in the header.
-        if(totAssertionsFailed === 0){
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' +  totAssertionsPassed + pluralize(' assertion', assertionsQueue.length) + ' passed' + '</p>';
-        }else if(totAssertionsPassed === 0){
-            html += '<p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
+    /**
+     * Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
+     */
+    function domAddEventHandler(el, event, handler){
+        if( el.addEventListener){
+            el.addEventListener(event, handler, false);
         }else{
-            html += '<p id="preamble-results-summary-passed" class="summary passed">' + totGroupsPassed + pluralize(' group', totGroupsPassed) + '/' + totTestsPassed + pluralize(' test', totTestsPassed) + '/' + totAssertionsPassed + pluralize(' assertion', totAssertionsPassed) + ' passed.</p><p id="preamble-results-summary-failed" class="summary failed">' + totGroupsFailed + pluralize(' group', totGroupsFailed) + '/' + totTestsFailed + pluralize(' test', totTestsFailed) + '/' + totAssertionsFailed + pluralize(' assertion', totAssertionsFailed) + ' failed.</p>';
+            el.attachEvent('on' + event, handler);
         }
-        html += '<a href="?">Rerun All Tests</a>';
-        elStatusContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    function showResultsDetails(){
-        var groupLabel = '';
-        var testLabel = '';
-        var html = '';
-        elResults.style.display = 'block';
-        results.forEach(function(result){
-            if(result.testLabel !== testLabel){
-                if(html.length){
-                    html += '</div>';
+    /**
+     * Hide/show passed tests.
+     */
+    function showHidePassedTests(){
+        var elUls = document.getElementsByTagName('ul'),
+            i,
+            ii,
+            l,
+            ll,
+            attributes,
+            elContainers = [],
+            classes = '';
+        for(i = 0, l= elUls.length; i < l; i++){
+            attributes = elUls[i].getAttribute('class');
+            if(attributes && attributes.length){
+                attributes = attributes.split(' ');
+                for(ii = 0, ll = attributes.length; ii < ll; ii++){
+                    if(attributes[ii] === 'group-container' || attributes[ii] === 'tests-container'){
+                        elContainers.push(elUls[i]);
+                    }
                 }
             }
-            if(result.groupLabel !== groupLabel){
-                if(html.length){
-                    html += '</div></a>';
+        }
+        if(document.getElementById('hidePassedTests').checked){
+            elContainers.forEach(function(elContainer){
+                if(elContainer.getAttribute('data-passed') === 'true'){
+                    classes = elContainer.getAttribute('class');
+                    elContainer.setAttribute('class', classes + ' hidden');
                 }
+            });
+        }else{
+            elContainers.forEach(function(elContainer){
+                if(elContainer.getAttribute('data-passed') === 'true'){
+                    classes = elContainer.getAttribute('class');
+                    attributes = classes.split(' ');
+                    classes = [];
+                    attributes.forEach(function(c){
+                        if(c !== 'hidden'){
+                            classes.push(c);
+                        }
+                    });
+                    elContainer.setAttribute('class', classes);
+                }
+            });
+        }
+    }
+
+    /**
+     * Click handler for the hide passed tests checkbox.
+     * Stops propagation of the event and calls showhidePassedTests
+     * to do the heavy lifting.
+     */
+    function hptClickHandler(evt){
+        evt.stopPropagation();
+        showHidePassedTests();
+    }
+
+    /**
+     * Handles all anchor tag click events which are delegated to the
+     * test container element.
+     * When an anchor tag is clicked, persist the hidePassedTests checkbox
+     * state as a query parameter and set the window location accordingly.
+     * @param {object} evt A DOM event object.
+     */
+    function runClickHandler(evt){
+        var checked,
+            lastChar,
+            href;
+        //Only respond to delegated anchor tag click events.
+        if(evt.target.tagName === 'A'){
+            evt.stopPropagation();
+            checked = document.getElementById('hidePassedTests').checked;
+            if(config.hidePassedTests !== checked){
+                evt.preventDefault();
+                href = evt.target.getAttribute('href');
+                lastChar = href[href.length -1];
+                lastChar = lastChar === '?' ? '' : '&';
+                window.location = href + lastChar + 'hpt=' + checked;
             }
-            if(result.groupLabel !== groupLabel){
-                html += '<div class="group-container"><a class="group" href="?group=' + encodeURI(result.groupLabel) + '">' + result.groupLabel + '</a>';
-                groupLabel = result.groupLabel;
-            }
-            if(result.testLabel !== testLabel){
-                html += '<div class="tests-container"><a class="test" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '">' + result.testLabel + '</a>';
-                testLabel = result.testLabel;
-            }
-            if(!result.result){
-                html += '<div class="assertion-container"><a class="assertion failed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  failed"</div>';
+        }
+    }
+
+    //Configuration is called once internally but may be called again if test script employs in-line configuration.
+    function configure(){
+        /**
+         * Default configuration options - override these in your config file (e.g. var preambleConfig = {testTimeOutInterval: 20})
+         * or in-line in your tests.
+         *
+         * windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT -
+         * USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
+         *
+         * testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds wait before a test times out.
+         * tests to complete.
+         *
+         * name: (default 'Test') - set to a meaningful name.
+         *
+         * uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+         *
+         * hidePassedTests: (default: false) - set to true to hide passed tests.
+         *
+         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma,
+         * initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
+         */
+        var defaultConfig = {
+                windowGlobals: true,
+                testTimeOutInterval: 10,
+                name: 'Test',
+                uiTestContainerId: 'ui-test-container',
+                hidePassedTests: false,
+                autoStart: true
+            },
+            configArg = arguments && arguments[0];
+        //Ignore configuration once testing has started.
+        if(configArg && queue.length){
+            return;
+        }
+        config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) : defaultConfig;
+        config = configArg ? merge(config, configArg) : config;
+        //Capture run-time filters, if any.
+        runtimeFilter = {group: loadPageVar('group'), test: loadPageVar('test')};
+        //Capture exception's stack trace property.
+        setStackTraceProperty();
+        //Handle global errors.
+        window.onerror = errorHandler;
+        //If the windowGlabals config option is false then window globals will
+        //not be used and the one Preamble name space will be used instead.
+        if(config.windowGlobals){
+            window.configure = configure;
+            window.describe = queueBuilder.group;
+            window.beforeEach = queueBuilder.beforeEachTest;
+            window.afterEach = queueBuilder.afterEachTest;
+            window.it = queueBuilder.test;
+            window.equal = noteEqualAssertion;
+            window.notEqual = noteNotEqualAssertion;
+            window.isTrue = noteIsTrueAssertion;
+            window.isFalse = noteIsFalseAssertion;
+            window.isTruthy = noteIsTruthyAssertion;
+            window.isNotTruthy = noteIsNotTruthyAssertion;
+            window.getUiTestContainerElement = getUiTestContainerElement;
+            window.getUiTestContainerElementId = getUiTestContainerElementId;
+            window.snoop = snoop;
+        }else{
+            window.Preamble = {
+                configure: configure,
+                describe: queueBuilder.group,
+                beforeEach: queueBuilder.beforeEachTest,
+                afterEach: queueBuilder.afterEachTest,
+                it: queueBuilder.test,
+                getUiTestContainerElement: getUiTestContainerElement,
+                getUiTestContainerElementId: getUiTestContainerElementId,
+                snoop: snoop
+            };
+            //Functions to "note" assertions are passed as the
+            //1st parameter to each test's callback function.
+            assert = {
+                equal: noteEqualAssertion,
+                notEqual: noteNotEqualAssertion,
+                isTrue: noteIsTrueAssertion,
+                isFalse: noteIsFalseAssertion,
+                isTruthy: noteIsTruthyAssertion,
+                isNotTruthy: noteIsNotTruthyAssertion
+            };
+        }
+        window.Preamble = window.Preamble || {};
+        //For use by external processes.
+        window.Preamble.__ext__ = {};
+        //Expose config options to external processes.
+        window.Preamble.__ext__.config = config;
+        //publish config event.
+        emit('configchanged', {name: config.name, uiTestContainerId: config.uiTestContainerId});
+    }
+
+    //Returns the "line" in the stack trace that points to the failed assertion.
+    function stackTrace(st) {
+        //Get all file references...
+        var matches = st.match(reFileFromStackTrace);
+        //... and filter out all references to preamble.js.
+        return matches.reduce(function(previousValue, currentValue){
+            if(currentValue.search(/preamble.js/) === -1){
+                return previousValue + '<p class="stacktrace">' + currentValue + '</p>';
             }else{
-                html += '<div class="assertion-container"><a class="assertion passed" href="?group=' + encodeURI(result.groupLabel) + '&test=' + encodeURI(result.testLabel) + '&assertion=' + encodeURI(result.assertionLabel) + '">"' + result.assertionLabel + '" (' + result.displayAssertionName + ')  passed"</div>';
+                return previousValue;
             }
-        });
-        html += '</div></div>';
-        elResults.innerHTML = html;
-    }
-
-    function showResults(){
-        showResultsSummary();
-        showResultsDetails();
-    }
-
-    function genTotalsFromResults(){
-        var prevGroupLabel;
-        var prevTestLabel;
-        results.forEach(function(result){
-            if(!result.result){
-                if(result.groupLabel !== prevGroupLabel){
-                    totGroupsFailed++;
-                    prevGroupLabel = result.groupLabel;
-                }
-                if(result.testLabel !== prevTestLabel){
-                    totTestsFailed++;
-                    prevTestLabel = result.testLabel;
-                }
-            }
-        });
-        totTestsPassed = totTests - totTestsFailed;
-        totGroupsPassed = totGroups - totGroupsFailed;
-    }
-
-    function reporter(){
-        genTotalsFromResults();
-        if(!isProcessAborted){
-            showResults();
-        }
+        }, '');
     }
 
     function compareArrays(a, b){
@@ -310,365 +1196,123 @@
 
     //Assertion runners.
 
-    // "strict" a === b
+    //"strict" a === b
     function assertEqual(a, b){
-        return a_equals_b(a, b);
+        //return a_equals_b(a, b);
+        var result = a_equals_b(a, b);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to equal ' + JSON.stringify(b)};
     }
 
-    // "strict" a === true, simple boolean test
+    //"strict" a === true, simple boolean test
     function assertIsTrue(a){
-        return a_equals_true(a);
+        //return a_equals_true(a);
+        var result = a_equals_true(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
     }
 
-    // "non strict" a == true, simple boolean test
+    //"non strict" a == true, simple boolean test
     function assertIsTruthy(a){
-        return a_is_truthy(a);
+        //return a_is_truthy(a);
+        var result = a_is_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
     }
 
-    // "strict" a !== b
+    //"strict" a !== b
     function assertNotEqual(a, b){
-        return a_notequals_b(a, b);
+        //return a_notequals_b(a, b);
+        var result = a_notequals_b(a, b);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not equal ' + JSON.stringify(b)};
     }
 
-    // "strict" a === false, simple boolean test
+    //"strict" a === false, simple boolean test
     function assertIsFalse(a){
-        return a_equals_false(a);
+        //return a_equals_false(a);
+        var result = a_equals_false(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
     }
 
-    // "non strict" a == true, simple boolean test
+    //"non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
-        return a_is_not_truthy(a);
+        //return a_is_not_truthy(a);
+        var result = a_is_not_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
 
-    //Loops through the assertionsQueue, running each assertion and records the results.
-    function runAssertions(){
-        var i,
-            len,
-            item;
-        //Show totals for groups, test, assertions before running the tests.
-        showTotalsToBeRun();
-        //A slight delay so user can see the totals and they don't flash.
-        setTimeout(function(){
-            //Synchronously iterate over the assertionsQueue, running each item's assertion.
-            for (i = 0, len = assertionsQueue.length; i < len; i++) {
-                item = assertionsQueue[i];
-                item.result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
-                if(item.result){
-                    totAssertionsPassed++;
-                }else{
-                    totAssertionsFailed++;
-                }
-                switch(item.assertion.name){
-                    case 'assertIsTrue':
-                        item.displayAssertionName = 'isTrue';
-                        break;
-                    case 'assertIsTruthy':
-                        item.displayAssertionName = 'isTruthy';
-                        break;
-                    case 'assertIsFalse':
-                        item.displayAssertionName = 'isFalse';
-                        break;
-                    case 'assertIsNotTruthy':
-                        item.displayAssertionName = 'isNotTruthy';
-                        break;
-                    case 'assertEqual':
-                        item.displayAssertionName = 'equal';
-                        break;
-                    case 'assertNotEqual':
-                        item.displayAssertionName = 'notEqual';
-                        break;
-                }
-                results.push(item);
-                if(config.shortCircuit && totAssertionsFailed){
-                    reporter();
-                    return;
-                }
+    function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
+        testsIterator.get().assertions.push({
+            assertion: assertion,
+            assertionLabel: assertionLabel,
+            value: value,
+            expectation: expectation,
+            stackTrace: stackTrace
+        });
+    }
+
+    function setStackTraceProperty(){
+        try{
+            throw new Error('woops');
+        }catch(error){
+            stackTraceProperty = error.stack ? 'stack' : error.stacktrace ? 'stacktrace' : undefined;
+        }
+    }
+
+    function stackTraceFromError(){
+        var stack = null;
+        if(stackTraceProperty){
+            try{
+                throw new Error();
+            }catch(error){
+                stack = error[stackTraceProperty];
             }
-            //Record the end time.
-            timerEnd = Date.now();
-            //Report the results.
-            reporter();
-        }, 1);
-    }
-
-    function pushOntoAssertionQueue(groupLabel, testLabel, assertion, assertionLabel, value, expectation, isAsync){
-        assertionsQueue.push({groupLabel: groupLabel, testLabel: testLabel, assertion: assertion, assertionLabel: assertionLabel, value: value, expectation: expectation, isAsync: isAsync});
-    }
-
-    function throwException(errMessage){
-        throw new Error(errMessage);
+        }
+        return stack;
     }
 
     function noteEqualAssertion(value, expectation, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 3){
-                throwException('Assertion "equal" requires 3 arguments, found ' + arguments.length);
-            }
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertEqual, label,
-                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, currentTestHash.isAsync);
+        if(arguments.length < 2){
+            throwException('Assertion "equal" requires 2 arguments, found ' + arguments.length);
         }
+        pushOntoAssertions(assertEqual, label, value, expectation, stackTraceFromError());
     }
 
     function noteIsTrueAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isTrue" requires 2 arguments, found ' + arguments.length);
-            }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTrue, label, value, true, currentTestHash.isAsync);
+        if(arguments.length < 1){
+            throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
         }
+        pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
     }
 
     function noteIsTruthyAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isTruthy" requires 2 arguments, found ' + arguments.length);
-            }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsTruthy, label, value, true, currentTestHash.isAsync);
+        if(arguments.length < 1){
+            throwException('Assertion "isTruthy" requires 1 argument, found ' + arguments.length);
         }
+        pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
     }
 
     function noteNotEqualAssertion(value, expectation, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 3){
-                throwException('Assertion "notEqual" requires 3 arguments, found ' + arguments.length);
-            }
-            //Deep copy value and expectation to freeze them against future changes when running an asynchronous test.
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertNotEqual, label,
-                currentTestHash.isAsync ? deepCopy(value) : value, currentTestHash.isAsync ? deepCopy(expectation) : expectation, currentTestHash.isAsync);
+        if(arguments.length < 2){
+            throwException('Assertion "notEqual" requires 2 arguments, found ' + arguments.length);
         }
+        pushOntoAssertions(assertNotEqual, label, value, expectation, stackTraceFromError());
     }
 
     function noteIsFalseAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isFalse" requires 2 arguments, found ' + arguments.length);
-            }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsFalse, label, value, true, currentTestHash.isAsync);
+        if(arguments.length < 1){
+            throwException('Assertion "isFalse" requires 1 argument, found ' + arguments.length);
         }
+        pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
     }
 
     function noteIsNotTruthyAssertion(value, label){
-        if(assertionFilter === label || assertionFilter === ''){
-            if(arguments.length !== 2){
-                throwException('Assertion "isNotTruthy" requires 2 arguments, found ' + arguments.length);
-            }
-            pushOntoAssertionQueue(currentTestHash.groupLabel, currentTestHash.testLabel, assertIsNotTruthy, label, value, true, currentTestHash.isAsync);
+        if(arguments.length < 1){
+            throwException('Assertion "isNotTruthy" requires 1 argument, found ' + arguments.length);
         }
-    }
-
-    //Starts the timer for an async test. When the timeout is triggered it calls
-    //callback allowing client to run their assertions. When the callback returns
-    //the processing of the next test is set by incrementing testQueueIndex and
-    //runTests is called to continue processing the testsQueue.
-    function whenAsyncDone(callback){
-        setTimeout(function(){
-            callback();
-            currentTestStep++;
-            runTest();
-        }, currentTestHash.asyncInterval || config.asyncTestDelay);
-    }
-
-    //Runs the current test asynchronously which will call whenAsyncDone (see above).
-    function runAsyncTest(){
-        if(config.windowGlobals){
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback();
-            }
-        }else{
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback(assert);
-            }
-        }
-    }
-
-    //Runs the current test synchronously. When the callback returns the
-    //processing of the next test is set by incrementing testQueueIndex and
-    //runTests is called to continue processing the testsQueue.
-    function runSyncTest(){
-        if(config.windowGlobals){
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback();
-            }
-        }else{
-            if(currentTestHash.beforeTestVal){
-                currentTestHash.testCallback(assert, currentTestHash.beforeTestVal);
-            }else{
-                currentTestHash.testCallback(assert);
-            }
-        }
-        currentTestStep++;
-        runTest();
-    }
-
-    //Runs setup synchronously for each test.
-    function runBeforeEachSync(){
-        currentTestHash.beforeTestVal = currentTestHash.beforeEachTest();
-        currentTestStep++;
-        runTest();
-    }
-
-    //Runs setup asynchronously for each test.
-    function runBeforeEachAsync(){
-        currentTestHash.beforeTestVal = currentTestHash.asyncBeforeEachTest();
-        setTimeout(function(){
-            currentTestStep++;
-            runTest();
-        }, currentTestHash.asyncBeforeTestInterval || config.asyncBeforeAfterTestDelay);
-    }
-
-    //Runs tear down synchronously for each test.
-    function runAfterEachSync(){
-        currentTestHash.afterEachTest();
-        currentTestStep++;
-        runTest();
-    }
-
-    //Runs tear down asynchronously for each test.
-    function runAfterEachAsync(){
-        currentTestHash.asyncAfterEachTest();
-        setTimeout(function(){
-            currentTestStep++;
-            runTest();
-        }, currentTestHash.asyncAfterTestInterval || config.asyncBeforeAfterTestDelay);
-    }
-
-    //Runs the 4 steps of a test's life cycle - before each test, test, after each test,
-    //and setup next test. The current test is the one pointed to by currentTestHash.
-    function runTest(){
-        //Run the test life cycle asynchronously so the Browser remains responsive.
-        setTimeout(function(){
-            switch(currentTestStep){
-                case 0: //Runs beforeEach.
-                    if(currentTestHash.beforeEachTest){
-                        runBeforeEachSync();
-                    }else if(currentTestHash.asyncBeforeEachTest){
-                        runBeforeEachAsync();
-                    }else{
-                        currentTestStep++;
-                        runTest();
-                    }
-                    break;
-                case 1: //Runs the test.
-                    if(currentTestHash.isAsync){
-                        runAsyncTest();
-                    }else{
-                        runSyncTest();
-                    }
-                    break;
-                case 2: //Runs afterEach.
-                    if(currentTestHash.afterEachTest){
-                        runAfterEachSync();
-                    }else if(currentTestHash.asyncAfterEachTest){
-                        runAfterEachAsync();
-                    }else{
-                        currentTestStep++;
-                        runTest();
-                    }
-                    break;
-                case 3: //Sets up the processing of the next test to be run.
-                    testsQueueIndex++;
-                    testIsRunning = false;
-                    runTests();
-                    break;
-            }
-        }, 1);
-    }
-
-    //Runs each test in testsQueue to build assertionsQueue.
-    function runTests(){
-        var len = testsQueue.length;
-        while(testsQueueIndex < len && !testIsRunning){
-            currentTestHash  = testsQueue[testsQueueIndex];
-            currentTestStep = 0;
-            testIsRunning = true;
-            runTest();
-        }
-        if(testsQueueIndex === len){
-            //Run the assertions in the assertionsQueue.
-            runAssertions();
-        }
-    }
-
-    //Note runBeforeEach.
-    function beforeEachTest(callback){
-        currentTestHash.beforeEachTest = callback;
-    }
-
-    //Note asyncRunBeforeEach.
-    function asyncBeforeEachTest(callback){
-        if(arguments.length === 2){
-            currentTestHash.asyncBeforeTestInterval = arguments[0];
-            currentTestHash.asyncBeforeEachTest = arguments[1];
-        }else{
-            currentTestHash.asyncBeforeEachTest = callback;
-        }
-    }
-
-    //Note runAfterEach.
-    function afterEachTest(callback){
-        currentTestHash.afterEachTest = callback;
-    }
-
-    //Note asyncRunAfterEach.
-    function asyncAfterEachTest(callback){
-        if(arguments.length === 2){
-            currentTestHash.asyncAfterTestInterval = arguments[0];
-            currentTestHash.asyncAfterEachTest = arguments[1];
-        }
-        currentTestHash.asyncAfterEachTest = callback;
-    }
-
-    //Provides closure and a label to a group of tests.
-    var group = function group(label, callback){
-        if(groupFilter === label || groupFilter === ''){
-            currentTestHash = {groupLabel: label};
-            totGroups++;
-            callback();
-        }
-    };
-
-    //Provides closure and a label to a synchronous test
-    //and registers its callback in its testsQueue item.
-    var test = function test(label, callback){
-        if(testFilter === label || testFilter === ''){
-            testsQueue.push(combine(currentTestHash,{testLabel: label, testCallback: callback, isAsync: false}));
-            totTests++;
-        }
-    };
-
-    //Provides closure and a label to an asynchronous test
-    //and registers its callback in its testsQueue item.
-    //Form: asyncTest(label[, interval], callback).
-    var asyncTest = function asyncTest(label){
-        if(testFilter === label || testFilter === ''){
-            testsQueue.push(combine(currentTestHash, {testLabel: label, testCallback: arguments.length === 3 ? arguments[2] : arguments[1], isAsync: true, asyncInterval: arguments.length === 3 ? arguments[1] : config.asyncTestDelay}));
-            totTests++;
-        }
-    };
-
-    //Shown while the testsQueue is being loaded.
-    function showStartMessage(){
-        elStatusContainer.innerHTML += '<p>Building queues. Please wait...</p>';
-    }
-
-    //Called after the testsQueue has been generated.
-    function runner(){
-        //Record the start time.
-        timerStart = Date.now();
-        //Run each test in the testsQueue.
-        runTests();
+        pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
-        return elUiTestContainer;
+        return document.getElementById(config.uiTestContainerId);
     }
 
     //Returns the id of the ui test container element.
@@ -676,267 +1320,128 @@
         return config.uiTestContainerId;
     }
 
-    //Completely rewritten for v1.2.0.
-    //A factory that creates a proxy wrapper for any function or object method prperty. 
-    //Use it to determine if the wrapped function was called, how many times it was called, 
-    //the arguments that were passed to it, the contexts it was called with and what it 
-    //returned. Extemely useful for testing synchronous and asynchronous methods.  
-    function proxy(){
-
-        var proxyFactory = function(){
-
-            //The wrapped function to call.
-            var fnToCall = arguments.length === 2 ? arguments[0][arguments[1]] : arguments[0];
-
-            //A counter used to note how many times proxy has been called.
-            var xCalled = 0;
-
-            //An array whose elements note the context used to calll the wrapped function.
-            var contexts = [];
-
-            //An array of arrays used to note the arguments that were passed to proxy.
-            var argsPassed = [];
-
-            //An array whose elements note what the wrapped function returned.
-            var returned = [];
-
-            ///
-            ///Privileged functions used by API
-            ///
-
-            //Returns the number of times the wrapped function was called.
-            var getCalledCount = function(){
-                return xCalled;
-            };
-
-            //If n is within bounds returns the context used on the nth 
-            //call to the wrapped function, otherwise returns undefined.
-            var getContext = function(n){
-                if(n >= 0 && n < xCalled){
-                    return contexts[n];
-                }
-            };
-
-            //If called with 'n' and 'n' is within bounds then returns the 
-            //array found at argsPassed[n], otherwise returns argsPassed.
-            var getArgsPassed = function(){
-                if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < argsPassed.length){
-                    return argsPassed[arguments[0]];
-                }else{
-                    return argsPassed;
-                }
-            };
-
-            //If called with 'n' and 'n' is within bounds then returns 
-            //value found at returned[n], otherwise returns returned.
-            var getReturned = function(){
-                if(arguments.length === 1 && arguments[0] >= 0 && arguments[0] < returned.length){
-                    return returned[arguments[0]];
-                }else{
-                    return returned;
-                }
-            };
-
-            //If 'n' is within bounds then returns an 
-            //info object, otherwise returns undefined.
-            var getData= function(n){
-                if(n >= 0 && n < xCalled){
-                    var args = getArgsPassed(n);
-                    var context = getContext(n);
-                    var ret = getReturned(n);
-                    var info = {
-                        count: n + 1,
-                        argsPassed: args,
-                        context: context,
-                        returned: ret
-                    };
-                    return info;
-                }
-            };
-
-            //If you just want to know if the wrapped function was called 
-            //then call wasCalled with no args. If you want to know if the 
-            //callback was called n times, pass n as an argument.
-            var wasCalled = function(){
-                return arguments.length === 1 ? arguments[0] === xCalled : xCalled > 0;
-            };
-
-            //A higher order function - iterates through the collected data and 
-            //returns the information collected for each invocation of proxy.
-            var dataIterator = function(callback){
-                for(var i = 0; i < xCalled; i++){
-                    callback(getData(i));
-                }
-            };
-
-            //The function that is returned to the caller.
-            var fn = function(){
-                //Note the context that the proxy was called with.
-                contexts.push(this);
-                //Note the arguments that were passed for this invocation.
-                var args = [].slice.call(arguments);
-                argsPassed.push(args.length ? args : []);
-                //Increment the called count for this invocation.
-                xCalled += 1;
-                //Call the wrapped function noting what it returns.
-                var ret = fnToCall.apply(this, args);
-                returned.push(ret);
-                //Return what the wrapped function returned to the caller.
-                return ret;
-            };
-
-            ///
-            ///Exposed Lovwer level API - see Privileged functions used by API above.
-            ///
-
-            fn.getCalledCount = getCalledCount;
-
-            fn.getContext = getContext;
-
-            fn.getArgsPassed = getArgsPassed;
-
-            fn.getReturned = getReturned;
-
-            fn.getData = getData;
-
-            ///
-            ///Exposed Higher Order API - see Privileged functions used by API above.
-            ///
-            
-            fn.wasCalled = wasCalled;
-
-            fn.dataIterator = dataIterator;
-
-            //Replaces object's method property with proxy's fn.
-            if(arguments.length === 2){
-                arguments[0][arguments[1]] = fn; 
-            }
-
-            //Return fn to the caller.
-            return fn;
+    /**
+     * @param {object} argObject Any object.
+     * @param {string} argProperty The name of the property of argObject to be snooped.
+     */
+    function snoop(argObject, argProperty){
+        var targetFn,
+            snoopster,
+            calls = [];
+        window.calls = calls;
+        function argsToArray(argArguments){
+            return [].slice.call(argArguments, 0);
+        }
+        if(arguments.length !== 2){
+            throw new Error('snoop requires 2 arguments, an object and a property name');
+        }
+        if(!arguments[0].hasOwnProperty([arguments[1]])){
+            throw new Error('object does not have property name "' + arguments[1] + '"');
+        }
+        function Args(args){
+            this.args = argsToArray(args);
+        }
+        Args.prototype.getArgument = function(i){
+            return i >= this.args.length ? null : this.args[i];
         };
-
-        //Convert arguments to an array, call factory and returns its value to the caller.
-        var args = [].slice.call(arguments);
-        return proxyFactory.apply(null, args);
-
-    }
-
-    function showCoverage(){
-        var html;
-        //Show groups and tests coverage in the header.
-        html = '<p id="preamble-coverage" class="summary">Covering ' + totGroups + pluralize(' group', totGroups) + '/' + totTests + pluralize(' test', totTests) + '</p>';
-        elStatusContainer.innerHTML = html;
+        function ACall(context, args, error, returned){
+            this.context = context;
+            this.args = args;
+            this.error = error;
+            this.returned = returned;
+        }
+        targetFn = argObject[argProperty];
+        //tracking
+        snoopster = function(){
+            var aArgs = arguments.length && argsToArray(arguments) || [];
+            var error = null;
+            var returned;
+            try{
+                returned = targetFn.apply(this, aArgs);
+            }catch(er){
+                error = er;
+            }
+            snoopster.args = new Args(aArgs);
+            calls.push(new ACall(this, aArgs, error, returned));
+        };
+        //api
+        snoopster.called = function(){
+            return calls.length;
+        };
+        snoopster.wasCalled = function(){
+            return !!calls.length;
+        };
+        snoopster.wasCalled.nTimes = function(count){
+            if(arguments.length !== 1){
+                throw new Error('wasCalled.nTimes expects to be called with an integer');
+            }
+            return calls.length === count;
+        };
+        snoopster.contextCalledWith = function(){
+            return snoopster.wasCalled() && calls[calls.length - 1].context;
+        };
+        snoopster.returned = function(){
+            return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
+        };
+        snoopster.threw = function(){
+            return snoopster.wasCalled() && !!calls[calls.length - 1].error;
+        };
+        snoopster.threw.withMessage = function(message){
+            return snoopster.wasCalled() && calls[calls.length - 1].error.message === message;
+        };
+        snoopster.calls = {
+            count: function(){
+                return calls.length;
+            },
+            forCall: function(i){
+                return i >= 0 && i < calls.length && calls[i] || undefined;
+            },
+            all: function(){
+                return calls;
+            }
+        };
+        argObject[argProperty] = snoopster;
     }
 
     /**
-     * It all starts here!!!
+     * It all starts here!
      */
 
-    //Capture filters if any.
-    groupFilter = loadPageVar('group');
-    testFilter = loadPageVar('test');
-    assertionFilter = loadPageVar('assertion');
+    //Record the start time.
+    queue.start = Date.now();
+
+    //Create a reporter.
+    reporter = new HtmlReporter(showHidePassedTests);
 
     //Configure the runtime environment.
     configure();
 
-    //Handle global errors.
-    window.onerror = errorHandler;
-
-    //Add markup structure to the DOM.
-    elPreambleContainer.innerHTML = '<header id="preamble-header-container"><h1 id="preamble-header"></h1></header><div class="container"><section id="preamble-status-container"><p>Please wait...</p></section><section id="preamble-results-container"></section></div>';
-
-    //Append the ui test container.
-    elPreambleContainer.insertAdjacentHTML('afterend', '<div id="' + config.uiTestContainerId + '" class="ui-test-container"></div>');
-
-    //Capture DOM elements for later use.
-    elHeader = document.getElementById('preamble-header');
-    elStatusContainer = document.getElementById('preamble-status-container');
-    elResults = document.getElementById('preamble-results-container');
-    elUiTestContainer = document.getElementById(config.uiTestContainerId);
-
-    //Display the name.
-    elHeader.innerHTML = config.name;
-
-    //Display the version.
-    elHeader.insertAdjacentHTML('afterend', '<small>Preamble ' + version + '</small>');
-
-    //If the windowGlabals config option is false then window globals will
-    //not be used and the one Preamble name space will be used instead.
-    if(config.windowGlobals){
-        window.group = group;
-        window.beforeEachTest = beforeEachTest;
-        window.asyncBeforeEachTest = asyncBeforeEachTest;
-        window.afterEachTest = afterEachTest;
-        window.asyncAfterEachTest = asyncAfterEachTest;
-        window.test = test;
-        window.asyncTest = asyncTest;
-        window.whenAsyncDone = whenAsyncDone;
-        window.equal = noteEqualAssertion;
-        window.notEqual = noteNotEqualAssertion;
-        window.isTrue = noteIsTrueAssertion;
-        window.isFalse = noteIsFalseAssertion;
-        window.isTruthy = noteIsTruthyAssertion;
-        window.isNotTruthy = noteIsNotTruthyAssertion;
-        window.getUiTestContainerElement = getUiTestContainerElement;
-        window.getUiTestContainerElementId = getUiTestContainerElementId;
-        window.proxy = proxy;
-    }else{
-        window.Preamble = {
-            group: group,
-            beforeEachTest: beforeEachTest,
-            asyncBeforeEachTest: asyncBeforeEachTest,
-            afterEachTest: afterEachTest,
-            asyncAfterEachTest: asyncAfterEachTest,
-            test: test,
-            asyncTest: asyncTest,
-            whenAsyncDone: whenAsyncDone,
-            getUiTestContainerElement: getUiTestContainerElement,
-            getUiTestContainerElementId: getUiTestContainerElementId,
-            proxy: proxy
-        };
-        //Functions to "note" assertions are passed as the
-        //1st parameter to each test's callback function.
-        assert = {
-            equal: noteEqualAssertion,
-            notEqual: noteNotEqualAssertion,
-            isTrue: noteIsTrueAssertion,
-            isFalse: noteIsFalseAssertion,
-            isTruthy: noteIsTruthyAssertion,
-            isNotTruthy: noteIsNotTruthyAssertion
-        };
-    }
-
     /**
-     * Wait while the testsQueue is loaded.
+     * Wait while the queue is loaded.
      */
-
-    //Catch errors.
     try{
-        //Build the testsQueue as user calls group, test or asyncTest.
-        //Keep checking the testsQueue's length until it is 'stable'.
+        //Wait while the queue is built as scripts call group function.
+        //Keep checking the queue's length until it is 'stable'.
+        //Keep checking that config.autoStart is true.
         //Stable is defined by a time interval during which the length
-        //of the testsQueue remains constant, indicating that all tests
-        //have been loaded. Once stable, run the tests.
+        //of the queue remains constant, indicating that all groups
+        //have been loaded. Once stable, emit the 'start' event.
+        //***Note: config.autoStart can only be false if it set by an
+        //external process (e.g. Karma adapter).
         intervalId = setInterval(function(){
-            if(testsQueue.length === testsQueueCount){
-                if(testsQueueStableCount > 1){
+            if(queue.length === prevQueueCount){
+                if(queueStableCount > 1 && config.autoStart){
                     clearInterval(intervalId);
-                    //Show total groups and test to be covered.
-                    showCoverage();
-                    //Show the start message.
-                    showStartMessage();
                     //Run!
-                    runner();
+                    emit('start');
                 }else{
-                    testsQueueStableCount++;
+                    queueStableCount++;
                 }
             }else{
-                testsQueueStableCount = 0;
-                testsQueueCount = testsQueue.length;
+                queueStableCount = 0;
+                prevQueueCount = queue.length;
             }
-        }, testsQueueStableInterval);
+        }, queueStableInterval);
     } catch(e) {
         errorHandler(e);
     }
