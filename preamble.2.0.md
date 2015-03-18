@@ -520,7 +520,7 @@ The _arguments_ passed to the method.
 If an exception was thrown when called this contains the exception's message.
 
 #### **returned**
-What the method returnd.
+What the method returned.
 
 _**snoop.calls**_ API is defined as follows:
 
