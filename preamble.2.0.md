@@ -607,9 +607,10 @@ Begining with v2.0, you can call _**configure**_ directly from within your test 
 #### **configure** *configure(hash)*
 Call _**configure**_ passing a _**hash**_ containing _properties_ and their associated _values_ for the configuration options to be overriden.
 <p class="warning">Place the call to <em>configure</em> at the very <strong><em>top</em></strong> of your test script file.</p>
+<p class="warning">Please note that the <em><strong>windowGlobals</strong></em> configuration option can only be overriden by setting its value in the <em>preamble-config.js</em> configuration file and that it cannot be overriden using <em>in-line</em> configuration. Please see <em>Configuration Using preamble-config.js</em> above.</p>
 
 ```javascript
-//Your test script file
+//Place the call to configure at the top of your test script file
 
 configure({
     name: 'Sample Test Suite',
