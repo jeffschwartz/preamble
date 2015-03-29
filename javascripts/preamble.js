@@ -1002,6 +1002,8 @@
          *
          * hidePassedTests: (default: false) - set to true to hide passed tests.
          *
+         * shortCircuit: (default: false) - set to true to short circuit when a test fails.
+         *
          * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma,
          * initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
          */
@@ -1011,6 +1013,7 @@
                 name: 'Test',
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
+                shortCircuit: false,
                 autoStart: true
             },
             configArg = arguments && arguments[0];
