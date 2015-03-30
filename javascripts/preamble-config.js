@@ -9,5 +9,6 @@
 //     name: 'Test',
 //     uiTestContainerId: 'ui-test-container',
 //     hidePassedTests: false,
+//     shortCircuit: false,
 //     hideAssertions: true
 // };
