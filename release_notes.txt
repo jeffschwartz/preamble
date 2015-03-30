@@ -1,3 +1,6 @@
 v2.1.0
 Enhancements
 o When running headless via PhantomJS coverage and time are also now displayed.
+o Short circuiting a running test suite immediately after the first test fails
+is now supported via the "shortCircuit" configuration property when it is set to
+boolean true (it defaults to boolean false).
