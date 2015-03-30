@@ -631,15 +631,25 @@
                 callback();
             }else{
                 test.run(function(){
-                    callback();
+                    //Pass the totFailed value for the test
+                    //back so that it and shortCircuit can
+                    //be analyzed to determine if testing
+                    //needs to be aborted.
+                    callback(test.totFailed);
                 });
             }
         }
 
         function runTests(callback){
             if(testsIterator.hasNext()){
-                runTest(testsIterator.getNext(), function(){
-                    runTests(callback);
+                runTest(testsIterator.getNext(), function(totFailed){
+                    if(totFailed && config.shortCircuit){
+                        //If totFailed and shortCircuit then abort
+                        //further testing!
+                        callback();
+                    }else{
+                        runTests(callback);
+                    }
                 });
             }else{
                 callback();
