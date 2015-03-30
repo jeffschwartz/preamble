@@ -384,7 +384,10 @@
             hpt;
         //Show groups and tests coverage in the header.
         show = show.replace(/{{tt}}/, tests.length - tests.totBypassed);
-        if(runtimeFilter.group){
+        if(config.testingShortCircuited){
+            show += (tests.length - tests.totBypassed) && ' of {{tbpt}}';
+            show = show.replace(/{{tbpt}}/, tests.length);
+        } else if(runtimeFilter.group){
             show += runtimeFilter.group && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         }
@@ -420,9 +423,11 @@
         el.innerHTML = s;
         el.style.display = 'block';
         if(tests.result){
-            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + tests.length + pluralize(' test', tests.length ) + ' passed' + '</div>';
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' +
+                'All tests passed' + '</div>';
         }else{
-            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' +
+                tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
         }
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     };
@@ -663,6 +668,20 @@
     });
 
     on('testingShortCircuited', function(){
+        //Set the "bypass" property for all groups and
+        //tests that arent related to this test to true.
+        var queueIterator, queueObj;
+        queueIterator = iteratorFactory(queue);
+        while(queueIterator.hasNext()){
+            queueObj = queueIterator.getNext();
+            //Groups that haven't run will have their passed property set to true.
+            if(queueObj instanceof Group && queueObj.passed){
+                queueObj.bypass = true;
+            //Tests that havent run do not have a totFailed property.
+            }else if(queueObj instanceof Test && !queueObj.hasOwnProperty('totFailed')){
+                    queueObj.bypass = true;
+            }
+        }
         //Set flag in config to indicate that testing has
         //been aborted due to short circuit condition.
         config.testingShortCircuited = true;
@@ -677,7 +696,7 @@
         //});
         //Record how many tests were bypassed.
         tests.totBypassed = 0;
-        if(runtimeFilter.group){
+        if(runtimeFilter.group || config.testingShortCircuited){
             tests.totBypassed = tests.reduce(function(prevValue, t){
                 return t.bypass ? prevValue + 1 : prevValue;
             }, 0);
