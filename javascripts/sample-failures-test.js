@@ -3,8 +3,8 @@
 /*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
 /*
- *IMPORTANT: Please note that for the purpose of providing
- *thoughtful examples 6 tests are coded to intentionally fail.
+ *IMPORTANT: Please note that for the purpose of providing thoughtful examples
+ *some of the following tests are coded to intentionally fail.
  */
 
 describe('A nested test fails', function(){
