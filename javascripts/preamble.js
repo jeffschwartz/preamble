@@ -646,6 +646,7 @@
                     if(totFailed && config.shortCircuit){
                         //If totFailed and shortCircuit then abort
                         //further testing!
+                        emit('testingShortCircuited');
                         callback();
                     }else{
                         runTests(callback);
@@ -659,6 +660,12 @@
         runTests(function(){
             callback();
         });
+    });
+
+    on('testingShortCircuited', function(){
+        //Set flag in config to indicate that testing has
+        //been aborted due to short circuit condition.
+        config.testingShortCircuited = true;
     });
 
     on('end', function(){
@@ -994,28 +1001,38 @@
         }
     }
 
-    //Configuration is called once internally but may be called again if test script employs in-line configuration.
+    //Configuration is called once internally but may be called again if test script
+    //employs in-line configuration.
     function configure(){
         /**
-         * Default configuration options - override these in your config file (e.g. var preambleConfig = {testTimeOutInterval: 20})
-         * or in-line in your tests.
+         * Default configuration options - override these in your config file
+         * (e.g. var preambleConfig = {testTimeOutInterval: 20}) or in-line in your tests.
          *
-         * windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT -
-         * USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
+         * windowGlobals: (default true) - set to false to not use window globals
+         * (i.e. non browser environment). *IMPORTANT - USING IN-LINE CONFIGURATION
+         * TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED*.
          *
-         * testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds wait before a test times out.
-         * tests to complete.
+         * testTimeOutInterval: (default 10 milliseconds) - set to some other number
+         * of milliseconds to wait before a test is timed out. This number is applied
+         * to all tests and can be selectively overridden by individual tests.
          *
          * name: (default 'Test') - set to a meaningful name.
          *
-         * uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+         * uiTestContainerId (default id="ui-test-container") - set its id to something
+         * else if desired.
          *
          * hidePassedTests: (default: false) - set to true to hide passed tests.
          *
          * shortCircuit: (default: false) - set to true to short circuit when a test fails.
          *
-         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma,
-         * initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
+         * testingShortCircuited: (default: false) - *IMPORTANT - FOR INTERNAL USE ONLY*
+         * When a test fails and shortCircuit is set to true then Preamble will set this
+         * to true.
+         *
+         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY* Adapters
+         * for external processes, such as for Karma, initially set this to false to
+         * delay the execution of the tests and will eventually set it to true when
+         * appropriate.
          */
         var defaultConfig = {
                 windowGlobals: true,
@@ -1024,6 +1041,7 @@
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
                 shortCircuit: false,
+                testingShortCircuited: false,
                 autoStart: true
             },
             configArg = arguments && arguments[0];
