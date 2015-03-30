@@ -10,9 +10,7 @@
 configure({
     name: 'Sample Test Suite',
     hidePassedTests: true,
-    //hideAssertions: true,
-    testTimeOutInterval: 500,
-    shortCircuit: true
+    testTimeOutInterval: 500
 });
 
 describe('A nested test fails', function(){
