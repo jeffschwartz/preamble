@@ -1,11 +1,11 @@
-//Preamble 2.0.0 (Ramoth)
+//Preamble 2.1.0 (Ramoth)
 //(c) 2013 - 2015 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v2.0.0 (Ramoth)',
+    var version = 'v2.1.0 (Ramoth)',
         //Merged configuration options.
         config = {},
         queue=[],
