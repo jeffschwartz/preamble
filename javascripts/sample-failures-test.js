@@ -7,6 +7,15 @@
  *some of the following tests are coded to intentionally fail.
  */
 
+/**
+ * inline configuration
+ */
+configure({
+    name: 'Sample Failures Test Suite',
+    hidePassedTests: true,
+    testTimeOutInterval: 500
+});
+
 describe('Running a test', function(){
     it('and it passes it looks like this', function(){
         var hw = 'Hello World!';
