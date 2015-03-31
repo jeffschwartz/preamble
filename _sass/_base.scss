@@ -216,7 +216,7 @@ pre {
 /**
  *
  */
- .warning {
+ .warning, .added {
     border: solid 5px $warning-border-color;
     background-color: $warning-background-color;
     color: $warning-color;
@@ -230,4 +230,8 @@ pre {
 
  .warning:after {
      content: " */"
+ }
+
+ .added:before {
+     content: "added in "
  }

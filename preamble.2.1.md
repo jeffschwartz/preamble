@@ -1,7 +1,7 @@
 ---
 layout: page
-title: v2.0 API Developer Guide
-permalink: /preamble/api/2/0/
+title: v2.1 API Developer Guide
+permalink: /preamble/api/2/1/
 ---
 
 ## Introducing Preamble
@@ -63,7 +63,6 @@ The only required tags (other than the script tags) are **&lt;div id="preamble-t
 <body>
     <!-- These are required. Do not remove them or rename their ids -->
     <div id="preamble-test-container"></div>
-            <!-- v2.0.0 -->
     <div id="preamble-ui-container"></div>
 
     <!-- JavaScripts Go Here -->
@@ -81,6 +80,7 @@ The only required tags (other than the script tags) are **&lt;div id="preamble-t
 
     <!-- Place your test script(s) here, immediately following preamble.js -->
     <script src="javascripts/sample-test.js"></script>
+    <script src="javascripts/sample-failures-test.js"></script>
 </body>
 </html>
 ```
@@ -600,6 +600,8 @@ Default value = 'Test'. Override this to display a meaningful name for your test
 Default value = 'ui-test-container'. Override this to use a different ID for the UI test container DOM element.
 #### **hidePassedTests**
 Default value = false. Set it to true to hide passed tests.
+#### **shortCircuit** <span class="added"><small>v2.1</small></span>
+Default value = false. Set it to true to cause Preamble to imediately terminate running any further tests and to then produce its coverage, summary and detail report. This is a convenient option to use if your suites take a long time to run.
 
 ### In-line Configuration
 Begining with v2.0, you can call _**configure**_ directly from within your test scripts.:
