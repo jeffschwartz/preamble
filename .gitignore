@@ -13,3 +13,4 @@ Gemfile.lock
 *.gem
 .sass-cache
 _site/
+images/

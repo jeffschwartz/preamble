@@ -58,10 +58,21 @@
     };
 
     page.open(system.args[1], function(status){
+        var timer;
         if (status !== 'success') {
             console.log('Unable to access network');
             phantom.exit(1);
         } else {
+            page.evaluate(function(){
+                timer = setInterval(function(){
+                    var elName = document.getElementById('name'),
+                        elVersion = document.getElementById('version');
+                    if(elName && elVersion){
+                        console.log(elName.innerText + ' - ' + elVersion.innerText);
+                        clearInterval(timer);
+                    }
+                }, 1);
+            });
             waitFor(function(){
                 return page.evaluate(function(){
                     var el = document.getElementById('preamble-results-summary-passed') ||
@@ -74,7 +85,11 @@
             }, function(){
                 var elFailed;
                 page.evaluate(function(){
-                    var elPassed = document.getElementById('preamble-results-summary-passed');
+                    var elPassed = document.getElementById('preamble-results-summary-passed'),
+                        elCoverageText = document.getElementById('coverage').innerText,
+                        elTimeText = document.getElementById('time').innerText;
+                    console.log(elCoverageText.substr(0, elCoverageText.indexOf('Hide')) + '.');
+                    console.log(elTimeText + '.');
                     if(elPassed){
                         console.log(elPassed.innerText);
                     }

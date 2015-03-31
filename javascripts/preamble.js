@@ -1,11 +1,11 @@
-//Preamble 2.0.0 (Ramoth)
+//Preamble 2.1.0 (Ramoth)
 //(c) 2013 - 2015 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v2.0.0 (Ramoth)',
+    var version = 'v2.1.0 (Ramoth)',
         //Merged configuration options.
         config = {},
         queue=[],
@@ -384,7 +384,10 @@
             hpt;
         //Show groups and tests coverage in the header.
         show = show.replace(/{{tt}}/, tests.length - tests.totBypassed);
-        if(runtimeFilter.group){
+        if(config.testingShortCircuited){
+            show += (tests.length - tests.totBypassed) && ' of {{tbpt}}';
+            show = show.replace(/{{tbpt}}/, tests.length);
+        } else if(runtimeFilter.group){
             show += runtimeFilter.group && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         }
@@ -420,9 +423,11 @@
         el.innerHTML = s;
         el.style.display = 'block';
         if(tests.result){
-            html = '<div id="preamble-results-summary-passed" class="summary-passed">' + tests.length + pluralize(' test', tests.length ) + ' passed' + '</div>';
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' +
+                'All tests passed' + '</div>';
         }else{
-            html = '<div id="preamble-results-summary-failed" class="summary-failed">' + tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' +
+                tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
         }
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     };
@@ -631,15 +636,26 @@
                 callback();
             }else{
                 test.run(function(){
-                    callback();
+                    //Pass the totFailed value for the test
+                    //back so that it and shortCircuit can
+                    //be analyzed to determine if testing
+                    //needs to be aborted.
+                    callback(test.totFailed);
                 });
             }
         }
 
         function runTests(callback){
             if(testsIterator.hasNext()){
-                runTest(testsIterator.getNext(), function(){
-                    runTests(callback);
+                runTest(testsIterator.getNext(), function(totFailed){
+                    if(totFailed && config.shortCircuit){
+                        //If totFailed and shortCircuit then abort
+                        //further testing!
+                        emit('testingShortCircuited');
+                        callback();
+                    }else{
+                        runTests(callback);
+                    }
                 });
             }else{
                 callback();
@@ -651,6 +667,26 @@
         });
     });
 
+    on('testingShortCircuited', function(){
+        //Set the "bypass" property for all groups and
+        //tests that arent related to this test to true.
+        var queueIterator, queueObj;
+        queueIterator = iteratorFactory(queue);
+        while(queueIterator.hasNext()){
+            queueObj = queueIterator.getNext();
+            //Groups that haven't run will have their passed property set to true.
+            if(queueObj instanceof Group && queueObj.passed){
+                queueObj.bypass = true;
+            //Tests that havent run do not have a totFailed property.
+            }else if(queueObj instanceof Test && !queueObj.hasOwnProperty('totFailed')){
+                    queueObj.bypass = true;
+            }
+        }
+        //Set flag in config to indicate that testing has
+        //been aborted due to short circuit condition.
+        config.testingShortCircuited = true;
+    });
+
     on('end', function(){
         //TODO(Jeff): comment out next line.
         //window.tests = tests;
@@ -660,7 +696,7 @@
         //});
         //Record how many tests were bypassed.
         tests.totBypassed = 0;
-        if(runtimeFilter.group){
+        if(runtimeFilter.group || config.testingShortCircuited){
             tests.totBypassed = tests.reduce(function(prevValue, t){
                 return t.bypass ? prevValue + 1 : prevValue;
             }, 0);
@@ -984,26 +1020,38 @@
         }
     }
 
-    //Configuration is called once internally but may be called again if test script employs in-line configuration.
+    //Configuration is called once internally but may be called again if test script
+    //employs in-line configuration.
     function configure(){
         /**
-         * Default configuration options - override these in your config file (e.g. var preambleConfig = {testTimeOutInterval: 20})
-         * or in-line in your tests.
+         * Default configuration options - override these in your config file
+         * (e.g. var preambleConfig = {testTimeOutInterval: 20}) or in-line in your tests.
          *
-         * windowGlobals: (default true) - set to false to not use window globals (i.e. non browser environment). *IMPORTANT -
-         * USING IN-LINE CONFIGURATION TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED.
+         * windowGlobals: (default true) - set to false to not use window globals
+         * (i.e. non browser environment). *IMPORTANT - USING IN-LINE CONFIGURATION
+         * TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED*.
          *
-         * testTimeOutInterval: (default 10 milliseconds) - set to some other number of milliseconds wait before a test times out.
-         * tests to complete.
+         * testTimeOutInterval: (default 10 milliseconds) - set to some other number
+         * of milliseconds to wait before a test is timed out. This number is applied
+         * to all tests and can be selectively overridden by individual tests.
          *
          * name: (default 'Test') - set to a meaningful name.
          *
-         * uiTestContainerId (default id="ui-test-container") - set its id to something else if desired.
+         * uiTestContainerId (default id="ui-test-container") - set its id to something
+         * else if desired.
          *
          * hidePassedTests: (default: false) - set to true to hide passed tests.
          *
-         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY. Adapters for external processes, such as for Karma,
-         * initially set this to false to delay the execution of the tests and will eventually set it to true when appropriate.
+         * shortCircuit: (default: false) - set to true to short circuit when a test fails.
+         *
+         * testingShortCircuited: (default: false) - *IMPORTANT - FOR INTERNAL USE ONLY*
+         * When a test fails and shortCircuit is set to true then Preamble will set this
+         * to true.
+         *
+         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY* Adapters
+         * for external processes, such as for Karma, initially set this to false to
+         * delay the execution of the tests and will eventually set it to true when
+         * appropriate.
          */
         var defaultConfig = {
                 windowGlobals: true,
@@ -1011,6 +1059,8 @@
                 name: 'Test',
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
+                shortCircuit: false,
+                testingShortCircuited: false,
                 autoStart: true
             },
             configArg = arguments && arguments[0];
