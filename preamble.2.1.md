@@ -632,4 +632,5 @@ configure({
 Beginning with v2 you can run _headless_ tests with Preamble using <a href="http://phantomjs.org" target="_blank">PhantomJS</a> v2. The following example assumes that you already have PhantomJS installed and that it can be found on the path.
 
 1. Open up a terminal and change to your test's root folder.
-2. From the command line enter "path/to/phantomjs javascripts/phantom-runner.js index.html".
+2. From the command line enter _"path/to/phantomjs javascripts/phantom-runner.js index.html"_ which should produce output similar to the example below:
+![PhantomJS Output]({{site.baseurl}}/images/phantomjs-output.jpg)
