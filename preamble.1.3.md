@@ -5,7 +5,7 @@ permalink: /preamble/api/1/3/
 ---
 
 <div class="warning">
-<strong>Heads up!</strong> These docs are for v1.3, which is no longer officially supported. Check out the latest version of <a href="{{ site.baseurl}}/preamble/api/2/0/">Preamble {{ site.preamble_version }}</a>.
+<strong>Heads up!</strong> These docs are for v1.3, which is no longer officially supported. Check out the latest version of <a href="{{ site.baseurl}}/preamble/api/2/1/">Preamble</a>.
 </div>
 
 # Introducing Preamble
