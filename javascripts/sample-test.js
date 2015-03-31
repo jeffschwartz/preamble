@@ -2,11 +2,9 @@
 /*jshint strict: false*/
 /*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
-/*
- *IMPORTANT: Please note that for the purpose of providing
- *thoughtful examples 6 tests are coded to intentionally fail.
+/**
+ * inline configuration
  */
-
 configure({
     name: 'Sample Test Suite',
     hidePassedTests: true,
