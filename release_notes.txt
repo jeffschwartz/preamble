@@ -1,3 +1,8 @@
+v2.2.0
+Enhancements
+o Report header now remains fixed and will not scroll when scrolling Report
+output.
+
 v2.1.0
 Enhancements
 o Short circuiting a running test suite immediately after the first test fails
