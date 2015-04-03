@@ -329,30 +329,34 @@
      */
     HtmlReporter.prototype.init = function(){
         var s = '<header>' +
-                    '<div class="banner">' +
-                        '<h1>' +
-                            '<span id="name">Test</span> - ' +
-                            '<span>' +
-                                '<span> ' +
-                                    '<span>' +
-                                        '<i id="version">{{version}}</i>' +
+                    '<div class="banner-table">' +
+                        '<section id="banner">' +
+                            '<h1>' +
+                                '<span id="name">Test</span> - ' +
+                                '<span>' +
+                                    '<span> ' +
+                                        '<span>' +
+                                            '<i id="version">{{version}}</i>' +
+                                        '</span>' +
                                     '</span>' +
                                 '</span>' +
+                            '</h1>' +
+                        '</section>' +
+                        '<section id="time">' +
+                            '<span>Completed in ' +
+                                '<span title="total time to completion">' +
+                                    '{{tt}}ms' +
+                                '</span>' +
                             '</span>' +
-                        '</h1>' +
+                        '</section>' +
                     '</div>' +
-                    '<div id="time">' +
-                        '<span>Completed in ' +
-                            '<span title="total time to completion">' +
-                                '{{tt}}ms' +
-                            '</span>' +
-                        '</span>' +
+                    '<div class="table">' +
+                        '<section id="preamble-status-container">' +
+                            '<div class="summary">Building queue. Please wait...</div>' +
+                        '</section>' +
                     '</div>' +
                 '</header>' +
                 '<div class="container">' +
-                    '<section id="preamble-status-container">' +
-                        '<div class="summary">Building queue. Please wait...</div>' +
-                    '</section>' +
                     '<section id="preamble-results-container"></section>' +
                 '</div>';
 
@@ -421,7 +425,7 @@
         s = el.innerHTML;
         s = s.replace(/{{tt}}/, tests.duration);
         el.innerHTML = s;
-        el.style.display = 'block';
+        el.style.display = 'table-cell';
         if(tests.result){
             html = '<div id="preamble-results-summary-passed" class="summary-passed">' +
                 'All tests passed' + '</div>';
