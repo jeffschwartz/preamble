@@ -6,6 +6,7 @@ permalink: /docs/
 
 ## API Developer Guides
 
+* [v2.2]({{ site.baseurl }}/preamble/api/2/2/)
 * [v2.1]({{ site.baseurl }}/preamble/api/2/1/)
 * [v2.0]({{ site.baseurl }}/preamble/api/2/0/)
 * [v1.3]({{ site.baseurl }}/preamble/api/1/3/)

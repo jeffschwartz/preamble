@@ -5,6 +5,12 @@ permalink: /preamble/changelog/2/
 ---
 
 ## Changes
+
+### v2.2.0
+#### Enhancements
+* Report header now remains fixed and will not scroll when scrolling Report
+output.
+
 ### v2.1.0
 #### Enhancements
 

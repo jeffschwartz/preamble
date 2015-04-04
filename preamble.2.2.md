@@ -1,12 +1,8 @@
 ---
 layout: page
-title: v2.1 API Developer Guide
-permalink: /preamble/api/2/1/
+title: v2.2 API Developer Guide
+permalink: /preamble/api/2/2/
 ---
-
-<div class="warning">
-<strong>Heads up!</strong> These docs are for v2.1, which is no longer officially supported. For more recent versions please see <a href="{{ site.baseurl }}/docs/">Guides & Resources</a>.
-</div>
 
 ## Introducing Preamble
 
