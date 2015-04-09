@@ -1404,6 +1404,7 @@
             this.error = error;
             this.returned = returned;
         }
+        //TODO(Jeff): v2.3.0 allow for no params and a function param
         targetFn = argObject[argProperty];
         //tracking
         snoopster = function(){
