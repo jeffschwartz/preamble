@@ -1387,9 +1387,6 @@
             snoopster,
             calls = [];
         // window.calls = calls;
-        function argsToArray(argArguments){
-            return [].slice.call(argArguments, 0);
-        }
         if(arguments.length < 1 || arguments.length > 2){
             throw new Error('snoop requires 1 or 2 arguments, a function with an optional binding context or an object and a property name');
         }
@@ -1400,6 +1397,9 @@
         }else if(arguments.length === 2 && typeof(arguments[0]) === 'object' &&
             !arguments[0].hasOwnProperty([arguments[1]])){
             throw new Error('object does not have property name "' + arguments[1] + '"');
+        }
+        function argsToArray(argArguments){
+            return [].slice.call(argArguments, 0);
         }
         function Args(args){
             this.args = argsToArray(args);
