@@ -323,7 +323,7 @@ describe('snooping on more than one method', function(){
     });
 });
 
-describe('using snoop\'s "calls" api', function(){
+describe('using snoop\'s "calls" api with methods', function(){
     var i,
         foo = {
             someFn: function(arg){
@@ -408,5 +408,79 @@ describe('snooping on a function', function(){
         snoopedFn(arg);
         equal(snoopedFn.returned(), arg);
         notEqual(snoopedFn.returned(), arg + '!');
+    });
+});
+
+describe('a snooped function throws', function(){
+    beforeEach(function(){
+        this.someFn = function(){
+            throw new Error('Holy Batman!');
+        };
+    });
+    it('we can query the function if threw', function(){
+        var someFn = this.someFn,
+            snoopedFn = snoop(someFn);
+        snoopedFn();
+        isTrue(snoopedFn.threw());
+        isTrue(snoopedFn.threw.withMessage('Holy Batman!'));
+        isFalse(snoopedFn.threw.withMessage('Holy Batman!!'));
+    });
+});
+
+describe('snooping on more than one function', function(){
+    beforeEach(function(){
+        this.fooFn = function(arg){
+            return arg;
+        };
+        this.barFn = function(arg){
+            return arg;
+        };
+    });
+
+    it('snoops are isolated and there are no side effects', function(){
+        var fooFn = this.fooFn,
+            barFn = this.barFn,
+            snoopedFooFn = snoop(fooFn),
+            snoopedBarFn = snoop(barFn);
+        snoopedFooFn('Is Preamble great?');
+        snoopedBarFn('Yes it is!');
+        snoopedFooFn('You got that right!');
+        isTrue(snoopedFooFn.wasCalled());
+        isTrue(snoopedFooFn.wasCalled.nTimes(2));
+        isFalse(snoopedFooFn.wasCalled.nTimes(1));
+        isTrue(snoopedBarFn.wasCalled());
+        isTrue(snoopedBarFn.wasCalled.nTimes(1));
+        isFalse(snoopedBarFn.wasCalled.nTimes(2));
+    });
+});
+
+describe('using snoop\'s "calls" api with functions', function(){
+    var i,
+        foo = function(arg){
+            return arg;
+        },
+        bar ={},
+        n = 3,
+        aCall,
+        snoopedFooFn = snoop(foo, bar);
+    for(i = 0; i < n; i++){
+        snoopedFooFn(i) ;
+    }
+    it('count() returns the right count', function(){
+        equal(snoopedFooFn.calls.count(), n);
+    });
+    it('all() returns an array with the right number of elements', function(){
+        equal(snoopedFooFn.calls.all().length, n);
+    });
+    it('forCall(n) returns the correct element', function(){
+        for(i = 0; i < n; i++){
+            aCall = snoopedFooFn.calls.forCall(i);
+            equal(aCall.context, bar);
+            equal(aCall.args[0], i);
+            notEqual(aCall.args[0], n);
+            isNotTruthy(aCall.error);
+            equal(aCall.returned, i);
+            notEqual(aCall.returned, n);
+        }
     });
 });

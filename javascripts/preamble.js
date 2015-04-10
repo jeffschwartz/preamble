@@ -1413,7 +1413,7 @@
             this.error = error;
             this.returned = returned;
         }
-        targetFn = arguments.length === 1 ? argObject : argObject[argProperty];
+        targetFn = typeof(arguments[0]) === 'function' ? argObject : argObject[argProperty];
         //tracking
         snoopster = function(){
             var aArgs = arguments.length && argsToArray(arguments) || [];
