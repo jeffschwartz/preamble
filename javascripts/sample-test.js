@@ -356,3 +356,57 @@ describe('using snoop\'s "calls" api', function(){
         }
     });
 });
+
+/**
+ *v2.3.0 support snooping on standalone functions
+ */
+describe('snooping on a function', function(){
+    beforeEach(function(){
+        this.someFn = function(arg){
+                return arg;
+        };
+    });
+    it('we can query if the function was called', function(){
+        var someFn = this.someFn,
+            snoopedFn = snoop(someFn);
+        snoopedFn();
+        isTrue(snoopedFn.wasCalled());
+    });
+    it('we can query how many times the method was called', function(){
+        var someFn = this.someFn,
+            snoopedFn = snoop(someFn);
+        snoopedFn();
+        equal(snoopedFn.called(), 1);
+    });
+    it('we can query the function was called n times', function(){
+        var someFn = this.someFn,
+            snoopedFn = snoop(someFn);
+        snoopedFn();
+        isTrue(snoopedFn.wasCalled.nTimes(1));
+        isFalse(snoopedFn.wasCalled.nTimes(2));
+    });
+    it('we can query the context the function was called with', function(){
+        var someFn = this.someFn,
+            bar = {},
+            snoopedFn = snoop(someFn, bar);
+        snoopedFn();
+        equal(snoopedFn.contextCalledWith(), bar);
+    });
+    it('we can query for the arguments that the function was called with', function(){
+        var someFn = this.someFn,
+            snoopedFn = snoop(someFn),
+            arg = 'Preamble rocks!';
+        snoopedFn(arg);
+        equal(snoopedFn.args.getArgument(0), arg);
+        notEqual(snoopedFn.args.getArgument(0), arg + '!');
+        isNotTruthy(snoopedFn.args.getArgument(1));
+    });
+    it('we can query for what the function returned', function(){
+        var someFn = this.someFn,
+            snoopedFn = snoop(someFn),
+            arg = 'Preamble rocks!';
+        snoopedFn(arg);
+        equal(snoopedFn.returned(), arg);
+        notEqual(snoopedFn.returned(), arg + '!');
+    });
+});
