@@ -1,6 +1,6 @@
 /*jslint eqeq: true*/
 /*jshint strict: false*/
-/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, expect, toEqual, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, expect, toEqual, toNotEqual, toBeTrue, toBeFalse, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
 /**
  * inline configuration
@@ -494,5 +494,11 @@ describe('using snoop\'s "calls" api with functions', function(){
     });
     it('toEqual will fail when false', function(){
         expect(1).toNotEqual(2);
+    });
+    it('toBeTrue will pass when true', function(){
+        expect(1 === 1).toBeTrue();
+        });
+    it('toBeFalse will pass when false', function(){
+        expect(1 === 2).toBeFalse();
     });
  });

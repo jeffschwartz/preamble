@@ -1131,6 +1131,8 @@
             //TODO(Jeff):v2.3.5 toEqual assertion
             toEqual: noteToEqualAssertion,
             toNotEqual: noteToNotEqualAssertion,
+            toBeTrue: noteToBeTrueAssertion,
+            toBeFalse: noteToBeFalseAssertion,
             equal: noteEqualAssertion,
             notEqual: noteNotEqualAssertion,
             isTrue: noteIsTrueAssertion,
@@ -1327,7 +1329,7 @@
         a = ti.get().assertions[ti.get().assertions.length - 1];
         a.assertion = assertion;
         a.assertionLabel = assertionLabel;
-        a.value = value ;
+        a.expectation = value;
         a.stackTrace = stackTrace;
     }
 
@@ -1351,13 +1353,13 @@
         return stack;
     }
 
-    //TODO(Jeff):v2.3.0 expect
-    function noteExpectation(expectation){
+    //TODO(Jeff):v2.3.0 notes the actual value
+    function noteExpectation(actual){
         if(arguments.length < 1){
             throwException('Assertion "expect" requires 1 arguments, found ' + arguments.length);
         }
-        //push partial assertion info onto the assertion table
-        pushOntoAssertions(null, null, null, expectation, null);
+        //push partial assertion (only the value) info onto the assertion table
+        pushOntoAssertions(null, null, actual, null, null);
         //retunr assert for chaining
         return assert;
     }
@@ -1376,6 +1378,22 @@
             throwException('Assertion "toNotEqual" requires 1 arguments, found ' + arguments.length);
         }
         completeTheAssertion(assertNotEqual, label, value, stackTraceFromError());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toBeTrue assertion
+    function noteToBeTrueAssertion(label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
+        // }
+        completeTheAssertion(assertIsTrue, label, true, stackTraceFromError());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotBeTrue assertiFalse
+    function noteToBeFalseAssertion(label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
+        // }
+        completeTheAssertion(assertIsFalse, label, true, stackTraceFromError());
     }
 
     function noteEqualAssertion(value, expectation, label){
