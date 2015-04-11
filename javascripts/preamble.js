@@ -1088,6 +1088,8 @@
             window.beforeEach = queueBuilder.beforeEachTest;
             window.afterEach = queueBuilder.afterEachTest;
             window.it = queueBuilder.test;
+            //TODO(Jeff):v2.3.5 expect
+            window.expect = noteExpectation;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -1104,21 +1106,38 @@
                 beforeEach: queueBuilder.beforeEachTest,
                 afterEach: queueBuilder.afterEachTest,
                 it: queueBuilder.test,
+                //TODO(Jeff):v2.3.5 expect
+                expect: noteExpectation,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
                 snoop: snoop
             };
+            //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
             //Functions to "note" assertions are passed as the
             //1st parameter to each test's callback function.
-            assert = {
-                equal: noteEqualAssertion,
-                notEqual: noteNotEqualAssertion,
-                isTrue: noteIsTrueAssertion,
-                isFalse: noteIsFalseAssertion,
-                isTruthy: noteIsTruthyAssertion,
-                isNotTruthy: noteIsNotTruthyAssertion
-            };
+            // assert = {
+            //     equal: noteEqualAssertion,
+            //     notEqual: noteNotEqualAssertion,
+            //     isTrue: noteIsTrueAssertion,
+            //     isFalse: noteIsFalseAssertion,
+            //     isTruthy: noteIsTruthyAssertion,
+            //     isNotTruthy: noteIsNotTruthyAssertion
+            // };
         }
+        //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
+        //Functions to "note" assertions are passed as the
+        //1st parameter to each test's callback function.
+        assert = {
+            //TODO(Jeff):v2.3.5 toEqual assertion
+            toEqual: noteToEqualAssertion,
+            toNotEqual: noteToNotEqualAssertion,
+            equal: noteEqualAssertion,
+            notEqual: noteNotEqualAssertion,
+            isTrue: noteIsTrueAssertion,
+            isFalse: noteIsFalseAssertion,
+            isTruthy: noteIsTruthyAssertion,
+            isNotTruthy: noteIsNotTruthyAssertion
+        };
         window.Preamble = window.Preamble || {};
         //For use by external processes.
         window.Preamble.__ext__ = {};
@@ -1302,6 +1321,7 @@
         });
     }
 
+    //TODO(Jeff):v2.3.0 complete the assertion entry in the assertion table
     function completeTheAssertion(assertion, assertionLabel, value, stackTrace){
         var ti = testsIterator,
         a = ti.get().assertions[ti.get().assertions.length - 1];
@@ -1329,6 +1349,33 @@
             }
         }
         return stack;
+    }
+
+    //TODO(Jeff):v2.3.0 expect
+    function noteExpectation(expectation){
+        if(arguments.length < 1){
+            throwException('Assertion "expect" requires 1 arguments, found ' + arguments.length);
+        }
+        //push partial assertion info onto the assertion table
+        pushOntoAssertions(null, null, null, expectation, null);
+        //retunr assert for chaining
+        return assert;
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toEqual assertion
+    function noteToEqualAssertion(value, label){
+        if(arguments.length < 1){
+            throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertEqual, label, value, stackTraceFromError());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotEqual assertion
+    function noteToNotEqualAssertion(value, label){
+        if(arguments.length < 1){
+            throwException('Assertion "toNotEqual" requires 1 arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertNotEqual, label, value, stackTraceFromError());
     }
 
     function noteEqualAssertion(value, expectation, label){
