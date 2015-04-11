@@ -1,6 +1,6 @@
 /*jslint eqeq: true*/
 /*jshint strict: false*/
-/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, expect, toEqual, toNotEqual, toBeTrue, toBeFalse, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, expect, toEqual, toNotEqual, toBeTrue, toBeFalse, toBeTruthy, toNotBeTruthy, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
 
 /**
  * inline configuration
@@ -502,3 +502,28 @@ describe('using snoop\'s "calls" api with functions', function(){
         expect(1 === 2).toBeFalse();
     });
  });
+
+describe('BDD Evaluating truthy assertions', function(){
+    it('undefined', function(){
+        var undef;
+        expect(undef).toNotBeTruthy();
+    });
+    it('objects', function(){
+        var def = {};
+        expect(def).toBeTruthy();
+    });
+    it('numeric values other than 0', function(){
+        var one = 1;
+        expect(one).toBeTruthy();
+    });
+    it('numeric vaules that are 0', function(){
+        var zero = 0;
+        expect(zero).toNotBeTruthy();
+    });
+    it('non empty strings', function(){
+        expect('not empty string').toBeTruthy();
+    });
+    it('empty strings', function(){
+        expect('').toNotBeTruthy();
+    });
+});

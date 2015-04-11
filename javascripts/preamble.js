@@ -1133,6 +1133,8 @@
             toNotEqual: noteToNotEqualAssertion,
             toBeTrue: noteToBeTrueAssertion,
             toBeFalse: noteToBeFalseAssertion,
+            toBeTruthy: noteToBeTruthyAssertion,
+            toNotBeTruthy: noteToNotBeTruthyAssertion,
             equal: noteEqualAssertion,
             notEqual: noteNotEqualAssertion,
             isTrue: noteIsTrueAssertion,
@@ -1394,6 +1396,22 @@
         //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
         // }
         completeTheAssertion(assertIsFalse, label, true, stackTraceFromError());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toBeTruthy assertiFalse
+    function noteToBeTruthyAssertion(label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
+        // }
+        completeTheAssertion(assertIsTruthy, label, true, stackTraceFromError());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotBeTruthy assertiFalse
+    function noteToNotBeTruthyAssertion(label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
+        // }
+        completeTheAssertion(assertIsNotTruthy, label, true, stackTraceFromError());
     }
 
     function noteEqualAssertion(value, expectation, label){
