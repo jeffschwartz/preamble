@@ -1302,6 +1302,15 @@
         });
     }
 
+    function completeTheAssertion(assertion, assertionLabel, value, stackTrace){
+        var ti = testsIterator,
+        a = ti.get().assertions[ti.get().assertions.length - 1];
+        a.assertion = assertion;
+        a.assertionLabel = assertionLabel;
+        a.value = value ;
+        a.stackTrace = stackTrace;
+    }
+
     function setStackTraceProperty(){
         try{
             throw new Error('woops');
