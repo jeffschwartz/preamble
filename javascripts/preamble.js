@@ -1375,22 +1375,31 @@
     }
 
     /**
-     * @param {object} argObject Any object.
-     * @param {string} argProperty The name of the property of argObject to be snooped.
+     * @param {object} argObject A function to be snooped or an object.
+     * @param {string} argProperty An optional object used as a context if the
+     * 1st parameter is a function or the name of the property of argObject to
+     * be snooped.
      */
+    //TODO(Jeff): v2.3.0 support snooping on standalone functions and
+    //allowing them to be bound to a context passed as the 2nd parameter
     function snoop(argObject, argProperty){
         var targetFn,
             snoopster,
             calls = [];
-        window.calls = calls;
+        // window.calls = calls;
+        if(arguments.length < 1 || arguments.length > 2){
+            throw new Error('snoop requires 1 or 2 arguments, a function with an optional binding context or an object and a property name');
+        }
+        if(arguments.length === 1 && typeof(arguments[0]) !== 'function'){
+            throw new Error('1st parameter must be a function or an object');
+        }else if(arguments.length === 2 && typeof(arguments[0]) !== 'function' && typeof(arguments[0]) !== 'object'){
+            throw new Error('when the 1st parameter is a function the 2nd parameter must be an object');
+        }else if(arguments.length === 2 && typeof(arguments[0]) === 'object' &&
+            !arguments[0].hasOwnProperty([arguments[1]])){
+            throw new Error('object does not have property name "' + arguments[1] + '"');
+        }
         function argsToArray(argArguments){
             return [].slice.call(argArguments, 0);
-        }
-        if(arguments.length !== 2){
-            throw new Error('snoop requires 2 arguments, an object and a property name');
-        }
-        if(!arguments[0].hasOwnProperty([arguments[1]])){
-            throw new Error('object does not have property name "' + arguments[1] + '"');
         }
         function Args(args){
             this.args = argsToArray(args);
@@ -1404,7 +1413,7 @@
             this.error = error;
             this.returned = returned;
         }
-        targetFn = argObject[argProperty];
+        targetFn = typeof(arguments[0]) === 'function' ? argObject : argObject[argProperty];
         //tracking
         snoopster = function(){
             var aArgs = arguments.length && argsToArray(arguments) || [];
@@ -1418,6 +1427,11 @@
             snoopster.args = new Args(aArgs);
             calls.push(new ACall(this, aArgs, error, returned));
         };
+        //bind passed context (2nd parameter/optional) when the 1st parameter is
+        //a function
+        if(typeof(arguments[0]) === 'function' && arguments.length === 2){
+            snoopster = snoopster.bind(arguments[1]);
+        }
         //api
         snoopster.called = function(){
             return calls.length;
@@ -1454,7 +1468,12 @@
                 return calls;
             }
         };
-        argObject[argProperty] = snoopster;
+        //when the 1st parameter is a function it must be returned
+        if(typeof(arguments[0]) === 'function'){
+            return snoopster;
+        }else{
+            argObject[argProperty] = snoopster;
+        }
     }
 
     /**
