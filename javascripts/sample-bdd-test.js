@@ -424,7 +424,7 @@ describe('a snooped function throws', function(){
         snoopedFn();
         expect(snoopedFn.threw()).toBeTrue();
         expect(snoopedFn.threw.withMessage('Holy Batman!')).toBeTrue();
-        expect(snoopedFn.threw.withMessage('Holy Batman!!')).toNotBeTrue();
+        expect(snoopedFn.threw.withMessage('Holy Batman!!')).toBeFalse();
     });
 });
 
@@ -471,7 +471,7 @@ describe('using snoop\'s "calls" api with functions', function(){
         expect(snoopedFooFn.calls.count()).toEqual(n);
     });
     it('all() returns an array with the right number of elements', function(){
-        expect(snoopedFooFn.call.all().length).toEqual(n);
+        expect(snoopedFooFn.calls.all().length).toEqual(n);
     });
     it('forCall(n) returns the correct element', function(){
         for(i = 0; i < n; i++){
@@ -483,48 +483,5 @@ describe('using snoop\'s "calls" api with functions', function(){
             expect(aCall.returned).toEqual(i);
             expect(aCall.returned).toNotEqual(n);
         }
-    });
-});
-
-/**
- * v2.3.0 expect().assertion() syntax
- */
- describe('when using expect', function(){
-    it('toEqual will pass when true', function(){
-        expect(1).toEqual(1);
-    });
-    it('toEqual will fail when false', function(){
-        expect(1).toNotEqual(2);
-    });
-    it('toBeTrue will pass when true', function(){
-        expect(1 === 1).toBeTrue();
-        });
-    it('toBeFalse will pass when false', function(){
-        expect(1 === 2).toBeFalse();
-    });
- });
-
-describe('BDD Evaluating truthy assertions', function(){
-    it('undefined', function(){
-        var undef;
-        expect(undef).toNotBeTruthy();
-    });
-    it('objects', function(){
-        var def = {};
-        expect(def).toBeTruthy();
-    });
-    it('numeric values other than 0', function(){
-        var one = 1;
-        expect(one).toBeTruthy();
-    });
-    it('numeric vaules that are 0', function(){
-        var zero = 0;
-        expect(zero).toNotBeTruthy();
-    });
-    it('non empty strings', function(){
-        expect('not empty string').toBeTruthy();
-    });
-    it('empty strings', function(){
-        expect('').toNotBeTruthy();
     });
 });
