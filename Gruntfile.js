@@ -6,7 +6,7 @@ module.exports = function ( grunt ) {
         less   : {
             production  : {
                 files : {
-                    "stylesheets/preamble.css" : "stylesheets/preamble.less"
+                    'stylesheets/preamble.css' : 'stylesheets/preamble.less'
                 }
             }
         },
@@ -14,7 +14,12 @@ module.exports = function ( grunt ) {
             options: {
                 jshintrc: true
             },
-            files   : ['javascripts/preamble.js']
+            files   : [
+                'javascripts/preamble.js',
+                'javascripts/sample-test.js',
+                'javascripts/sample-failures-test.js',
+                'javascripts/sample-bdd-test.js',
+            ]
         },
         watch  : {
             less : {
@@ -25,7 +30,7 @@ module.exports = function ( grunt ) {
                 }
             },
             js : {
-                files   : ['javascripts/preamble.js'],
+                files   : ['javascripts/*.js'],
                 tasks   : ['jshint'],
                 options : {
                     interrupt : true

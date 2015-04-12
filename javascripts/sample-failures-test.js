@@ -1,6 +1,6 @@
-/*jslint eqeq: true*/
-/*jshint strict: false*/
-/*global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy*/
+/* jslint eqeq: true */
+/* jshint strict: false */
+/* global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, equal, isTrue */
 
 /*
  *IMPORTANT: Please note that for the purpose of providing thoughtful examples

@@ -1,19 +1,19 @@
 /* jslint eqeq: true */
 /* jshint strict: false */
-/* global configure, describe, beforeEach, afterEach, it, -getUiTestContainerElement, -getUiTestContainerElementId, snoop, equal, notEqual, isTrue, isFalse, isTruthy, isNotTruthy */
+/* global configure, describe, beforeEach, afterEach, it, snoop, expect, -getUiTestContainerElement, -getUiTestContainerElementId */
 
 /**
  * inline configuration
  */
 configure({
-    name: 'Sample Test Suite',
+    name: 'Sample BDD Test Suite',
     hidePassedTests: true,
     testTimeOutInterval: 500
 });
 
 describe('A simple test', function(){
     it('of equality', function(){
-        equal(1,1);
+        expect(1).toEqual(1);
     });
 });
 
@@ -26,10 +26,10 @@ describe('Nested specs', function(){
     });
     describe('Nested spec 1', function(){
         it('nested spec 1: test 1', function(){
-            equal(this.value, 10);
+            expect(this.value).toEqual(10);
         });
         it('isCrazy is true', function(){
-            isTrue(typeof(this.isCrazy) === 'undefined');
+            expect(typeof(this.isCrazy) === 'undefined').toBeTrue();
         });
     });
     describe('Nested spec 2', function(){
@@ -40,22 +40,22 @@ describe('Nested specs', function(){
             this.xx = 'xx';
         });
         it('nested spec 2: test 1', function(){
-            equal(this.value, 10);
-            equal(this.foo, 'bar');
+            expect(this.value).toEqual(10);
+            expect(this.foo).toEqual('bar');
         });
         it('nested spec 2: test 2', function(){
-            equal(this.value, 10);
-            equal(this.foo, 'bar');
-            isTrue(typeof(this.xx) === 'undefined');
+            expect(this.value).toEqual(10);
+            expect(this.foo).toEqual('bar');
+            expect(typeof(this.xx) === 'undefined').toBeTrue();
         });
         describe('Nested spec 3', function(){
             beforeEach(function(){
                 this.flim = 'flam';
             });
             it('nested spec 3: test 1', function(){
-                equal(this.value, 10);
-                equal(this.foo, 'bar');
-                equal(this.flim, 'flam');
+                expect(this.value).toEqual(10);
+                expect(this.foo).toEqual('bar');
+                expect(this.flim).toEqual('flam');
             });
         });
     });
@@ -63,35 +63,35 @@ describe('Nested specs', function(){
 
 describe('Evaluating boolean assertions', function(){
     it('bollean true', function(){
-        isTrue(true);
+        expect(true).toBeTrue();
     });
     it('boolean false', function(){
-        isFalse(false);
+        expect(false).toBeFalse();
     });
 });
 
 describe('Evaluating truthy assertions', function(){
     it('undefined', function(){
         var undef;
-        isNotTruthy(undef);
+        expect(undef).toNotBeTruthy();
     });
     it('objects', function(){
         var def = {};
-        isTruthy(def);
+        expect(def).toBeTruthy();
     });
     it('numeric values other than 0', function(){
         var one = 1;
-        isTruthy(one);
+        expect(one).toBeTruthy();
     });
     it('numeric vaules that are 0', function(){
         var zero = 0;
-        isNotTruthy(zero);
+        expect(zero).toNotBeTruthy();
     });
     it('non empty strings', function(){
-        isTruthy('not empty string');
+        expect('not empty string').toBeTruthy();
     });
     it('empty strings', function(){
-        isNotTruthy('');
+        expect('').toNotBeTruthy();
     });
 });
 
@@ -101,16 +101,16 @@ describe('Evaluating strict, deep recursive comparison assertions', function(){
     var b = {a: 'a', b: b};
     var c = {a: 'a', b: 'b'};
     it('2 objects with exactly the same properties and property values', function(){
-        equal(a, c);
+        expect(a).toEqual(c);
     });
     it('2 objects with different properties or property values', function(){
-        notEqual(a, b);
+        expect(a).toNotEqual(b);
     });
     it('2 value types whose values are the same', function(){
-        equal(char, 'b');
+        expect(char).toEqual('b');
     });
     it('2 value types whose values are  not the same', function(){
-        notEqual(char, 'a');
+        expect(char).toNotEqual('a');
     });
 });
 
@@ -120,7 +120,7 @@ describe('Running synchronous tests with beforeEach', function(){
         count = 100;
     });
     it('beforeEach is called', function(){
-        equal(count, 100);
+        expect(count).toEqual(100);
     });
 });
 
@@ -129,7 +129,7 @@ describe('Passing a value from beforeEach to tests', function(){
         this.value = 10;
     });
     it('the tests', function(){
-        equal(this.value, 10);
+        expect(this.value).toEqual(10);
     });
 });
 
@@ -139,10 +139,10 @@ describe('Running synchronous tests with afterEachTest', function(){
         count = 100;
     });
     it('the first test', function(){
-        equal(count, 0);
+        expect(count).toEqual(0);
     });
     it('but subsequent tests', function(){
-        equal(count, 100);
+        expect(count).toEqual(100);
     });
 });
 
@@ -152,7 +152,7 @@ describe('Running asynchronous tests', function(){
         setTimeout(function(){
             count = 100;
             done(function(){
-                equal(count, 100);
+                expect(count).toEqual(100);
             });
         }, 1);
     });
@@ -170,7 +170,7 @@ describe('Running asynchronous tests with beforeEachAsync', function(){
         setTimeout(function(){
             count *= 10;
             done(function(){
-                equal(count, 100);
+                expect(count).toEqual(100);
             });
         }, 1);
     });
@@ -188,7 +188,7 @@ describe('Passing a value from beforeEachAsync to asynchronous tests', function(
         setTimeout(function(){
             //some asynchronous process...
             done(function(){
-                equal(this.value, 10);
+                expect(this.value).toEqual(10);
             });
         }, 1);
     });
@@ -206,7 +206,7 @@ describe('Running asynchronous tests with afterEachAsync', function(){
         setTimeout(function(){
             count = 10;
             done(function(){
-                isTrue(count === 10);
+                expect(count).toEqual(10);
             });
         }, 1);
     });
@@ -214,12 +214,13 @@ describe('Running asynchronous tests with afterEachAsync', function(){
         setTimeout(function(){
             count *= 100;
             done(function(){
-                isTrue(count === 100);
+                expect(count).toEqual(100);
             });
         }, 1);
     });
 });
 
+//pick up modifying script here
 describe('snooping on a method', function(){
     beforeEach(function(){
         this.foo = {
@@ -232,45 +233,45 @@ describe('snooping on a method', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        isTrue(foo.someFn.wasCalled());
+        expect(foo.someFn.wasCalled()).toBeTrue();
     });
     it('we can query how many times the method was called', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        equal(foo.someFn.called(), 1);
+        expect(foo.someFn.called()).toEqual(1);
     });
     it('we can query the method was called n times', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        isTrue(foo.someFn.wasCalled.nTimes(1));
-        isFalse(foo.someFn.wasCalled.nTimes(2));
+        expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
+        expect(foo.someFn.wasCalled.nTimes(2)).toBeFalse();
     });
     it('we can query the context the method was called with', function(){
         var foo = this.foo,
             bar = {};
         snoop(foo, 'someFn');
         foo.someFn();
-        equal(foo.someFn.contextCalledWith(), foo);
-        notEqual(foo.someFn.contextCalledWith(), bar);
+        expect(foo.someFn.contextCalledWith()).toEqual(foo);
+        expect(foo.someFn.contextCalledWith()).toNotEqual(bar);
     });
     it('we can query for the arguments that the method was called with', function(){
         var foo = this.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
         foo.someFn(arg);
-        equal(foo.someFn.args.getArgument(0), arg);
-        notEqual(foo.someFn.args.getArgument(0), arg + '!');
-        isNotTruthy(foo.someFn.args.getArgument(1));
+        expect(foo.someFn.args.getArgument(0)).toEqual(arg);
+        expect(foo.someFn.args.getArgument(0)).toNotEqual(arg + '!');
+        expect(foo.someFn.args.getArgument(1)).toNotBeTruthy();
     });
     it('we can query for what the method returned', function(){
         var foo = this.foo,
             arg = 'Preamble rocks!';
         snoop(foo, 'someFn');
         foo.someFn(arg);
-        equal(foo.someFn.returned(), arg);
-        notEqual(foo.someFn.returned(), arg + '!');
+        expect(foo.someFn.returned()).toEqual(arg);
+        expect(foo.someFn.returned()).toNotEqual(arg + '!');
     });
 });
 
@@ -286,9 +287,9 @@ describe('a snooped method throws', function(){
         var foo = this.foo;
         snoop(foo, 'someFn');
         foo.someFn();
-        isTrue(foo.someFn.threw());
-        isTrue(foo.someFn.threw.withMessage('Holy Batman!'));
-        isFalse(foo.someFn.threw.withMessage('Holy Batman!!'));
+        expect(foo.someFn.threw()).toBeTrue();
+        expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
+        expect(foo.someFn.threw.withMessage('Holy Batman!!')).toBeFalse();
     });
 });
 
@@ -314,12 +315,12 @@ describe('snooping on more than one method', function(){
         foo.someFn('Is Preamble great?');
         bar.someFn('Yes it is!');
         foo.someFn('You got that right!');
-        isTrue(foo.someFn.wasCalled());
-        isTrue(foo.someFn.wasCalled.nTimes(2));
-        isFalse(foo.someFn.wasCalled.nTimes(1));
-        isTrue(bar.someFn.wasCalled());
-        isTrue(bar.someFn.wasCalled.nTimes(1));
-        isFalse(bar.someFn.wasCalled.nTimes(2));
+        expect(foo.someFn.wasCalled()).toBeTrue();
+        expect(foo.someFn.wasCalled.nTimes(2)).toBeTrue();
+        expect(foo.someFn.wasCalled.nTimes(1)).toBeFalse();
+        expect(bar.someFn.wasCalled()).toBeTrue();
+        expect(bar.someFn.wasCalled.nTimes(1)).toBeTrue();
+        expect(bar.someFn.wasCalled.nTimes(2)).toBeFalse();
     });
 });
 
@@ -338,21 +339,21 @@ describe('using snoop\'s "calls" api with methods', function(){
         foo.someFn(i) ;
     }
     it('count() returns the right count', function(){
-        equal(foo.someFn.calls.count(), n);
+        expect(foo.someFn.calls.count()).toEqual(n);
     });
     it('all() returns an array with the right number of elements', function(){
-        equal(foo.someFn.calls.all().length, n);
+        expect(foo.someFn.calls.all().length).toEqual(n);
     });
     it('forCall(n) returns the correct element', function(){
         for(i = 0; i < n; i++){
             aCall = foo.someFn.calls.forCall(i);
-            equal(aCall.context, foo);
-            notEqual(aCall.context, bar);
-            equal(aCall.args[0], i);
-            notEqual(aCall.args[0], n);
-            isNotTruthy(aCall.error);
-            equal(aCall.returned, i);
-            notEqual(aCall.returned, n);
+            expect(aCall.context).toEqual(foo);
+            expect(aCall.context).toNotEqual(bar);
+            expect(aCall.args[0]).toEqual(i);
+            expect(aCall.args[0]).toNotEqual(n);
+            expect(aCall.error).toNotBeTruthy();
+            expect(aCall.returned).toEqual(i);
+            expect(aCall.returned).toNotEqual(n);
         }
     });
 });
@@ -370,44 +371,44 @@ describe('snooping on a function', function(){
         var someFn = this.someFn,
             snoopedFn = snoop(someFn);
         snoopedFn();
-        isTrue(snoopedFn.wasCalled());
+        expect(snoopedFn.wasCalled()).toBeTrue();
     });
     it('we can query how many times the method was called', function(){
         var someFn = this.someFn,
             snoopedFn = snoop(someFn);
         snoopedFn();
-        equal(snoopedFn.called(), 1);
+        expect(snoopedFn.called()).toEqual(1);
     });
     it('we can query the function was called n times', function(){
         var someFn = this.someFn,
             snoopedFn = snoop(someFn);
         snoopedFn();
-        isTrue(snoopedFn.wasCalled.nTimes(1));
-        isFalse(snoopedFn.wasCalled.nTimes(2));
+        expect(snoopedFn.wasCalled.nTimes(1)).toBeTrue();
+        expect(snoopedFn.wasCalled.nTimes(2)).toBeFalse();
     });
     it('we can query the context the function was called with', function(){
         var someFn = this.someFn,
             bar = {},
             snoopedFn = snoop(someFn, bar);
         snoopedFn();
-        equal(snoopedFn.contextCalledWith(), bar);
+        expect(snoopedFn.contextCalledWith()).toEqual(bar);
     });
     it('we can query for the arguments that the function was called with', function(){
         var someFn = this.someFn,
             snoopedFn = snoop(someFn),
             arg = 'Preamble rocks!';
         snoopedFn(arg);
-        equal(snoopedFn.args.getArgument(0), arg);
-        notEqual(snoopedFn.args.getArgument(0), arg + '!');
-        isNotTruthy(snoopedFn.args.getArgument(1));
+        expect(snoopedFn.args.getArgument(0)).toEqual(arg);
+        expect(snoopedFn.args.getArgument(0)).toNotEqual(arg + '!');
+        expect(snoopedFn.args.getArgument(1)).toNotBeTruthy();
     });
     it('we can query for what the function returned', function(){
         var someFn = this.someFn,
             snoopedFn = snoop(someFn),
             arg = 'Preamble rocks!';
         snoopedFn(arg);
-        equal(snoopedFn.returned(), arg);
-        notEqual(snoopedFn.returned(), arg + '!');
+        expect(snoopedFn.returned()).toEqual(arg);
+        expect(snoopedFn.returned()).toNotEqual(arg + '1');
     });
 });
 
@@ -421,9 +422,9 @@ describe('a snooped function throws', function(){
         var someFn = this.someFn,
             snoopedFn = snoop(someFn);
         snoopedFn();
-        isTrue(snoopedFn.threw());
-        isTrue(snoopedFn.threw.withMessage('Holy Batman!'));
-        isFalse(snoopedFn.threw.withMessage('Holy Batman!!'));
+        expect(snoopedFn.threw()).toBeTrue();
+        expect(snoopedFn.threw.withMessage('Holy Batman!')).toBeTrue();
+        expect(snoopedFn.threw.withMessage('Holy Batman!!')).toNotBeTrue();
     });
 });
 
@@ -445,12 +446,12 @@ describe('snooping on more than one function', function(){
         snoopedFooFn('Is Preamble great?');
         snoopedBarFn('Yes it is!');
         snoopedFooFn('You got that right!');
-        isTrue(snoopedFooFn.wasCalled());
-        isTrue(snoopedFooFn.wasCalled.nTimes(2));
-        isFalse(snoopedFooFn.wasCalled.nTimes(1));
-        isTrue(snoopedBarFn.wasCalled());
-        isTrue(snoopedBarFn.wasCalled.nTimes(1));
-        isFalse(snoopedBarFn.wasCalled.nTimes(2));
+        expect(snoopedFooFn.wasCalled()).toBeTrue();
+        expect(snoopedFooFn.wasCalled.nTimes(2)).toBeTrue();
+        expect(snoopedFooFn.wasCalled.nTimes(1)).toBeFalse();
+        expect(snoopedBarFn.wasCalled()).toBeTrue();
+        expect(snoopedBarFn.wasCalled.nTimes(1)).toBeTrue();
+        expect(snoopedBarFn.wasCalled.nTimes(2)).toBeFalse();
     });
 });
 
@@ -467,20 +468,63 @@ describe('using snoop\'s "calls" api with functions', function(){
         snoopedFooFn(i) ;
     }
     it('count() returns the right count', function(){
-        equal(snoopedFooFn.calls.count(), n);
+        expect(snoopedFooFn.calls.count()).toEqual(n);
     });
     it('all() returns an array with the right number of elements', function(){
-        equal(snoopedFooFn.calls.all().length, n);
+        expect(snoopedFooFn.call.all().length).toEqual(n);
     });
     it('forCall(n) returns the correct element', function(){
         for(i = 0; i < n; i++){
             aCall = snoopedFooFn.calls.forCall(i);
-            equal(aCall.context, bar);
-            equal(aCall.args[0], i);
-            notEqual(aCall.args[0], n);
-            isNotTruthy(aCall.error);
-            equal(aCall.returned, i);
-            notEqual(aCall.returned, n);
+            expect(aCall.context).toEqual(bar);
+            expect(aCall.args[0]).toEqual(i);
+            expect(aCall.args[0]).toNotEqual(n);
+            expect(aCall.error).toNotBeTruthy();
+            expect(aCall.returned).toEqual(i);
+            expect(aCall.returned).toNotEqual(n);
         }
+    });
+});
+
+/**
+ * v2.3.0 expect().assertion() syntax
+ */
+ describe('when using expect', function(){
+    it('toEqual will pass when true', function(){
+        expect(1).toEqual(1);
+    });
+    it('toEqual will fail when false', function(){
+        expect(1).toNotEqual(2);
+    });
+    it('toBeTrue will pass when true', function(){
+        expect(1 === 1).toBeTrue();
+        });
+    it('toBeFalse will pass when false', function(){
+        expect(1 === 2).toBeFalse();
+    });
+ });
+
+describe('BDD Evaluating truthy assertions', function(){
+    it('undefined', function(){
+        var undef;
+        expect(undef).toNotBeTruthy();
+    });
+    it('objects', function(){
+        var def = {};
+        expect(def).toBeTruthy();
+    });
+    it('numeric values other than 0', function(){
+        var one = 1;
+        expect(one).toBeTruthy();
+    });
+    it('numeric vaules that are 0', function(){
+        var zero = 0;
+        expect(zero).toNotBeTruthy();
+    });
+    it('non empty strings', function(){
+        expect('not empty string').toBeTruthy();
+    });
+    it('empty strings', function(){
+        expect('').toNotBeTruthy();
     });
 });
