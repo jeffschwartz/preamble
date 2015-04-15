@@ -275,6 +275,19 @@ describe('snooping on a method', function(){
     });
 });
 
+describe ('A stub is a spy and when configured to return a value', function(){
+    var foo = {
+        someFn: function(){
+            return 25;
+        }
+    };
+    it('returns that value', function(){
+        snoop(foo, 'someFn').returns(13);
+        foo.someFn();
+        expect(foo.someFn.returned()).toEqual(13);
+    });
+});
+
 describe('A stub is a spy and when configured to throw an error', function(){
     var foo = {
         someFn: function(){

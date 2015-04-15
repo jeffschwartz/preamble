@@ -1541,7 +1541,7 @@
                         error = er;
                     }
                 }
-                returned = this._returns;
+                returned = snoopster._returns || returned;
             }
             snoopster.args = new Args(aArgs);
             calls.push(new ACall(this, aArgs, error, returned));
@@ -1587,6 +1587,7 @@
                 throw new Error(err);
             }
         };
+        //TODO(Jeff): v2.3.0
         snoopster.returns = function(ret){
             this._returns = ret;
             //for chaining
