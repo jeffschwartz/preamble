@@ -1541,8 +1541,8 @@
                         error = er;
                     }
                 }
-                returned = snoopster._returns || returned;
             }
+            returned = snoopster._returns || returned;
             snoopster.args = new Args(aArgs);
             calls.push(new ACall(this, aArgs, error, returned));
         };
@@ -1622,7 +1622,7 @@
             return snoopster.wasCalled() && !!calls[calls.length - 1].error;
         };
         snoopster.threw.withMessage = function(message){
-            return snoopster.wasCalled() && calls[calls.length - 1].error.message === message;
+            return snoopster.threw() && calls[calls.length - 1].error.message === message;
         };
         //TODO(Jeff): v2.3.0
         snoopster.threw.withValue = function(val){
