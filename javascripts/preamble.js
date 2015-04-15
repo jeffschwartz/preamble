@@ -1600,6 +1600,11 @@
             //for chaining
             return this;
         };
+        snoopster.callStub = function(){
+            this._callActual = false;
+            //for chaining
+            return this;
+        };
         snoopster.called = function(){
             return calls.length;
         };

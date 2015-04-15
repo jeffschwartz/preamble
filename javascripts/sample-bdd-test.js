@@ -11,8 +11,14 @@ configure({
     testTimeOutInterval: 500
 });
 
-describe('A simple test', function(){
-    it('of equality', function(){
+describe('"describe" describes a "suite" which contains one or more "specs"', function(){
+    it('and "it" specifies a spec which contain one or more "assertions"', function(){
+        expect(1).toEqual(1);
+    });
+});
+
+describe('"Assertions" are defined by "matchers"', function(){
+    it('and "it" specifies a spec which contain one or more assertions', function(){
         expect(1).toEqual(1);
     });
 });
@@ -294,13 +300,29 @@ describe('A stub is a spy and when configured to call the actual implementation'
             return arg;
         }
     };
-    it('it calls it', function(){
+    it('calls it', function(){
         snoop(foo, 'someFn');
         foo.someFn(123);
         expect(foo.someFn.returned()).toNotEqual(123);
         foo.someFn.callActual();
         foo.someFn(123);
         expect(foo.someFn.returned()).toEqual(123);
+    });
+});
+
+describe('A stub configured to call the actual implementation can be reset', function(){
+    var foo = {
+        someFn: function(arg){
+            return arg;
+        }
+    };
+    it('and it will call the stub', function(){
+        snoop(foo, 'someFn').callActual();
+        foo.someFn(123);
+        expect(foo.someFn.returned()).toEqual(123);
+        foo.someFn.callStub();
+        foo.someFn(123);
+        expect(foo.someFn.returned()).toEqual(void(0));
     });
 });
 
@@ -372,7 +394,7 @@ describe('using snoop\'s "calls" api with methods', function(){
         bar ={},
         n = 3,
         aCall;
-    snoop(foo, 'someFn');
+    snoop(foo, 'someFn').callActual();
     for(i = 0; i < n; i++){
         foo.someFn(i) ;
     }
@@ -442,7 +464,7 @@ describe('snooping on a function', function(){
     });
     it('we can query for what the function returned', function(){
         var someFn = this.someFn,
-            snoopedFn = snoop(someFn),
+            snoopedFn = snoop(someFn).callActual(),
             arg = 'Preamble rocks!';
         snoopedFn(arg);
         expect(snoopedFn.returned()).toEqual(arg);
@@ -457,7 +479,7 @@ describe('a snooped function throws', function(){
         };
     });
     it('we can query the function if threw', function(){
-        var snoopedFn = snoop(this.someFn);
+        var snoopedFn = snoop(this.someFn).callActual();
         snoopedFn();
         expect(snoopedFn.threw()).toBeTrue();
         expect(snoopedFn.threw.withMessage('Holy Batman!')).toBeTrue();
@@ -500,7 +522,7 @@ describe('using snoop\'s "calls" api with functions', function(){
         bar ={},
         n = 3,
         aCall,
-        snoopedFooFn = snoop(foo, bar);
+        snoopedFooFn = snoop(foo, bar).callActual();
     for(i = 0; i < n; i++){
         snoopedFooFn(i) ;
     }
