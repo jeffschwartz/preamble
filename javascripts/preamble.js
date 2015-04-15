@@ -1099,6 +1099,8 @@
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
             window.snoop = snoop;
+            // //TODO(Jeff):v2.3.5 stub
+            // window.stub = stub;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -1111,6 +1113,8 @@
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
                 snoop: snoop
+                // //TODO(Jeff):v2.3.5 spy
+                // stub: stub
             };
             //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
             //Functions to "note" assertions are passed as the
@@ -1467,8 +1471,8 @@
     }
 
     /**
-     * @param {object} argObject A function to be snooped or an object.
-     * @param {string} argProperty An optional object used as a context if the
+     * @param {object} argObject optional A function to be snooped or an object.
+     * @param {string} argProperty optional An object used as a context if the
      * 1st parameter is a function or the name of the property of argObject to
      * be snooped.
      */
@@ -1479,8 +1483,10 @@
             snoopster,
             calls = [];
         // window.calls = calls;
-        if(arguments.length < 1 || arguments.length > 2){
-            throw new Error('snoop requires 1 or 2 arguments, a function with an optional binding context or an object and a property name');
+        //TODO(Jeff): v2.3.0
+        if(arguments.length > 2){
+            throw new Error('snoop requires 0, 1 or 2 arguments - found ' +
+                arguments.length + '.');
         }
         if(arguments.length === 1 && typeof(arguments[0]) !== 'function'){
             throw new Error('1st parameter must be a function or an object');
@@ -1505,16 +1511,37 @@
             this.error = error;
             this.returned = returned;
         }
-        targetFn = typeof(arguments[0]) === 'function' ? argObject : argObject[argProperty];
+        //TODO(Jeff): v2.3.0
+        targetFn = arguments.length === 0 ? function(){} :
+            typeof(arguments[0]) === 'function' ? argObject :
+            argObject[argProperty];
         //tracking
         snoopster = function(){
-            var aArgs = arguments.length && argsToArray(arguments) || [];
-            var error = null;
-            var returned;
-            try{
-                returned = targetFn.apply(this, aArgs);
-            }catch(er){
-                error = er;
+            var aArgs = arguments.length && argsToArray(arguments) || [],
+                error,
+                returned;
+            //TODO(Jeff): v2.3.0
+            function ThrowsException(message, value){
+                this.message = message;
+                this.value = value;
+            }
+            //TODO(Jeff): v2.3.0
+            if(snoopster._callActual){
+                try{
+                    returned = targetFn.apply(this, aArgs);
+                }catch(er){
+                    error = er;
+                }
+            }else{
+                //TODO(Jeff): v2.3.Error
+                if(snoopster._throws){
+                    try{
+                        throw new ThrowsException(snoopster._throws.message, snoopster._throws.value);
+                    }catch(er){
+                        error = er;
+                    }
+                }
+                returned = this._returns;
             }
             snoopster.args = new Args(aArgs);
             calls.push(new ACall(this, aArgs, error, returned));
@@ -1525,6 +1552,53 @@
             snoopster = snoopster.bind(arguments[1]);
         }
         //api
+        //TODO(Jeff): v2.3.0
+        snoopster._throws = undefined;
+        /**
+         * @param {string} message The message for the exception.
+         * @param {number} value The value for the exception.
+         */
+        snoopster.throws = function(message, value){
+            var err = 'throws expects a string or a value or a string and a value';
+            snoopster._throws = snoopster._throws || {message: void(0), value: void(0)};
+            if(!arguments.length){
+                throw new Error(err);
+            }
+            //string or value passed
+            if(arguments.length === 1){
+                if(typeof(arguments[0]) === 'string'){
+                    snoopster._throws.message = arguments[0];
+                }else if(typeof(arguments[0]) === 'number'){
+                    snoopster._throws.value = arguments[0];
+                // }else if(typeof(arguments[0]) === 'function'){
+                //     snoopster._throws = arguments[0];
+                }else{
+                    throw new Error(err);
+                }
+            // string and value passed
+            }else if(arguments.length === 2){
+                if(typeof(message) === 'string' && typeof(value) === 'number'){
+                    snoopster._throws.message = message;
+                    snoopster._throws.value = value;
+                }else{
+                    throw new Error(err);
+                }
+            }else{
+                throw new Error(err);
+            }
+        };
+        snoopster.returns = function(ret){
+            this._returns = ret;
+            //for chaining
+            return this;
+        };
+        //TODO(Jeff): v2.3.0
+        snoopster._callActual = false;
+        snoopster.callActual = function(){
+            this._callActual = true;
+            //for chaining
+            return this;
+        };
         snoopster.called = function(){
             return calls.length;
         };
@@ -1549,6 +1623,10 @@
         snoopster.threw.withMessage = function(message){
             return snoopster.wasCalled() && calls[calls.length - 1].error.message === message;
         };
+        //TODO(Jeff): v2.3.0
+        snoopster.threw.withValue = function(val){
+            return snoopster.wasCalled() && calls[calls.length - 1].error.value === val;
+        };
         snoopster.calls = {
             count: function(){
                 return calls.length;
@@ -1560,13 +1638,29 @@
                 return calls;
             }
         };
-        //when the 1st parameter is a function it must be returned
-        if(typeof(arguments[0]) === 'function'){
-            return snoopster;
-        }else{
+        //TODO(Jeff): v2.3.0
+        if(arguments.length && typeof(arguments[0]) !== 'function' &&
+            typeof(arguments[0]) === 'object'){
             argObject[argProperty] = snoopster;
         }
+        return snoopster;
     }
+
+    // //TODO(Jeff): v2.3.0
+    // function stub(argObject, argProperty){
+    //     var _stub;
+    //     // _stub = arguments.length === 0? snoop(function(){}) : snoop(arguments);
+    //     _stub = function(){
+    //         i
+    //     };
+    //     _stub.withArgs = function(args){
+    //         this._useArgs = args;
+    //     };
+    //     _stub.returns = function(val){
+    //         this._returns = val;
+    //     };
+    //     return _stub;
+    // }
 
     /**
      * It all starts here!
