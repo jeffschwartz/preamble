@@ -17,7 +17,7 @@ describe('"describe" describes a "suite" which contains one or more "specs"', fu
     });
 });
 
-describe('"Assertions" are defined by "matchers"', function(){
+describe('"Assertions" are defined by "expectations" and "matchers"', function(){
     it('and "it" specifies a spec which contain one or more assertions', function(){
         expect(1).toEqual(1);
     });
@@ -281,12 +281,8 @@ describe('snooping on a method', function(){
     });
 });
 
-describe ('A stub is a spy and when configured to return a value', function(){
-    var foo = {
-        someFn: function(){
-            return 25;
-        }
-    };
+describe ('A stub is also a spy and when configured to return a value', function(){
+    var foo = { someFn: function(){ return 25; } };
     it('returns that value', function(){
         snoop(foo, 'someFn').returns(13);
         foo.someFn();
@@ -294,12 +290,8 @@ describe ('A stub is a spy and when configured to return a value', function(){
     });
 });
 
-describe('A stub is a spy and when configured to call the actual implementation', function(){
-    var foo = {
-        someFn: function(arg){
-            return arg;
-        }
-    };
+describe('A stub when configured to call the actual implementation', function(){
+    var foo = { someFn: function(arg){ return arg; } };
     it('calls it', function(){
         snoop(foo, 'someFn');
         foo.someFn(123);
@@ -311,11 +303,7 @@ describe('A stub is a spy and when configured to call the actual implementation'
 });
 
 describe('A stub configured to call the actual implementation can be reset', function(){
-    var foo = {
-        someFn: function(arg){
-            return arg;
-        }
-    };
+    var foo = { someFn: function(arg){ return arg; } };
     it('and it will call the stub', function(){
         snoop(foo, 'someFn').callActual();
         foo.someFn(123);
@@ -326,25 +314,21 @@ describe('A stub configured to call the actual implementation can be reset', fun
     });
 });
 
-describe('A stub is a spy and when configured to throw an error', function(){
-    var foo = {
-        someFn: function(){
-            throw new Error('Holy Batman!');
-        }
-    };
-    it('with a message throws the message', function(){
+describe('A stub when configured can throw an error', function(){
+    var foo = { someFn: function(){} };
+    it('with a message', function(){
         snoop(foo, 'someFn').throws('Holy Batman!');
         foo.someFn();
         expect(foo.someFn.threw()).toBeTrue();
         expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
     });
-    it('with a value throws the value', function(){
+    it('with a value', function(){
         snoop(foo, 'someFn').throws(42);
         foo.someFn();
         expect(foo.someFn.threw()).toBeTrue();
         expect(foo.someFn.threw.withValue(42)).toBeTrue();
     });
-    it('with a message and a value throws both', function(){
+    it('with a message and a value', function(){
         snoop(foo, 'someFn').throws('Holy Batman!', 42);
         foo.someFn();
         expect(foo.someFn.threw()).toBeTrue();
