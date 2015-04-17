@@ -354,6 +354,9 @@ describe('Using a "stub" to test Ajax', function(){
         snoop(jQueryNot, 'ajax');
         getToDos(10, function(){});
         expect(jQueryNot.ajax.wasCalled()).toBeTrue();
+        expect(jQueryNot.ajax.args.getArgumentsLength()).toEqual(1);
+        expect(jQueryNot.ajax.args.hasArgument(0)).toBeTrue();
+        expect(typeof(jQueryNot.ajax.args.getArgument(0)) === 'object').toBeTrue();
         expect(jQueryNot.ajax.args.getArgumentProperty(0, 'url')).
             toEqual('/api/v2/todo/count/10');
     });

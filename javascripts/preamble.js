@@ -1499,16 +1499,31 @@
         function argsToArray(argArguments){
             return [].slice.call(argArguments, 0);
         }
+        //api
         function Args(args){
             this.args = argsToArray(args);
         }
+        //TODO(Jeff): v2.3.0 - fixed check for args length bug
+        Args.prototype.getArgumentsLength = function(){
+            return  this.args && this.args.length;
+        };
+        //TODO(Jeff): v2.3.0 - fixed check for args length bug
+        Args.prototype.hasArgument = function(i){
+            return this.args.length && this.args.length > i ? true : false;
+        };
+        //TODO(Jeff): v2.3.0 - fixed check for args length bug
+        Args.prototype.getArgument = function(i){
+            return this.hasArgument(i) ? this.args[i] : null;
+        };
+        //TODO(Jeff): v2.3.0
+        Args.prototype.hasArgumentProperty = function(i, propertyName){
+            return this.hasArgument(i) && this.args[i][propertyName] ? true : false;
+        };
         //TODO(Jeff): v2.3.0
         Args.prototype.getArgumentProperty = function(i, propertyName){
-            return i >= this.args.length && this.args[i][propertyName] ? null : this.args[i][propertyName];
+            return this.hasArgumentProperty(i, propertyName) ? this.args[i][propertyName] : null;
         };
-        Args.prototype.getArgument = function(i){
-            return i >= this.args.length ? null : this.args[i];
-        };
+        //api
         function ACall(context, args, error, returned){
             this.context = context;
             this.args = args;
@@ -1558,6 +1573,7 @@
         //api
         //TODO(Jeff): v2.3.0
         snoopster._throws = undefined;
+        //TODO(Jeff): v2.3.0
         /**
          * @param {string} message The message for the exception.
          * @param {number} value The value for the exception.
@@ -1655,22 +1671,6 @@
         }
         return snoopster;
     }
-
-    // //TODO(Jeff): v2.3.0
-    // function stub(argObject, argProperty){
-    //     var _stub;
-    //     // _stub = arguments.length === 0? snoop(function(){}) : snoop(arguments);
-    //     _stub = function(){
-    //         i
-    //     };
-    //     _stub.withArgs = function(args){
-    //         this._useArgs = args;
-    //     };
-    //     _stub.returns = function(val){
-    //         this._returns = val;
-    //     };
-    //     return _stub;
-    // }
 
     /**
      * It all starts here!
