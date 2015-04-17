@@ -337,6 +337,28 @@ describe('A stub when configured can throw an error', function(){
     });
 });
 
+describe('Using a "stub" to test Ajax', function(){
+    //simulates a jQuery-like object
+    var jQueryNot = {
+        ajax: function(){}
+    };
+    function getToDos(count, callback){
+        jQueryNot.ajax({
+            url: '/api/v2/todo/count/' + count,
+            success: function(toDos){
+                callback(null, toDos);
+            }
+        });
+    }
+    it('without triggering a network call', function(){
+        snoop(jQueryNot, 'ajax');
+        getToDos(10, function(){});
+        expect(jQueryNot.ajax.wasCalled()).toBeTrue();
+        expect(jQueryNot.ajax.args.getArgumentProperty(0, 'url')).
+            toEqual('/api/v2/todo/count/10');
+    });
+});
+
 describe('snooping on more than one method', function(){
     beforeEach(function(){
         this.foo = {

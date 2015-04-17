@@ -1502,6 +1502,10 @@
         function Args(args){
             this.args = argsToArray(args);
         }
+        //TODO(Jeff): v2.3.0
+        Args.prototype.getArgumentProperty = function(i, propertyName){
+            return i >= this.args.length && this.args[i][propertyName] ? null : this.args[i][propertyName];
+        };
         Args.prototype.getArgument = function(i){
             return i >= this.args.length ? null : this.args[i];
         };
@@ -1600,7 +1604,7 @@
             //for chaining
             return this;
         };
-        snoopster.callStub = function(){
+        snoopster.callStub = function   (){
             this._callActual = false;
             //for chaining
             return this;
