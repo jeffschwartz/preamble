@@ -47,8 +47,4 @@ module.exports = function ( grunt ) {
     // Default task(s).
     grunt.registerTask( 'default', ['watch'] );
 
-    // Alias Tasks
-    //grunt.registerTask( 'dev', 'Running Grunt dev', ['less:production', 'concat:dist', 'imagemin'] );
-    //grunt.registerTask( 'prod', 'Running Grunt prod', ['less:production', 'concat:dist', 'uglify:prod', 'imagemin'] );
-
 };
