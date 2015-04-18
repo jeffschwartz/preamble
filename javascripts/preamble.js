@@ -1500,16 +1500,18 @@
             return [].slice.call(argArguments, 0);
         }
         //api
-        function Args(args){
-            this.args = argsToArray(args);
+        function Args(aArgs){
+            //TODO(Jeff): remove commented out code
+            // this.args = argsToArray(args);
+            this.args = aArgs;
         }
         //TODO(Jeff): v2.3.0 - fixed check for args length bug
         Args.prototype.getArgumentsLength = function(){
-            return  this.args && this.args.length;
+            return  this.args.length ? this.args.length : 0;
         };
         //TODO(Jeff): v2.3.0 - fixed check for args length bug
         Args.prototype.hasArgument = function(i){
-            return this.args.length && this.args.length > i ? true : false;
+            return this.getArgumentsLength() > i ? true : false;
         };
         //TODO(Jeff): v2.3.0 - fixed check for args length bug
         Args.prototype.getArgument = function(i){
