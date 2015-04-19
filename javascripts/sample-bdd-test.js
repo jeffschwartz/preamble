@@ -302,6 +302,21 @@ describe('A stub when configured to call the actual implementation', function(){
     });
 });
 
+describe('A stub when configured to call a fake implementation', function(){
+    var foo = { someFn: function(arg){ return arg; } };
+    it('calls it', function(){
+        snoop(foo, 'someFn');
+        foo.someFn(123);
+        expect(foo.someFn.returned()).toNotEqual(123);
+        foo.someFn.callActual();
+        foo.someFn(123);
+        expect(foo.someFn.returned()).toEqual(123);
+        foo.someFn.callFake(function(){ return 'sorry'; });
+        foo.someFn(123);
+        expect(foo.someFn.returned()).toEqual('sorry');
+    });
+});
+
 describe('A stub configured to call the actual implementation can be reset', function(){
     var foo = { someFn: function(arg){ return arg; } };
     it('and it will call the stub', function(){

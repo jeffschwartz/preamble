@@ -1539,6 +1539,7 @@
         //tracking
         snoopster = function(){
             var aArgs = arguments.length && argsToArray(arguments) || [],
+                fn,
                 error,
                 returned;
             //TODO(Jeff): v2.3.0
@@ -1547,9 +1548,10 @@
                 this.value = value;
             }
             //TODO(Jeff): v2.3.0
-            if(snoopster._callActual){
+            if(snoopster._callActual || snoopster._callFake){
+                fn = snoopster._callFake || targetFn;
                 try{
-                    returned = targetFn.apply(this, aArgs);
+                    returned = fn.apply(this, aArgs);
                 }catch(er){
                     error = er;
                 }
@@ -1614,13 +1616,29 @@
             return this;
         };
         //TODO(Jeff): v2.3.0
+        snoopster._resetCalls = function(){
+            this._callFake = null;
+            this._callActual = this._callStub = false;
+        };
+        //TODO(Jeff): v2.3.0
+        snoopster._callFake = null;
+        snoopster.callFake = function(fn){
+            if(fn && typeof(fn) !== 'function'){
+                throw new Error('callFake expects to be called with a function');
+            }
+            this._resetCalls();
+            snoopster._callFake = fn;
+        };
+        //TODO(Jeff): v2.3.0
         snoopster._callActual = false;
         snoopster.callActual = function(){
+            this._resetCalls();
             this._callActual = true;
             //for chaining
             return this;
         };
         snoopster.callStub = function(){
+            this._resetCalls();
             this._callActual = false;
             //for chaining
             return this;
