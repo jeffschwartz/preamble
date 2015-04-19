@@ -1592,8 +1592,6 @@
                     snoopster._throws.message = arguments[0];
                 }else if(typeof(arguments[0]) === 'number'){
                     snoopster._throws.value = arguments[0];
-                // }else if(typeof(arguments[0]) === 'function'){
-                //     snoopster._throws = arguments[0];
                 }else{
                     throw new Error(err);
                 }
