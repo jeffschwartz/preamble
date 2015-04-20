@@ -262,6 +262,7 @@ describe('snooping on a method', function(){
         snoop(foo, 'someFn');
         foo.someFn();
         expect(foo.someFn.wasCalled()).toBeTrue();
+        expect(foo.someFn).toHaveBeenCalled();
     });
     it('we can query how many times the method was called', function(){
         var foo = this.foo;

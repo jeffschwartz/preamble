@@ -288,7 +288,8 @@
         this.totFailed = 0;
         for (i = 0, len = this.assertions.length; i < len; i++) {
             item = this.assertions[i];
-            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            result = item.assertion(typeof item.value === 'function' &&
+                !item.value._marker ? item.value() : item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             item.explain = result.explain;
@@ -1088,8 +1089,10 @@
             window.beforeEach = queueBuilder.beforeEachTest;
             window.afterEach = queueBuilder.afterEachTest;
             window.it = queueBuilder.test;
-            //TODO(Jeff):v2.3.5 expect
+            //TODO(Jeff):v2.3.0 expect
             window.expect = noteExpectation;
+            //TODO(Jeff): v2.3.0 toHaveBeenCalled
+            window.toHaveBeenCalled = noteToHaveBeenCalled;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -1144,7 +1147,8 @@
             isTrue: noteIsTrueAssertion,
             isFalse: noteIsFalseAssertion,
             isTruthy: noteIsTruthyAssertion,
-            isNotTruthy: noteIsNotTruthyAssertion
+            isNotTruthy: noteIsNotTruthyAssertion,
+            toHaveBeenCalled: noteToHaveBeenCalled
         };
         window.Preamble = window.Preamble || {};
         //For use by external processes.
@@ -1277,6 +1281,14 @@
 
     //Assertion runners.
 
+    //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToHaveBeenCalled(a){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have been called '};
+    }
+
     //"strict" a === b
     function assertEqual(a, b){
         //return a_equals_b(a, b);
@@ -1330,13 +1342,14 @@
     }
 
     //TODO(Jeff):v2.3.0 complete the assertion entry in the assertion table
-    function completeTheAssertion(assertion, assertionLabel, value, stackTrace){
+    function completeTheAssertion(assertion, assertionLabel, value, stackTrace, actual){
         var ti = testsIterator,
         a = ti.get().assertions[ti.get().assertions.length - 1];
         a.assertion = assertion;
         a.assertionLabel = assertionLabel;
         a.expectation = value;
         a.stackTrace = stackTrace;
+        a.value = actual ? actual : a.value;
     }
 
     function setStackTraceProperty(){
@@ -1368,6 +1381,16 @@
         pushOntoAssertions(null, null, actual, null, null);
         //retunr assert for chaining
         return assert;
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
+    function noteToHaveBeenCalled(label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
@@ -1575,6 +1598,8 @@
             snoopster = snoopster.bind(arguments[1]);
         }
         //api
+        //TODO(Jeff): v2.3.0
+        snoopster._marker = 'preamble.snoopster';
         //TODO(Jeff): v2.3.0
         snoopster._throws = undefined;
         //TODO(Jeff): v2.3.0
