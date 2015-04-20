@@ -4,6 +4,7 @@
 
 /**
  * inline configuration
+ * NOTE: inline configuration cannot be use to set "windowGlobals"!
  */
 configure({
     name: 'Sample BDD Test Suite',
