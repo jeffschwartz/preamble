@@ -19,8 +19,29 @@ describe('"describe" describes a "suite" which contains one or more "specs"', fu
 });
 
 describe('"Assertions" are defined by an "expectation" and a "matcher"', function(){
-    it('"expect" sets the "actual" value and the matcher "teEqual" sets the "expected" value', function(){
+    it('"expect" sets the "actual" value & the matcher "teEqual" asserts against that', function(){
         expect(1).toEqual(1);
+    });
+});
+
+describe('Preamble comes with these matchers', function(){
+    it('"toBeTrue"', function(){
+        expect(true).toBeTrue();
+    });
+    it('"toBeFalse"', function(){
+        expect(false).toBeFalse();
+    });
+    it('"toBeTruthy"', function(){
+        expect(1).toBeTruthy();
+    });
+    it('"toNotBeTruthy"', function(){
+        expect(0).toNotBeTruthy();
+    });
+    it('"toEqual"', function(){
+        expect(1).toEqual(1);
+    });
+    it('"toNotEqual"', function(){
+        expect(2).toNotEqual(1);
     });
 });
 
