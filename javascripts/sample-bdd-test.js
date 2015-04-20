@@ -17,13 +17,13 @@ describe('"describe" describes a "suite" which contains one or more "specs"', fu
     });
 });
 
-describe('"Assertions" are defined by "expectations" and "matchers"', function(){
-    it('and "it" specifies a spec which contain one or more assertions', function(){
+describe('"Assertions" are defined by an "expectation" and a "matcher"', function(){
+    it('"expect" sets the "actual" value and the matcher "teEqual" sets the "expected" value', function(){
         expect(1).toEqual(1);
     });
 });
 
-describe('Nested specs', function(){
+describe('specs can be nested within specs', function(){
     beforeEach(function(){
         this.value = 10;
     });
