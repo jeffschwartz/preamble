@@ -1089,27 +1089,10 @@
             window.beforeEach = queueBuilder.beforeEachTest;
             window.afterEach = queueBuilder.afterEachTest;
             window.it = queueBuilder.test;
-            //TODO(Jeff):v2.3.0 expect
             window.expect = noteExpectation;
-            //TODO(Jeff): v2.3.0 toHaveBeenCalled
-            window.toHaveBeenCalled = noteToHaveBeenCalled;
-            //TODO(Jeff): v2.3.0 toNotHaveBeenCalled
-            window.toNotHaveBeenCalled = noteToNotHaveBeenCalled;
-            //TODO(Jeff): v2.3.0 toNotHaveBeenCalled
-            window.toNotHaveBeenCalled = noteToNotHaveBeenCalled;
-            //TODO(Jeff): v2.3.0 toHaveReturned
-            window.toHaveReturned = noteToHaveReturned;
-            window.equal = noteEqualAssertion;
-            window.notEqual = noteNotEqualAssertion;
-            window.isTrue = noteIsTrueAssertion;
-            window.isFalse = noteIsFalseAssertion;
-            window.isTruthy = noteIsTruthyAssertion;
-            window.isNotTruthy = noteIsNotTruthyAssertion;
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
             window.snoop = snoop;
-            // //TODO(Jeff):v2.3.5 stub
-            // window.stub = stub;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -1125,17 +1108,6 @@
                 // //TODO(Jeff):v2.3.5 spy
                 // stub: stub
             };
-            //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
-            //Functions to "note" assertions are passed as the
-            //1st parameter to each test's callback function.
-            // assert = {
-            //     equal: noteEqualAssertion,
-            //     notEqual: noteNotEqualAssertion,
-            //     isTrue: noteIsTrueAssertion,
-            //     isFalse: noteIsFalseAssertion,
-            //     isTruthy: noteIsTruthyAssertion,
-            //     isNotTruthy: noteIsNotTruthyAssertion
-            // };
         }
         //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
         //Functions to "note" assertions are passed as the
@@ -1155,7 +1127,7 @@
             isTruthy: noteIsTruthyAssertion,
             isNotTruthy: noteIsNotTruthyAssertion,
             toHaveBeenCalled: noteToHaveBeenCalled,
-            toNotHaveBeenCalled: noteToNotHaveBeenCalled,
+            // toNotHaveBeenCalled: noteToNotHaveBeenCalled,
             toHaveReturned: noteToHaveReturned,
             toHaveThrown: noteToHaveThrown
         };
@@ -1298,13 +1270,13 @@
         return {result: result, explain: 'expected spy to have been called'};
     }
 
-    //TODO(Jeff): v2.3.0
-    // //spy was not called (boolean)
-    function assertToNotHaveBeenCalled(a){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have been called'};
-    }
+    // //TODO(Jeff): v2.3.0
+    // // //spy was not called (boolean)
+    // function assertToNotHaveBeenCalled(a){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to not have been called'};
+    // }
 
     //TODO(Jeff): v2.3.0
     // //spy returned
@@ -1426,15 +1398,15 @@
         completeTheAssertion(assertToHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
     }
 
-    //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
-    function noteToNotHaveBeenCalled(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
-    }
+    // //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
+    // function noteToNotHaveBeenCalled(label){
+    //     // if(arguments.length < 1){
+    //     //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+    //     // }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
+    // }
 
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
     function noteToHaveReturned(value, label){
