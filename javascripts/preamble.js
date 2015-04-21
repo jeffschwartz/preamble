@@ -1156,7 +1156,8 @@
             isNotTruthy: noteIsNotTruthyAssertion,
             toHaveBeenCalled: noteToHaveBeenCalled,
             toNotHaveBeenCalled: noteToNotHaveBeenCalled,
-            toHaveReturned: noteToHaveReturned
+            toHaveReturned: noteToHaveReturned,
+            toHaveThrown: noteToHaveThrown
         };
         window.Preamble = window.Preamble || {};
         //For use by external processes.
@@ -1294,7 +1295,7 @@
     function assertToHaveBeenCalled(a){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have been called '};
+        return {result: result, explain: 'expected spy to have been called'};
     }
 
     //TODO(Jeff): v2.3.0
@@ -1302,7 +1303,23 @@
     function assertToNotHaveBeenCalled(a){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have been called '};
+        return {result: result, explain: 'expected spy to not have been called'};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy returned
+    function assertToHaveReturned(a, b){
+        var result = a_equals_b(a, b);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have returned ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy threw
+    function assertToHaveThrown(a){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have thrown an exception'};
     }
 
     //"strict" a === b
@@ -1426,7 +1443,17 @@
         // }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertEqual, label, value, stackTraceFromError(), a.value.returned());
+        completeTheAssertion(assertToHaveReturned, label, value, stackTraceFromError(), a.value.returned());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveThrown assertion
+    function noteToHaveThrown(label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrown, label, true, stackTraceFromError(), a.value.threw());
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
