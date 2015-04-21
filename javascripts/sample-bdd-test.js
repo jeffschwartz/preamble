@@ -304,6 +304,49 @@ describe('snooping on a method', function(){
     });
 });
 
+describe('snooping on a method', function(){
+    beforeEach(function(){
+        this.error = 'something went terribly wrong!';
+        this.foo = {
+            someFn: function(arg){
+                return arg;
+            },
+            someOtherFn: function(arg){
+                throw new Error(this.error);
+            }
+        };
+    });
+    it('we can query if the method was called', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn');
+        foo.someFn();
+        expect(foo.someFn).toHaveBeenCalled();
+    });
+    it('we can query if the method returned a specific value', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn').callActual();
+        foo.someFn(123);
+        expect(foo.someFn).toHaveReturned(123);
+    });
+    it('we can query if the method threw an exception', function(){
+        var foo = this.foo;
+        snoop(foo, 'someOtherFn').callActual();
+        foo.someOtherFn(123);
+        expect(foo.someOtherFn).toHaveThrown();
+    });
+    it('we can query if the method threw an exception with a specific value', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn').throws(123);
+        foo.someFn();
+        expect(foo.someFn).toHaveThrownWithValue(123);
+    });
+    it('we can query if the method threw an exception with a specific message', function(){
+        var foo = this.foo;
+        snoop(foo, 'someFn').throws('123');
+        foo.someFn();
+        expect(foo.someFn).toHaveThrownWithMessage('123');
+    });
+});
 describe ('A stub is also a spy and when configured to return a value', function(){
     var foo = { someFn: function(){ return 25; } };
     it('returns that value', function(){
