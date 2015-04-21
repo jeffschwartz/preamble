@@ -1093,6 +1093,8 @@
             window.expect = noteExpectation;
             //TODO(Jeff): v2.3.0 toHaveBeenCalled
             window.toHaveBeenCalled = noteToHaveBeenCalled;
+            //TODO(Jeff): v2.3.0 toNotHaveBeenCalled
+            window.toNotHaveBeenCalled = noteToNotHaveBeenCalled;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -1148,7 +1150,8 @@
             isFalse: noteIsFalseAssertion,
             isTruthy: noteIsTruthyAssertion,
             isNotTruthy: noteIsNotTruthyAssertion,
-            toHaveBeenCalled: noteToHaveBeenCalled
+            toHaveBeenCalled: noteToHaveBeenCalled,
+            toNotHaveBeenCalled: noteToNotHaveBeenCalled
         };
         window.Preamble = window.Preamble || {};
         //For use by external processes.
@@ -1289,6 +1292,14 @@
         return {result: result, explain: 'expected spy to have been called '};
     }
 
+    //TODO(Jeff): v2.3.0
+    // //spy was not called (boolean)
+    function assertToNotHaveBeenCalled(a){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have been called '};
+    }
+
     //"strict" a === b
     function assertEqual(a, b){
         //return a_equals_b(a, b);
@@ -1349,7 +1360,7 @@
         a.assertionLabel = assertionLabel;
         a.expectation = value;
         a.stackTrace = stackTrace;
-        a.value = actual ? actual : a.value;
+        a.value = typeof(actual) === 'undefined' ? a.value : actual;
     }
 
     function setStackTraceProperty(){
@@ -1391,6 +1402,16 @@
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
+    function noteToNotHaveBeenCalled(label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
