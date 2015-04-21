@@ -1129,7 +1129,9 @@
             toHaveBeenCalled: noteToHaveBeenCalled,
             // toNotHaveBeenCalled: noteToNotHaveBeenCalled,
             toHaveReturned: noteToHaveReturned,
-            toHaveThrown: noteToHaveThrown
+            toHaveThrown: noteToHaveThrown,
+            toHaveThrownWithValue: noteToHaveThrownWithValue,
+            toHaveThrownWithMessage: noteToHaveThrownWithMessage
         };
         window.Preamble = window.Preamble || {};
         //For use by external processes.
@@ -1294,6 +1296,22 @@
         return {result: result, explain: 'expected spy to have thrown an exception'};
     }
 
+    //TODO(Jeff): v2.3.0
+    // //spy threwWithValue
+    function assertToHaveThrownWithValue(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have thrown an exception with the value ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy threwWithMessage
+    function assertToHaveThrownWithMessage(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have thrown an exception with the message ' + JSON.stringify(b)};
+    }
+
     //"strict" a === b
     function assertEqual(a, b){
         //return a_equals_b(a, b);
@@ -1426,6 +1444,26 @@
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrown, label, true, stackTraceFromError(), a.value.threw());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveThrownWithValue assertion
+    function noteToHaveThrownWithValue(value, label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrownWithValue, label, value, stackTraceFromError(), a.value.threw.withValue(value));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
+    function noteToHaveThrownWithMessage(value, label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrownWithMessage, label, value, stackTraceFromError(), a.value.threw.withMessage(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
