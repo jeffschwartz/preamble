@@ -1095,6 +1095,10 @@
             window.toHaveBeenCalled = noteToHaveBeenCalled;
             //TODO(Jeff): v2.3.0 toNotHaveBeenCalled
             window.toNotHaveBeenCalled = noteToNotHaveBeenCalled;
+            //TODO(Jeff): v2.3.0 toNotHaveBeenCalled
+            window.toNotHaveBeenCalled = noteToNotHaveBeenCalled;
+            //TODO(Jeff): v2.3.0 toHaveReturned
+            window.toHaveReturned = noteToHaveReturned;
             window.equal = noteEqualAssertion;
             window.notEqual = noteNotEqualAssertion;
             window.isTrue = noteIsTrueAssertion;
@@ -1151,7 +1155,8 @@
             isTruthy: noteIsTruthyAssertion,
             isNotTruthy: noteIsNotTruthyAssertion,
             toHaveBeenCalled: noteToHaveBeenCalled,
-            toNotHaveBeenCalled: noteToNotHaveBeenCalled
+            toNotHaveBeenCalled: noteToNotHaveBeenCalled,
+            toHaveReturned: noteToHaveReturned
         };
         window.Preamble = window.Preamble || {};
         //For use by external processes.
@@ -1412,6 +1417,16 @@
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToNotHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
+    function noteToHaveReturned(value, label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertEqual, label, value, stackTraceFromError(), a.value.returned());
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
