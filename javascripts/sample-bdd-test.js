@@ -12,36 +12,40 @@ configure({
     testTimeOutInterval: 500
 });
 
-describe('"describe" describes a "suite" which contains one or more "specs"', function(){
-    it('and "it" specifies a spec which contain one or more "assertions"', function(){
+describe('"describe" describes a "suite" which can contains one or more "specs"', function(){
+    it('and "it" specifies a spec which can contain one or more "assertions"', function(){
         expect(1).toEqual(1);
     });
 });
 
-describe('"Assertions" are defined by an "expectation" and a "matcher"', function(){
-    it('"expect" sets the "actual" value & the matcher "teEqual" asserts against that', function(){
+describe('Assertions are composed using "expect" to set the actual value and a matcher', function(){
+    it('"expect" sets the "actual" value & the matcher applies a condition against that', function(){
         expect(1).toEqual(1);
     });
 });
 
-describe('Preamble comes with these matchers', function(){
-    it('"toBeTrue"', function(){
+describe('Preamble comes with numerous matchers', function(){
+    it('the "toBeTrue" matcher uses a strict boolean comparison to assert that the actual value is boolen true', function(){
         expect(true).toBeTrue();
     });
-    it('"toBeFalse"', function(){
+    it('the "toBeFalse" matcher uses a strict boolean comparison to assert that the actual value is boolen false', function(){
         expect(false).toBeFalse();
     });
-    it('"toBeTruthy"', function(){
-        expect(1).toBeTruthy();
+    it('the "toBeTruthy" matcher uses a truthy comparison to assert that the actual value is truthy', function(){
+        expect({}).toBeTruthy();
     });
-    it('"toNotBeTruthy"', function(){
-        expect(0).toNotBeTruthy();
+    it('the "toNotBeTruthy" matcher uses a truthy comparison to assert that the actual value is not truthy', function(){
+        expect('').toNotBeTruthy();
     });
-    it('"toEqual"', function(){
-        expect(1).toEqual(1);
+    it('the "toEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are equal (===)' , function(){
+        var anObj1 = {iAm: 'some object to compare to'},
+            anObj2 = {iAm: 'some object to compare to'};
+        expect(anObj1).toEqual(anObj2);
     });
-    it('"toNotEqual"', function(){
-        expect(2).toNotEqual(1);
+    it('the "toNotEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are not equal (!==)', function(){
+        var anObj1 = {iAm: 'anObj1'},
+            anObj2 = {iAm: 'anObj2'};
+        expect(anObj1).toNotEqual(anObj2);
     });
 });
 
@@ -311,7 +315,7 @@ describe('snooping on a method', function(){
             someFn: function(arg){
                 return arg;
             },
-            someOtherFn: function(arg){
+            someOtherFn: function(){
                 throw new Error(this.error);
             }
         };
