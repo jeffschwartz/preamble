@@ -1092,7 +1092,7 @@
             window.expect = noteExpectation;
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
-            window.snoop = snoop;
+            window.spy = spy;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -1104,7 +1104,7 @@
                 expect: noteExpectation,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
-                snoop: snoop
+                spy: spy
                 // //TODO(Jeff):v2.3.5 spy
                 // stub: stub
             };
@@ -1127,6 +1127,7 @@
             isTruthy: noteIsTruthyAssertion,
             isNotTruthy: noteIsNotTruthyAssertion,
             toHaveBeenCalled: noteToHaveBeenCalled,
+            toHaveBeenCalledNTimes: noteToHaveBeenCalledNTimes,
             // toNotHaveBeenCalled: noteToNotHaveBeenCalled,
             toHaveReturned: noteToHaveReturned,
             toHaveThrown: noteToHaveThrown,
@@ -1272,6 +1273,14 @@
         return {result: result, explain: 'expected spy to have been called'};
     }
 
+    //TODO(Jeff): v2.3.0
+    // //spy was called n times (boolean)
+    function assertToHaveBeenCalledNTimes(a, b){
+        var result = a_equals_b(a, b);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have been called ' + b + ' times'};
+    }
+
     // //TODO(Jeff): v2.3.0
     // // //spy was not called (boolean)
     // function assertToNotHaveBeenCalled(a){
@@ -1414,6 +1423,16 @@
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalledNTimes assertion
+    function noteToHaveBeenCalledNTimes(value, label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalledNTimes, label, value, stackTraceFromError(), a.value.called());
     }
 
     // //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
@@ -1574,14 +1593,14 @@
      */
     //TODO(Jeff): v2.3.0 support snooping on standalone functions and
     //allowing them to be bound to a context passed as the 2nd parameter
-    function snoop(argObject, argProperty){
+    function spy(argObject, argProperty){
         var targetFn,
             snoopster,
             calls = [];
         // window.calls = calls;
         //TODO(Jeff): v2.3.0
         if(arguments.length > 2){
-            throw new Error('snoop requires 0, 1 or 2 arguments - found ' +
+            throw new Error('spy requires 0, 1 or 2 arguments - found ' +
                 arguments.length + '.');
         }
         if(arguments.length === 1 && typeof(arguments[0]) !== 'function'){

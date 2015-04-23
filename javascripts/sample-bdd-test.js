@@ -1,6 +1,6 @@
 /* jslint eqeq: true */
 /* jshint strict: false */
-/* global configure, describe, beforeEach, afterEach, it, snoop, expect, -getUiTestContainerElement, -getUiTestContainerElementId */
+/* global configure, describe, beforeEach, afterEach, it, spy, expect, -getUiTestContainerElement, -getUiTestContainerElementId */
 
 /**
  * inline configuration
@@ -252,8 +252,7 @@ describe('Running asynchronous tests with afterEachAsync', function(){
     });
 });
 
-//pick up modifying script here
-describe('snooping on a method', function(){
+describe('spying on a method', function(){
     beforeEach(function(){
         this.foo = {
             someFn: function(arg){
@@ -263,20 +262,19 @@ describe('snooping on a method', function(){
     });
     it('we can query if the method was called', function(){
         var foo = this.foo;
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn();
-        expect(foo.someFn.wasCalled()).toBeTrue();
         expect(foo.someFn).toHaveBeenCalled();
     });
     it('we can query how many times the method was called', function(){
         var foo = this.foo;
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn();
-        expect(foo.someFn.called()).toEqual(1);
+        expect(foo.someFn).toHaveBeenCalledNTimes(1);
     });
     it('we can query the method was called n times', function(){
         var foo = this.foo;
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn();
         expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
         expect(foo.someFn.wasCalled.nTimes(2)).toBeFalse();
@@ -284,7 +282,7 @@ describe('snooping on a method', function(){
     it('we can query the context the method was called with', function(){
         var foo = this.foo,
             bar = {};
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn();
         expect(foo.someFn.contextCalledWith()).toEqual(foo);
         expect(foo.someFn.contextCalledWith()).toNotEqual(bar);
@@ -292,7 +290,7 @@ describe('snooping on a method', function(){
     it('we can query for the arguments that the method was called with', function(){
         var foo = this.foo,
             arg = 'Preamble rocks!';
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn(arg);
         expect(foo.someFn.args.getArgument(0)).toEqual(arg);
         expect(foo.someFn.args.getArgument(0)).toNotEqual(arg + '!');
@@ -301,14 +299,14 @@ describe('snooping on a method', function(){
     it('we can query for what the method returned', function(){
         var foo = this.foo,
             arg = 'Preamble rocks!';
-        snoop(foo, 'someFn').callActual();
+        spy(foo, 'someFn').callActual();
         foo.someFn(arg);
         expect(foo.someFn.returned()).toEqual(arg);
         expect(foo.someFn.returned()).toNotEqual(arg + '!');
     });
 });
 
-describe('snooping on a method', function(){
+describe('spying on a method', function(){
     beforeEach(function(){
         this.error = 'something went terribly wrong!';
         this.foo = {
@@ -322,39 +320,40 @@ describe('snooping on a method', function(){
     });
     it('we can query if the method was called', function(){
         var foo = this.foo;
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn();
         expect(foo.someFn).toHaveBeenCalled();
     });
     it('we can query if the method returned a specific value', function(){
         var foo = this.foo;
-        snoop(foo, 'someFn').callActual();
+        spy(foo, 'someFn').callActual();
         foo.someFn(123);
         expect(foo.someFn).toHaveReturned(123);
     });
     it('we can query if the method threw an exception', function(){
         var foo = this.foo;
-        snoop(foo, 'someOtherFn').callActual();
+        spy(foo, 'someOtherFn').callActual();
         foo.someOtherFn(123);
         expect(foo.someOtherFn).toHaveThrown();
     });
     it('we can query if the method threw an exception with a specific value', function(){
         var foo = this.foo;
-        snoop(foo, 'someFn').throws(123);
+        spy(foo, 'someFn').throws(123);
         foo.someFn();
         expect(foo.someFn).toHaveThrownWithValue(123);
     });
     it('we can query if the method threw an exception with a specific message', function(){
         var foo = this.foo;
-        snoop(foo, 'someFn').throws('123');
+        spy(foo, 'someFn').throws('123');
         foo.someFn();
         expect(foo.someFn).toHaveThrownWithMessage('123');
     });
 });
+
 describe ('A stub is also a spy and when configured to return a value', function(){
     var foo = { someFn: function(){ return 25; } };
     it('returns that value', function(){
-        snoop(foo, 'someFn').returns(13);
+        spy(foo, 'someFn').returns(13);
         foo.someFn();
         expect(foo.someFn.returned()).toEqual(13);
     });
@@ -363,7 +362,7 @@ describe ('A stub is also a spy and when configured to return a value', function
 describe('A stub when configured to call the actual implementation', function(){
     var foo = { someFn: function(arg){ return arg; } };
     it('calls it', function(){
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn(123);
         expect(foo.someFn.returned()).toNotEqual(123);
         foo.someFn.callActual();
@@ -375,7 +374,7 @@ describe('A stub when configured to call the actual implementation', function(){
 describe('A stub when configured to call a fake implementation', function(){
     var foo = { someFn: function(arg){ return arg; } };
     it('calls it', function(){
-        snoop(foo, 'someFn');
+        spy(foo, 'someFn');
         foo.someFn(123);
         expect(foo.someFn.returned()).toNotEqual(123);
         foo.someFn.callActual();
@@ -390,7 +389,7 @@ describe('A stub when configured to call a fake implementation', function(){
 describe('A stub configured to call the actual implementation can be reset', function(){
     var foo = { someFn: function(arg){ return arg; } };
     it('and it will call the stub', function(){
-        snoop(foo, 'someFn').callActual();
+        spy(foo, 'someFn').callActual();
         foo.someFn(123);
         expect(foo.someFn.returned()).toEqual(123);
         foo.someFn.callStub();
@@ -402,19 +401,19 @@ describe('A stub configured to call the actual implementation can be reset', fun
 describe('A stub when configured can throw an error', function(){
     var foo = { someFn: function(){} };
     it('with a message', function(){
-        snoop(foo, 'someFn').throws('Holy Batman!');
+        spy(foo, 'someFn').throws('Holy Batman!');
         foo.someFn();
         expect(foo.someFn.threw()).toBeTrue();
         expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
     });
     it('with a value', function(){
-        snoop(foo, 'someFn').throws(42);
+        spy(foo, 'someFn').throws(42);
         foo.someFn();
         expect(foo.someFn.threw()).toBeTrue();
         expect(foo.someFn.threw.withValue(42)).toBeTrue();
     });
     it('with a message and a value', function(){
-        snoop(foo, 'someFn').throws('Holy Batman!', 42);
+        spy(foo, 'someFn').throws('Holy Batman!', 42);
         foo.someFn();
         expect(foo.someFn.threw()).toBeTrue();
         expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
@@ -436,7 +435,7 @@ describe('Using a "stub" to test Ajax', function(){
         });
     }
     it('without triggering a network call', function(){
-        snoop(jQueryNot, 'ajax');
+        spy(jQueryNot, 'ajax');
         getToDos(10, function(){});
         expect(jQueryNot.ajax.wasCalled()).toBeTrue();
         expect(jQueryNot.ajax.args.getArgumentsLength()).toEqual(1);
@@ -447,7 +446,7 @@ describe('Using a "stub" to test Ajax', function(){
     });
 });
 
-describe('snooping on more than one method', function(){
+describe('spying on more than one method', function(){
     beforeEach(function(){
         this.foo = {
             someFn: function(arg){
@@ -461,11 +460,11 @@ describe('snooping on more than one method', function(){
         };
     });
 
-    it('snoops are isolated and there are no side effects', function(){
+    it('spies are isolated and there are no side effects', function(){
         var foo = this.foo,
             bar = this.bar;
-        snoop(foo, 'someFn');
-        snoop(bar, 'someFn');
+        spy(foo, 'someFn');
+        spy(bar, 'someFn');
         foo.someFn('Is Preamble great?');
         bar.someFn('Yes it is!');
         foo.someFn('You got that right!');
@@ -478,7 +477,7 @@ describe('snooping on more than one method', function(){
     });
 });
 
-describe('using snoop\'s "calls" api with methods', function(){
+describe('using spy\'s "calls" api with methods', function(){
     var i,
         foo = {
             someFn: function(arg){
@@ -488,7 +487,7 @@ describe('using snoop\'s "calls" api with methods', function(){
         bar ={},
         n = 3,
         aCall;
-    snoop(foo, 'someFn').callActual();
+    spy(foo, 'someFn').callActual();
     for(i = 0; i < n; i++){
         foo.someFn(i) ;
     }
@@ -513,9 +512,9 @@ describe('using snoop\'s "calls" api with methods', function(){
 });
 
 /**
- *v2.3.0 support snooping on standalone functions
+ *v2.3.0 support spying on standalone functions
  */
-describe('snooping on a function', function(){
+describe('spying on a function', function(){
     beforeEach(function(){
         this.someFn = function(arg){
                 return arg;
@@ -523,65 +522,65 @@ describe('snooping on a function', function(){
     });
     it('we can query if the function was called', function(){
         var someFn = this.someFn,
-            snoopedFn = snoop(someFn);
-        snoopedFn();
-        expect(snoopedFn.wasCalled()).toBeTrue();
+            spyFn = spy(someFn);
+        spyFn();
+        expect(spyFn.wasCalled()).toBeTrue();
     });
     it('we can query how many times the method was called', function(){
         var someFn = this.someFn,
-            snoopedFn = snoop(someFn);
-        snoopedFn();
-        expect(snoopedFn.called()).toEqual(1);
+            spyFn = spy(someFn);
+        spyFn();
+        expect(spyFn.called()).toEqual(1);
     });
     it('we can query the function was called n times', function(){
         var someFn = this.someFn,
-            snoopedFn = snoop(someFn);
-        snoopedFn();
-        expect(snoopedFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(snoopedFn.wasCalled.nTimes(2)).toBeFalse();
+            spyFn = spy(someFn);
+        spyFn();
+        expect(spyFn.wasCalled.nTimes(1)).toBeTrue();
+        expect(spyFn.wasCalled.nTimes(2)).toBeFalse();
     });
     it('we can query the context the function was called with', function(){
         var someFn = this.someFn,
             bar = {},
-            snoopedFn = snoop(someFn, bar);
-        snoopedFn();
-        expect(snoopedFn.contextCalledWith()).toEqual(bar);
+            spyFn = spy(someFn, bar);
+        spyFn();
+        expect(spyFn.contextCalledWith()).toEqual(bar);
     });
     it('we can query for the arguments that the function was called with', function(){
         var someFn = this.someFn,
-            snoopedFn = snoop(someFn),
+            spyFn = spy(someFn),
             arg = 'Preamble rocks!';
-        snoopedFn(arg);
-        expect(snoopedFn.args.getArgument(0)).toEqual(arg);
-        expect(snoopedFn.args.getArgument(0)).toNotEqual(arg + '!');
-        expect(snoopedFn.args.getArgument(1)).toNotBeTruthy();
+        spyFn(arg);
+        expect(spyFn.args.getArgument(0)).toEqual(arg);
+        expect(spyFn.args.getArgument(0)).toNotEqual(arg + '!');
+        expect(spyFn.args.getArgument(1)).toNotBeTruthy();
     });
     it('we can query for what the function returned', function(){
         var someFn = this.someFn,
-            snoopedFn = snoop(someFn).callActual(),
+            spyFn = spy(someFn).callActual(),
             arg = 'Preamble rocks!';
-        snoopedFn(arg);
-        expect(snoopedFn.returned()).toEqual(arg);
-        expect(snoopedFn.returned()).toNotEqual(arg + '1');
+        spyFn(arg);
+        expect(spyFn.returned()).toEqual(arg);
+        expect(spyFn.returned()).toNotEqual(arg + '1');
     });
 });
 
-describe('a snooped function throws', function(){
+describe('a spy function throws', function(){
     beforeEach(function(){
         this.someFn = function(){
             throw new Error('Holy Batman!');
         };
     });
     it('we can query the function if threw', function(){
-        var snoopedFn = snoop(this.someFn).callActual();
-        snoopedFn();
-        expect(snoopedFn.threw()).toBeTrue();
-        expect(snoopedFn.threw.withMessage('Holy Batman!')).toBeTrue();
-        expect(snoopedFn.threw.withMessage('Holy Batman!!')).toBeFalse();
+        var spyFn = spy(this.someFn).callActual();
+        spyFn();
+        expect(spyFn.threw()).toBeTrue();
+        expect(spyFn.threw.withMessage('Holy Batman!')).toBeTrue();
+        expect(spyFn.threw.withMessage('Holy Batman!!')).toBeFalse();
     });
 });
 
-describe('snooping on more than one function', function(){
+describe('spying on more than one function', function(){
     beforeEach(function(){
         this.fooFn = function(arg){
             return arg;
@@ -591,24 +590,24 @@ describe('snooping on more than one function', function(){
         };
     });
 
-    it('snoops are isolated and there are no side effects', function(){
+    it('spies are isolated and there are no side effects', function(){
         var fooFn = this.fooFn,
             barFn = this.barFn,
-            snoopedFooFn = snoop(fooFn),
-            snoopedBarFn = snoop(barFn);
-        snoopedFooFn('Is Preamble great?');
-        snoopedBarFn('Yes it is!');
-        snoopedFooFn('You got that right!');
-        expect(snoopedFooFn.wasCalled()).toBeTrue();
-        expect(snoopedFooFn.wasCalled.nTimes(2)).toBeTrue();
-        expect(snoopedFooFn.wasCalled.nTimes(1)).toBeFalse();
-        expect(snoopedBarFn.wasCalled()).toBeTrue();
-        expect(snoopedBarFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(snoopedBarFn.wasCalled.nTimes(2)).toBeFalse();
+            spyFooFn = spy(fooFn),
+            spyBarFn = spy(barFn);
+        spyFooFn('Is Preamble great?');
+        spyBarFn('Yes it is!');
+        spyFooFn('You got that right!');
+        expect(spyFooFn.wasCalled()).toBeTrue();
+        expect(spyFooFn.wasCalled.nTimes(2)).toBeTrue();
+        expect(spyFooFn.wasCalled.nTimes(1)).toBeFalse();
+        expect(spyBarFn.wasCalled()).toBeTrue();
+        expect(spyBarFn.wasCalled.nTimes(1)).toBeTrue();
+        expect(spyBarFn.wasCalled.nTimes(2)).toBeFalse();
     });
 });
 
-describe('using snoop\'s "calls" api with functions', function(){
+describe('using spy\'s "calls" api with functions', function(){
     var i,
         foo = function(arg){
             return arg;
@@ -616,19 +615,19 @@ describe('using snoop\'s "calls" api with functions', function(){
         bar ={},
         n = 3,
         aCall,
-        snoopedFooFn = snoop(foo, bar).callActual();
+        spyFooFn = spy(foo, bar).callActual();
     for(i = 0; i < n; i++){
-        snoopedFooFn(i) ;
+        spyFooFn(i) ;
     }
     it('count() returns the right count', function(){
-        expect(snoopedFooFn.calls.count()).toEqual(n);
+        expect(spyFooFn.calls.count()).toEqual(n);
     });
     it('all() returns an array with the right number of elements', function(){
-        expect(snoopedFooFn.calls.all().length).toEqual(n);
+        expect(spyFooFn.calls.all().length).toEqual(n);
     });
     it('forCall(n) returns the correct element', function(){
         for(i = 0; i < n; i++){
-            aCall = snoopedFooFn.calls.forCall(i);
+            aCall = spyFooFn.calls.forCall(i);
             expect(aCall.context).toEqual(bar);
             expect(aCall.args[0]).toEqual(i);
             expect(aCall.args[0]).toNotEqual(n);
