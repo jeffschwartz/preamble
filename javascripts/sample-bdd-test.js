@@ -266,11 +266,16 @@ describe('spying on a method', function(){
         foo.someFn();
         expect(foo.someFn).toHaveBeenCalled();
     });
+    it('we can query if the method was not called', function(){
+        var foo = this.foo;
+        spy(foo, 'someFn');
+        expect(foo.someFn).not.toHaveBeenCalled();
+    });
     it('we can query how many times the method was called', function(){
         var foo = this.foo;
         spy(foo, 'someFn');
         foo.someFn();
-        expect(foo.someFn).toHaveBeenCalledNTimes(1);
+        expect(foo.someFn.called()).toEqual(1);
     });
     it('we can query the method was called n times', function(){
         var foo = this.foo;

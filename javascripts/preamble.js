@@ -1112,28 +1112,10 @@
         //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
         //Functions to "note" assertions are passed as the
         //1st parameter to each test's callback function.
-        assert = {
-            //TODO(Jeff):v2.3.5 toEqual assertion
-            toEqual: noteToEqualAssertion,
-            toNotEqual: noteToNotEqualAssertion,
-            toBeTrue: noteToBeTrueAssertion,
-            toBeFalse: noteToBeFalseAssertion,
-            toBeTruthy: noteToBeTruthyAssertion,
-            toNotBeTruthy: noteToNotBeTruthyAssertion,
-            equal: noteEqualAssertion,
-            notEqual: noteNotEqualAssertion,
-            isTrue: noteIsTrueAssertion,
-            isFalse: noteIsFalseAssertion,
-            isTruthy: noteIsTruthyAssertion,
-            isNotTruthy: noteIsNotTruthyAssertion,
-            toHaveBeenCalled: noteToHaveBeenCalled,
-            toHaveBeenCalledNTimes: noteToHaveBeenCalledNTimes,
-            // toNotHaveBeenCalled: noteToNotHaveBeenCalled,
-            toHaveReturned: noteToHaveReturned,
-            toHaveThrown: noteToHaveThrown,
-            toHaveThrownWithValue: noteToHaveThrownWithValue,
-            toHaveThrownWithMessage: noteToHaveThrownWithMessage
-        };
+        //TODO(Jeff): v2.3.0
+        assert = new Assert();
+        //TODO(Jeff): v2.3.0
+        assert.not = new Not();
         window.Preamble = window.Preamble || {};
         //For use by external processes.
         window.Preamble.__ext__ = {};
@@ -1274,21 +1256,12 @@
     }
 
     //TODO(Jeff): v2.3.0
-    // //spy was called n times (boolean)
-    function assertToHaveBeenCalledNTimes(a, b){
-        var result = a_equals_b(a, b);
+    // //spy was not called (boolean)
+    function assertToNotHaveBeenCalled(a){
+        var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have been called ' + b + ' times'};
+        return {result: result, explain: 'expected spy to not have been called'};
     }
-
-    // //TODO(Jeff): v2.3.0
-    // // //spy was not called (boolean)
-    // function assertToNotHaveBeenCalled(a){
-    //     var result = a_equals_false(a);
-    //     // var result = a.wasCalled();
-    //     return {result: result, explain: 'expected spy to not have been called'};
-    // }
-
     //TODO(Jeff): v2.3.0
     // //spy returned
     function assertToHaveReturned(a, b){
@@ -1369,7 +1342,9 @@
             assertionLabel: assertionLabel,
             value: value,
             expectation: expectation,
-            stackTrace: stackTrace
+            stackTrace: stackTrace,
+            //TODO(Jeff): v2.3.0
+            negate: false
         });
     }
 
@@ -1411,28 +1386,28 @@
         }
         //push partial assertion (only the value) info onto the assertion table
         pushOntoAssertions(null, null, actual, null, null);
-        //retunr assert for chaining
+        //return assert for chaining
         return assert;
+    }
+
+    //TODO(Jeff): v2.3.0
+    //Qualifies if a matcher should be negated by examining its context (what it was called through)
+    function isNegated(context){
+        return context instanceof Not ? true : false;
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
     function noteToHaveBeenCalled(label){
+        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
-    }
 
-    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalledNTimes assertion
-    function noteToHaveBeenCalledNTimes(value, label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
         var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalledNTimes, label, value, stackTraceFromError(), a.value.called());
+            a = ti.get().assertions[ti.get().assertions.length - 1],
+            shouldNegate = isNegated(this);
+        completeTheAssertion(shouldNegate? assertToNotHaveBeenCalled : assertToHaveBeenCalled,
+            label, true, stackTraceFromError(), a.value.wasCalled());
     }
 
     // //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
@@ -1574,6 +1549,68 @@
         }
         pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
+
+    // api = {
+    //     toEqual: noteToEqualAssertion,
+    //     toNotEqual: noteToNotEqualAssertion,
+    //     toBeTrue: noteToBeTrueAssertion,
+    //     toBeFalse: noteToBeFalseAssertion,
+    //     toBeTruthy: noteToBeTruthyAssertion,
+    //     toNotBeTruthy: noteToNotBeTruthyAssertion,
+    //     equal: noteEqualAssertion,
+    //     notEqual: noteNotEqualAssertion,
+    //     isTrue: noteIsTrueAssertion,
+    //     isFalse: noteIsFalseAssertion,
+    //     isTruthy: noteIsTruthyAssertion,
+    //     isNotTruthy: noteIsNotTruthyAssertion,
+    //     toHaveBeenCalled: noteToHaveBeenCalled,
+    //     toHaveReturned: noteToHaveReturned,
+    //     toHaveThrown: noteToHaveThrown,
+    //     toHaveThrownWithValue: noteToHaveThrownWithValue,
+    //     toHaveThrownWithMessage: noteToHaveThrownWithMessage,
+    // };
+
+    //TODO(Jeff): v2.3.0
+    function Assert(){}
+    // Assert.prototype = api;
+    Assert.prototype.toEqual = noteToEqualAssertion;
+    Assert.prototype.toNotEqual = noteToNotEqualAssertion;
+    Assert.prototype.toBeTrue = noteToBeTrueAssertion;
+    Assert.prototype.toBeFalse = noteToBeFalseAssertion;
+    Assert.prototype.toBeTruthy = noteToBeTruthyAssertion;
+    Assert.prototype.toNotBeTruthy = noteToNotBeTruthyAssertion;
+    Assert.prototype.equal = noteEqualAssertion;
+    Assert.prototype.notEqual = noteNotEqualAssertion;
+    Assert.prototype.isTrue = noteIsTrueAssertion;
+    Assert.prototype.isFalse = noteIsFalseAssertion;
+    Assert.prototype.isTruthy = noteIsTruthyAssertion;
+    Assert.prototype.isNotTruthy = noteIsNotTruthyAssertion;
+    Assert.prototype.toHaveBeenCalled = noteToHaveBeenCalled;
+    Assert.prototype.toHaveReturned = noteToHaveReturned;
+    Assert.prototype.toHaveThrown = noteToHaveThrown;
+    Assert.prototype.toHaveThrownWithValue = noteToHaveThrownWithValue;
+    Assert.prototype.toHaveThrownWithMessage = noteToHaveThrownWithMessage;
+
+    //TODO(Jeff): v2.3.0
+    function Not(){}
+    // Not.prototype = api;
+    Not.prototype.toEqual = noteToEqualAssertion;
+    Not.prototype.toNotEqual = noteToNotEqualAssertion;
+    Not.prototype.toBeTrue = noteToBeTrueAssertion;
+    Not.prototype.toBeFalse = noteToBeFalseAssertion;
+    Not.prototype.toBeTruthy = noteToBeTruthyAssertion;
+    Not.prototype.toNotBeTruthy = noteToNotBeTruthyAssertion;
+    Not.prototype.equal = noteEqualAssertion;
+    Not.prototype.notEqual = noteNotEqualAssertion;
+    Not.prototype.isTrue = noteIsTrueAssertion;
+    Not.prototype.isFalse = noteIsFalseAssertion;
+    Not.prototype.isTruthy = noteIsTruthyAssertion;
+    Not.prototype.isNotTruthy = noteIsNotTruthyAssertion;
+    Not.prototype.toHaveBeenCalled = noteToHaveBeenCalled;
+    Not.prototype.toHaveReturned = noteToHaveReturned;
+    Not.prototype.toHaveThrown = noteToHaveThrown;
+    Not.prototype.toHaveThrownWithValue = noteToHaveThrownWithValue;
+    Not.prototype.toHaveThrownWithMessage = noteToHaveThrownWithMessage;
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
