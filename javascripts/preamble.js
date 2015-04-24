@@ -1262,10 +1262,19 @@
         // var result = a.wasCalled();
         return {result: result, explain: 'expected spy to not have been called'};
     }
+
     //TODO(Jeff): v2.3.0
     // //spy returned
     function assertToHaveReturned(a, b){
         var result = a_equals_b(a, b);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have returned ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy not have returned
+    function assertToNotHaveReturned(a, b){
+        var result = a_notequals_b(a, b);
         // var result = a.wasCalled();
         return {result: result, explain: 'expected spy to have returned ' + JSON.stringify(b)};
     }
@@ -1410,24 +1419,17 @@
             label, true, stackTraceFromError(), a.value.wasCalled());
     }
 
-    // //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
-    // function noteToNotHaveBeenCalled(label){
-    //     // if(arguments.length < 1){
-    //     //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-    //     // }
-    //     var ti = testsIterator,
-    //         a = ti.get().assertions[ti.get().assertions.length - 1];
-    //     completeTheAssertion(assertToNotHaveBeenCalled, label, true, stackTraceFromError(), a.value.wasCalled());
-    // }
-
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
     function noteToHaveReturned(value, label){
+        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
         var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveReturned, label, value, stackTraceFromError(), a.value.returned());
+            a = ti.get().assertions[ti.get().assertions.length - 1],
+            shouldNegate = isNegated(this);
+        completeTheAssertion(shouldNegate ? assertToNotHaveReturned : assertToHaveReturned,
+            label, value, stackTraceFromError(), a.value.returned());
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrown assertion

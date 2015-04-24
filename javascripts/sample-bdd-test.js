@@ -306,8 +306,14 @@ describe('spying on a method', function(){
             arg = 'Preamble rocks!';
         spy(foo, 'someFn').callActual();
         foo.someFn(arg);
-        expect(foo.someFn.returned()).toEqual(arg);
-        expect(foo.someFn.returned()).toNotEqual(arg + '!');
+        expect(foo.someFn).toHaveReturned(arg);
+    });
+    it('we can query for what the method did not returned', function(){
+        var foo = this.foo,
+            arg = 'Preamble rocks!';
+        spy(foo, 'someFn').callActual();
+        foo.someFn(arg);
+        expect(foo.someFn).not.toHaveReturned(arg + '!');
     });
 });
 
