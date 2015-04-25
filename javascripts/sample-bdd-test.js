@@ -252,6 +252,68 @@ describe('Running asynchronous tests with afterEachAsync', function(){
     });
 });
 
+describe('Spies are test doubles', function(){
+    beforeEach(function(){
+        this.foo = {
+            someFn: function(arg){
+                return arg;
+            },
+            someOtherFn: function () {}
+        };
+    });
+    describe('which can stub any method or function', function(){
+        describe('and can track all calls, contexts used, arguments passed and return values', function(){
+            it('tracks all calls', function(){
+                var foo = this.foo;
+                spy(foo, 'someFn');
+                foo.someFn();
+                expect(foo.someFn).toHaveBeenCalled();
+                spy(foo, 'someOtherFn');
+                expect(foo.someOtherFn).not.toHaveBeenCalled();
+            });
+            it('tracks how many times it was called', function(){
+                var foo = this.foo;
+                spy(foo, 'someFn');
+                foo.someFn();
+                expect(foo.someFn.called()).toEqual(1);
+            });
+            it('tracks if it was called "n" times', function(){
+                var foo = this.foo;
+                spy(foo, 'someFn');
+                foo.someFn();
+                expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
+                expect(foo.someFn.wasCalled.nTimes(2)).toBeFalse();
+            });
+            it('tracks what context it was called with', function(){
+                var foo = this.foo,
+                    bar = {};
+                spy(foo, 'someFn');
+                foo.someFn();
+                expect(foo.someFn.contextCalledWith()).toEqual(foo);
+                expect(foo.someFn.contextCalledWith()).toNotEqual(bar);
+            });
+            it('tracks the arguments that it was called with', function(){
+                var foo = this.foo,
+                    arg = 'Preamble rocks!';
+                spy(foo, 'someFn');
+                foo.someFn(arg);
+                expect(foo.someFn.args.getArgument(0)).toEqual(arg);
+                expect(foo.someFn.args.getArgument(0)).toNotEqual(arg + '!');
+                expect(foo.someFn.args.getArgument(1)).toNotBeTruthy();
+            });
+            it('tracks what it returned', function(){
+                var foo = this.foo,
+                    arg = 'Preamble rocks!';
+                spy(foo, 'someFn').callActual();
+                foo.someFn(arg);
+                expect(foo.someFn).toHaveReturned(arg);
+                spy(foo, 'someOtherFn').callActual();
+                expect(foo.someOtherFn).not.toHaveReturned(arg);
+            });
+        });
+    });
+});
+
 describe('spying on a method', function(){
     beforeEach(function(){
         this.foo = {
@@ -260,64 +322,66 @@ describe('spying on a method', function(){
             }
         };
     });
-    it('we can query if the method was called', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn');
-        foo.someFn();
-        expect(foo.someFn).toHaveBeenCalled();
-    });
-    it('we can query if the method was not called', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn');
-        expect(foo.someFn).not.toHaveBeenCalled();
-    });
-    it('we can query how many times the method was called', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn');
-        foo.someFn();
-        expect(foo.someFn.called()).toEqual(1);
-    });
-    it('we can query the method was called n times', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn');
-        foo.someFn();
-        expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(foo.someFn.wasCalled.nTimes(2)).toBeFalse();
-    });
-    it('we can query the context the method was called with', function(){
-        var foo = this.foo,
-            bar = {};
-        spy(foo, 'someFn');
-        foo.someFn();
-        expect(foo.someFn.contextCalledWith()).toEqual(foo);
-        expect(foo.someFn.contextCalledWith()).toNotEqual(bar);
-    });
-    it('we can query for the arguments that the method was called with', function(){
-        var foo = this.foo,
-            arg = 'Preamble rocks!';
-        spy(foo, 'someFn');
-        foo.someFn(arg);
-        expect(foo.someFn.args.getArgument(0)).toEqual(arg);
-        expect(foo.someFn.args.getArgument(0)).toNotEqual(arg + '!');
-        expect(foo.someFn.args.getArgument(1)).toNotBeTruthy();
-    });
-    it('we can query for what the method returned', function(){
-        var foo = this.foo,
-            arg = 'Preamble rocks!';
-        spy(foo, 'someFn').callActual();
-        foo.someFn(arg);
-        expect(foo.someFn).toHaveReturned(arg);
-    });
-    it('we can query for what the method did not returned', function(){
-        var foo = this.foo,
-            arg = 'Preamble rocks!';
-        spy(foo, 'someFn').callActual();
-        foo.someFn(arg);
-        expect(foo.someFn).not.toHaveReturned(arg + '!');
+    describe('we can query', function(){
+        it('if the method was called', function(){
+            var foo = this.foo;
+            spy(foo, 'someFn');
+            foo.someFn();
+            expect(foo.someFn).toHaveBeenCalled();
+        });
+        it('if the method was not called', function(){
+            var foo = this.foo;
+            spy(foo, 'someFn');
+            expect(foo.someFn).not.toHaveBeenCalled();
+        });
+        it('for how many times the method was called', function(){
+            var foo = this.foo;
+            spy(foo, 'someFn');
+            foo.someFn();
+            expect(foo.someFn.called()).toEqual(1);
+        });
+        it('if the method was called "n" times', function(){
+            var foo = this.foo;
+            spy(foo, 'someFn');
+            foo.someFn();
+            expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
+            expect(foo.someFn.wasCalled.nTimes(2)).toBeFalse();
+        });
+        it('for what context the method was called with', function(){
+            var foo = this.foo,
+                bar = {};
+            spy(foo, 'someFn');
+            foo.someFn();
+            expect(foo.someFn.contextCalledWith()).toEqual(foo);
+            expect(foo.someFn.contextCalledWith()).toNotEqual(bar);
+        });
+        it('for the arguments that the method was called with', function(){
+            var foo = this.foo,
+                arg = 'Preamble rocks!';
+            spy(foo, 'someFn');
+            foo.someFn(arg);
+            expect(foo.someFn.args.getArgument(0)).toEqual(arg);
+            expect(foo.someFn.args.getArgument(0)).toNotEqual(arg + '!');
+            expect(foo.someFn.args.getArgument(1)).toNotBeTruthy();
+        });
+        it('for what the method returned', function(){
+            var foo = this.foo,
+                arg = 'Preamble rocks!';
+            spy(foo, 'someFn').callActual();
+            foo.someFn(arg);
+            expect(foo.someFn).toHaveReturned(arg);
+        });
+        it('for what the method did not return', function(){
+            var foo = this.foo,
+                arg = 'Preamble rocks!';
+            spy(foo, 'someFn').callActual();
+            foo.someFn(arg);
+            expect(foo.someFn).not.toHaveReturned(arg + '!');
+        });
     });
 });
 
-describe('spying on a method', function(){
+describe('spying on a method that throws an exception', function(){
     beforeEach(function(){
         this.error = 'something went terribly wrong!';
         this.foo = {
@@ -328,30 +392,6 @@ describe('spying on a method', function(){
                 throw new Error(this.error);
             }
         };
-    });
-    it('we can query if the method was called', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn');
-        foo.someFn();
-        expect(foo.someFn).toHaveBeenCalled();
-    });
-    it('we can query if the method returned a specific value', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn').callActual();
-        foo.someFn(123);
-        expect(foo.someFn).toHaveReturned(123);
-    });
-    it('we can query if the method threw an exception', function(){
-        var foo = this.foo;
-        spy(foo, 'someOtherFn').callActual();
-        foo.someOtherFn(123);
-        expect(foo.someOtherFn).toHaveThrown();
-    });
-    it('we can query if the method threw an exception with a specific value', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn').throws(123);
-        foo.someFn();
-        expect(foo.someFn).toHaveThrownWithValue(123);
     });
     it('we can query if the method threw an exception with a specific message', function(){
         var foo = this.foo;
