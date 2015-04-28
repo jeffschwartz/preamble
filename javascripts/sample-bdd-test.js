@@ -379,25 +379,36 @@ describe('spying on a method', function(){
             expect(foo.someFn).not.toHaveReturned(arg + '!');
         });
     });
-});
-
-describe('spying on a method that throws an exception', function(){
-    beforeEach(function(){
-        this.error = 'something went terribly wrong!';
-        this.foo = {
-            someFn: function(arg){
-                return arg;
-            },
-            someOtherFn: function(){
-                throw new Error(this.error);
-            }
-        };
-    });
-    it('we can query if the method threw an exception with a specific message', function(){
-        var foo = this.foo;
-        spy(foo, 'someFn').throws('123');
-        foo.someFn();
-        expect(foo.someFn).toHaveThrownWithMessage('123');
+    describe('and if it throws an exception', function(){
+        beforeEach(function(){
+            this.error = 'something went terribly wrong!';
+            this.foo = {
+                someFn: function(arg){
+                    return a + arg;
+                }
+            };
+        });
+        describe('we can query', function(){
+            it('does throw', function(){
+                var foo = this.foo;
+                spy(foo, 'someFn');
+                foo.someFn.callActual();
+                foo.someFn();
+                expect(foo.someFn).not.toHaveThrown();
+            });
+            it('if the method threw an exception with a specific message', function(){
+                var foo = this.foo;
+                spy(foo, 'someFn').throws('abc');
+                foo.someFn('panda');
+                expect(foo.someFn).toHaveThrownWithMessage('abc');
+            });
+            it('if the method threw an exception with a specific value', function(){
+                var foo = this.foo;
+                spy(foo, 'someFn').throws(123);
+                foo.someFn('panda');
+                expect(foo.someFn).toHaveThrownWithValue(123);
+            });
+        });
     });
 });
 
