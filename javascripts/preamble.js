@@ -1398,11 +1398,20 @@
 
     //TODO(Jeff):v2.3.0 notes the actual value
     function noteExpectation(actual){
+        var aSpy;
         if(arguments.length < 1){
             throwException('Assertion "expect" requires 1 arguments, found ' + arguments.length);
         }
+        //Make it a spy if it isn't one already
+        if(typeof(actual) === 'function' && !actual._marker){
+            aSpy = spy(actual);
+            //will need to call the actual implementation, not the stub
+            aSpy.callActual();
+            //call it!
+            aSpy();
+        }
         //push partial assertion (only the value) info onto the assertion table
-        pushOntoAssertions(null, null, actual, null, null);
+        pushOntoAssertions(null, null, aSpy ? aSpy : actual, null, null);
         //return assert for chaining
         return assert;
     }
