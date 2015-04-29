@@ -47,6 +47,18 @@ describe('Preamble comes with numerous matchers', function(){
             anObj2 = {iAm: 'anObj2'};
         expect(anObj1).toNotEqual(anObj2);
     });
+    it('the "toHaveThrown" matcher uses a strict boolean comparison to assert that the function threw an exception', function(){
+        function someFn(arg){
+            return a + arg;
+        }
+        expect(function(){ someFn('abc'); }).toHaveThrown();
+    });
+    it('the "not" qualifier along with "toHaveThrown" matcher uses a strict boolean comparison to assert that the function did not throw an exception', function(){
+        function someFn(arg){
+            return arg;
+        }
+        expect(function(){ someFn('abc'); }).not.toHaveThrown();
+    });
 });
 
 describe('specs can be nested within specs', function(){
@@ -389,12 +401,12 @@ describe('spying on a method', function(){
             };
         });
         describe('we can query', function(){
-            it('does throw', function(){
+            it('if it does throw', function(){
                 var foo = this.foo;
                 spy(foo, 'someFn');
                 foo.someFn.callActual();
                 foo.someFn();
-                expect(foo.someFn).not.toHaveThrown();
+                expect(foo.someFn).toHaveThrown();
             });
             it('if the method threw an exception with a specific message', function(){
                 var foo = this.foo;
