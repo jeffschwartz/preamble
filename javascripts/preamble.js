@@ -14,6 +14,7 @@
         queueStableInterval = 1,
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
         reporter,
+        api,
         assert,
         intervalId,
         runtimeFilter,
@@ -44,6 +45,25 @@
             fBound.prototype = new FNOP();
             return fBound;
         };
+    }
+
+    //TODO(Jeff): v2.3.0
+    /**
+     * Creates a new object that can be used as a protype for a ctor.
+     * @param api object The object whose own properties are to be copied to
+     * the new prototype object.
+     * @param ctr function The constructor function which will be set as the
+     * value of the new prototype's contructor property.
+     * @returns an object that can be uses as a protytpe.
+     */
+    function createPrototype(api, ctr){
+        var ownProps = Object.getOwnPropertyNames(api),
+            prototype = {};
+        ownProps.forEach(function(prop){
+            prototype[prop] = api[prop];
+        });
+        prototype.constructor = ctr;
+        return prototype;
     }
 
     function throwException(errMessage){
@@ -1115,7 +1135,7 @@
         //TODO(Jeff): v2.3.0
         assert = new Assert();
         //TODO(Jeff): v2.3.0
-        assert.not = new Not();
+        // assert.not = new Not();
         window.Preamble = window.Preamble || {};
         //For use by external processes.
         window.Preamble.__ext__ = {};
@@ -1572,67 +1592,34 @@
         pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
 
-    // api = {
-    //     toEqual: noteToEqualAssertion,
-    //     toNotEqual: noteToNotEqualAssertion,
-    //     toBeTrue: noteToBeTrueAssertion,
-    //     toBeFalse: noteToBeFalseAssertion,
-    //     toBeTruthy: noteToBeTruthyAssertion,
-    //     toNotBeTruthy: noteToNotBeTruthyAssertion,
-    //     equal: noteEqualAssertion,
-    //     notEqual: noteNotEqualAssertion,
-    //     isTrue: noteIsTrueAssertion,
-    //     isFalse: noteIsFalseAssertion,
-    //     isTruthy: noteIsTruthyAssertion,
-    //     isNotTruthy: noteIsNotTruthyAssertion,
-    //     toHaveBeenCalled: noteToHaveBeenCalled,
-    //     toHaveReturned: noteToHaveReturned,
-    //     toHaveThrown: noteToHaveThrown,
-    //     toHaveThrownWithValue: noteToHaveThrownWithValue,
-    //     toHaveThrownWithMessage: noteToHaveThrownWithMessage,
-    // };
+    //TODO(Jeff): v2.3.0
+    api = {
+        toEqual: noteToEqualAssertion,
+        toNotEqual: noteToNotEqualAssertion,
+        toBeTrue: noteToBeTrueAssertion,
+        toBeFalse: noteToBeFalseAssertion,
+        toBeTruthy: noteToBeTruthyAssertion,
+        toNotBeTruthy: noteToNotBeTruthyAssertion,
+        equal: noteEqualAssertion,
+        notEqual: noteNotEqualAssertion,
+        isTrue: noteIsTrueAssertion,
+        isFalse: noteIsFalseAssertion,
+        isTruthy: noteIsTruthyAssertion,
+        isNotTruthy: noteIsNotTruthyAssertion,
+        toHaveBeenCalled: noteToHaveBeenCalled,
+        toHaveReturned: noteToHaveReturned,
+        toHaveThrown: noteToHaveThrown,
+        toHaveThrownWithValue: noteToHaveThrownWithValue,
+        toHaveThrownWithMessage: noteToHaveThrownWithMessage
+    };
 
     //TODO(Jeff): v2.3.0
-    function Assert(){}
-    // Assert.prototype = api;
-    Assert.prototype.toEqual = noteToEqualAssertion;
-    Assert.prototype.toNotEqual = noteToNotEqualAssertion;
-    Assert.prototype.toBeTrue = noteToBeTrueAssertion;
-    Assert.prototype.toBeFalse = noteToBeFalseAssertion;
-    Assert.prototype.toBeTruthy = noteToBeTruthyAssertion;
-    Assert.prototype.toNotBeTruthy = noteToNotBeTruthyAssertion;
-    Assert.prototype.equal = noteEqualAssertion;
-    Assert.prototype.notEqual = noteNotEqualAssertion;
-    Assert.prototype.isTrue = noteIsTrueAssertion;
-    Assert.prototype.isFalse = noteIsFalseAssertion;
-    Assert.prototype.isTruthy = noteIsTruthyAssertion;
-    Assert.prototype.isNotTruthy = noteIsNotTruthyAssertion;
-    Assert.prototype.toHaveBeenCalled = noteToHaveBeenCalled;
-    Assert.prototype.toHaveReturned = noteToHaveReturned;
-    Assert.prototype.toHaveThrown = noteToHaveThrown;
-    Assert.prototype.toHaveThrownWithValue = noteToHaveThrownWithValue;
-    Assert.prototype.toHaveThrownWithMessage = noteToHaveThrownWithMessage;
+    function Assert(){this.not = new Not();}
+    Assert.prototype = createPrototype(api, Assert);
 
     //TODO(Jeff): v2.3.0
     function Not(){}
-    // Not.prototype = api;
-    Not.prototype.toEqual = noteToEqualAssertion;
-    Not.prototype.toNotEqual = noteToNotEqualAssertion;
-    Not.prototype.toBeTrue = noteToBeTrueAssertion;
-    Not.prototype.toBeFalse = noteToBeFalseAssertion;
-    Not.prototype.toBeTruthy = noteToBeTruthyAssertion;
-    Not.prototype.toNotBeTruthy = noteToNotBeTruthyAssertion;
-    Not.prototype.equal = noteEqualAssertion;
-    Not.prototype.notEqual = noteNotEqualAssertion;
-    Not.prototype.isTrue = noteIsTrueAssertion;
-    Not.prototype.isFalse = noteIsFalseAssertion;
-    Not.prototype.isTruthy = noteIsTruthyAssertion;
-    Not.prototype.isNotTruthy = noteIsNotTruthyAssertion;
-    Not.prototype.toHaveBeenCalled = noteToHaveBeenCalled;
-    Not.prototype.toHaveReturned = noteToHaveReturned;
-    Not.prototype.toHaveThrown = noteToHaveThrown;
-    Not.prototype.toHaveThrownWithValue = noteToHaveThrownWithValue;
-    Not.prototype.toHaveThrownWithMessage = noteToHaveThrownWithMessage;
+    Not.prototype = createPrototype(api, Not);
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
