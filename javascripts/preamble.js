@@ -14,6 +14,8 @@
         queueStableInterval = 1,
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
         reporter,
+        spy,
+        iteratorFactory,
         api,
         assert,
         intervalId,
@@ -554,7 +556,8 @@
         function on(topic, handler, context){
             var token = getToken(),
                 boundAsyncHandler;
-                boundAsyncHandler = context && makeAsync(topic, bindTo(handler, context)) || makeAsync(topic, handler);
+                boundAsyncHandler = context && makeAsync(topic,
+                    bindTo(handler, context)) || makeAsync(topic, handler);
             //Add topic to subscribers if it doesn't already have it.
             if(!subscribers.hasOwnProperty(topic)){
                 subscribers[topic] = {};
@@ -738,56 +741,60 @@
         reporter.details(queue);
     });
 
-    /**
-     * An iterator for iterating over arrays.
-     * @param {array} argArray The array to be iterated over.
-     */
-    function iteratorFactory(argArray){
-        var currentIndex = -1;
-        if(!Array.isArray(argArray)){
-            throw new Error('iteratorFactory expects an array.');
-        }
-        function hasNext(){
-            if(argArray.length && currentIndex + 1 < argArray.length){
-                return true;
-            }else{
-                return false;
+    iteratorFactory = (function() {
+        /**
+         * An iterator for iterating over arrays.
+         * @param {array} argArray The array to be iterated over.
+         */
+        function _iteratorFactory(argArray){
+            var currentIndex = -1;
+            if(!Array.isArray(argArray)){
+                throw new Error('iteratorFactory expects an array.');
             }
-        }
-        function next(){
-            if(hasNext()){
-                currentIndex++;
-                return true;
-            }else{
-                return false;
+            function hasNext(){
+                if(argArray.length && currentIndex + 1 < argArray.length){
+                    return true;
+                }else{
+                    return false;
+                }
             }
-        }
-        function get(){
-            return argArray.length && currentIndex >= 0 && currentIndex < argArray.length && argArray[currentIndex];
-        }
-        function getNext(){
-            if(next()){
-                return get();
+            function next(){
+                if(hasNext()){
+                    currentIndex++;
+                    return true;
+                }else{
+                    return false;
+                }
             }
-        }
-        function peekForward(){
-            if(currentIndex + 1 < argArray.length){
-                return argArray[currentIndex + 1];
+            function get(){
+                return argArray.length && currentIndex >= 0 && currentIndex <
+                    argArray.length && argArray[currentIndex];
             }
+            function getNext(){
+                if(next()){
+                    return get();
+                }
+            }
+            function peekForward(){
+                if(currentIndex + 1 < argArray.length){
+                    return argArray[currentIndex + 1];
+                }
+            }
+            function peekBackward() {
+                return argArray[currentIndex - 1];
+            }
+            var iterator = {
+                hasNext: hasNext,
+                next: next,
+                get: get,
+                getNext: getNext,
+                peekForward: peekForward,
+                peekBackward: peekBackward
+            };
+            return iterator;
         }
-        function peekBackward() {
-            return argArray[currentIndex - 1];
-        }
-        var iterator = {
-            hasNext: hasNext,
-            next: next,
-            get: get,
-            getNext: getNext,
-            peekForward: peekForward,
-            peekBackward: peekBackward
-        };
-        return iterator;
-    }
+        return _iteratorFactory;
+    }());
 
     /**
      * Process for building the queue.
@@ -1557,20 +1564,6 @@
         pushOntoAssertions(assertEqual, label, value, expectation, stackTraceFromError());
     }
 
-    function noteIsTrueAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
-    }
-
-    function noteIsTruthyAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isTruthy" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
-    }
-
     function noteNotEqualAssertion(value, expectation, label){
         if(arguments.length < 2){
             throwException('Assertion "notEqual" requires 2 arguments, found ' + arguments.length);
@@ -1578,11 +1571,25 @@
         pushOntoAssertions(assertNotEqual, label, value, expectation, stackTraceFromError());
     }
 
+    function noteIsTrueAssertion(value, label){
+        if(arguments.length < 1){
+            throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
+        }
+        pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
+    }
+
     function noteIsFalseAssertion(value, label){
         if(arguments.length < 1){
             throwException('Assertion "isFalse" requires 1 argument, found ' + arguments.length);
         }
         pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
+    }
+
+    function noteIsTruthyAssertion(value, label){
+        if(arguments.length < 1){
+            throwException('Assertion "isTruthy" requires 1 argument, found ' + arguments.length);
+        }
+        pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
     }
 
     function noteIsNotTruthyAssertion(value, label){
@@ -1631,227 +1638,230 @@
         return config.uiTestContainerId;
     }
 
-    /**
-     * @param {object} argObject optional A function to be snooped or an object.
-     * @param {string} argProperty optional An object used as a context if the
-     * 1st parameter is a function or the name of the property of argObject to
-     * be snooped.
-     */
-    //TODO(Jeff): v2.3.0 support snooping on standalone functions and
-    //allowing them to be bound to a context passed as the 2nd parameter
-    function spy(argObject, argProperty){
-        var targetFn,
-            snoopster,
-            calls = [];
-        // window.calls = calls;
-        //TODO(Jeff): v2.3.0
-        if(arguments.length > 2){
-            throw new Error('spy requires 0, 1 or 2 arguments - found ' +
-                arguments.length + '.');
-        }
-        if(arguments.length === 1 && typeof(arguments[0]) !== 'function'){
-            throw new Error('1st parameter must be a function or an object');
-        }else if(arguments.length === 2 && typeof(arguments[0]) !== 'function' && typeof(arguments[0]) !== 'object'){
-            throw new Error('when the 1st parameter is a function the 2nd parameter must be an object');
-        }else if(arguments.length === 2 && typeof(arguments[0]) === 'object' &&
-            !arguments[0].hasOwnProperty([arguments[1]])){
-            throw new Error('object does not have property name "' + arguments[1] + '"');
-        }
-        function argsToArray(argArguments){
-            return [].slice.call(argArguments, 0);
-        }
-        //api
-        function Args(aArgs){
-            //TODO(Jeff): remove commented out code
-            // this.args = argsToArray(args);
-            this.args = aArgs;
-        }
-        //TODO(Jeff): v2.3.0 - fixed check for args length bug
-        Args.prototype.getArgumentsLength = function(){
-            return  this.args.length ? this.args.length : 0;
-        };
-        //TODO(Jeff): v2.3.0 - fixed check for args length bug
-        Args.prototype.hasArgument = function(i){
-            return this.getArgumentsLength() > i ? true : false;
-        };
-        //TODO(Jeff): v2.3.0 - fixed check for args length bug
-        Args.prototype.getArgument = function(i){
-            return this.hasArgument(i) ? this.args[i] : null;
-        };
-        //TODO(Jeff): v2.3.0
-        Args.prototype.hasArgumentProperty = function(i, propertyName){
-            return this.hasArgument(i) && this.args[i][propertyName] ? true : false;
-        };
-        //TODO(Jeff): v2.3.0
-        Args.prototype.getArgumentProperty = function(i, propertyName){
-            return this.hasArgumentProperty(i, propertyName) ? this.args[i][propertyName] : null;
-        };
-        //api
-        function ACall(context, args, error, returned){
-            this.context = context;
-            this.args = args;
-            this.error = error;
-            this.returned = returned;
-        }
-        //TODO(Jeff): v2.3.0
-        targetFn = arguments.length === 0 ? function(){} :
-            typeof(arguments[0]) === 'function' ? argObject :
-            argObject[argProperty];
-        //tracking
-        snoopster = function(){
-            var aArgs = arguments.length && argsToArray(arguments) || [],
-                fn,
-                error,
-                returned;
+    spy = (function() {
+        /**
+         * @param {object} argObject optional A function to be snooped or an object.
+         * @param {string} argProperty optional An object used as a context if the
+         * 1st parameter is a function or the name of the property of argObject to
+         * be snooped.
+         */
+        //TODO(Jeff): v2.3.0 support snooping on standalone functions and
+        //allowing them to be bound to a context passed as the 2nd parameter
+        function _spy(argObject, argProperty){
+            var targetFn,
+                snoopster,
+                calls = [];
+            // window.calls = calls;
             //TODO(Jeff): v2.3.0
-            function ThrowsException(message, value){
-                this.message = message;
-                this.value = value;
+            if(arguments.length > 2){
+                throw new Error('spy requires 0, 1 or 2 arguments - found ' +
+                    arguments.length + '.');
+            }
+            if(arguments.length === 1 && typeof(arguments[0]) !== 'function'){
+                throw new Error('1st parameter must be a function or an object');
+            }else if(arguments.length === 2 && typeof(arguments[0]) !== 'function' && typeof(arguments[0]) !== 'object'){
+                throw new Error('when the 1st parameter is a function the 2nd parameter must be an object');
+            }else if(arguments.length === 2 && typeof(arguments[0]) === 'object' &&
+                !arguments[0].hasOwnProperty([arguments[1]])){
+                throw new Error('object does not have property name "' + arguments[1] + '"');
+            }
+            function argsToArray(argArguments){
+                return [].slice.call(argArguments, 0);
+            }
+            //api
+            function Args(aArgs){
+                //TODO(Jeff): remove commented out code
+                // this.args = argsToArray(args);
+                this.args = aArgs;
+            }
+            //TODO(Jeff): v2.3.0 - fixed check for args length bug
+            Args.prototype.getArgumentsLength = function(){
+                return  this.args.length ? this.args.length : 0;
+            };
+            //TODO(Jeff): v2.3.0 - fixed check for args length bug
+            Args.prototype.hasArgument = function(i){
+                return this.getArgumentsLength() > i ? true : false;
+            };
+            //TODO(Jeff): v2.3.0 - fixed check for args length bug
+            Args.prototype.getArgument = function(i){
+                return this.hasArgument(i) ? this.args[i] : null;
+            };
+            //TODO(Jeff): v2.3.0
+            Args.prototype.hasArgumentProperty = function(i, propertyName){
+                return this.hasArgument(i) && this.args[i][propertyName] ? true : false;
+            };
+            //TODO(Jeff): v2.3.0
+            Args.prototype.getArgumentProperty = function(i, propertyName){
+                return this.hasArgumentProperty(i, propertyName) ? this.args[i][propertyName] : null;
+            };
+            //api
+            function ACall(context, args, error, returned){
+                this.context = context;
+                this.args = args;
+                this.error = error;
+                this.returned = returned;
             }
             //TODO(Jeff): v2.3.0
-            if(snoopster._callActual || snoopster._callFake){
-                fn = snoopster._callFake || targetFn;
-                try{
-                    returned = fn.apply(this, aArgs);
-                }catch(er){
-                    error = er;
+            targetFn = arguments.length === 0 ? function(){} :
+                typeof(arguments[0]) === 'function' ? argObject :
+                argObject[argProperty];
+            //tracking
+            snoopster = function(){
+                var aArgs = arguments.length && argsToArray(arguments) || [],
+                    fn,
+                    error,
+                    returned;
+                //TODO(Jeff): v2.3.0
+                function ThrowsException(message, value){
+                    this.message = message;
+                    this.value = value;
                 }
-            }else{
-                //TODO(Jeff): v2.3.Error
-                if(snoopster._throws){
+                //TODO(Jeff): v2.3.0
+                if(snoopster._callActual || snoopster._callFake){
+                    fn = snoopster._callFake || targetFn;
                     try{
-                        throw new ThrowsException(snoopster._throws.message, snoopster._throws.value);
+                        returned = fn.apply(this, aArgs);
                     }catch(er){
                         error = er;
                     }
+                }else{
+                    //TODO(Jeff): v2.3.Error
+                    if(snoopster._throws){
+                        try{
+                            throw new ThrowsException(snoopster._throws.message, snoopster._throws.value);
+                        }catch(er){
+                            error = er;
+                        }
+                    }
                 }
+                returned = snoopster._returns || returned;
+                snoopster.args = new Args(aArgs);
+                calls.push(new ACall(this, aArgs, error, returned));
+            };
+            //bind passed context (2nd parameter/optional) when the 1st parameter is
+            //a function
+            if(typeof(arguments[0]) === 'function' && arguments.length === 2){
+                snoopster = snoopster.bind(arguments[1]);
             }
-            returned = snoopster._returns || returned;
-            snoopster.args = new Args(aArgs);
-            calls.push(new ACall(this, aArgs, error, returned));
-        };
-        //bind passed context (2nd parameter/optional) when the 1st parameter is
-        //a function
-        if(typeof(arguments[0]) === 'function' && arguments.length === 2){
-            snoopster = snoopster.bind(arguments[1]);
-        }
-        //api
-        //TODO(Jeff): v2.3.0
-        snoopster._marker = 'preamble.snoopster';
-        //TODO(Jeff): v2.3.0
-        snoopster._throws = undefined;
-        //TODO(Jeff): v2.3.0
-        /**
-         * @param {string} message The message for the exception.
-         * @param {number} value The value for the exception.
-         */
-        snoopster.throws = function(message, value){
-            var err = 'throws expects a string or a value or a string and a value';
-            snoopster._throws = snoopster._throws || {message: void(0), value: void(0)};
-            if(!arguments.length){
-                throw new Error(err);
-            }
-            //string or value passed
-            if(arguments.length === 1){
-                if(typeof(arguments[0]) === 'string'){
-                    snoopster._throws.message = arguments[0];
-                }else if(typeof(arguments[0]) === 'number'){
-                    snoopster._throws.value = arguments[0];
+            //api
+            //TODO(Jeff): v2.3.0
+            snoopster._marker = 'preamble.snoopster';
+            //TODO(Jeff): v2.3.0
+            snoopster._throws = undefined;
+            //TODO(Jeff): v2.3.0
+            /**
+             * @param {string} message The message for the exception.
+             * @param {number} value The value for the exception.
+             */
+            snoopster.throws = function(message, value){
+                var err = 'throws expects a string or a value or a string and a value';
+                snoopster._throws = snoopster._throws || {message: void(0), value: void(0)};
+                if(!arguments.length){
+                    throw new Error(err);
+                }
+                //string or value passed
+                if(arguments.length === 1){
+                    if(typeof(arguments[0]) === 'string'){
+                        snoopster._throws.message = arguments[0];
+                    }else if(typeof(arguments[0]) === 'number'){
+                        snoopster._throws.value = arguments[0];
+                    }else{
+                        throw new Error(err);
+                    }
+                // string and value passed
+                }else if(arguments.length === 2){
+                    if(typeof(message) === 'string' && typeof(value) === 'number'){
+                        snoopster._throws.message = message;
+                        snoopster._throws.value = value;
+                    }else{
+                        throw new Error(err);
+                    }
                 }else{
                     throw new Error(err);
                 }
-            // string and value passed
-            }else if(arguments.length === 2){
-                if(typeof(message) === 'string' && typeof(value) === 'number'){
-                    snoopster._throws.message = message;
-                    snoopster._throws.value = value;
-                }else{
-                    throw new Error(err);
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster.returns = function(ret){
+                this._returns = ret;
+                //for chaining
+                return this;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster._resetCalls = function(){
+                this._callFake = null;
+                this._callActual = this._callStub = false;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster._callFake = null;
+            snoopster.callFake = function(fn){
+                if(fn && typeof(fn) !== 'function'){
+                    throw new Error('callFake expects to be called with a function');
                 }
-            }else{
-                throw new Error(err);
-            }
-        };
-        //TODO(Jeff): v2.3.0
-        snoopster.returns = function(ret){
-            this._returns = ret;
-            //for chaining
-            return this;
-        };
-        //TODO(Jeff): v2.3.0
-        snoopster._resetCalls = function(){
-            this._callFake = null;
-            this._callActual = this._callStub = false;
-        };
-        //TODO(Jeff): v2.3.0
-        snoopster._callFake = null;
-        snoopster.callFake = function(fn){
-            if(fn && typeof(fn) !== 'function'){
-                throw new Error('callFake expects to be called with a function');
-            }
-            this._resetCalls();
-            snoopster._callFake = fn;
-        };
-        //TODO(Jeff): v2.3.0
-        snoopster._callActual = false;
-        snoopster.callActual = function(){
-            this._resetCalls();
-            this._callActual = true;
-            //for chaining
-            return this;
-        };
-        snoopster.callStub = function(){
-            this._resetCalls();
-            this._callActual = false;
-            //for chaining
-            return this;
-        };
-        snoopster.called = function(){
-            return calls.length;
-        };
-        snoopster.wasCalled = function(){
-            return !!calls.length;
-        };
-        snoopster.wasCalled.nTimes = function(count){
-            if(arguments.length !== 1){
-                throw new Error('wasCalled.nTimes expects to be called with an integer');
-            }
-            return calls.length === count;
-        };
-        snoopster.contextCalledWith = function(){
-            return snoopster.wasCalled() && calls[calls.length - 1].context;
-        };
-        snoopster.returned = function(){
-            return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
-        };
-        snoopster.threw = function(){
-            return snoopster.wasCalled() && !!calls[calls.length - 1].error;
-        };
-        snoopster.threw.withMessage = function(message){
-            return snoopster.threw() && calls[calls.length - 1].error.message === message;
-        };
-        //TODO(Jeff): v2.3.0
-        snoopster.threw.withValue = function(val){
-            return snoopster.wasCalled() && calls[calls.length - 1].error.value === val;
-        };
-        snoopster.calls = {
-            count: function(){
+                this._resetCalls();
+                snoopster._callFake = fn;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster._callActual = false;
+            snoopster.callActual = function(){
+                this._resetCalls();
+                this._callActual = true;
+                //for chaining
+                return this;
+            };
+            snoopster.callStub = function(){
+                this._resetCalls();
+                this._callActual = false;
+                //for chaining
+                return this;
+            };
+            snoopster.called = function(){
                 return calls.length;
-            },
-            forCall: function(i){
-                return i >= 0 && i < calls.length && calls[i] || undefined;
-            },
-            all: function(){
-                return calls;
+            };
+            snoopster.wasCalled = function(){
+                return !!calls.length;
+            };
+            snoopster.wasCalled.nTimes = function(count){
+                if(arguments.length !== 1){
+                    throw new Error('wasCalled.nTimes expects to be called with an integer');
+                }
+                return calls.length === count;
+            };
+            snoopster.contextCalledWith = function(){
+                return snoopster.wasCalled() && calls[calls.length - 1].context;
+            };
+            snoopster.returned = function(){
+                return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
+            };
+            snoopster.threw = function(){
+                return snoopster.wasCalled() && !!calls[calls.length - 1].error;
+            };
+            snoopster.threw.withMessage = function(message){
+                return snoopster.threw() && calls[calls.length - 1].error.message === message;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster.threw.withValue = function(val){
+                return snoopster.wasCalled() && calls[calls.length - 1].error.value === val;
+            };
+            snoopster.calls = {
+                count: function(){
+                    return calls.length;
+                },
+                forCall: function(i){
+                    return i >= 0 && i < calls.length && calls[i] || undefined;
+                },
+                all: function(){
+                    return calls;
+                }
+            };
+            //TODO(Jeff): v2.3.0
+            if(arguments.length && typeof(arguments[0]) !== 'function' &&
+                typeof(arguments[0]) === 'object'){
+                argObject[argProperty] = snoopster;
             }
-        };
-        //TODO(Jeff): v2.3.0
-        if(arguments.length && typeof(arguments[0]) !== 'function' &&
-            typeof(arguments[0]) === 'object'){
-            argObject[argProperty] = snoopster;
+            return snoopster;
         }
-        return snoopster;
-    }
+        return _spy;
+    }());
 
     /**
      * It all starts here!
