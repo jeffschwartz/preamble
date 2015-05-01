@@ -1888,6 +1888,7 @@
         //have been loaded. Once stable, emit the 'start' event.
         //***Note: config.autoStart can only be false if it set by an
         //external process (e.g. Karma adapter).
+        //TODO(Jeff): v2.3.0 handle a missing test script
         intervalId = setInterval(function(){
             if(queue.length === prevQueueCount){
                 if(queueStableCount > 1 && config.autoStart){
