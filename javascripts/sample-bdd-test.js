@@ -63,10 +63,7 @@ describe('Preamble comes with numerous matchers', function(){
 
 describe('Preamble also has a "not" qualifier', function(){
     it('the "toBeTrue" matcher uses a strict boolean comparison to assert that the actual value is boolen true', function(){
-        expect(true).not.toBeTrue();
-    });
-    it('the "toBeFalse" matcher uses a strict boolean comparison to assert that the actual value is boolen false', function(){
-        expect(false).toBeFalse();
+        expect(false).not.toBeTrue();
     });
     it('the "toBeTruthy" matcher uses a truthy comparison to assert that the actual value is truthy', function(){
         expect({}).toBeTruthy();

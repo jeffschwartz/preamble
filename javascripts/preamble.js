@@ -16,7 +16,8 @@
         reporter,
         spy,
         iteratorFactory,
-        api,
+        // api,
+        // notApi,
         assert,
         intervalId,
         runtimeFilter,
@@ -49,24 +50,24 @@
         };
     }
 
-    //TODO(Jeff): v2.3.0
-    /**
-     * Creates a new object that can be used as a protype for a ctor.
-     * @param api object The object whose own properties are to be copied to
-     * the new prototype object.
-     * @param ctr function The constructor function which will be set as the
-     * value of the new prototype's contructor property.
-     * @returns an object that can be uses as a protytpe.
-     */
-    function createPrototype(api, ctr){
-        var ownProps = Object.getOwnPropertyNames(api),
-            prototype = {};
-        ownProps.forEach(function(prop){
-            prototype[prop] = api[prop];
-        });
-        prototype.constructor = ctr;
-        return prototype;
-    }
+    // //TODO(Jeff): v2.3.0
+    // /**
+    //  * Creates a new object that can be used as a protype for a ctor.
+    //  * @param api object The object whose own properties are to be copied to
+    //  * the new prototype object.
+    //  * @param ctr function The constructor function which will be set as the
+    //  * value of the new prototype's contructor property.
+    //  * @returns an object that can be uses as a protytpe.
+    //  */
+    // function createPrototype(api, ctr){
+    //     var ownProps = Object.getOwnPropertyNames(api),
+    //         prototype = {};
+    //     ownProps.forEach(function(prop){
+    //         prototype[prop] = api[prop];
+    //     });
+    //     prototype.constructor = ctr;
+    //     return prototype;
+    // }
 
     function throwException(errMessage){
         throw new Error(errMessage);
@@ -1331,11 +1332,27 @@
     }
 
     //TODO(Jeff): v2.3.0
+    // //spy not threwWithValue
+    function assertToNotHaveThrownWithValue(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have thrown an exception with the value ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
     // //spy threwWithMessage
     function assertToHaveThrownWithMessage(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
         return {result: result, explain: 'expected spy to have thrown an exception with the message ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy not threwWithMessage
+    function assertToNotHaveThrownWithMessage(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have thrown an exception with the message ' + JSON.stringify(b)};
     }
 
     //"strict" a === b
@@ -1345,20 +1362,6 @@
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to equal ' + JSON.stringify(b)};
     }
 
-    //"strict" a === true, simple boolean test
-    function assertIsTrue(a){
-        //return a_equals_true(a);
-        var result = a_equals_true(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
-    }
-
-    //"non strict" a == true, simple boolean test
-    function assertIsTruthy(a){
-        //return a_is_truthy(a);
-        var result = a_is_truthy(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
-    }
-
     //"strict" a !== b
     function assertNotEqual(a, b){
         //return a_notequals_b(a, b);
@@ -1366,11 +1369,25 @@
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not equal ' + JSON.stringify(b)};
     }
 
+    //"strict" a === true, simple boolean test
+    function assertIsTrue(a){
+        //return a_equals_true(a);
+        var result = a_equals_true(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
+    }
+
     //"strict" a === false, simple boolean test
     function assertIsFalse(a){
         //return a_equals_false(a);
         var result = a_equals_false(a);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
+    }
+
+    //"non strict" a == true, simple boolean test
+    function assertIsTruthy(a){
+        //return a_is_truthy(a);
+        var result = a_is_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
     }
 
     //"non strict" a == true, simple boolean test
@@ -1443,11 +1460,11 @@
         return assert;
     }
 
-    //TODO(Jeff): v2.3.0
-    //Qualifies if a matcher should be negated by examining its context (what it was called through)
-    function isNegated(context){
-        return context instanceof Not ? true : false;
-    }
+    // //TODO(Jeff): v2.3.0
+    // //Qualifies if a matcher should be negated by examining its context (what it was called through)
+    // function isNegated(context){
+    //     return context instanceof Not ? true : false;
+    // }
 
     //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
     function noteToHaveBeenCalled(label){
@@ -1457,10 +1474,20 @@
         // }
 
         var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1],
-            shouldNegate = isNegated(this);
-        completeTheAssertion(shouldNegate? assertToNotHaveBeenCalled : assertToHaveBeenCalled,
-            label, true, stackTraceFromError(), a.value.wasCalled());
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalled, label, null, stackTraceFromError(), a.value.wasCalled());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
+    function noteToNotHaveBeenCalled(label){
+        /* jshint validthis: true */
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalled, label, null, stackTraceFromError(), a.value.wasCalled());
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
@@ -1470,10 +1497,19 @@
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
         var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1],
-            shouldNegate = isNegated(this);
-        completeTheAssertion(shouldNegate ? assertToNotHaveReturned : assertToHaveReturned,
-            label, value, stackTraceFromError(), a.value.returned());
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveReturned, label, value, stackTraceFromError(), a.value.returned());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveReturned assertion
+    function noteToNotHaveReturned(value, label){
+        /* jshint validthis: true */
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveReturned, label, value, stackTraceFromError(), a.value.returned());
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrown assertion
@@ -1483,10 +1519,19 @@
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
         var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1],
-            shouldNegate = isNegated(this);
-        completeTheAssertion(shouldNegate ? assertToNotHaveThrown : assertToHaveThrown,
-            label, true, stackTraceFromError(), a.value.threw());
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrown, label, true, stackTraceFromError(), a.value.threw());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveThrown assertion
+    function noteToNotHaveThrown(label){
+        /* jshint validthis: true */
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrown, label, true, stackTraceFromError(), a.value.threw());
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithValue assertion
@@ -1499,6 +1544,16 @@
         completeTheAssertion(assertToHaveThrownWithValue, label, value, stackTraceFromError(), a.value.threw.withValue(value));
     }
 
+    //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithValue assertion
+    function noteToNotHaveThrownWithValue(value, label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrownWithValue, label, value, stackTraceFromError(), a.value.threw.withValue(value));
+    }
+
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
     function noteToHaveThrownWithMessage(value, label){
         // if(arguments.length < 1){
@@ -1507,6 +1562,16 @@
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrownWithMessage, label, value, stackTraceFromError(), a.value.threw.withMessage(value));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithMessage assertion
+    function noteToNotHaveThrownWithMessage(value, label){
+        // if(arguments.length < 1){
+        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrownWithMessage, label, value, stackTraceFromError(), a.value.threw.withMessage(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
@@ -1599,8 +1664,31 @@
         pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
     }
 
+    // //TODO(Jeff): v2.3.0
+    // api = {
+    //     toEqual: noteToEqualAssertion,
+    //     toNotEqual: noteToNotEqualAssertion,
+    //     toBeTrue: noteToBeTrueAssertion,
+    //     toBeFalse: noteToBeFalseAssertion,
+    //     toBeTruthy: noteToBeTruthyAssertion,
+    //     toNotBeTruthy: noteToNotBeTruthyAssertion,
+    //     equal: noteEqualAssertion,
+    //     notEqual: noteNotEqualAssertion,
+    //     isTrue: noteIsTrueAssertion,
+    //     isFalse: noteIsFalseAssertion,
+    //     isTruthy: noteIsTruthyAssertion,
+    //     isNotTruthy: noteIsNotTruthyAssertion,
+    //     toHaveBeenCalled: noteToHaveBeenCalled,
+    //     toHaveReturned: noteToHaveReturned,
+    //     toHaveThrown: noteToHaveThrown,
+    //     toHaveThrownWithValue: noteToHaveThrownWithValue,
+    //     toHaveThrownWithMessage: noteToHaveThrownWithMessage
+    // };
+
     //TODO(Jeff): v2.3.0
-    api = {
+    function Assert(){this.not = new Not();}
+    Assert.prototype = {
+        constructor: Assert,
         toEqual: noteToEqualAssertion,
         toNotEqual: noteToNotEqualAssertion,
         toBeTrue: noteToBeTrueAssertion,
@@ -1621,12 +1709,21 @@
     };
 
     //TODO(Jeff): v2.3.0
-    function Assert(){this.not = new Not();}
-    Assert.prototype = createPrototype(api, Assert);
-
-    //TODO(Jeff): v2.3.0
     function Not(){}
-    Not.prototype = createPrototype(api, Not);
+    Not.prototype = {
+        constructor: Not,
+        toEqual: noteToNotEqualAssertion,
+        toBeTrue: noteToBeFalseAssertion,
+        toBeTruthy: noteToNotBeTruthyAssertion,
+        equal: noteNotEqualAssertion,
+        isTrue: noteIsFalseAssertion,
+        isTruthy: noteIsNotTruthyAssertion,
+        toHaveBeenCalled: noteToNotHaveBeenCalled,
+        toHaveReturned: noteToNotHaveReturned,
+        toHaveThrown: noteToNotHaveThrown,
+        toHaveThrownWithValue: noteToNotHaveThrownWithValue,
+        toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
+    };
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
