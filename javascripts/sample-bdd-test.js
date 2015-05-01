@@ -66,26 +66,12 @@ describe('Preamble also has a "not" qualifier', function(){
         expect(false).not.toBeTrue();
     });
     it('the "toBeTruthy" matcher uses a truthy comparison to assert that the actual value is truthy', function(){
-        expect({}).toBeTruthy();
-    });
-    it('the "toNotBeTruthy" matcher uses a truthy comparison to assert that the actual value is not truthy', function(){
-        expect('').toNotBeTruthy();
-    });
-    it('the "toEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are equal (===)' , function(){
-        var anObj1 = {iAm: 'some object to compare to'},
-            anObj2 = {iAm: 'some object to compare to'};
-        expect(anObj1).toEqual(anObj2);
+        expect('').not.toBeTruthy();
     });
     it('the "toNotEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are not equal (!==)', function(){
         var anObj1 = {iAm: 'anObj1'},
             anObj2 = {iAm: 'anObj2'};
-        expect(anObj1).toNotEqual(anObj2);
-    });
-    it('the "toHaveThrown" matcher uses a strict boolean comparison to assert that the function threw an exception', function(){
-        function someFn(arg){
-            return a + arg;
-        }
-        expect(function(){ someFn('abc'); }).toHaveThrown();
+        expect(anObj1).not.toEqual(anObj2);
     });
     it('the "not" qualifier along with "toHaveThrown" matcher uses a strict boolean comparison to assert that the function did not throw an exception', function(){
         function someFn(arg){
