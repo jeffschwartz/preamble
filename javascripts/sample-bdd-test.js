@@ -61,19 +61,19 @@ describe('Preamble comes with numerous matchers', function(){
     });
 });
 
-describe('Preamble also has a "not" qualifier', function(){
-    it('the "toBeTrue" matcher uses a strict boolean comparison to assert that the actual value is boolen true', function(){
+describe('Preamble also has a "not" qualifier which when used with a', function(){
+    it('"toBeTrue" matcher asserts that the actual value is boolen false', function(){
         expect(false).not.toBeTrue();
     });
-    it('the "toBeTruthy" matcher uses a truthy comparison to assert that the actual value is truthy', function(){
+    it('"toBeTruthy" matcher asserts that the actual value is not truthy', function(){
         expect('').not.toBeTruthy();
     });
-    it('the "toNotEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are not equal (!==)', function(){
+    it('"toEqual" matcher asserts that the actual value and the expected value are not equal (!==)', function(){
         var anObj1 = {iAm: 'anObj1'},
             anObj2 = {iAm: 'anObj2'};
         expect(anObj1).not.toEqual(anObj2);
     });
-    it('the "not" qualifier along with "toHaveThrown" matcher uses a strict boolean comparison to assert that the function did not throw an exception', function(){
+    it('"toHaveThrown" matcher asserts that the function did not throw an exception', function(){
         function someFn(arg){
             return arg;
         }
@@ -413,10 +413,9 @@ describe('spying on a method', function(){
     });
     describe('and if it throws an exception', function(){
         beforeEach(function(){
-            this.error = 'something went terribly wrong!';
             this.foo = {
-                someFn: function(arg){
-                    return a + arg;
+                someFn: function(){
+                    throw new Error('something went terribly wrong');
                 }
             };
         });
@@ -430,15 +429,15 @@ describe('spying on a method', function(){
             });
             it('if the method threw an exception with a specific message', function(){
                 var foo = this.foo;
-                spy(foo, 'someFn').throws('abc');
+                spy(foo, 'someFn').callActual();;
                 foo.someFn('panda');
-                expect(foo.someFn).toHaveThrownWithMessage('abc');
+                expect(foo.someFn).toHaveThrownWithMessage('something went terribly wrong');
             });
-            it('if the method threw an exception with a specific value', function(){
+            it('if the method threw an exception with a specific name', function(){
                 var foo = this.foo;
-                spy(foo, 'someFn').throws(123);
+                spy(foo, 'someFn').callActual();
                 foo.someFn('panda');
-                expect(foo.someFn).toHaveThrownWithValue(123);
+                expect(foo.someFn).toHaveThrownWithName('Error');
             });
         });
     });
@@ -500,19 +499,19 @@ describe('A stub when configured can throw an error', function(){
         expect(foo.someFn.threw()).toBeTrue();
         expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
     });
-    it('with a value', function(){
-        spy(foo, 'someFn').throws(42);
-        foo.someFn();
-        expect(foo.someFn.threw()).toBeTrue();
-        expect(foo.someFn.threw.withValue(42)).toBeTrue();
-    });
-    it('with a message and a value', function(){
-        spy(foo, 'someFn').throws('Holy Batman!', 42);
-        foo.someFn();
-        expect(foo.someFn.threw()).toBeTrue();
-        expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
-        expect(foo.someFn.threw.withValue(42)).toBeTrue();
-    });
+    // it('with a value', function(){
+    //     spy(foo, 'someFn').throws(42);
+    //     foo.someFn();
+    //     expect(foo.someFn.threw()).toBeTrue();
+    //     expect(foo.someFn.threw.withValue(42)).toBeTrue();
+    // });
+    // it('with a message and a value', function(){
+    //     spy(foo, 'someFn').throws('Holy Batman!', 42);
+    //     foo.someFn();
+    //     expect(foo.someFn.threw()).toBeTrue();
+    //     expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
+    //     expect(foo.someFn.threw.withValue(42)).toBeTrue();
+    // });
 });
 
 describe('Using a "stub" to test Ajax', function(){

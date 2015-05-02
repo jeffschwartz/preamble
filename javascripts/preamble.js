@@ -1325,18 +1325,18 @@
 
     //TODO(Jeff): v2.3.0
     // //spy threwWithValue
-    function assertToHaveThrownWithValue(a, b){
+    function assertToHaveThrownWithName(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have thrown an exception with the value ' + JSON.stringify(b)};
+        return {result: result, explain: 'expected spy to have thrown an exception with the name ' + JSON.stringify(b)};
     }
 
     //TODO(Jeff): v2.3.0
-    // //spy not threwWithValue
-    function assertToNotHaveThrownWithValue(a, b){
+    // //spy not threwWithName
+    function assertToNotHaveThrownWithName(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have thrown an exception with the value ' + JSON.stringify(b)};
+        return {result: result, explain: 'expected spy to not have thrown an exception with the name ' + JSON.stringify(b)};
     }
 
     //TODO(Jeff): v2.3.0
@@ -1468,7 +1468,6 @@
 
     //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
     function noteToHaveBeenCalled(label){
-        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
@@ -1480,7 +1479,6 @@
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
     function noteToNotHaveBeenCalled(label){
-        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
@@ -1492,7 +1490,6 @@
 
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
     function noteToHaveReturned(value, label){
-        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
@@ -1503,7 +1500,6 @@
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveReturned assertion
     function noteToNotHaveReturned(value, label){
-        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
@@ -1514,7 +1510,6 @@
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrown assertion
     function noteToHaveThrown(label){
-        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
@@ -1525,7 +1520,6 @@
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrown assertion
     function noteToNotHaveThrown(label){
-        /* jshint validthis: true */
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
@@ -1534,24 +1528,24 @@
         completeTheAssertion(assertToNotHaveThrown, label, true, stackTraceFromError(), a.value.threw());
     }
 
-    //TODO(Jeff):v2.3.0 BDD toHaveThrownWithValue assertion
-    function noteToHaveThrownWithValue(value, label){
+    //TODO(Jeff):v2.3.0 BDD toHaveThrownWithName assertion
+    function noteToHaveThrownWithName(value, label){
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithValue, label, value, stackTraceFromError(), a.value.threw.withValue(value));
+        completeTheAssertion(assertToHaveThrownWithName, label, value, stackTraceFromError(), a.value.threw.withName(value));
     }
 
-    //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithValue assertion
-    function noteToNotHaveThrownWithValue(value, label){
+    //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithName assertion
+    function noteToNotHaveThrownWithName(value, label){
         // if(arguments.length < 1){
         //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
         // }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithValue, label, value, stackTraceFromError(), a.value.threw.withValue(value));
+        completeTheAssertion(assertToNotHaveThrownWithName, label, value, stackTraceFromError(), a.value.threw.withName(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
@@ -1704,7 +1698,7 @@
         toHaveBeenCalled: noteToHaveBeenCalled,
         toHaveReturned: noteToHaveReturned,
         toHaveThrown: noteToHaveThrown,
-        toHaveThrownWithValue: noteToHaveThrownWithValue,
+        toHaveThrownWithName: noteToHaveThrownWithName,
         toHaveThrownWithMessage: noteToHaveThrownWithMessage
     };
 
@@ -1721,7 +1715,7 @@
         toHaveBeenCalled: noteToNotHaveBeenCalled,
         toHaveReturned: noteToNotHaveReturned,
         toHaveThrown: noteToNotHaveThrown,
-        toHaveThrownWithValue: noteToNotHaveThrownWithValue,
+        toHaveThrownWithName: noteToNotHaveThrownWithName,
         toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
     };
 
@@ -1936,8 +1930,8 @@
                 return snoopster.threw() && calls[calls.length - 1].error.message === message;
             };
             //TODO(Jeff): v2.3.0
-            snoopster.threw.withValue = function(val){
-                return snoopster.wasCalled() && calls[calls.length - 1].error.value === val;
+            snoopster.threw.withName = function(val){
+                return snoopster.threw() && calls[calls.length - 1].error.name === val;
             };
             snoopster.calls = {
                 count: function(){
