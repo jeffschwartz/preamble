@@ -1803,9 +1803,9 @@
                     error,
                     returned;
                 //TODO(Jeff): v2.3.0
-                function ThrowsException(message, value){
+                function ThrowsException(message, name){
                     this.message = message;
-                    this.value = value;
+                    this.name = name;
                 }
                 //TODO(Jeff): v2.3.0
                 if(snoopster._callActual || snoopster._callFake){
@@ -1817,9 +1817,10 @@
                     }
                 }else{
                     //TODO(Jeff): v2.3.Error
-                    if(snoopster._throws){
+                    if(snoopster.throws._throws){
                         try{
-                            throw new ThrowsException(snoopster._throws.message, snoopster._throws.value);
+
+                            throw new ThrowsException(snoopster.throws.throwsMessage, snoopster.throws.throwsName);
                         }catch(er){
                             error = er;
                         }
@@ -1837,40 +1838,77 @@
             //api
             //TODO(Jeff): v2.3.0
             snoopster._marker = 'preamble.snoopster';
+            // //TODO(Jeff): v2.3.0
+            // snoopster._throws = false;
             //TODO(Jeff): v2.3.0
-            snoopster._throws = undefined;
-            //TODO(Jeff): v2.3.0
-            /**
-             * @param {string} message The message for the exception.
-             * @param {number} value The value for the exception.
-             */
-            snoopster.throws = function(message, value){
-                var err = 'throws expects a string or a value or a string and a value';
-                snoopster._throws = snoopster._throws || {message: void(0), value: void(0)};
-                if(!arguments.length){
-                    throw new Error(err);
-                }
-                //string or value passed
-                if(arguments.length === 1){
-                    if(typeof(arguments[0]) === 'string'){
-                        snoopster._throws.message = arguments[0];
-                    }else if(typeof(arguments[0]) === 'number'){
-                        snoopster._throws.value = arguments[0];
-                    }else{
-                        throw new Error(err);
-                    }
-                // string and value passed
-                }else if(arguments.length === 2){
-                    if(typeof(message) === 'string' && typeof(value) === 'number'){
-                        snoopster._throws.message = message;
-                        snoopster._throws.value = value;
-                    }else{
-                        throw new Error(err);
-                    }
-                }else{
-                    throw new Error(err);
-                }
+            snoopster.throws = function(){
+                snoopster.throws._throws = true;
+                // return this.throws._api.with;
             };
+            //TODO(Jeff): v2.3.0
+            snoopster.throws._throws = false;
+            snoopster.throws._message = '';
+            snoopster.throws._name = '';
+            //TODO(Jeff): v2.3.0
+            snoopster.throws._api = function ThrowsApi(){};
+            snoopster.throws._api.prototype.message = function(message){
+                if(typeof(message) !== 'string'){
+                    throw new Error('message expects a string');
+                }
+                snoopster.throws._throws = true;
+                snoopster.throws.throwsMessage= message;
+                //for chaining - spy.throws.with.message().and.with.name();
+                return snoopster.throws.with;
+            };
+            snoopster.throws._api.prototype.name = function(name){
+                if(typeof(name) !== 'string'){
+                    throw new Error('name expects a string');
+                }
+                snoopster.throws._throws = true;
+                snoopster.throws.throwsName = name;
+                //for chaining - spy.throws.with.message().and.with.name();
+                return snoopster.throws.with;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster.throws.with = new snoopster.throws._api();
+            snoopster.throws.with.and = {with: snoopster.throws.with};
+            // //TODO(Jeff): v2.3.0
+            // snoopster.throws._api.and = new snoopster.throws._api();
+            // //TODO(Jeff): v2.3.0
+            // /**
+            //  * @param {string} message The message for the exception.
+            //  * @param {number} value The value for the exception.
+            //  * @param {object} arg argument
+            //  * @param {string} arg.message The message for the exception.
+            //  * @param {string} arg.name The name for the exception.
+            //  */
+            // snoopster.throws = function(message, arg){
+            //     var err = 'throws expects a string or a value or a string and a value';
+            //     snoopster._throws = snoopster._throws || {message: void(0), value: void(0)};
+            //     if(!arguments.length){
+            //         throw new Error(err);
+            //     }
+            //     //string or value passed
+            //     if(arguments.length === 1){
+            //         if(typeof(arguments[0]) === 'string'){
+            //             snoopster._throws.message = arguments[0];
+            //         }else if(typeof(arguments[0]) === 'number'){
+            //             snoopster._throws.value = arguments[0];
+            //         }else{
+            //             throw new Error(err);
+            //         }
+            //     // string and value passed
+            //     }else if(arguments.length === 2){
+            //         if(typeof(message) === 'string' && typeof(value) === 'number'){
+            //             snoopster._throws.message = message;
+            //             snoopster._throws.value = value;
+            //         }else{
+            //             throw new Error(err);
+            //         }
+            //     }else{
+            //         throw new Error(err);
+            //     }
+            // };
             //TODO(Jeff): v2.3.0
             snoopster.returns = function(ret){
                 this._returns = ret;

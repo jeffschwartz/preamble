@@ -429,7 +429,7 @@ describe('spying on a method', function(){
             });
             it('if the method threw an exception with a specific message', function(){
                 var foo = this.foo;
-                spy(foo, 'someFn').callActual();;
+                spy(foo, 'someFn').callActual();
                 foo.someFn('panda');
                 expect(foo.someFn).toHaveThrownWithMessage('something went terribly wrong');
             });
@@ -491,27 +491,35 @@ describe('A stub configured to call the actual implementation can be reset', fun
     });
 });
 
-describe('A stub when configured can throw an error', function(){
-    var foo = { someFn: function(){} };
-    it('with a message', function(){
-        spy(foo, 'someFn').throws('Holy Batman!');
-        foo.someFn();
-        expect(foo.someFn.threw()).toBeTrue();
-        expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
+describe('A stub can be configured to throw an exception', function(){
+    beforeEach(function(){
+        this.foo = { someFn: function(){} };
     });
-    // it('with a value', function(){
-    //     spy(foo, 'someFn').throws(42);
-    //     foo.someFn();
-    //     expect(foo.someFn.threw()).toBeTrue();
-    //     expect(foo.someFn.threw.withValue(42)).toBeTrue();
-    // });
-    // it('with a message and a value', function(){
-    //     spy(foo, 'someFn').throws('Holy Batman!', 42);
-    //     foo.someFn();
-    //     expect(foo.someFn.threw()).toBeTrue();
-    //     expect(foo.someFn.threw.withMessage('Holy Batman!')).toBeTrue();
-    //     expect(foo.someFn.threw.withValue(42)).toBeTrue();
-    // });
+    it('when it is called', function(){
+        spy(this.foo, 'someFn').throws();
+        this.foo.someFn();
+        expect(this.foo.someFn).toHaveThrown();
+    });
+    it('with a message when it is called', function(){
+        spy(this.foo, 'someFn').throws.with.message('Holy Batman!');
+        this.foo.someFn();
+        expect(this.foo.someFn).toHaveThrown();
+        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
+    });
+    it('with a name when it is called', function(){
+        spy(this.foo, 'someFn').throws.with.name('NotBatmanError');
+        this.foo.someFn();
+        expect(this.foo.someFn).toHaveThrown();
+        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
+    });
+    it('with a message and a name when it is called', function(){
+        spy(this.foo, 'someFn').throws.with.message('Holy Batman!').
+            and.with.name('NotBatmanError');
+        this.foo.someFn();
+        expect(this.foo.someFn).toHaveThrown();
+        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
+        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
+    });
 });
 
 describe('Using a "stub" to test Ajax', function(){
