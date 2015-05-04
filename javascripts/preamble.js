@@ -50,25 +50,6 @@
         };
     }
 
-    // //TODO(Jeff): v2.3.0
-    // /**
-    //  * Creates a new object that can be used as a protype for a ctor.
-    //  * @param api object The object whose own properties are to be copied to
-    //  * the new prototype object.
-    //  * @param ctr function The constructor function which will be set as the
-    //  * value of the new prototype's contructor property.
-    //  * @returns an object that can be uses as a protytpe.
-    //  */
-    // function createPrototype(api, ctr){
-    //     var ownProps = Object.getOwnPropertyNames(api),
-    //         prototype = {};
-    //     ownProps.forEach(function(prop){
-    //         prototype[prop] = api[prop];
-    //     });
-    //     prototype.constructor = ctr;
-    //     return prototype;
-    // }
-
     function throwException(errMessage){
         throw new Error(errMessage);
     }
@@ -1759,12 +1740,9 @@
             //api
             //TODO(Jeff): v2.3.0
             snoopster._marker = 'preamble.snoopster';
-            // //TODO(Jeff): v2.3.0
-            // snoopster._throws = false;
             //TODO(Jeff): v2.3.0
             snoopster.throws = function(){
                 snoopster.throws._throws = true;
-                // return this.throws._api.with;
             };
             //TODO(Jeff): v2.3.0
             snoopster.throws._throws = false;
@@ -1793,43 +1771,6 @@
             //TODO(Jeff): v2.3.0
             snoopster.throws.with = new snoopster.throws._api();
             snoopster.throws.with.and = {with: snoopster.throws.with};
-            // //TODO(Jeff): v2.3.0
-            // snoopster.throws._api.and = new snoopster.throws._api();
-            // //TODO(Jeff): v2.3.0
-            // /**
-            //  * @param {string} message The message for the exception.
-            //  * @param {number} value The value for the exception.
-            //  * @param {object} arg argument
-            //  * @param {string} arg.message The message for the exception.
-            //  * @param {string} arg.name The name for the exception.
-            //  */
-            // snoopster.throws = function(message, arg){
-            //     var err = 'throws expects a string or a value or a string and a value';
-            //     snoopster._throws = snoopster._throws || {message: void(0), value: void(0)};
-            //     if(!arguments.length){
-            //         throw new Error(err);
-            //     }
-            //     //string or value passed
-            //     if(arguments.length === 1){
-            //         if(typeof(arguments[0]) === 'string'){
-            //             snoopster._throws.message = arguments[0];
-            //         }else if(typeof(arguments[0]) === 'number'){
-            //             snoopster._throws.value = arguments[0];
-            //         }else{
-            //             throw new Error(err);
-            //         }
-            //     // string and value passed
-            //     }else if(arguments.length === 2){
-            //         if(typeof(message) === 'string' && typeof(value) === 'number'){
-            //             snoopster._throws.message = message;
-            //             snoopster._throws.value = value;
-            //         }else{
-            //             throw new Error(err);
-            //         }
-            //     }else{
-            //         throw new Error(err);
-            //     }
-            // };
             //TODO(Jeff): v2.3.0
             snoopster.returns = function(ret){
                 this._returns = ret;
