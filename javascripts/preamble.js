@@ -419,7 +419,7 @@
             show += runtimeFilter.group && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         }
-        show += pluralize(' test', tests.length);
+        show += pluralize(' spec', tests.length);
         coverage = '<div id="coverage">' + show +
             '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' +
             '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
@@ -452,10 +452,10 @@
         el.style.display = 'table-cell';
         if(tests.result){
             html = '<div id="preamble-results-summary-passed" class="summary-passed">' +
-                'All tests passed' + '</div>';
+                'All specs passed' + '</div>';
         }else{
             html = '<div id="preamble-results-summary-failed" class="summary-failed">' +
-                tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
+                tests.totTestsFailed + pluralize(' spec', tests.totTestsFailed) + ' failed.</div>';
         }
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     };

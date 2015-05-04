@@ -7,7 +7,7 @@
  * NOTE: inline configuration cannot be use to set "windowGlobals"!
  */
 configure({
-    name: 'Sample BDD Test Suite',
+    name: 'Sample BDD Suite',
     hidePassedTests: true,
     testTimeOutInterval: 500
 });
