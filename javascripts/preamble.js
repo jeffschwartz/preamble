@@ -1410,11 +1410,10 @@
     }
 
     //TODO(Jeff):v2.3.0 complete the assertion entry in the assertion table
-    function completeTheAssertion(assertion, assertionLabel, value, stackTrace, actual){
+    function completeTheAssertion(assertion,  value, stackTrace, actual){
         var ti = testsIterator,
         a = ti.get().assertions[ti.get().assertions.length - 1];
         a.assertion = assertion;
-        a.assertionLabel = assertionLabel;
         a.expectation = value;
         a.stackTrace = stackTrace;
         a.value = typeof(actual) === 'undefined' ? a.value : actual;
@@ -1443,8 +1442,8 @@
     //TODO(Jeff):v2.3.0 notes the actual value
     function noteExpectation(actual){
         var aSpy;
-        if(arguments.length < 1){
-            throwException('Assertion "expect" requires 1 arguments, found ' + arguments.length);
+        if(arguments.length !== 1){
+            throwException('"expect" requires 1 argument, found ' + arguments.length);
         }
         //Make it a spy if it isn't one already
         if(typeof(actual) === 'function' && !actual._marker){
@@ -1460,224 +1459,155 @@
         return assert;
     }
 
-    // //TODO(Jeff): v2.3.0
-    // //Qualifies if a matcher should be negated by examining its context (what it was called through)
-    // function isNegated(context){
-    //     return context instanceof Not ? true : false;
-    // }
-
     //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
-    function noteToHaveBeenCalled(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToHaveBeenCalled(){
+        if(arguments.length){
+            throwException('matcher "toHaveBeenCalled" expects no arguments, found ' + arguments.length);
+        }
 
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalled, label, null, stackTraceFromError(), a.value.wasCalled());
+        completeTheAssertion(assertToHaveBeenCalled, null, stackTraceFromError(), a.value.wasCalled());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
-    function noteToNotHaveBeenCalled(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToNotHaveBeenCalled(){
+        if(arguments.length){
+            throwException('matcher "toNotHaveBeenCalled" expects no arguments, found ' + arguments.length);
+        }
 
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalled, label, null, stackTraceFromError(), a.value.wasCalled());
+        completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(), a.value.wasCalled());
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
-    function noteToHaveReturned(value, label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToHaveReturned(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toEqual" requires 1 argument, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveReturned, label, value, stackTraceFromError(), a.value.returned());
+        completeTheAssertion(assertToHaveReturned, value, stackTraceFromError(), a.value.returned());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveReturned assertion
-    function noteToNotHaveReturned(value, label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToNotHaveReturned(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toEqual" requires 1 argument, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveReturned, label, value, stackTraceFromError(), a.value.returned());
+        completeTheAssertion(assertToNotHaveReturned, value, stackTraceFromError(), a.value.returned());
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrown assertion
-    function noteToHaveThrown(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToHaveThrown(){
+        if(arguments.length){
+            throwException('matcher "toHaveThrown" expects no arguments, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrown, label, true, stackTraceFromError(), a.value.threw());
+        completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(), a.value.threw());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrown assertion
-    function noteToNotHaveThrown(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToNotHaveThrown(){
+        if(arguments.length){
+            throwException('matcher "toNotHaveThrown" expects no arguments, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrown, label, true, stackTraceFromError(), a.value.threw());
+        completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(), a.value.threw());
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithName assertion
-    function noteToHaveThrownWithName(value, label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToHaveThrownWithName(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithName, label, value, stackTraceFromError(), a.value.threw.withName(value));
+        completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithName assertion
-    function noteToNotHaveThrownWithName(value, label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToNotHaveThrownWithName(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithName, label, value, stackTraceFromError(), a.value.threw.withName(value));
+        completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
-    function noteToHaveThrownWithMessage(value, label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToHaveThrownWithMessage(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithMessage, label, value, stackTraceFromError(), a.value.threw.withMessage(value));
+        completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithMessage assertion
-    function noteToNotHaveThrownWithMessage(value, label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
-        // }
+    function noteToNotHaveThrownWithMessage(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
+        }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithMessage, label, value, stackTraceFromError(), a.value.threw.withMessage(value));
+        completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
-    function noteToEqualAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+    function noteToEqualAssertion(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toEqual" requires 1 argument, found ' + arguments.length);
         }
-        completeTheAssertion(assertEqual, label, value, stackTraceFromError());
+        completeTheAssertion(assertEqual, value, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotEqual assertion
-    function noteToNotEqualAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "toNotEqual" requires 1 arguments, found ' + arguments.length);
+    function noteToNotEqualAssertion(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toNotEqual" requires 1 argument, found ' + arguments.length);
         }
-        completeTheAssertion(assertNotEqual, label, value, stackTraceFromError());
+        completeTheAssertion(assertNotEqual, value, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toBeTrue assertion
-    function noteToBeTrueAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsTrue, label, true, stackTraceFromError());
+    function noteToBeTrueAssertion(){
+        if(arguments.length){
+            throwException('matcher "toBeTrue;" expects no arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertIsTrue, true, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotBeTrue assertiFalse
-    function noteToBeFalseAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsFalse, label, true, stackTraceFromError());
+    function noteToBeFalseAssertion(){
+        if(arguments.length){
+            throwException('matcher "toBeFalse;" expects no arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertIsFalse, true, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toBeTruthy assertiFalse
-    function noteToBeTruthyAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsTruthy, label, true, stackTraceFromError());
+    function noteToBeTruthyAssertion(){
+        if(arguments.length){
+            throwException('matcher "toBeTruthy" expects no arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertIsTruthy, true, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotBeTruthy assertiFalse
-    function noteToNotBeTruthyAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsNotTruthy, label, true, stackTraceFromError());
-    }
-
-    function noteEqualAssertion(value, expectation, label){
-        if(arguments.length < 2){
-            throwException('Assertion "equal" requires 2 arguments, found ' + arguments.length);
+    function noteToNotBeTruthyAssertion(){
+        if(arguments.length){
+            throwException('matcher "toNotBeTruthy" expects no arguments, found ' + arguments.length);
         }
-        pushOntoAssertions(assertEqual, label, value, expectation, stackTraceFromError());
+        completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
     }
-
-    function noteNotEqualAssertion(value, expectation, label){
-        if(arguments.length < 2){
-            throwException('Assertion "notEqual" requires 2 arguments, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertNotEqual, label, value, expectation, stackTraceFromError());
-    }
-
-    function noteIsTrueAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
-    }
-
-    function noteIsFalseAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isFalse" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
-    }
-
-    function noteIsTruthyAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isTruthy" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
-    }
-
-    function noteIsNotTruthyAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isNotTruthy" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
-    }
-
-    // //TODO(Jeff): v2.3.0
-    // api = {
-    //     toEqual: noteToEqualAssertion,
-    //     toNotEqual: noteToNotEqualAssertion,
-    //     toBeTrue: noteToBeTrueAssertion,
-    //     toBeFalse: noteToBeFalseAssertion,
-    //     toBeTruthy: noteToBeTruthyAssertion,
-    //     toNotBeTruthy: noteToNotBeTruthyAssertion,
-    //     equal: noteEqualAssertion,
-    //     notEqual: noteNotEqualAssertion,
-    //     isTrue: noteIsTrueAssertion,
-    //     isFalse: noteIsFalseAssertion,
-    //     isTruthy: noteIsTruthyAssertion,
-    //     isNotTruthy: noteIsNotTruthyAssertion,
-    //     toHaveBeenCalled: noteToHaveBeenCalled,
-    //     toHaveReturned: noteToHaveReturned,
-    //     toHaveThrown: noteToHaveThrown,
-    //     toHaveThrownWithValue: noteToHaveThrownWithValue,
-    //     toHaveThrownWithMessage: noteToHaveThrownWithMessage
-    // };
 
     //TODO(Jeff): v2.3.0
     function Assert(){this.not = new Not();}
@@ -1689,12 +1619,6 @@
         toBeFalse: noteToBeFalseAssertion,
         toBeTruthy: noteToBeTruthyAssertion,
         toNotBeTruthy: noteToNotBeTruthyAssertion,
-        equal: noteEqualAssertion,
-        notEqual: noteNotEqualAssertion,
-        isTrue: noteIsTrueAssertion,
-        isFalse: noteIsFalseAssertion,
-        isTruthy: noteIsTruthyAssertion,
-        isNotTruthy: noteIsNotTruthyAssertion,
         toHaveBeenCalled: noteToHaveBeenCalled,
         toHaveReturned: noteToHaveReturned,
         toHaveThrown: noteToHaveThrown,
@@ -1709,9 +1633,6 @@
         toEqual: noteToNotEqualAssertion,
         toBeTrue: noteToBeFalseAssertion,
         toBeTruthy: noteToNotBeTruthyAssertion,
-        equal: noteNotEqualAssertion,
-        isTrue: noteIsFalseAssertion,
-        isTruthy: noteIsNotTruthyAssertion,
         toHaveBeenCalled: noteToNotHaveBeenCalled,
         toHaveReturned: noteToNotHaveReturned,
         toHaveThrown: noteToNotHaveThrown,
