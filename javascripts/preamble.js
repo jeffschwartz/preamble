@@ -1068,7 +1068,7 @@
          * of milliseconds to wait before a test is timed out. This number is applied
          * to all tests and can be selectively overridden by individual tests.
          *
-         * name: (default 'Test') - set to a meaningful name.
+         * name: (default 'Suite') - set to a meaningful name.
          *
          * uiTestContainerId (default id="ui-test-container") - set its id to something
          * else if desired.
@@ -1089,7 +1089,7 @@
         var defaultConfig = {
                 windowGlobals: true,
                 testTimeOutInterval: 10,
-                name: 'Test',
+                name: 'Suite',
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
                 shortCircuit: false,
