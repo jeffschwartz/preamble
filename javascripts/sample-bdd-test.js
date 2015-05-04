@@ -430,14 +430,16 @@ describe('spying on a method', function(){
             it('if the method threw an exception with a specific message', function(){
                 var foo = this.foo;
                 spy(foo, 'someFn').callActual();
-                foo.someFn('panda');
-                expect(foo.someFn).toHaveThrownWithMessage('something went terribly wrong');
+                foo.someFn();
+                expect(foo.someFn).toHaveThrown.with.message('something went terribly wrong');
+                expect(foo.someFn).not.toHaveThrown.with.message('something went terribly wrong!');
             });
             it('if the method threw an exception with a specific name', function(){
                 var foo = this.foo;
                 spy(foo, 'someFn').callActual();
-                foo.someFn('panda');
-                expect(foo.someFn).toHaveThrownWithName('Error');
+                foo.someFn();
+                expect(foo.someFn).toHaveThrown.with.name('Error');
+                expect(foo.someFn).not.toHaveThrown.with.name('ErrorError');
             });
         });
     });
@@ -504,21 +506,21 @@ describe('A stub can be configured to throw an exception', function(){
         spy(this.foo, 'someFn').throws.with.message('Holy Batman!');
         this.foo.someFn();
         expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
+        expect(this.foo.someFn).toHaveThrown.with.message('Holy Batman!');
     });
     it('with a name when it is called', function(){
         spy(this.foo, 'someFn').throws.with.name('NotBatmanError');
         this.foo.someFn();
         expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
+        expect(this.foo.someFn).toHaveThrown.with.name('NotBatmanError');
     });
     it('with a message and a name when it is called', function(){
         spy(this.foo, 'someFn').throws.with.message('Holy Batman!').
             and.with.name('NotBatmanError');
         this.foo.someFn();
         expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
-        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
+        expect(this.foo.someFn).toHaveThrown.with.message('Holy Batman!');
+        expect(this.foo.someFn).toHaveThrown.with.name('NotBatmanError');
     });
 });
 

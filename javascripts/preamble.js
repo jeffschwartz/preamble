@@ -1489,6 +1489,7 @@
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(), a.value.threw());
     }
+    noteToHaveThrown.with = {};
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrown assertion
     function noteToNotHaveThrown(){
@@ -1499,46 +1500,47 @@
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(), a.value.threw());
     }
+    noteToNotHaveThrown.with = {};
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithName assertion
-    function noteToHaveThrownWithName(value){
+    noteToHaveThrown.with.name = function noteToHaveThrownWithName(value){
         if(arguments.length !== 1){
             throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
-    }
+    };
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithName assertion
-    function noteToNotHaveThrownWithName(value){
+    noteToNotHaveThrown.with.name = function noteToNotHaveThrownWithName(value){
         if(arguments.length !== 1){
             throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
-    }
+    };
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
-    function noteToHaveThrownWithMessage(value){
+    noteToHaveThrown.with.message = function noteToHaveThrownWithMessage(value){
         if(arguments.length !== 1){
             throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
-    }
+    };
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithMessage assertion
-    function noteToNotHaveThrownWithMessage(value){
+    noteToNotHaveThrown.with.message = function noteToNotHaveThrownWithMessage(value){
         if(arguments.length !== 1){
             throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
-    }
+    };
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
     function noteToEqualAssertion(value){
@@ -1600,9 +1602,10 @@
         toNotBeTruthy: noteToNotBeTruthyAssertion,
         toHaveBeenCalled: noteToHaveBeenCalled,
         toHaveReturned: noteToHaveReturned,
-        toHaveThrown: noteToHaveThrown,
-        toHaveThrownWithName: noteToHaveThrownWithName,
-        toHaveThrownWithMessage: noteToHaveThrownWithMessage
+        toHaveThrown: noteToHaveThrown
+        // ,
+        // toHaveThrownWithName: noteToHaveThrown.withName,
+        // toHaveThrownWithMessage: noteToHaveThrown.withMessage
     };
 
     //TODO(Jeff): v2.3.0
@@ -1614,9 +1617,10 @@
         toBeTruthy: noteToNotBeTruthyAssertion,
         toHaveBeenCalled: noteToNotHaveBeenCalled,
         toHaveReturned: noteToNotHaveReturned,
-        toHaveThrown: noteToNotHaveThrown,
-        toHaveThrownWithName: noteToNotHaveThrownWithName,
-        toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
+        toHaveThrown: noteToNotHaveThrown
+        // ,
+        // toHaveThrownWithName: noteToNotHaveThrownWithName,
+        // toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
     };
 
     //Returns the ui test container element.
