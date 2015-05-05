@@ -36,23 +36,11 @@ describe('Preamble has numerous matchers', function(){
             anObj2 = {iAm: 'some object to compare to'};
         expect(anObj1).toEqual(anObj2);
     });
-    describe('and some matchers are specifically for working withe methods and functions ', function(){
-        beforeEach(function(){
-            this.someFn = function(arg){ return arg; };
-            this.someOtherFn = function(arg){ return a + arg; };
-        });
-        it('the "toHaveBeenCalled" matcher asserts that the function or method was called', function(){
-            var someFn = this.someFn;
-            expect(someFn).whenCalled().toHaveBeenCalled();
-        });
-        it('the "toHaveReturned" matcher asserts that the function returned a specific value', function(){
-            var someFn = this.someFn;
-            expect(someFn).whenCalled('abc').toHaveReturned('abc');
-        });
-        it('the "toHaveThrown" matcher asserts that the function or method was threw an exception', function(){
-            var someOtherFn = this.someOtherFn;
-            expect(someOtherFn).whenCalled().toHaveThrown();
-        });
+    it('the "toHaveThrown" matcher uses a strict boolean comparison to assert that the function threw an exception', function(){
+        function someFn(arg){
+            return a + arg;
+        }
+        expect(function(){ someFn('abc'); }).toHaveThrown();
     });
 });
 
