@@ -1430,10 +1430,23 @@
             //will need to call the actual implementation, not the stub
             aSpy.callActual();
             //call it!
-            aSpy();
+            // aSpy();
         }
         //push partial assertion (only the value) info onto the assertion table
         pushOntoAssertions(null, null, aSpy ? aSpy : actual, null, null);
+        //return assert for chaining
+        return assert;
+    }
+
+    //TODO(Jeff): notes to call the function or method
+    function noteWhenCalled() {
+        // if(arguments.length){
+        //     throwException('"whenCalled" expects no arguments, found ' + arguments.length);
+        // }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        //call the function or method
+        a.value.apply(null, arguments);
         //return assert for chaining
         return assert;
     }
@@ -1597,6 +1610,7 @@
         toEqual: noteToEqualAssertion,
         toBeTrue: noteToBeTrueAssertion,
         toBeTruthy: noteToBeTruthyAssertion,
+        whenCalled: noteWhenCalled,
         toHaveBeenCalled: noteToHaveBeenCalled,
         toHaveReturned: noteToHaveReturned,
         toHaveThrown: noteToHaveThrown
