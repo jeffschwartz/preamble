@@ -1595,17 +1595,11 @@
     Assert.prototype = {
         constructor: Assert,
         toEqual: noteToEqualAssertion,
-        toNotEqual: noteToNotEqualAssertion,
         toBeTrue: noteToBeTrueAssertion,
-        toBeFalse: noteToBeFalseAssertion,
         toBeTruthy: noteToBeTruthyAssertion,
-        toNotBeTruthy: noteToNotBeTruthyAssertion,
         toHaveBeenCalled: noteToHaveBeenCalled,
         toHaveReturned: noteToHaveReturned,
         toHaveThrown: noteToHaveThrown
-        // ,
-        // toHaveThrownWithName: noteToHaveThrown.withName,
-        // toHaveThrownWithMessage: noteToHaveThrown.withMessage
     };
 
     //TODO(Jeff): v2.3.0
@@ -1618,9 +1612,6 @@
         toHaveBeenCalled: noteToNotHaveBeenCalled,
         toHaveReturned: noteToNotHaveReturned,
         toHaveThrown: noteToNotHaveThrown
-        // ,
-        // toHaveThrownWithName: noteToNotHaveThrownWithName,
-        // toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
     };
 
     //Returns the ui test container element.

@@ -24,40 +24,23 @@ describe('Assertions are composed using "expect" to set the actual value and a m
     });
 });
 
-describe('Preamble comes with numerous matchers', function(){
+describe('Preamble has numerous matchers', function(){
     it('the "toBeTrue" matcher uses a strict boolean comparison to assert that the actual value is boolen true', function(){
         expect(true).toBeTrue();
     });
-    it('the "toBeFalse" matcher uses a strict boolean comparison to assert that the actual value is boolen false', function(){
-        expect(false).toBeFalse();
-    });
     it('the "toBeTruthy" matcher uses a truthy comparison to assert that the actual value is truthy', function(){
         expect({}).toBeTruthy();
-    });
-    it('the "toNotBeTruthy" matcher uses a truthy comparison to assert that the actual value is not truthy', function(){
-        expect('').toNotBeTruthy();
     });
     it('the "toEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are equal (===)' , function(){
         var anObj1 = {iAm: 'some object to compare to'},
             anObj2 = {iAm: 'some object to compare to'};
         expect(anObj1).toEqual(anObj2);
     });
-    it('the "toNotEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are not equal (!==)', function(){
-        var anObj1 = {iAm: 'anObj1'},
-            anObj2 = {iAm: 'anObj2'};
-        expect(anObj1).toNotEqual(anObj2);
-    });
     it('the "toHaveThrown" matcher uses a strict boolean comparison to assert that the function threw an exception', function(){
         function someFn(arg){
             return a + arg;
         }
         expect(function(){ someFn('abc'); }).toHaveThrown();
-    });
-    it('the "not" qualifier along with "toHaveThrown" matcher uses a strict boolean comparison to assert that the function did not throw an exception', function(){
-        function someFn(arg){
-            return arg;
-        }
-        expect(function(){ someFn('abc'); }).not.toHaveThrown();
     });
 });
 
@@ -130,14 +113,14 @@ describe('Evaluating boolean assertions', function(){
         expect(true).toBeTrue();
     });
     it('boolean false', function(){
-        expect(false).toBeFalse();
+        expect(false).not.toBeTrue();
     });
 });
 
 describe('Evaluating truthy assertions', function(){
     it('undefined', function(){
         var undef;
-        expect(undef).toNotBeTruthy();
+        expect(undef).not.toBeTruthy();
     });
     it('objects', function(){
         var def = {};
@@ -149,13 +132,13 @@ describe('Evaluating truthy assertions', function(){
     });
     it('numeric vaules that are 0', function(){
         var zero = 0;
-        expect(zero).toNotBeTruthy();
+        expect(zero).not.toBeTruthy();
     });
     it('non empty strings', function(){
         expect('not empty string').toBeTruthy();
     });
     it('empty strings', function(){
-        expect('').toNotBeTruthy();
+        expect('').not.toBeTruthy();
     });
 });
 
@@ -168,13 +151,13 @@ describe('Evaluating strict, deep recursive comparison assertions', function(){
         expect(a).toEqual(c);
     });
     it('2 objects with different properties or property values', function(){
-        expect(a).toNotEqual(b);
+        expect(a).not.toEqual(b);
     });
     it('2 value types whose values are the same', function(){
         expect(char).toEqual('b');
     });
     it('2 value types whose values are  not the same', function(){
-        expect(char).toNotEqual('a');
+        expect(char).not.toEqual(a);
     });
 });
 
@@ -314,7 +297,7 @@ describe('Spies are test doubles', function(){
                 spy(foo, 'someFn');
                 foo.someFn();
                 expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
-                expect(foo.someFn.wasCalled.nTimes(2)).toBeFalse();
+                expect(foo.someFn.wasCalled.nTimes(2)).not.toBeTrue();
             });
             it('tracks what context it was called with', function(){
                 var foo = this.foo,
@@ -322,7 +305,7 @@ describe('Spies are test doubles', function(){
                 spy(foo, 'someFn');
                 foo.someFn();
                 expect(foo.someFn.contextCalledWith()).toEqual(foo);
-                expect(foo.someFn.contextCalledWith()).toNotEqual(bar);
+                expect(foo.someFn.contextCalledWith()).not.toEqual(bar);
             });
             it('tracks the arguments that it was called with', function(){
                 var foo = this.foo,
@@ -330,8 +313,8 @@ describe('Spies are test doubles', function(){
                 spy(foo, 'someFn');
                 foo.someFn(arg);
                 expect(foo.someFn.args.getArgument(0)).toEqual(arg);
-                expect(foo.someFn.args.getArgument(0)).toNotEqual(arg + '!');
-                expect(foo.someFn.args.getArgument(1)).toNotBeTruthy();
+                expect(foo.someFn.args.getArgument(0)).not.toEqual(arg + '!');
+                expect(foo.someFn.args.getArgument(1)).not.toBeTruthy();
             });
             it('tracks what it returned', function(){
                 var foo = this.foo,
@@ -377,7 +360,7 @@ describe('spying on a method', function(){
             spy(foo, 'someFn');
             foo.someFn();
             expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
-            expect(foo.someFn.wasCalled.nTimes(2)).toBeFalse();
+            expect(foo.someFn.wasCalled.nTimes(2)).not.toBeTrue();
         });
         it('for what context the method was called with', function(){
             var foo = this.foo,
@@ -385,7 +368,7 @@ describe('spying on a method', function(){
             spy(foo, 'someFn');
             foo.someFn();
             expect(foo.someFn.contextCalledWith()).toEqual(foo);
-            expect(foo.someFn.contextCalledWith()).toNotEqual(bar);
+            expect(foo.someFn.contextCalledWith()).not.toEqual(bar);
         });
         it('for the arguments that the method was called with', function(){
             var foo = this.foo,
@@ -393,8 +376,8 @@ describe('spying on a method', function(){
             spy(foo, 'someFn');
             foo.someFn(arg);
             expect(foo.someFn.args.getArgument(0)).toEqual(arg);
-            expect(foo.someFn.args.getArgument(0)).toNotEqual(arg + '!');
-            expect(foo.someFn.args.getArgument(1)).toNotBeTruthy();
+            expect(foo.someFn.args.getArgument(0)).not.toEqual(arg + '!');
+            expect(foo.someFn.args.getArgument(1)).not.toBeTruthy();
         });
         it('for what the method returned', function(){
             var foo = this.foo,
@@ -459,7 +442,7 @@ describe('A stub when configured to call the actual implementation', function(){
     it('calls it', function(){
         spy(foo, 'someFn');
         foo.someFn(123);
-        expect(foo.someFn.returned()).toNotEqual(123);
+        expect(foo.someFn.returned()).not.toEqual(123);
         foo.someFn.callActual();
         foo.someFn(123);
         expect(foo.someFn.returned()).toEqual(123);
@@ -471,7 +454,7 @@ describe('A stub when configured to call a fake implementation', function(){
     it('calls it', function(){
         spy(foo, 'someFn');
         foo.someFn(123);
-        expect(foo.someFn.returned()).toNotEqual(123);
+        expect(foo.someFn.returned()).not.toEqual(123);
         foo.someFn.callActual();
         foo.someFn(123);
         expect(foo.someFn.returned()).toEqual(123);
@@ -573,10 +556,10 @@ describe('spying on more than one method', function(){
         foo.someFn('You got that right!');
         expect(foo.someFn.wasCalled()).toBeTrue();
         expect(foo.someFn.wasCalled.nTimes(2)).toBeTrue();
-        expect(foo.someFn.wasCalled.nTimes(1)).toBeFalse();
+        expect(foo.someFn.wasCalled.nTimes(1)).not.toBeTrue();
         expect(bar.someFn.wasCalled()).toBeTrue();
         expect(bar.someFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(bar.someFn.wasCalled.nTimes(2)).toBeFalse();
+        expect(bar.someFn.wasCalled.nTimes(2)).not.toBeTrue();
     });
 });
 
@@ -604,12 +587,12 @@ describe('using spy\'s "calls" api with methods', function(){
         for(i = 0; i < n; i++){
             aCall = foo.someFn.calls.forCall(i);
             expect(aCall.context).toEqual(foo);
-            expect(aCall.context).toNotEqual(bar);
+            expect(aCall.context).not.toEqual(bar);
             expect(aCall.args[0]).toEqual(i);
-            expect(aCall.args[0]).toNotEqual(n);
-            expect(aCall.error).toNotBeTruthy();
+            expect(aCall.args[0]).not.toEqual(n);
+            expect(aCall.error).not.toBeTruthy();
             expect(aCall.returned).toEqual(i);
-            expect(aCall.returned).toNotEqual(n);
+            expect(aCall.returned).not.toEqual(n);
         }
     });
 });
@@ -640,7 +623,7 @@ describe('spying on a function', function(){
             spyFn = spy(someFn);
         spyFn();
         expect(spyFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(spyFn.wasCalled.nTimes(2)).toBeFalse();
+        expect(spyFn.wasCalled.nTimes(2)).not.toBeTrue();
     });
     it('we can query the context the function was called with', function(){
         var someFn = this.someFn,
@@ -655,8 +638,8 @@ describe('spying on a function', function(){
             arg = 'Preamble rocks!';
         spyFn(arg);
         expect(spyFn.args.getArgument(0)).toEqual(arg);
-        expect(spyFn.args.getArgument(0)).toNotEqual(arg + '!');
-        expect(spyFn.args.getArgument(1)).toNotBeTruthy();
+        expect(spyFn.args.getArgument(0)).not.toEqual(arg + '!');
+        expect(spyFn.args.getArgument(1)).not.toBeTruthy();
     });
     it('we can query for what the function returned', function(){
         var someFn = this.someFn,
@@ -664,7 +647,7 @@ describe('spying on a function', function(){
             arg = 'Preamble rocks!';
         spyFn(arg);
         expect(spyFn.returned()).toEqual(arg);
-        expect(spyFn.returned()).toNotEqual(arg + '1');
+        expect(spyFn.returned()).not.toEqual(arg + '1');
     });
 });
 
@@ -679,7 +662,7 @@ describe('a spy function throws', function(){
         spyFn();
         expect(spyFn.threw()).toBeTrue();
         expect(spyFn.threw.withMessage('Holy Batman!')).toBeTrue();
-        expect(spyFn.threw.withMessage('Holy Batman!!')).toBeFalse();
+        expect(spyFn.threw.withMessage('Holy Batman!!')).not.toBeTrue();
     });
 });
 
@@ -703,10 +686,10 @@ describe('spying on more than one function', function(){
         spyFooFn('You got that right!');
         expect(spyFooFn.wasCalled()).toBeTrue();
         expect(spyFooFn.wasCalled.nTimes(2)).toBeTrue();
-        expect(spyFooFn.wasCalled.nTimes(1)).toBeFalse();
+        expect(spyFooFn.wasCalled.nTimes(1)).not.toBeTrue();
         expect(spyBarFn.wasCalled()).toBeTrue();
         expect(spyBarFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(spyBarFn.wasCalled.nTimes(2)).toBeFalse();
+        expect(spyBarFn.wasCalled.nTimes(2)).not.toBeTrue();
     });
 });
 
@@ -733,10 +716,10 @@ describe('using spy\'s "calls" api with functions', function(){
             aCall = spyFooFn.calls.forCall(i);
             expect(aCall.context).toEqual(bar);
             expect(aCall.args[0]).toEqual(i);
-            expect(aCall.args[0]).toNotEqual(n);
-            expect(aCall.error).toNotBeTruthy();
+            expect(aCall.args[0]).not.toEqual(n);
+            expect(aCall.error).not.toBeTruthy();
             expect(aCall.returned).toEqual(i);
-            expect(aCall.returned).toNotEqual(n);
+            expect(aCall.returned).not.toEqual(n);
         }
     });
 });
