@@ -1432,10 +1432,10 @@
         /**
          * If actual is a function and if it is a spy and it has been called
          * set the actual to the spy itself. If it hasn't been called then call
-         * it and set the actual to the spy.
-         * If actual is a function and it isn't a spy make it a spy and call it
-         * and set the actual to the spy.
-         * If actual isn't a function then set actual to the actual's value.
+         * it and then set the actual to the spy.
+         * If actual is a function and it isn't a spy make it a spy, call it
+         * and then set the actual to the spy.
+         * If actual isn't a function then just set the actual to the value.
          */
         if(typeof(actual) === 'function'){
             if(actual._snoopsterMaker){
@@ -1446,6 +1446,14 @@
                     val = actual;
                 }
             }else{
+                /**
+                 * Note: since a function might call another function which is a
+                 * spy (i.e. spy(function(){someSpy();})) we need to capture that
+                 * spy. snoopster will push itself onto wasSnooped when it is
+                 * called. Therefore wasSnooped[0] will always be the spy to use
+                 * to set the actual value. This then assumes that the first spy
+                 * actually called is expect's intended target.
+                 */
                 wasSnooped = null;
                 fn = spy(actual).callActual();
                 fn();
