@@ -24,7 +24,7 @@ describe('Assertions are composed using "expect" to set the actual value and a m
     });
 });
 
-describe('"expect" can take any value as an argument', function(){
+describe('"expect" takes a single value as an argument', function(){
     it('such as a number', function(){
         expect(1).toEqual(1);
     });
@@ -34,10 +34,10 @@ describe('"expect" can take any value as an argument', function(){
    it('such as an object', function(){
        expect({iAm: 'anObject'}).toEqual({iAm: 'anObject'});
    });
-   it('such as a function', function(){
+   it('such as a function which Preamble will first convert into an anonymous spy and then call it', function(){
        expect(function(){ return 'abc'; } ).toHaveReturned('abc');
    });
-   it('such as a function which is also a spy', function(){
+   it('such as a function which is already a spy', function(){
        var aSpy = spy(function(){ throw new Error('with a message'); }).callActual();
        expect(aSpy).toHaveThrown.with.message('with a message');
    });
