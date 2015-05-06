@@ -15,6 +15,7 @@
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
         reporter,
         spy,
+        wasSnooped,
         iteratorFactory,
         assert,
         intervalId,
@@ -291,7 +292,7 @@
         for (i = 0, len = this.assertions.length; i < len; i++) {
             item = this.assertions[i];
             result = item.assertion(typeof item.value === 'function' &&
-                !item.value._marker ? item.value() : item.value, item.expectation);
+                !item.value._snoopsterMaker ? item.value() : item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             item.explain = result.explain;
@@ -1419,21 +1420,40 @@
     }
 
     //TODO(Jeff):v2.3.0 notes the actual value
+    /**
+     * @param {*} actual If a function it can be a spy.
+     */
     function noteExpectation(actual){
-        var aSpy;
+        var val = actual,
+            fn;
         if(arguments.length !== 1){
             throwException('"expect" requires 1 argument, found ' + arguments.length);
         }
-        //Make it a spy if it isn't one already
-        if(typeof(actual) === 'function' && !actual._marker){
-            aSpy = spy(actual);
-            //will need to call the actual implementation, not the stub
-            aSpy.callActual();
-            //call it!
-            aSpy();
+        /**
+         * If actual is a function and if it is a spy and it has been called
+         * set the actual to the spy itself. If it hasn't been called then call
+         * it and set the actual to the spy.
+         * If actual is a function and it isn't a spy make it a spy and call it
+         * and set the actual to the spy.
+         * If actual isn't a function then set actual to the actual's value.
+         */
+        if(typeof(actual) === 'function'){
+            if(actual._snoopsterMaker){
+                if(actual.wasCalled()){
+                    val = actual;
+                }else{
+                    actual();
+                    val = actual;
+                }
+            }else{
+                wasSnooped = null;
+                fn = spy(actual).callActual();
+                fn();
+                val = wasSnooped[0];
+            }
         }
         //push partial assertion (only the value) info onto the assertion table
-        pushOntoAssertions(null, null, aSpy ? aSpy : actual, null, null);
+        pushOntoAssertions(null, null, val, null, null);
         //return assert for chaining
         return assert;
     }
@@ -1724,6 +1744,9 @@
                 returned = snoopster._returns || returned;
                 snoopster.args = new Args(aArgs);
                 calls.push(new ACall(this, aArgs, error, returned));
+                wasSnooped = Array.isArray(wasSnooped) ? wasSnooped : [];
+                wasSnooped.push(snoopster);
+                return snoopster;
             };
             //bind passed context (2nd parameter/optional) when the 1st parameter is
             //a function
@@ -1732,7 +1755,7 @@
             }
             //api
             //TODO(Jeff): v2.3.0
-            snoopster._marker = 'preamble.snoopster';
+            snoopster._snoopsterMaker = 'preamble.snoopster';
             //TODO(Jeff): v2.3.0
             snoopster.throws = function(){
                 snoopster.throws._throws = true;
