@@ -24,43 +24,74 @@ describe('Assertions are composed using "expect" to set the actual value and a m
     });
 });
 
+describe('"expect" can take any value as an argument', function(){
+    it('such as a number', function(){
+        expect(1).toEqual(1);
+    });
+    it('such as a string', function(){
+        expect('abc').toEqual('abc');
+    });
+   it('such as an object', function(){
+       expect({iAm: 'anObject'}).toEqual({iAm: 'anObject'});
+   });
+   it('such as a function', function(){
+       expect(function(){ return 'abc'; } ).toHaveReturned('abc');
+   });
+   it('such as a function which is also a spy', function(){
+       var aSpy = spy(function(){ throw new Error('with a message'); }).callActual();
+       expect(aSpy).toHaveThrown.with.message('with a message');
+   });
+});
+
 describe('Preamble has numerous matchers', function(){
+    it('the "toEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are equal (===)' , function(){
+        var anObj1 = {iAm: 'some object to compare to'},
+            anObj2 = {iAm: 'some object to compare to'};
+        expect(anObj1).toEqual(anObj2);
+    });
     it('the "toBeTrue" matcher uses a strict boolean comparison to assert that the actual value is boolen true', function(){
         expect(true).toBeTrue();
     });
     it('the "toBeTruthy" matcher uses a truthy comparison to assert that the actual value is truthy', function(){
         expect({}).toBeTruthy();
     });
-    it('the "toEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are equal (===)' , function(){
-        var anObj1 = {iAm: 'some object to compare to'},
-            anObj2 = {iAm: 'some object to compare to'};
-        expect(anObj1).toEqual(anObj2);
+    it('the "toHaveBeenCalled" matcher is used to assert that a function was called', function(){
+        var someFn = spy(function(){}).callActual();
+        expect(someFn).toHaveBeenCalled();
     });
-    it('the "toHaveThrown" matcher uses a strict boolean comparison to assert that the function threw an exception', function(){
-        function someFn(arg){
-            return a + arg;
-        }
+    it('the "toHaveReturned" matcher is used to assert that a function returned a particular value', function(){
+        var someFn = spy(function(){return 'abc';}).callActual();
+        expect(someFn).toHaveReturned('abc');
+    });
+    it('the "toHaveThrown" matcher is used to assert that a function threw an exception', function(){
+        var someFn = spy(function(arg){ return a + arg; }).callActual();
         expect(function(){ someFn('abc'); }).toHaveThrown();
     });
 });
 
-describe('Preamble also has a "not" qualifier which when used with a', function(){
-    it('"toBeTrue" matcher asserts that the actual value is boolen false', function(){
-        expect(false).not.toBeTrue();
-    });
-    it('"toBeTruthy" matcher asserts that the actual value is not truthy', function(){
-        expect('').not.toBeTruthy();
-    });
-    it('"toEqual" matcher asserts that the actual value and the expected value are not equal (!==)', function(){
+describe('Preamble also has a "not" qualifier', function(){
+    it('the "not.toEqual" expression is used to assert that the actual value and the expected value are not equal (!==)', function(){
         var anObj1 = {iAm: 'anObj1'},
             anObj2 = {iAm: 'anObj2'};
         expect(anObj1).not.toEqual(anObj2);
     });
-    it('"toHaveThrown" matcher asserts that the function did not throw an exception', function(){
-        function someFn(arg){
-            return arg;
-        }
-        expect(function(){ someFn('abc'); }).not.toHaveThrown();
+    it('the "not.toBeTrue" expression is used to assert that the actual value is boolen false', function(){
+        expect(false).not.toBeTrue();
+    });
+    it('the "not.toBeTruthy" expression is used to assert that the actual value is not truthy', function(){
+        expect('').not.toBeTruthy();
+    });
+    it('the "not.toHaveBeenCalled" expression is used to assert that a function was not called', function(){
+        var someFn = spy(function(){}).callActual();
+        expect(someFn).toHaveBeenCalled();
+    });
+    it('the "not.toHaveReturned" expression is used to assert that a function did not return a particular value', function(){
+        var someFn = spy(function(){return 'abc';}).callActual();
+        expect(someFn).toHaveReturned('abc');
+    });
+    it('the "not.toHaveThrown" expression is used to assert that a function did not throw an exception', function(){
+        var someFn = spy(function(arg){ return a + arg; }).callActual();
+        expect(function(){ someFn('abc'); }).toHaveThrown();
     });
 });
 
@@ -281,10 +312,7 @@ describe('Spies are test doubles', function(){
             it('tracks all calls', function(){
                 var foo = this.foo;
                 spy(foo, 'someFn');
-                foo.someFn();
                 expect(foo.someFn).toHaveBeenCalled();
-                spy(foo, 'someOtherFn');
-                expect(foo.someOtherFn).not.toHaveBeenCalled();
             });
             it('tracks how many times it was called', function(){
                 var foo = this.foo;
@@ -334,6 +362,9 @@ describe('spying on a method', function(){
         this.foo = {
             someFn: function(arg){
                 return arg;
+            },
+            someOtherFn: function(arg){
+                return arg;
             }
         };
     });
@@ -344,10 +375,9 @@ describe('spying on a method', function(){
             foo.someFn();
             expect(foo.someFn).toHaveBeenCalled();
         });
-        it('if the method was not called', function(){
+        it('if the method was called using an anonymous spy', function(){
             var foo = this.foo;
-            spy(foo, 'someFn');
-            expect(foo.someFn).not.toHaveBeenCalled();
+            expect(foo.someOtherFn).toHaveBeenCalled();
         });
         it('for how many times the method was called', function(){
             var foo = this.foo;
