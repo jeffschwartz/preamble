@@ -354,6 +354,28 @@ describe('Spies are test doubles', function(){
                 expect(foo.someOtherFn).not.toHaveReturned(arg);
             });
         });
+        describe('and be used as a "mock"', function(){
+            var os = {
+                rmProperty: function(obj, propName){
+                    delete obj[propName];
+                }
+            };
+            function doSomeThing(){
+                var anObj = {
+                        a: 'a',
+                        b: 'b'
+                    };
+                os.rmProperty(anObj, 'a');
+            }
+            it('mocks rmProperty', function(){
+                spy(os, 'rmProperty');
+                os.rmProperty.returns(true);
+                doSomeThing();
+                expect(os.rmProperty).toHaveBeenCalled();
+                expect(os.rmProperty).toHaveBeenCalled.with.
+                expect(os.rmProperty).toHaveReturned(true);
+            });
+        });
     });
 });
 
