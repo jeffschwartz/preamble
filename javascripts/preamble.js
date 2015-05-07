@@ -15,7 +15,6 @@
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
         reporter,
         spy,
-        wasSnooped,
         iteratorFactory,
         assert,
         intervalId,
@@ -1449,15 +1448,15 @@
                 /**
                  * Note: since a function might call another function which is a
                  * spy (i.e. spy(function(){someSpy();})) we need to capture that
-                 * spy. snoopster will push itself onto wasSnooped when it is
-                 * called. Therefore wasSnooped[0] will always be the spy to use
-                 * to set the actual value. This then assumes that the first spy
-                 * actually called is expect's intended target.
+                 * spy. snoopster will push itself onto spy.wasSnooped when it is
+                 * called. Therefore spy.wasSnooped[0] will always be the spy to
+                 * use to set the actual value. This then assumes that the first
+                 * spy actually called is expect's intended target.
                  */
-                wasSnooped = null;
+                spy.wasSnooped = null;
                 fn = spy(actual).callActual();
                 fn();
-                val = wasSnooped[0];
+                val = spy.wasSnooped[0];
             }
         }
         //push partial assertion (only the value) info onto the assertion table
@@ -1752,8 +1751,8 @@
                 returned = snoopster._returns || returned;
                 snoopster.args = new Args(aArgs);
                 calls.push(new ACall(this, aArgs, error, returned));
-                wasSnooped = Array.isArray(wasSnooped) ? wasSnooped : [];
-                wasSnooped.push(snoopster);
+                _spy.wasSnooped = _spy.wasSnooped && Array.isArray(_spy.wasSnooped) ? _spy.wasSnooped : [];
+                _spy.wasSnooped.push(snoopster);
                 return snoopster;
             };
             //bind passed context (2nd parameter/optional) when the 1st parameter is
