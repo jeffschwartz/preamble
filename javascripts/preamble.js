@@ -488,9 +488,9 @@
                             failed = testFailureMarkup.
                                 replace(/{{explain}}/, assertion.explain).
                                 replace(/{{stacktrace}}/, stackTrace(assertion.stackTrace));
+                            html = html.slice(0, -5) + failed + html.slice(-5);
                         }
                     });
-                    html = html.slice(0, -5) + failed + html.slice(-5);
                 }else if(item.totFailed === -1){
                     failed = testFailureMarkup.
                         replace(/{{explain}}/, 'test timed out').

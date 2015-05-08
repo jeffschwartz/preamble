@@ -372,9 +372,20 @@ describe('Spies are test doubles', function(){
                 os.rmProperty.returns(true);
                 doSomeThing();
                 expect(os.rmProperty).toHaveBeenCalled();
-                expect(os.rmProperty).toHaveBeenCalled.with.
+                // expect(os.rmProperty).toHaveBeenCalled.with.
                 expect(os.rmProperty).toHaveReturned(true);
             });
+        });
+    });
+    describe('create a stub', function(){
+        it('dynamically', function(){
+            var stub = spy();
+            stub.throws.with.message('whoops!').and.with.name('Whoops!');
+            stub();
+            expect(stub).toHaveBeenCalled();
+            expect(stub).toHaveThrown();
+            expect(stub).toHaveThrown.with.message('whoops');
+            expect(stub).toHaveThrown.with.name('Whoops');
         });
     });
 });
