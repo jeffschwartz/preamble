@@ -381,11 +381,10 @@ describe('Spies are test doubles', function(){
         it('dynamically', function(){
             var stub = spy();
             stub.throws.with.message('whoops!').and.with.name('Whoops!');
-            stub();
             expect(stub).toHaveBeenCalled();
             expect(stub).toHaveThrown();
-            expect(stub).toHaveThrown.with.message('whoops');
-            expect(stub).toHaveThrown.with.name('Whoops');
+            expect(stub).toHaveThrown.with.message('whoops!');
+            expect(stub).toHaveThrown.with.name('Whoops!');
         });
     });
 });
