@@ -1653,30 +1653,39 @@
 
     spy = (function() {
         /**
-         * @param {object} argObject optional A function to be snooped or an object.
-         * @param {string} argProperty optional An object used as a context if the
-         * 1st parameter is a function or the name of the property of argObject to
-         * be snooped.
+         * @param {function | object} argObject A function to be spied or an object.
+         * @param {[object] | string} argProperty An object used as the  calling
+         * context to call argObject if argObject is a function or the name
+         * of the property method of argObject to spy if argObject is an object.
+         * @param {[object]} context An object used as the calling context to call the
+         * method on argObject.
          */
         //TODO(Jeff): v2.3.0 support snooping on standalone functions and
         //allowing them to be bound to a context passed as the 2nd parameter
-        function _spy(argObject, argProperty){
+        function _spy(argObject, argProperty, context){
             var targetFn,
                 snoopster,
                 calls = [];
-            // window.calls = calls;
             //TODO(Jeff): v2.3.0
-            if(arguments.length > 2){
-                throw new Error('spy requires 0, 1 or 2 arguments - found ' +
-                    arguments.length + '.');
-            }
-            if(arguments.length === 1 && typeof(arguments[0]) !== 'function'){
-                throw new Error('1st parameter must be a function or an object');
-            }else if(arguments.length === 2 && typeof(arguments[0]) !== 'function' && typeof(arguments[0]) !== 'object'){
-                throw new Error('when the 1st parameter is a function the 2nd parameter must be an object');
-            }else if(arguments.length === 2 && typeof(arguments[0]) === 'object' &&
-                !arguments[0].hasOwnProperty([arguments[1]])){
-                throw new Error('object does not have property name "' + arguments[1] + '"');
+            if(arguments.length){
+                if(typeof(argObject) !== 'function' &&
+                    typeof(argObject) !== 'object'){
+                    throw new Error('1st parameter must be a function or an object');
+                }
+                if(typeof(argObject) === 'function' && arguments.length === 2 &&
+                    typeof(argProperty) !== 'object'){
+                    throw new Error('2nd parameter must be an object');
+                }
+                if(typeof(argObject) === 'object' && arguments.length < 2){
+                    throw new Error('expecting 2 or 3 parameters - found ' + arguments.length);
+                }
+                if(typeof(argObject) === 'object' && typeof(argProperty) !== 'string'){
+                    throw new Error('2nd parameter must be a string');
+                }
+                if(typeof(argObject) === 'object' && arguments.length === 3 &&
+                    typeof(context) !== 'object'){
+                    throw new Error('3rd parameter must be an object');
+                }
             }
             function argsToArray(argArguments){
                 return [].slice.call(argArguments, 0);
@@ -1755,10 +1764,11 @@
                 _spy.wasSnooped.push(snoopster);
                 return snoopster;
             };
-            //bind passed context (2nd parameter/optional) when the 1st parameter is
-            //a function
+            //bind 2nd or 3rd parameter as context if passed
             if(typeof(arguments[0]) === 'function' && arguments.length === 2){
                 snoopster = snoopster.bind(arguments[1]);
+            }else if(typeof(arguments[0]) === 'object' && arguments.length === 3){
+                snoopster = snoopster.bind(context);
             }
             //api
             //TODO(Jeff): v2.3.0
