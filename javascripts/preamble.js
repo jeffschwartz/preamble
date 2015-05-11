@@ -1657,12 +1657,9 @@
          * @param {[object] | string} argProperty An object used as the  calling
          * context to call argObject if argObject is a function or the name
          * of the property method of argObject to spy if argObject is an object.
-         * @param {[object]} context An object used as the calling context to call the
-         * method on argObject.
          */
-        //TODO(Jeff): v2.3.0 support snooping on standalone functions and
-        //allowing them to be bound to a context passed as the 2nd parameter
-        function _spy(argObject, argProperty, context){
+        //TODO(Jeff): v2.3.0 support snooping on standalone functions
+        function _spy(argObject, argProperty){
             var targetFn,
                 snoopster,
                 calls = [];
@@ -1682,9 +1679,8 @@
                 if(typeof(argObject) === 'object' && typeof(argProperty) !== 'string'){
                     throw new Error('2nd parameter must be a string');
                 }
-                if(typeof(argObject) === 'object' && arguments.length === 3 &&
-                    typeof(context) !== 'object'){
-                    throw new Error('3rd parameter must be an object');
+                if(typeof(argObject) === 'object' && typeof(argObject[argProperty]) !== 'function'){
+                    throw new Error('expected ' + argProperty + ' to be a method');
                 }
             }
             function argsToArray(argArguments){
@@ -1762,14 +1758,10 @@
                 calls.push(new ACall(this, aArgs, error, returned));
                 _spy.wasSnooped = _spy.wasSnooped && Array.isArray(_spy.wasSnooped) ? _spy.wasSnooped : [];
                 _spy.wasSnooped.push(snoopster);
-                return snoopster;
+                //TODO(Jeff):
+                // return snoopster;
+                return returned;
             };
-            //bind 2nd or 3rd parameter as context if passed
-            if(typeof(arguments[0]) === 'function' && arguments.length === 2){
-                snoopster = snoopster.bind(arguments[1]);
-            }else if(typeof(arguments[0]) === 'object' && arguments.length === 3){
-                snoopster = snoopster.bind(context);
-            }
             //api
             //TODO(Jeff): v2.3.0
             snoopster._snoopsterMaker = 'preamble.snoopster';
@@ -1878,12 +1870,54 @@
                 }
             };
             //TODO(Jeff): v2.3.0
+            //if target is a property method then assign snoopster to it
             if(arguments.length && typeof(arguments[0]) !== 'function' &&
                 typeof(arguments[0]) === 'object'){
                 argObject[argProperty] = snoopster;
             }
             return snoopster;
         }
+        /**
+         * @param {object} argObject An object whose properties identified by
+         * the elements in argPropertyNames are to be spies.
+         * @param {array} argPropertyNames An array of strings whose elements
+         * identify the methods in argObject to be spies.
+         * @param {[object]} context An object to use as the context when calling
+         * the spied property methods.
+         */
+        _spy.x = function(argObject, argPropertyNames){
+            var i,
+                len;
+            if(!argObject || typeof(argObject) !== 'object'){
+                throw new Error('expected an object for 1st parameter - found ' +
+                    typeof(argObject));
+            }
+            if(!argPropertyNames || !Array.isArray(argPropertyNames)){
+                throw new Error('expected an array for 2nd parameter - found ' +
+                    typeof(argObject));
+            }
+            if(!argPropertyNames.length){
+                throw new Error('expected an array for 2nd parameter with at ' +
+                    'least one element for 2nd parameter');
+            }
+            for(i = 0, len = argPropertyNames.length; i < len; i++){
+                if(typeof(argPropertyNames[i]) !== 'string'){
+                    throw new Error('expected element ' + i +
+                    ' of 2nd parameter to be a string');
+                }
+                if(!argObject[argPropertyNames[i]]){
+                    throw new Error('expected 1st paramter to have property ' +
+                        argPropertyNames[i]);
+                }
+                if(typeof(argObject[argPropertyNames[i]]) !== 'function'){
+                    throw new Error('expected ' + argPropertyNames[i] +
+                        ' to be a method');
+                }
+            }
+            argPropertyNames.forEach(function(property){
+                spy(argObject, property);
+            });
+        };
         return _spy;
     }());
 

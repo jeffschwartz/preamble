@@ -389,6 +389,42 @@ describe('Spies are test doubles', function(){
     });
 });
 
+describe('spying on more than one method', function(){
+    var foo,
+        bar;
+    beforeEach(function(){
+        foo = {
+            someFn: function(num){
+                return this.square(num);
+            },
+            square: function(num){
+                return num * num;
+            }
+        };
+        bar = {
+            someFn: function(num){
+                return this.square(num);
+            },
+            square: function(num){
+                return num * num;
+            }
+        };
+    });
+    it('with spy.x', function(){
+        spy.x(foo, ['someFn', 'square']);
+        foo.someFn.callActual();
+        foo.square.callActual();
+        foo.someFn(2);
+        expect(foo.someFn.contextCalledWith()).toEqual(foo);
+        expect(foo.someFn).toHaveBeenCalled();
+        expect(foo.someFn.args.getArgument(0)).toEqual(2);
+        expect(foo.someFn).toHaveReturned(4);
+        expect(foo.square).toHaveBeenCalled();
+        expect(foo.square.args.getArgument(0)).toEqual(2);
+        expect(foo.square).toHaveReturned(4);
+    });
+});
+
 describe('spying on a method', function(){
     beforeEach(function(){
         this.foo = {
@@ -688,11 +724,13 @@ describe('spying on a function', function(){
         expect(spyFn.wasCalled.nTimes(2)).not.toBeTrue();
     });
     it('we can query the context the function was called with', function(){
-        var someFn = this.someFn,
-            bar = {},
-            spyFn = spy(someFn, bar);
-        spyFn();
-        expect(spyFn.contextCalledWith()).toEqual(bar);
+        var someFn = spy(),
+            foo = {fn: someFn},
+            bar = {fn: someFn};
+        foo.fn(123);
+        bar.fn(123);
+        expect(someFn.calls.forCall(0).context).toEqual(foo);
+        expect(someFn.calls.forCall(1).context).toEqual(bar);
     });
     it('we can query for the arguments that the function was called with', function(){
         var someFn = this.someFn,
@@ -760,10 +798,9 @@ describe('using spy\'s "calls" api with functions', function(){
         foo = function(arg){
             return arg;
         },
-        bar ={},
         n = 3,
         aCall,
-        spyFooFn = spy(foo, bar).callActual();
+        spyFooFn = spy(foo).callActual();
     for(i = 0; i < n; i++){
         spyFooFn(i) ;
     }
@@ -776,7 +813,6 @@ describe('using spy\'s "calls" api with functions', function(){
     it('forCall(n) returns the correct element', function(){
         for(i = 0; i < n; i++){
             aCall = spyFooFn.calls.forCall(i);
-            expect(aCall.context).toEqual(bar);
             expect(aCall.args[0]).toEqual(i);
             expect(aCall.args[0]).not.toEqual(n);
             expect(aCall.error).not.toBeTruthy();
