@@ -1438,12 +1438,8 @@
          */
         if(typeof(actual) === 'function'){
             if(actual._snoopsterMaker){
-                if(actual.wasCalled()){
-                    val = actual;
-                }else{
-                    actual();
-                    val = actual;
-                }
+                val = actual.wasCalled() && actual ||
+                    (function(){actual(); return actual;})();
             }else{
                 /**
                  * Note: since a function might call another function which is a
