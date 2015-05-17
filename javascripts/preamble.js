@@ -1274,7 +1274,7 @@
         return {result: result, explain: 'expected spy to not have been called'};
     }
 
-    function arrayToString(a){
+    function argToPrintableValue(a){
         var s = '';
         a.forEach(function(el){
             s = s.length ? s + ',' : s;
@@ -1300,7 +1300,7 @@
     function assertToHaveBeenCalledWith(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have been called with ' + /*JSON.stringify(b)*/ arrayToString(b)};
+        return {result: result, explain: 'expected spy to have been called with ' + /*JSON.stringify(b)*/ argToPrintableValue(b)};
     }
 
     //TODO(Jeff): v2.3.0
@@ -1308,13 +1308,13 @@
     function assertToNotHaveBeenCalledWith(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have been called with ' + /*JSON.stringify(b)*/ arrayToString(b)};
+        return {result: result, explain: 'expected spy to not have been called with ' + /*JSON.stringify(b)*/ argToPrintableValue(b)};
     }
 
     //TODO(Jeff): v2.3.0
     // //spy returned
     function assertToHaveReturned(a, b){
-        var result = a_equals_b(a, b);
+        var result = a_equals_true(a);
         // var result = a.wasCalled();
         return {result: result, explain: 'expected spy to have returned ' + JSON.stringify(b)};
     }
@@ -1322,7 +1322,7 @@
     //TODO(Jeff): v2.3.0
     // //spy not have returned
     function assertToNotHaveReturned(a, b){
-        var result = a_notequals_b(a, b);
+        var result = a_equals_false(a);
         // var result = a.wasCalled();
         return {result: result, explain: 'expected spy to not have returned ' + JSON.stringify(b)};
     }
@@ -1551,21 +1551,21 @@
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
     function noteToHaveReturned(value){
         if(arguments.length !== 1){
-            throwException('matcher "toEqual" requires 1 argument, found ' + arguments.length);
+            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveReturned, value, stackTraceFromError(), a.value.returned());
+        completeTheAssertion(assertToHaveReturned, value, stackTraceFromError(), a.value.calls.returned(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveReturned assertion
     function noteToNotHaveReturned(value){
         if(arguments.length !== 1){
-            throwException('matcher "toEqual" requires 1 argument, found ' + arguments.length);
+            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveReturned, value, stackTraceFromError(), a.value.returned());
+        completeTheAssertion(assertToNotHaveReturned, value, stackTraceFromError(), a.value.calls.returned(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrown assertion
@@ -1956,6 +1956,12 @@
                     return calls.some(function(call){
                         var args = call.getArgs().args;
                         return(a_equals_b(value, args));
+                    });
+                },
+                returned: function(value){
+                    return calls.some(function(call){
+                        var returned = call.getReturned();
+                        return(a_equals_b(value, returned));
                     });
                 }
             };
