@@ -48,6 +48,10 @@
         };
     }
 
+    function argsToArray(argArguments){
+        return [].slice.call(argArguments, 0);
+    }
+
     function throwException(errMessage){
         throw new Error(errMessage);
     }
@@ -1270,6 +1274,43 @@
         return {result: result, explain: 'expected spy to not have been called'};
     }
 
+    function arrayToString(a){
+        var s = '';
+        a.forEach(function(el){
+            s = s.length ? s + ',' : s;
+            switch (typeof(el)) {
+                case 'string':
+                    s += '\'' + el + '\'';
+                    break;
+                case 'function':
+                    s += 'function';
+                    break;
+                case 'object':
+                    s += JSON.stringify(el);
+                    break;
+                default:
+                    s += el;
+           }
+       });
+       return s;
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToHaveBeenCalledWith(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have been called with ' + /*JSON.stringify(b)*/ arrayToString(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was not called (boolean)
+    function assertToNotHaveBeenCalledWith(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have been called with ' + /*JSON.stringify(b)*/ arrayToString(b)};
+    }
+
     //TODO(Jeff): v2.3.0
     // //spy returned
     function assertToHaveReturned(a, b){
@@ -1483,6 +1524,30 @@
         completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(), a.value.wasCalled());
     }
 
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
+    function noteToHaveBeenCalledWith(){
+        if(!arguments.length){
+            throwException('matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none');
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1],
+            aArgs = argsToArray(arguments);
+        completeTheAssertion(assertToHaveBeenCalledWith, aArgs, stackTraceFromError(), a.value.calls.wasCalledWith(aArgs));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
+    function noteToNotHaveBeenCalledWith(){
+        if(!arguments.length){
+            throwException('matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none');
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1],
+            aArgs = argsToArray(arguments);
+        completeTheAssertion(assertToNotHaveBeenCalledWith, aArgs, stackTraceFromError(), a.value.calls.wasCalledWith(aArgs));
+    }
+
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
     function noteToHaveReturned(value){
         if(arguments.length !== 1){
@@ -1621,6 +1686,7 @@
         toBeTrue: noteToBeTrueAssertion,
         toBeTruthy: noteToBeTruthyAssertion,
         toHaveBeenCalled: noteToHaveBeenCalled,
+        toHaveBeenCalledWith: noteToHaveBeenCalledWith,
         toHaveReturned: noteToHaveReturned,
         toHaveThrown: noteToHaveThrown
     };
@@ -1633,6 +1699,7 @@
         toBeTrue: noteToBeFalseAssertion,
         toBeTruthy: noteToNotBeTruthyAssertion,
         toHaveBeenCalled: noteToNotHaveBeenCalled,
+        toHaveBeenCalledWith: noteToNotHaveBeenCalledWith,
         toHaveReturned: noteToNotHaveReturned,
         toHaveThrown: noteToNotHaveThrown
     };
@@ -1679,9 +1746,6 @@
                     throw new Error('expected ' + argProperty + ' to be a method');
                 }
             }
-            function argsToArray(argArguments){
-                return [].slice.call(argArguments, 0);
-            }
             //api
             function Args(aArgs){
                 //TODO(Jeff): remove commented out code
@@ -1715,6 +1779,21 @@
                 this.error = error;
                 this.returned = returned;
             }
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getContext = function(){
+                return this.context;
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getArgs = function(){
+                return this.args;
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getError = function(){
+                return this.error;
+            };
+            ACall.prototype.getReturned = function(){
+                return this.returned;
+            };
             //TODO(Jeff): v2.3.0
             targetFn = arguments.length === 0 ? function(){} :
                 typeof(arguments[0]) === 'function' ? argObject :
@@ -1750,8 +1829,8 @@
                     }
                 }
                 returned = snoopster._returns || returned;
-                snoopster.args = new Args(aArgs);
-                calls.push(new ACall(this, aArgs, error, returned));
+                // snoopster.args = new Args(aArgs);
+                calls.push(new ACall(this, new Args(aArgs), error, returned));
                 _spy.wasSnooped = _spy.wasSnooped && Array.isArray(_spy.wasSnooped) ? _spy.wasSnooped : [];
                 _spy.wasSnooped.push(snoopster);
                 //TODO(Jeff):
@@ -1838,6 +1917,11 @@
                 }
                 return calls.length === count;
             };
+            //TODO(Jeff): v2.3.0
+            snoopster.wasCalled.with = function(val){
+                var args = snoopster.wasCalled() && snoopster.calls.getCall(0).args.args || null;
+               return args === val;
+            };
             snoopster.contextCalledWith = function(){
                 return snoopster.wasCalled() && calls[calls.length - 1].context;
             };
@@ -1861,8 +1945,18 @@
                 forCall: function(i){
                     return i >= 0 && i < calls.length && calls[i] || undefined;
                 },
+                //TODO(Jeff): v2.3.0
+                getCall: function(i){
+                    return i >= 0 && i < calls.length && calls[i] || undefined;
+                },
                 all: function(){
                     return calls;
+                },
+                wasCalledWith: function(value){
+                    return calls.some(function(call){
+                        var args = call.getArgs().args;
+                        return(a_equals_b(value, args));
+                    });
                 }
             };
             //TODO(Jeff): v2.3.0
