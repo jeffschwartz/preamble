@@ -1464,40 +1464,11 @@
      * @param {*} actual If a function it can be a spy.
      */
     function noteExpectation(actual){
-        var val = actual,
-            fn;
         if(arguments.length !== 1){
             throwException('"expect" requires 1 argument, found ' + arguments.length);
         }
-        /**
-         * If actual is a function and if it is a spy and it has been called
-         * set the actual to the spy itself. If it hasn't been called then call
-         * it and then set the actual to the spy.
-         * If actual is a function and it isn't a spy make it a spy, call it
-         * and then set the actual to the spy.
-         * If actual isn't a function then just set the actual to the value.
-         */
-        if(typeof(actual) === 'function'){
-            if(actual._snoopsterMaker){
-                val = actual.wasCalled() && actual ||
-                    (function(){actual(); return actual;})();
-            }else{
-                /**
-                 * Note: since a function might call another function which is a
-                 * spy (i.e. spy(function(){someSpy();})) we need to capture that
-                 * spy. snoopster will push itself onto spy.wasSnooped when it is
-                 * called. Therefore spy.wasSnooped[0] will always be the spy to
-                 * use to set the actual value. This then assumes that the first
-                 * spy actually called is expect's intended target.
-                 */
-                spy.wasSnooped = null;
-                fn = spy(actual).callActual();
-                fn();
-                val = spy.wasSnooped[0];
-            }
-        }
         //push partial assertion (only the value) info onto the assertion table
-        pushOntoAssertions(null, null, val, null, null);
+        pushOntoAssertions(null, null, actual, null, null);
         //return assert for chaining
         return assert;
     }
@@ -1831,10 +1802,6 @@
                 returned = snoopster._returns || returned;
                 // snoopster.args = new Args(aArgs);
                 calls.push(new ACall(this, new Args(aArgs), error, returned));
-                _spy.wasSnooped = _spy.wasSnooped && Array.isArray(_spy.wasSnooped) ? _spy.wasSnooped : [];
-                _spy.wasSnooped.push(snoopster);
-                //TODO(Jeff):
-                // return snoopster;
                 return returned;
             };
             //api
