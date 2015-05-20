@@ -1103,7 +1103,8 @@
             window.expect = noteExpectation;
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
-            window.spy = spy;
+            //TODO(Jeff): renamed spy to spyOn
+            window.spyOn = spy;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -1115,7 +1116,8 @@
                 expect: noteExpectation,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
-                spy: spy
+                //TODO(Jeff): renamed spy to spyOn
+                spyOn: spy
                 // //TODO(Jeff):v2.3.5 spy
                 // stub: stub
             };
