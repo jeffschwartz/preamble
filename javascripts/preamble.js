@@ -294,6 +294,7 @@
         this.totFailed = 0;
         for (i = 0, len = this.assertions.length; i < len; i++) {
             item = this.assertions[i];
+            //TODO(Jeff): when item.value is a function not sure if it should be called????
             result = item.assertion(typeof item.value === 'function' &&
                 !item.value._snoopsterMaker ? item.value() : item.value, item.expectation);
             item.result = result.result;
@@ -1719,33 +1720,33 @@
                     throw new Error('expected ' + argProperty + ' to be a method');
                 }
             }
-            //api
+            //spy api
             function Args(aArgs){
                 //TODO(Jeff): remove commented out code
                 // this.args = argsToArray(args);
                 this.args = aArgs;
             }
             //TODO(Jeff): v2.3.0 - fixed check for args length bug
-            Args.prototype.getArgumentsLength = function(){
+            Args.prototype.getLength = function(){
                 return  this.args.length ? this.args.length : 0;
             };
             //TODO(Jeff): v2.3.0 - fixed check for args length bug
-            Args.prototype.hasArgument = function(i){
-                return this.getArgumentsLength() > i ? true : false;
+            Args.prototype.hasArg = function(i){
+                return this.getLength() > i ? true : false;
             };
             //TODO(Jeff): v2.3.0 - fixed check for args length bug
-            Args.prototype.getArgument = function(i){
-                return this.hasArgument(i) ? this.args[i] : null;
+            Args.prototype.getArg = function(i){
+                return this.hasArg(i) ? this.args[i] : null;
             };
             //TODO(Jeff): v2.3.0
-            Args.prototype.hasArgumentProperty = function(i, propertyName){
-                return this.hasArgument(i) && this.args[i][propertyName] ? true : false;
+            Args.prototype.hasArgProperty = function(i, propertyName){
+                return this.hasArg(i) && this.args[i][propertyName] ? true : false;
             };
             //TODO(Jeff): v2.3.0
-            Args.prototype.getArgumentProperty = function(i, propertyName){
-                return this.hasArgumentProperty(i, propertyName) ? this.args[i][propertyName] : null;
+            Args.prototype.getArgProperty = function(i, propertyName){
+                return this.hasArgProperty(i, propertyName) ? this.args[i][propertyName] : null;
             };
-            //api
+            //spy api
             function ACall(context, args, error, returned){
                 this.context = context;
                 this.args = args;
@@ -1761,6 +1762,26 @@
                 return this.args;
             };
             //TODO(Jeff): v2.3.0
+            ACall.prototype.getArg = function(i){
+                return this.args.getArg(i);
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getArgsLength = function(){
+                return this.args.getLength();
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getArgProperty = function(i, propertyName){
+                return this.args.getArgProperty(i, propertyName);
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.hasArgProperty = function(i, propertyName){
+                return this.args.hasArgProperty(i, propertyName);
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.hasArg = function(i){
+                return this.args.hasArg(i);
+            };
+            //TODO(Jeff): v2.3.0
             ACall.prototype.getError = function(){
                 return this.error;
             };
@@ -1771,7 +1792,7 @@
             targetFn = arguments.length === 0 ? function(){} :
                 typeof(arguments[0]) === 'function' ? argObject :
                 argObject[argProperty];
-            //tracking
+            //spy api - tracking
             snoopster = function(){
                 var aArgs = arguments.length && argsToArray(arguments) || [],
                     fn,
@@ -1806,10 +1827,10 @@
                 calls.push(new ACall(this, new Args(aArgs), error, returned));
                 return returned;
             };
-            //api
             //TODO(Jeff): v2.3.0
             snoopster._snoopsterMaker = 'preamble.snoopster';
             //TODO(Jeff): v2.3.0
+            //stub api
             snoopster.throws = function(){
                 snoopster.throws._throws = true;
             };
@@ -1847,11 +1868,13 @@
                 return this;
             };
             //TODO(Jeff): v2.3.0
+            //spy api
             snoopster._resetCalls = function(){
                 this._callFake = null;
                 this._callActual = this._callStub = false;
             };
             //TODO(Jeff): v2.3.0
+            //spy api
             snoopster._callFake = null;
             snoopster.callFake = function(fn){
                 if(fn && typeof(fn) !== 'function'){
@@ -1861,6 +1884,7 @@
                 snoopster._callFake = fn;
             };
             //TODO(Jeff): v2.3.0
+            //spy api
             snoopster._callActual = false;
             snoopster.callActual = function(){
                 this._resetCalls();
@@ -1868,18 +1892,22 @@
                 //for chaining
                 return this;
             };
+            //spy api
             snoopster.callStub = function(){
                 this._resetCalls();
                 this._callActual = false;
                 //for chaining
                 return this;
             };
+            //spy api
             snoopster.called = function(){
                 return calls.length;
             };
+            //spy api
             snoopster.wasCalled = function(){
                 return !!calls.length;
             };
+            //spy api
             snoopster.wasCalled.nTimes = function(count){
                 if(arguments.length !== 1){
                     throw new Error('wasCalled.nTimes expects to be called with an integer');
@@ -1887,26 +1915,33 @@
                 return calls.length === count;
             };
             //TODO(Jeff): v2.3.0
+            //spy api
             snoopster.wasCalled.with = function(val){
-                var args = snoopster.wasCalled() && snoopster.calls.getCall(0).args.args || null;
+                var args = snoopster.wasCalled() && snoopster.calls.forCall(0).args.args || null;
                return args === val;
             };
+            //spy api
             snoopster.contextCalledWith = function(){
                 return snoopster.wasCalled() && calls[calls.length - 1].context;
             };
+            //spy api
             snoopster.returned = function(){
                 return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
             };
+            //spy api
             snoopster.threw = function(){
                 return snoopster.wasCalled() && !!calls[calls.length - 1].error;
             };
+            //spy api
             snoopster.threw.withMessage = function(message){
                 return snoopster.threw() && calls[calls.length - 1].error.message === message;
             };
             //TODO(Jeff): v2.3.0
+            //spy api
             snoopster.threw.withName = function(val){
                 return snoopster.threw() && calls[calls.length - 1].error.name === val;
             };
+            //spy calls api
             snoopster.calls = {
                 count: function(){
                     return calls.length;
