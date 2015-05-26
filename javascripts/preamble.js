@@ -1813,10 +1813,10 @@
                     }
                 }else{
                     //TODO(Jeff): v2.3.Error
-                    if(snoopster.throws._throws){
+                    if(snoopster._throws){
                         try{
 
-                            throw new ThrowsException(snoopster.throws.throwsMessage, snoopster.throws.throwsName);
+                            throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
                         }catch(er){
                             error = er;
                         }
@@ -1831,73 +1831,72 @@
             snoopster._snoopsterMaker = 'preamble.snoopster';
             //TODO(Jeff): v2.3.0
             //stub api
-            snoopster.throws = function(){
-                snoopster.throws._throws = true;
+            //TODO(Jeff): v2.3.0
+            snoopster._throws = false;
+            snoopster._throwsMessage = '';
+            snoopster._throwsName = '';
+            //TODO(Jeff): v2.3.0
+            snoopster.and = {};
+            snoopster.and.throw = function(){
+                snoopster._throws = true;
             };
             //TODO(Jeff): v2.3.0
-            snoopster.throws._throws = false;
-            snoopster.throws._message = '';
-            snoopster.throws._name = '';
-            //TODO(Jeff): v2.3.0
-            snoopster.throws._api = function ThrowsApi(){};
-            snoopster.throws._api.prototype.message = function(message){
+            snoopster.and.throw.with = {};
+            snoopster.and.throw.with.message = function(message){
                 if(typeof(message) !== 'string'){
                     throw new Error('message expects a string');
                 }
-                snoopster.throws._throws = true;
-                snoopster.throws.throwsMessage= message;
+                snoopster._throws = true;
+                snoopster._throwsMessage = message;
                 //for chaining - spy.throws.with.message().and.with.name();
-                return snoopster.throws.with;
+                return snoopster;
             };
-            snoopster.throws._api.prototype.name = function(name){
+            snoopster.and.throw.with.name = function(name){
                 if(typeof(name) !== 'string'){
                     throw new Error('name expects a string');
                 }
-                snoopster.throws._throws = true;
-                snoopster.throws.throwsName = name;
+                snoopster._throws = true;
+                snoopster._throwsName = name;
                 //for chaining - spy.throws.with.message().and.with.name();
-                return snoopster.throws.with;
+                return snoopster;
             };
             //TODO(Jeff): v2.3.0
-            snoopster.throws.with = new snoopster.throws._api();
-            snoopster.throws.with.and = {with: snoopster.throws.with};
-            //TODO(Jeff): v2.3.0
-            snoopster.returns = function(ret){
-                this._returns = ret;
+            snoopster.and.return = function(ret){
+                snoopster._returns = ret;
                 //for chaining
-                return this;
+                return snoopster;
             };
             //TODO(Jeff): v2.3.0
             //spy api
             snoopster._resetCalls = function(){
-                this._callFake = null;
-                this._callActual = this._callStub = false;
+                snoopster._callFake = null;
+                snoopster._callActual = this._callStub = false;
             };
             //TODO(Jeff): v2.3.0
             //spy api
             snoopster._callFake = null;
-            snoopster.callFake = function(fn){
+            snoopster.and.callFake = function(fn){
                 if(fn && typeof(fn) !== 'function'){
                     throw new Error('callFake expects to be called with a function');
                 }
-                this._resetCalls();
+                snoopster._resetCalls();
                 snoopster._callFake = fn;
             };
             //TODO(Jeff): v2.3.0
             //spy api
             snoopster._callActual = false;
-            snoopster.callActual = function(){
-                this._resetCalls();
-                this._callActual = true;
+            snoopster.and.callActual = function(){
+                snoopster._resetCalls();
+                snoopster._callActual = true;
                 //for chaining
-                return this;
+                return snoopster;
             };
             //spy api
-            snoopster.callStub = function(){
-                this._resetCalls();
-                this._callActual = false;
+            snoopster.and.callStub = function(){
+                snoopster._resetCalls();
+                snoopster._callActual = false;
                 //for chaining
-                return this;
+                return snoopster;
             };
             //spy api
             snoopster.called = function(){
