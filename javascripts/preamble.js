@@ -1104,8 +1104,10 @@
             window.expect = noteExpectation;
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
-            //TODO(Jeff): renamed spy to spyOn
+            //TODO(Jeff): v2.3.0 renamed spy to spyOn
             window.spyOn = spy;
+            //TODO(Jeff): v2.3.0
+            window.validate = validate;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -1117,10 +1119,10 @@
                 expect: noteExpectation,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
-                //TODO(Jeff): renamed spy to spyOn
-                spyOn: spy
-                // //TODO(Jeff):v2.3.5 spy
-                // stub: stub
+                //TODO(Jeff): v2.3.0 renamed spy to spyOn
+                spyOn: spy,
+                //TODO(Jeff): v2.3.0
+                validate: validate
             };
         }
         //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
@@ -1319,7 +1321,7 @@
     function assertToHaveReturned(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have returned ' + JSON.stringify(b)};
+        return {result: result, explain: 'expected spy to have returned ' + argToPrintableValue([b])};
     }
 
     //TODO(Jeff): v2.3.0
@@ -1327,7 +1329,7 @@
     function assertToNotHaveReturned(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have returned ' + JSON.stringify(b)};
+        return {result: result, explain: 'expected spy to not have returned ' + argToPrintableValue([b])};
     }
 
     //TODO(Jeff): v2.3.0
@@ -1419,6 +1421,16 @@
         var result = a_is_not_truthy(a);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
+
+    // //TODO(Jeff): v2.3.0 asserts on a mock's expectations
+    // function assertIsValid(a, b){
+    //
+    // }
+    //
+    // //TODO(Jeff): v2.3.0 asserts on a mock's expectations
+    // function assertIsNotValid(a, b){
+    //
+    // }
 
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         testsIterator.get().assertions.push({
@@ -1650,6 +1662,53 @@
             throwException('matcher "toNotBeTruthy" expects no arguments, found ' + arguments.length);
         }
         completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
+    }
+
+    // //TODO(Jeff): v2.3.0 BDD mock validation
+    // function noteToBeValid(){
+    //     if(arguments.length){
+    //         throwException('matcher "toBeValid" expects no arguments, found ' + arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertIsValid, true, stackTraceFromError(), a.value);
+    // }
+    //
+    // //TODO(Jeff): v2.3.0 BDD mock validation
+    // function noteToNotBeValid(){
+    //     if(arguments.length){
+    //         throwException('matcher "toBeValid" expects no arguments, found ' + arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertIsNotValid, true, stackTraceFromError(), a.value);
+    // }
+
+    //TODO(Jeff): v2.3.0 mock validation
+    function validate(mock){
+        if(arguments.length !== 1 || typeof(arguments[0]) !== 'function' || !arguments[0]._snoopsterMaker){
+            throwException('"validate" expects a spy as its only argument');
+        }
+        if(!mock._hasExpectations){
+            throwException('"validate" expects a spy with predefined expectation and found none');
+        }
+        // var ti = testsIterator,
+        //     a = ti.get().assertions[ti.get().assertions.length - 1];
+        //for each expectation
+        //  call noteExpectation to note the actual
+        //  call the appropriate notation to complete the assertion
+        if(mock._expectations.toHaveBeenCalled){
+            noteExpectation(mock);
+            noteToHaveBeenCalled();
+        }
+        if(mock._expectations.toHaveBeenCalledWith){
+            noteExpectation(mock);
+            noteToHaveBeenCalledWith.apply(null, argsToArray(mock._expectations.toHaveBeenCalledWith));
+        }
+        if(mock._expectations.toHaveReturned){
+            noteExpectation(mock);
+            noteToHaveReturned(mock._expectations.toHaveReturned);
+        }
     }
 
     //TODO(Jeff): v2.3.0
@@ -1967,6 +2026,38 @@
                         return(a_equals_b(value, returned));
                     });
                 }
+            };
+            //TODO(Jeff): v2.3.0
+            //mock api
+            snoopster._hasExpectations = false;
+            snoopster._expectations = {};
+            snoopster.and.expect = {it: {}};
+            // snoopster.validate = function(){
+            //     if(snoopster._expectations.length){}
+            // };
+            snoopster.and.expect.it.toHaveBeenCalled = function(){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toHaveBeenCalled = true;
+            };
+            snoopster.and.expect.it.toHaveBeenCalledWith = function(){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toHaveBeenCalledWith = arguments;
+            };
+            snoopster.and.expect.it.toHaveReturned = function(value){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toHaveReturned = value;
+            };
+            snoopster.and.expect.it.toHaveThrown = function(){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toHaveThrown = true;
+            };
+            snoopster.and.expect.it.toHaveThrownWithName = function(name){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toHaveThrownWithName = name;
+            };
+            snoopster.and.expect.it.toHaveThrownWithMessage = function(message){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toHaveThrownWithMessage = message;
             };
             //TODO(Jeff): v2.3.0
             //if target is a property method then assign snoopster to it
