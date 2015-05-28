@@ -1702,26 +1702,6 @@
         completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
     }
 
-    // //TODO(Jeff): v2.3.0 BDD mock validation
-    // function noteToBeValid(){
-    //     if(arguments.length){
-    //         throwException('matcher "toBeValid" expects no arguments, found ' + arguments.length);
-    //     }
-    //     var ti = testsIterator,
-    //         a = ti.get().assertions[ti.get().assertions.length - 1];
-    //     completeTheAssertion(assertIsValid, true, stackTraceFromError(), a.value);
-    // }
-    //
-    // //TODO(Jeff): v2.3.0 BDD mock validation
-    // function noteToNotBeValid(){
-    //     if(arguments.length){
-    //         throwException('matcher "toBeValid" expects no arguments, found ' + arguments.length);
-    //     }
-    //     var ti = testsIterator,
-    //         a = ti.get().assertions[ti.get().assertions.length - 1];
-    //     completeTheAssertion(assertIsNotValid, true, stackTraceFromError(), a.value);
-    // }
-
     //TODO(Jeff): v2.3.0 mock validation
     function validate(mock){
         if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
@@ -1730,11 +1710,6 @@
         if(!mock._hasExpectations){
             throwException('"validate" expects a spy with predefined expectation and found none');
         }
-        // var ti = testsIterator,
-        //     a = ti.get().assertions[ti.get().assertions.length - 1];
-        //for each expectation
-        //  call noteExpectation to note the actual
-        //  call the appropriate notation to complete the assertion
         if(mock._expectations.toBeCalled){
             noteExpectation(mock);
             noteToHaveBeenCalled();
