@@ -1317,6 +1317,22 @@
     }
 
     //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToHaveBeenCalledWithContext(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have been called with context ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToNotHaveBeenCalledWithContext(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have been called with context ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
     // //spy returned
     function assertToHaveReturned(a, b){
         var result = a_equals_true(a);
@@ -1534,6 +1550,28 @@
         completeTheAssertion(assertToNotHaveBeenCalledWith, aArgs, stackTraceFromError(), a.value.calls.wasCalledWith(aArgs));
     }
 
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalledWithContext assertion
+    function noteToHaveBeenCalledWithContext(context){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' + arguments.length);
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalledWithContext, context, stackTraceFromError(), a.value.calls.wasCalledWithContext(context));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalledWithContext assertion
+    function noteToNotHaveBeenCalledWithContext(context){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' + arguments.length);
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalledWithContext, context, stackTraceFromError(), a.value.calls.wasCalledWithContext(context));
+    }
+
     //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
     function noteToHaveReturned(value){
         if(arguments.length !== 1){
@@ -1686,7 +1724,7 @@
 
     //TODO(Jeff): v2.3.0 mock validation
     function validate(mock){
-        if(arguments.length !== 1 || typeof(arguments[0]) !== 'function' || !arguments[0]._snoopsterMaker){
+        if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
             throwException('"validate" expects a spy as its only argument');
         }
         if(!mock._hasExpectations){
@@ -1697,17 +1735,21 @@
         //for each expectation
         //  call noteExpectation to note the actual
         //  call the appropriate notation to complete the assertion
-        if(mock._expectations.toHaveBeenCalled){
+        if(mock._expectations.toBeCalled){
             noteExpectation(mock);
             noteToHaveBeenCalled();
         }
-        if(mock._expectations.toHaveBeenCalledWith){
+        if(mock._expectations.toBeCalledWith){
             noteExpectation(mock);
-            noteToHaveBeenCalledWith.apply(null, argsToArray(mock._expectations.toHaveBeenCalledWith));
+            noteToHaveBeenCalledWith.apply(null, argsToArray(mock._expectations.toBeCalledWith));
         }
-        if(mock._expectations.toHaveReturned){
+        if (mock._expectations.toBeCalledWithContext){
             noteExpectation(mock);
-            noteToHaveReturned(mock._expectations.toHaveReturned);
+            noteToHaveBeenCalledWithContext(mock._expectations.toBeCalledWithContext);
+        }
+        if(mock._expectations.toReturn){
+            noteExpectation(mock);
+            noteToHaveReturned(mock._expectations.toReturn);
         }
     }
 
@@ -1720,6 +1762,7 @@
         toBeTruthy: noteToBeTruthyAssertion,
         toHaveBeenCalled: noteToHaveBeenCalled,
         toHaveBeenCalledWith: noteToHaveBeenCalledWith,
+        toHaveBeenCalledWithContext: noteToHaveBeenCalledWithContext,
         toHaveReturned: noteToHaveReturned,
         toHaveThrown: noteToHaveThrown
     };
@@ -1733,6 +1776,7 @@
         toBeTruthy: noteToNotBeTruthyAssertion,
         toHaveBeenCalled: noteToNotHaveBeenCalled,
         toHaveBeenCalledWith: noteToNotHaveBeenCalledWith,
+        toHaveBeenCalledWithContext: noteToNotHaveBeenCalledWithContext,
         toHaveReturned: noteToNotHaveReturned,
         toHaveThrown: noteToNotHaveThrown
     };
@@ -2020,6 +2064,12 @@
                         return(a_equals_b(value, args));
                     });
                 },
+                wasCalledWithContext: function(obj){
+                    return calls.some(function(call){
+                        var context = call.context;
+                        return(a_equals_b(obj, context));
+                    });
+                },
                 returned: function(value){
                     return calls.some(function(call){
                         var returned = call.getReturned();
@@ -2035,29 +2085,33 @@
             // snoopster.validate = function(){
             //     if(snoopster._expectations.length){}
             // };
-            snoopster.and.expect.it.toHaveBeenCalled = function(){
+            snoopster.and.expect.it.toBeCalled = function(){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toHaveBeenCalled = true;
+                snoopster._expectations.toBeCalled = true;
             };
-            snoopster.and.expect.it.toHaveBeenCalledWith = function(){
+            snoopster.and.expect.it.toBeCalledWith = function(){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toHaveBeenCalledWith = arguments;
+                snoopster._expectations.toBeCalledWith = arguments;
             };
-            snoopster.and.expect.it.toHaveReturned = function(value){
+            snoopster.and.expect.it.toBeCalledWithContext = function(obj){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toHaveReturned = value;
+                snoopster._expectations.toBeCalledWithContext = obj;
             };
-            snoopster.and.expect.it.toHaveThrown = function(){
+            snoopster.and.expect.it.toReturn = function(value){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toHaveThrown = true;
+                snoopster._expectations.toReturn = value;
             };
-            snoopster.and.expect.it.toHaveThrownWithName = function(name){
+            snoopster.and.expect.it.toThrow = function(){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toHaveThrownWithName = name;
+                snoopster._expectations.toThrow = true;
             };
-            snoopster.and.expect.it.toHaveThrownWithMessage = function(message){
+            snoopster.and.expect.it.toThrowWithName = function(name){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toHaveThrownWithMessage = message;
+                snoopster._expectations.toThrowWithName = name;
+            };
+            snoopster.and.expect.it.toThrowWithMessage = function(message){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toThrowWithMessage = message;
             };
             //TODO(Jeff): v2.3.0
             //if target is a property method then assign snoopster to it
