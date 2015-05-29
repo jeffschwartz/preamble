@@ -14,6 +14,8 @@
         queueStableInterval = 1,
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
         reporter,
+        spy,
+        iteratorFactory,
         assert,
         intervalId,
         runtimeFilter,
@@ -44,6 +46,10 @@
             fBound.prototype = new FNOP();
             return fBound;
         };
+    }
+
+    function argsToArray(argArguments){
+        return [].slice.call(argArguments, 0);
     }
 
     function throwException(errMessage){
@@ -288,7 +294,9 @@
         this.totFailed = 0;
         for (i = 0, len = this.assertions.length; i < len; i++) {
             item = this.assertions[i];
-            result = item.assertion(typeof item.value === 'function' ? item.value() : item.value, item.expectation);
+            //TODO(Jeff): when item.value is a function not sure if it should be called????
+            result = item.assertion(typeof item.value === 'function' &&
+                !item.value._snoopsterMaker ? item.value() : item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             item.explain = result.explain;
@@ -395,7 +403,7 @@
             show += runtimeFilter.group && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         }
-        show += pluralize(' test', tests.length);
+        show += pluralize(' spec', tests.length);
         coverage = '<div id="coverage">' + show +
             '<div class="hptui"><label for="hidePassedTests">Hide passed</label>' +
             '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
@@ -428,10 +436,10 @@
         el.style.display = 'table-cell';
         if(tests.result){
             html = '<div id="preamble-results-summary-passed" class="summary-passed">' +
-                'All tests passed' + '</div>';
+                'All specs passed' + '</div>';
         }else{
             html = '<div id="preamble-results-summary-failed" class="summary-failed">' +
-                tests.totTestsFailed + pluralize(' test', tests.totTestsFailed) + ' failed.</div>';
+                tests.totTestsFailed + pluralize(' spec', tests.totTestsFailed) + ' failed.</div>';
         }
         document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     };
@@ -485,9 +493,9 @@
                             failed = testFailureMarkup.
                                 replace(/{{explain}}/, assertion.explain).
                                 replace(/{{stacktrace}}/, stackTrace(assertion.stackTrace));
+                            html = html.slice(0, -5) + failed + html.slice(-5);
                         }
                     });
-                    html = html.slice(0, -5) + failed + html.slice(-5);
                 }else if(item.totFailed === -1){
                     failed = testFailureMarkup.
                         replace(/{{explain}}/, 'test timed out').
@@ -533,7 +541,8 @@
         function on(topic, handler, context){
             var token = getToken(),
                 boundAsyncHandler;
-                boundAsyncHandler = context && makeAsync(topic, bindTo(handler, context)) || makeAsync(topic, handler);
+                boundAsyncHandler = context && makeAsync(topic,
+                    bindTo(handler, context)) || makeAsync(topic, handler);
             //Add topic to subscribers if it doesn't already have it.
             if(!subscribers.hasOwnProperty(topic)){
                 subscribers[topic] = {};
@@ -717,56 +726,60 @@
         reporter.details(queue);
     });
 
-    /**
-     * An iterator for iterating over arrays.
-     * @param {array} argArray The array to be iterated over.
-     */
-    function iteratorFactory(argArray){
-        var currentIndex = -1;
-        if(!Array.isArray(argArray)){
-            throw new Error('iteratorFactory expects an array.');
-        }
-        function hasNext(){
-            if(argArray.length && currentIndex + 1 < argArray.length){
-                return true;
-            }else{
-                return false;
+    iteratorFactory = (function() {
+        /**
+         * An iterator for iterating over arrays.
+         * @param {array} argArray The array to be iterated over.
+         */
+        function _iteratorFactory(argArray){
+            var currentIndex = -1;
+            if(!Array.isArray(argArray)){
+                throw new Error('iteratorFactory expects an array.');
             }
-        }
-        function next(){
-            if(hasNext()){
-                currentIndex++;
-                return true;
-            }else{
-                return false;
+            function hasNext(){
+                if(argArray.length && currentIndex + 1 < argArray.length){
+                    return true;
+                }else{
+                    return false;
+                }
             }
-        }
-        function get(){
-            return argArray.length && currentIndex >= 0 && currentIndex < argArray.length && argArray[currentIndex];
-        }
-        function getNext(){
-            if(next()){
-                return get();
+            function next(){
+                if(hasNext()){
+                    currentIndex++;
+                    return true;
+                }else{
+                    return false;
+                }
             }
-        }
-        function peekForward(){
-            if(currentIndex + 1 < argArray.length){
-                return argArray[currentIndex + 1];
+            function get(){
+                return argArray.length && currentIndex >= 0 && currentIndex <
+                    argArray.length && argArray[currentIndex];
             }
+            function getNext(){
+                if(next()){
+                    return get();
+                }
+            }
+            function peekForward(){
+                if(currentIndex + 1 < argArray.length){
+                    return argArray[currentIndex + 1];
+                }
+            }
+            function peekBackward() {
+                return argArray[currentIndex - 1];
+            }
+            var iterator = {
+                hasNext: hasNext,
+                next: next,
+                get: get,
+                getNext: getNext,
+                peekForward: peekForward,
+                peekBackward: peekBackward
+            };
+            return iterator;
         }
-        function peekBackward() {
-            return argArray[currentIndex - 1];
-        }
-        var iterator = {
-            hasNext: hasNext,
-            next: next,
-            get: get,
-            getNext: getNext,
-            peekForward: peekForward,
-            peekBackward: peekBackward
-        };
-        return iterator;
-    }
+        return _iteratorFactory;
+    }());
 
     /**
      * Process for building the queue.
@@ -1039,7 +1052,7 @@
          * of milliseconds to wait before a test is timed out. This number is applied
          * to all tests and can be selectively overridden by individual tests.
          *
-         * name: (default 'Test') - set to a meaningful name.
+         * name: (default 'Suite') - set to a meaningful name.
          *
          * uiTestContainerId (default id="ui-test-container") - set its id to something
          * else if desired.
@@ -1060,7 +1073,7 @@
         var defaultConfig = {
                 windowGlobals: true,
                 testTimeOutInterval: 10,
-                name: 'Test',
+                name: 'Suite',
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
                 shortCircuit: false,
@@ -1088,17 +1101,13 @@
             window.beforeEach = queueBuilder.beforeEachTest;
             window.afterEach = queueBuilder.afterEachTest;
             window.it = queueBuilder.test;
-            //TODO(Jeff):v2.3.5 expect
             window.expect = noteExpectation;
-            window.equal = noteEqualAssertion;
-            window.notEqual = noteNotEqualAssertion;
-            window.isTrue = noteIsTrueAssertion;
-            window.isFalse = noteIsFalseAssertion;
-            window.isTruthy = noteIsTruthyAssertion;
-            window.isNotTruthy = noteIsNotTruthyAssertion;
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
-            window.snoop = snoop;
+            //TODO(Jeff): v2.3.0 renamed spy to spyOn
+            window.spyOn = spy;
+            // //TODO(Jeff): v2.3.0
+            // window.validate = validate;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -1110,38 +1119,19 @@
                 expect: noteExpectation,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
-                snoop: snoop
+                //TODO(Jeff): v2.3.0 renamed spy to spyOn
+                spyOn: spy,
+                // //TODO(Jeff): v2.3.0
+                // validate: validate
             };
-            //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
-            //Functions to "note" assertions are passed as the
-            //1st parameter to each test's callback function.
-            // assert = {
-            //     equal: noteEqualAssertion,
-            //     notEqual: noteNotEqualAssertion,
-            //     isTrue: noteIsTrueAssertion,
-            //     isFalse: noteIsFalseAssertion,
-            //     isTruthy: noteIsTruthyAssertion,
-            //     isNotTruthy: noteIsNotTruthyAssertion
-            // };
         }
         //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
         //Functions to "note" assertions are passed as the
         //1st parameter to each test's callback function.
-        assert = {
-            //TODO(Jeff):v2.3.5 toEqual assertion
-            toEqual: noteToEqualAssertion,
-            toNotEqual: noteToNotEqualAssertion,
-            toBeTrue: noteToBeTrueAssertion,
-            toBeFalse: noteToBeFalseAssertion,
-            toBeTruthy: noteToBeTruthyAssertion,
-            toNotBeTruthy: noteToNotBeTruthyAssertion,
-            equal: noteEqualAssertion,
-            notEqual: noteNotEqualAssertion,
-            isTrue: noteIsTrueAssertion,
-            isFalse: noteIsFalseAssertion,
-            isTruthy: noteIsTruthyAssertion,
-            isNotTruthy: noteIsNotTruthyAssertion
-        };
+        //TODO(Jeff): v2.3.0
+        assert = new Assert();
+        //TODO(Jeff): v2.3.0
+        // assert.not = new Not();
         window.Preamble = window.Preamble || {};
         //For use by external processes.
         window.Preamble.__ext__ = {};
@@ -1273,6 +1263,139 @@
 
     //Assertion runners.
 
+    //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToHaveBeenCalled(a){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have been called'};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was not called (boolean)
+    function assertToNotHaveBeenCalled(a){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have been called'};
+    }
+
+    function argToPrintableValue(a){
+        var s = '';
+        a.forEach(function(el){
+            s = s.length ? s + ',' : s;
+            switch (typeof(el)) {
+                case 'string':
+                    s += '\'' + el + '\'';
+                    break;
+                case 'function':
+                    s += 'function';
+                    break;
+                case 'object':
+                    s += JSON.stringify(el);
+                    break;
+                default:
+                    s += el;
+           }
+       });
+       return s;
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToHaveBeenCalledWith(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have been called with ' + /*JSON.stringify(b)*/ argToPrintableValue(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was not called (boolean)
+    function assertToNotHaveBeenCalledWith(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have been called with ' + /*JSON.stringify(b)*/ argToPrintableValue(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToHaveBeenCalledWithContext(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have been called with context ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy was called (boolean)
+    function assertToNotHaveBeenCalledWithContext(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have been called with context ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy returned
+    function assertToHaveReturned(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have returned ' + argToPrintableValue([b])};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy not have returned
+    function assertToNotHaveReturned(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have returned ' + argToPrintableValue([b])};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy thrown
+    function assertToHaveThrown(a){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have thrown an exception'};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy not to have thrown
+    function assertToNotHaveThrown(a){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have thrown an exception'};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy threwWithValue
+    function assertToHaveThrownWithName(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have thrown an exception with the name ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy not threwWithName
+    function assertToNotHaveThrownWithName(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have thrown an exception with the name ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy threwWithMessage
+    function assertToHaveThrownWithMessage(a, b){
+        var result = a_equals_true(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to have thrown an exception with the message ' + JSON.stringify(b)};
+    }
+
+    //TODO(Jeff): v2.3.0
+    // //spy not threwWithMessage
+    function assertToNotHaveThrownWithMessage(a, b){
+        var result = a_equals_false(a);
+        // var result = a.wasCalled();
+        return {result: result, explain: 'expected spy to not have thrown an exception with the message ' + JSON.stringify(b)};
+    }
+
     //"strict" a === b
     function assertEqual(a, b){
         //return a_equals_b(a, b);
@@ -1280,25 +1403,18 @@
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to equal ' + JSON.stringify(b)};
     }
 
-    //"strict" a === true, simple boolean test
-    function assertIsTrue(a){
-        //return a_equals_true(a);
-        var result = a_equals_true(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
-    }
-
-    //"non strict" a == true, simple boolean test
-    function assertIsTruthy(a){
-        //return a_is_truthy(a);
-        var result = a_is_truthy(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
-    }
-
     //"strict" a !== b
     function assertNotEqual(a, b){
         //return a_notequals_b(a, b);
         var result = a_notequals_b(a, b);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not equal ' + JSON.stringify(b)};
+    }
+
+    //"strict" a === true, simple boolean test
+    function assertIsTrue(a){
+        //return a_equals_true(a);
+        var result = a_equals_true(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true'};
     }
 
     //"strict" a === false, simple boolean test
@@ -1309,11 +1425,28 @@
     }
 
     //"non strict" a == true, simple boolean test
+    function assertIsTruthy(a){
+        //return a_is_truthy(a);
+        var result = a_is_truthy(a);
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
+    }
+
+    //"non strict" a == true, simple boolean test
     function assertIsNotTruthy(a){
         //return a_is_not_truthy(a);
         var result = a_is_not_truthy(a);
         return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
+
+    // //TODO(Jeff): v2.3.0 asserts on a mock's expectations
+    // function assertIsValid(a, b){
+    //
+    // }
+    //
+    // //TODO(Jeff): v2.3.0 asserts on a mock's expectations
+    // function assertIsNotValid(a, b){
+    //
+    // }
 
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
         testsIterator.get().assertions.push({
@@ -1321,18 +1454,20 @@
             assertionLabel: assertionLabel,
             value: value,
             expectation: expectation,
-            stackTrace: stackTrace
+            stackTrace: stackTrace,
+            //TODO(Jeff): v2.3.0
+            negate: false
         });
     }
 
     //TODO(Jeff):v2.3.0 complete the assertion entry in the assertion table
-    function completeTheAssertion(assertion, assertionLabel, value, stackTrace){
+    function completeTheAssertion(assertion,  value, stackTrace, actual){
         var ti = testsIterator,
         a = ti.get().assertions[ti.get().assertions.length - 1];
         a.assertion = assertion;
-        a.assertionLabel = assertionLabel;
         a.expectation = value;
         a.stackTrace = stackTrace;
+        a.value = typeof(actual) === 'undefined' ? a.value : actual;
     }
 
     function setStackTraceProperty(){
@@ -1356,105 +1491,282 @@
     }
 
     //TODO(Jeff):v2.3.0 notes the actual value
+    /**
+     * @param {*} actual If a function it can be a spy.
+     */
     function noteExpectation(actual){
-        if(arguments.length < 1){
-            throwException('Assertion "expect" requires 1 arguments, found ' + arguments.length);
+        if(arguments.length !== 1){
+            throwException('"expect" requires 1 argument, found ' + arguments.length);
         }
         //push partial assertion (only the value) info onto the assertion table
         pushOntoAssertions(null, null, actual, null, null);
-        //retunr assert for chaining
+        //return assert for chaining
         return assert;
     }
 
-    //TODO(Jeff):v2.3.0 BDD toEqual assertion
-    function noteToEqualAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "toEqual" requires 1 arguments, found ' + arguments.length);
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
+    function noteToHaveBeenCalled(){
+        if(arguments.length){
+            throwException('matcher "toHaveBeenCalled" expects no arguments, found ' + arguments.length);
         }
-        completeTheAssertion(assertEqual, label, value, stackTraceFromError());
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalled, null, stackTraceFromError(), a.value.wasCalled());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
+    function noteToNotHaveBeenCalled(){
+        if(arguments.length){
+            throwException('matcher "toNotHaveBeenCalled" expects no arguments, found ' + arguments.length);
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(), a.value.wasCalled());
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
+    function noteToHaveBeenCalledWith(){
+        if(!arguments.length){
+            throwException('matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none');
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1],
+            aArgs = argsToArray(arguments);
+        completeTheAssertion(assertToHaveBeenCalledWith, aArgs, stackTraceFromError(), a.value.calls.wasCalledWith(aArgs));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
+    function noteToNotHaveBeenCalledWith(){
+        if(!arguments.length){
+            throwException('matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none');
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1],
+            aArgs = argsToArray(arguments);
+        completeTheAssertion(assertToNotHaveBeenCalledWith, aArgs, stackTraceFromError(), a.value.calls.wasCalledWith(aArgs));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalledWithContext assertion
+    function noteToHaveBeenCalledWithContext(context){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' + arguments.length);
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalledWithContext, context, stackTraceFromError(), a.value.calls.wasCalledWithContext(context));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveBeenCalledWithContext assertion
+    function noteToNotHaveBeenCalledWithContext(context){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' + arguments.length);
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalledWithContext, context, stackTraceFromError(), a.value.calls.wasCalledWithContext(context));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveReturned assertion
+    function noteToHaveReturned(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveReturned, value, stackTraceFromError(), a.value.calls.returned(value));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveReturned assertion
+    function noteToNotHaveReturned(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveReturned, value, stackTraceFromError(), a.value.calls.returned(value));
+    }
+
+    //TODO(Jeff):v2.3.0 BDD toHaveThrown assertion
+    function noteToHaveThrown(){
+        if(arguments.length){
+            throwException('matcher "toHaveThrown" expects no arguments, found ' + arguments.length);
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(), a.value.threw());
+    }
+    noteToHaveThrown.with = {};
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveThrown assertion
+    function noteToNotHaveThrown(){
+        if(arguments.length){
+            throwException('matcher "toNotHaveThrown" expects no arguments, found ' + arguments.length);
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(), a.value.threw());
+    }
+    noteToNotHaveThrown.with = {};
+
+    //TODO(Jeff):v2.3.0 BDD toHaveThrownWithName assertion
+    noteToHaveThrown.with.name = function noteToHaveThrownWithName(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' + arguments.length);
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
+    };
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithName assertion
+    noteToNotHaveThrown.with.name = function noteToNotHaveThrownWithName(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' + arguments.length);
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
+    };
+
+    //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
+    noteToHaveThrown.with.message = function noteToHaveThrownWithMessage(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
+    };
+
+    //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithMessage assertion
+    noteToNotHaveThrown.with.message = function noteToNotHaveThrownWithMessage(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
+        }
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
+    };
+
+    //TODO(Jeff):v2.3.0 BDD toEqual assertion
+    function noteToEqualAssertion(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toEqual" requires 1 argument, found ' + arguments.length);
+        }
+        completeTheAssertion(assertEqual, value, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotEqual assertion
-    function noteToNotEqualAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "toNotEqual" requires 1 arguments, found ' + arguments.length);
+    function noteToNotEqualAssertion(value){
+        if(arguments.length !== 1){
+            throwException('matcher "toNotEqual" requires 1 argument, found ' + arguments.length);
         }
-        completeTheAssertion(assertNotEqual, label, value, stackTraceFromError());
+        completeTheAssertion(assertNotEqual, value, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toBeTrue assertion
-    function noteToBeTrueAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsTrue, label, true, stackTraceFromError());
+    function noteToBeTrueAssertion(){
+        if(arguments.length){
+            throwException('matcher "toBeTrue;" expects no arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertIsTrue, true, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotBeTrue assertiFalse
-    function noteToBeFalseAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsFalse, label, true, stackTraceFromError());
+    function noteToBeFalseAssertion(){
+        if(arguments.length){
+            throwException('matcher "toBeFalse;" expects no arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertIsFalse, true, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toBeTruthy assertiFalse
-    function noteToBeTruthyAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsTruthy, label, true, stackTraceFromError());
+    function noteToBeTruthyAssertion(){
+        if(arguments.length){
+            throwException('matcher "toBeTruthy" expects no arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertIsTruthy, true, stackTraceFromError());
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotBeTruthy assertiFalse
-    function noteToNotBeTruthyAssertion(label){
-        // if(arguments.length < 1){
-        //     throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        // }
-        completeTheAssertion(assertIsNotTruthy, label, true, stackTraceFromError());
+    function noteToNotBeTruthyAssertion(){
+        if(arguments.length){
+            throwException('matcher "toNotBeTruthy" expects no arguments, found ' + arguments.length);
+        }
+        completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
     }
 
-    function noteEqualAssertion(value, expectation, label){
-        if(arguments.length < 2){
-            throwException('Assertion "equal" requires 2 arguments, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertEqual, label, value, expectation, stackTraceFromError());
-    }
+    // //TODO(Jeff): v2.3.0 mock validation
+    // function validate(mock){
+    //     if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
+    //         throwException('"validate" expects a spy as its only argument');
+    //     }
+    //     if(!mock._hasExpectations){
+    //         throwException('"validate" expects a spy with predefined expectation and found none');
+    //     }
+    //     if(mock._expectations.toBeCalled){
+    //         noteExpectation(mock);
+    //         noteToHaveBeenCalled();
+    //     }
+    //     if(mock._expectations.toBeCalledWith){
+    //         noteExpectation(mock);
+    //         noteToHaveBeenCalledWith.apply(null, argsToArray(mock._expectations.toBeCalledWith));
+    //     }
+    //     if (mock._expectations.toBeCalledWithContext){
+    //         noteExpectation(mock);
+    //         noteToHaveBeenCalledWithContext(mock._expectations.toBeCalledWithContext);
+    //     }
+    //     if(mock._expectations.toReturn){
+    //         noteExpectation(mock);
+    //         noteToHaveReturned(mock._expectations.toReturn);
+    //     }
+    //     if(mock._expectations.toThrow){
+    //         noteExpectation(mock);
+    //         noteToHaveThrown();
+    //     }
+    //     if(mock._expectations.toThrowWithName){
+    //         noteExpectation(mock);
+    //         noteToHaveThrown.with.name(mock._expectations.toThrowWithName);
+    //     }
+    //     if(mock._expectations.toThrowWithMessage){
+    //         noteExpectation(mock);
+    //         noteToHaveThrown.with.message(mock._expectations.toThrowWithName);
+    //     }
+    // }
 
-    function noteIsTrueAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isTrue" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsTrue, label, value, true, stackTraceFromError());
-    }
+    //TODO(Jeff): v2.3.0
+    function Assert(){this.not = new Not();}
+    Assert.prototype = {
+        constructor: Assert,
+        toEqual: noteToEqualAssertion,
+        toBeTrue: noteToBeTrueAssertion,
+        toBeTruthy: noteToBeTruthyAssertion,
+        toHaveBeenCalled: noteToHaveBeenCalled,
+        toHaveBeenCalledWith: noteToHaveBeenCalledWith,
+        toHaveBeenCalledWithContext: noteToHaveBeenCalledWithContext,
+        toHaveReturned: noteToHaveReturned,
+        toHaveThrown: noteToHaveThrown
+    };
 
-    function noteIsTruthyAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isTruthy" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsTruthy, label, value, true, stackTraceFromError());
-    }
-
-    function noteNotEqualAssertion(value, expectation, label){
-        if(arguments.length < 2){
-            throwException('Assertion "notEqual" requires 2 arguments, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertNotEqual, label, value, expectation, stackTraceFromError());
-    }
-
-    function noteIsFalseAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isFalse" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsFalse, label, value, true, stackTraceFromError());
-    }
-
-    function noteIsNotTruthyAssertion(value, label){
-        if(arguments.length < 1){
-            throwException('Assertion "isNotTruthy" requires 1 argument, found ' + arguments.length);
-        }
-        pushOntoAssertions(assertIsNotTruthy, label, value, true, stackTraceFromError());
-    }
+    //TODO(Jeff): v2.3.0
+    function Not(){}
+    Not.prototype = {
+        constructor: Not,
+        toEqual: noteToNotEqualAssertion,
+        toBeTrue: noteToBeFalseAssertion,
+        toBeTruthy: noteToNotBeTruthyAssertion,
+        toHaveBeenCalled: noteToNotHaveBeenCalled,
+        toHaveBeenCalledWith: noteToNotHaveBeenCalledWith,
+        toHaveBeenCalledWithContext: noteToNotHaveBeenCalledWithContext,
+        toHaveReturned: noteToNotHaveReturned,
+        toHaveThrown: noteToNotHaveThrown
+    };
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
@@ -1466,107 +1778,417 @@
         return config.uiTestContainerId;
     }
 
-    /**
-     * @param {object} argObject A function to be snooped or an object.
-     * @param {string} argProperty An optional object used as a context if the
-     * 1st parameter is a function or the name of the property of argObject to
-     * be snooped.
-     */
-    //TODO(Jeff): v2.3.0 support snooping on standalone functions and
-    //allowing them to be bound to a context passed as the 2nd parameter
-    function snoop(argObject, argProperty){
-        var targetFn,
-            snoopster,
-            calls = [];
-        // window.calls = calls;
-        if(arguments.length < 1 || arguments.length > 2){
-            throw new Error('snoop requires 1 or 2 arguments, a function with an optional binding context or an object and a property name');
-        }
-        if(arguments.length === 1 && typeof(arguments[0]) !== 'function'){
-            throw new Error('1st parameter must be a function or an object');
-        }else if(arguments.length === 2 && typeof(arguments[0]) !== 'function' && typeof(arguments[0]) !== 'object'){
-            throw new Error('when the 1st parameter is a function the 2nd parameter must be an object');
-        }else if(arguments.length === 2 && typeof(arguments[0]) === 'object' &&
-            !arguments[0].hasOwnProperty([arguments[1]])){
-            throw new Error('object does not have property name "' + arguments[1] + '"');
-        }
-        function argsToArray(argArguments){
-            return [].slice.call(argArguments, 0);
-        }
-        function Args(args){
-            this.args = argsToArray(args);
-        }
-        Args.prototype.getArgument = function(i){
-            return i >= this.args.length ? null : this.args[i];
-        };
-        function ACall(context, args, error, returned){
-            this.context = context;
-            this.args = args;
-            this.error = error;
-            this.returned = returned;
-        }
-        targetFn = typeof(arguments[0]) === 'function' ? argObject : argObject[argProperty];
-        //tracking
-        snoopster = function(){
-            var aArgs = arguments.length && argsToArray(arguments) || [];
-            var error = null;
-            var returned;
-            try{
-                returned = targetFn.apply(this, aArgs);
-            }catch(er){
-                error = er;
+    spy = (function() {
+        /**
+         * @param {function | object} argObject A function to be spied or an object.
+         * @param {[object] | string} argProperty An object used as the  calling
+         * context to call argObject if argObject is a function or the name
+         * of the property method of argObject to spy if argObject is an object.
+         */
+        //TODO(Jeff): v2.3.0 support snooping on standalone functions
+        function _spy(argObject, argProperty){
+            var targetFn,
+                snoopster,
+                calls = [];
+            //TODO(Jeff): v2.3.0
+            if(arguments.length){
+                if(typeof(argObject) !== 'function' &&
+                    typeof(argObject) !== 'object'){
+                    throw new Error('1st parameter must be a function or an object');
+                }
+                if(typeof(argObject) === 'function' && arguments.length === 2 &&
+                    typeof(argProperty) !== 'object'){
+                    throw new Error('2nd parameter must be an object');
+                }
+                if(typeof(argObject) === 'object' && arguments.length < 2){
+                    throw new Error('expecting 2 or 3 parameters - found ' + arguments.length);
+                }
+                if(typeof(argObject) === 'object' && typeof(argProperty) !== 'string'){
+                    throw new Error('2nd parameter must be a string');
+                }
+                if(typeof(argObject) === 'object' && typeof(argObject[argProperty]) !== 'function'){
+                    throw new Error('expected ' + argProperty + ' to be a method');
+                }
             }
-            snoopster.args = new Args(aArgs);
-            calls.push(new ACall(this, aArgs, error, returned));
-        };
-        //bind passed context (2nd parameter/optional) when the 1st parameter is
-        //a function
-        if(typeof(arguments[0]) === 'function' && arguments.length === 2){
-            snoopster = snoopster.bind(arguments[1]);
-        }
-        //api
-        snoopster.called = function(){
-            return calls.length;
-        };
-        snoopster.wasCalled = function(){
-            return !!calls.length;
-        };
-        snoopster.wasCalled.nTimes = function(count){
-            if(arguments.length !== 1){
-                throw new Error('wasCalled.nTimes expects to be called with an integer');
+            //spy api
+            function Args(aArgs){
+                //TODO(Jeff): remove commented out code
+                // this.args = argsToArray(args);
+                this.args = aArgs;
             }
-            return calls.length === count;
-        };
-        snoopster.contextCalledWith = function(){
-            return snoopster.wasCalled() && calls[calls.length - 1].context;
-        };
-        snoopster.returned = function(){
-            return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
-        };
-        snoopster.threw = function(){
-            return snoopster.wasCalled() && !!calls[calls.length - 1].error;
-        };
-        snoopster.threw.withMessage = function(message){
-            return snoopster.wasCalled() && calls[calls.length - 1].error.message === message;
-        };
-        snoopster.calls = {
-            count: function(){
+            //TODO(Jeff): v2.3.0 - fixed check for args length bug
+            Args.prototype.getLength = function(){
+                return  this.args.length ? this.args.length : 0;
+            };
+            //TODO(Jeff): v2.3.0 - fixed check for args length bug
+            Args.prototype.hasArg = function(i){
+                return this.getLength() > i ? true : false;
+            };
+            //TODO(Jeff): v2.3.0 - fixed check for args length bug
+            Args.prototype.getArg = function(i){
+                return this.hasArg(i) ? this.args[i] : null;
+            };
+            //TODO(Jeff): v2.3.0
+            Args.prototype.hasArgProperty = function(i, propertyName){
+                return this.hasArg(i) && this.args[i][propertyName] ? true : false;
+            };
+            //TODO(Jeff): v2.3.0
+            Args.prototype.getArgProperty = function(i, propertyName){
+                return this.hasArgProperty(i, propertyName) ? this.args[i][propertyName] : null;
+            };
+            //spy api
+            function ACall(context, args, error, returned){
+                this.context = context;
+                this.args = args;
+                this.error = error;
+                this.returned = returned;
+            }
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getContext = function(){
+                return this.context;
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getArgs = function(){
+                return this.args;
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getArg = function(i){
+                return this.args.getArg(i);
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getArgsLength = function(){
+                return this.args.getLength();
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getArgProperty = function(i, propertyName){
+                return this.args.getArgProperty(i, propertyName);
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.hasArgProperty = function(i, propertyName){
+                return this.args.hasArgProperty(i, propertyName);
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.hasArg = function(i){
+                return this.args.hasArg(i);
+            };
+            //TODO(Jeff): v2.3.0
+            ACall.prototype.getError = function(){
+                return this.error;
+            };
+            ACall.prototype.getReturned = function(){
+                return this.returned;
+            };
+            //TODO(Jeff): v2.3.0
+            targetFn = arguments.length === 0 ? function(){} :
+                typeof(arguments[0]) === 'function' ? argObject :
+                argObject[argProperty];
+            //spy api - tracking
+            snoopster = function(){
+                var aArgs = arguments.length && argsToArray(arguments) || [],
+                    fn,
+                    error,
+                    returned;
+                //TODO(Jeff): v2.3.0
+                function ThrowsException(message, name){
+                    this.message = message;
+                    this.name = name;
+                }
+                //TODO(Jeff): v2.3.0
+                if(snoopster._callActual || snoopster._callFake){
+                    fn = snoopster._callFake || targetFn;
+                    try{
+                        returned = fn.apply(this, aArgs);
+                    }catch(er){
+                        error = er;
+                    }
+                }else{
+                    //TODO(Jeff): v2.3.Error
+                    if(snoopster._throws){
+                        try{
+
+                            throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
+                        }catch(er){
+                            error = er;
+                        }
+                    }
+                }
+                returned = snoopster._returns || returned;
+                // snoopster.args = new Args(aArgs);
+                calls.push(new ACall(this, new Args(aArgs), error, returned));
+                return returned;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster._snoopsterMaker = 'preamble.snoopster';
+            //TODO(Jeff): v2.3.0
+            //stub api
+            //TODO(Jeff): v2.3.0
+            snoopster._throws = false;
+            snoopster._throwsMessage = '';
+            snoopster._throwsName = '';
+            //TODO(Jeff): v2.3.0
+            snoopster.and = {};
+            snoopster.and.throw = function(){
+                snoopster._throws = true;
+                //for chaining
+                return snoopster;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster.and.throw.with = {};
+            snoopster.and.throw.with.message = function(message){
+                if(typeof(message) !== 'string'){
+                    throw new Error('message expects a string');
+                }
+                snoopster._throws = true;
+                snoopster._throwsMessage = message;
+                //for chaining - spy.throws.with.message().and.with.name();
+                return snoopster;
+            };
+            snoopster.and.throw.with.name = function(name){
+                if(typeof(name) !== 'string'){
+                    throw new Error('name expects a string');
+                }
+                snoopster._throws = true;
+                snoopster._throwsName = name;
+                //for chaining - spy.throws.with.message().and.with.name();
+                return snoopster;
+            };
+            //TODO(Jeff): v2.3.0
+            snoopster.and.return = function(ret){
+                snoopster._returns = ret;
+                //for chaining
+                return snoopster;
+            };
+            //TODO(Jeff): v2.3.0
+            //spy api
+            snoopster._resetCalls = function(){
+                snoopster._callFake = null;
+                snoopster._callActual = this._callStub = false;
+            };
+            //TODO(Jeff): v2.3.0
+            //spy api
+            snoopster._callFake = null;
+            snoopster.and.callFake = function(fn){
+                if(fn && typeof(fn) !== 'function'){
+                    throw new Error('callFake expects to be called with a function');
+                }
+                snoopster._resetCalls();
+                snoopster._callFake = fn;
+            };
+            //TODO(Jeff): v2.3.0
+            //spy api
+            snoopster._callActual = false;
+            snoopster.and.callActual = function(){
+                snoopster._resetCalls();
+                snoopster._callActual = true;
+                //for chaining
+                return snoopster;
+            };
+            //spy api
+            snoopster.and.callStub = function(){
+                snoopster._resetCalls();
+                snoopster._callActual = false;
+                //for chaining
+                return snoopster;
+            };
+            //spy api
+            snoopster.called = function(){
                 return calls.length;
-            },
-            forCall: function(i){
-                return i >= 0 && i < calls.length && calls[i] || undefined;
-            },
-            all: function(){
-                return calls;
+            };
+            //spy api
+            snoopster.wasCalled = function(){
+                return !!calls.length;
+            };
+            //spy api
+            snoopster.wasCalled.nTimes = function(count){
+                if(arguments.length !== 1){
+                    throw new Error('wasCalled.nTimes expects to be called with an integer');
+                }
+                return calls.length === count;
+            };
+            //TODO(Jeff): v2.3.0
+            //spy api
+            snoopster.wasCalled.with = function(val){
+                var args = snoopster.wasCalled() && snoopster.calls.forCall(0).args.args || null;
+               return args === val;
+            };
+            //spy api
+            snoopster.contextCalledWith = function(){
+                return snoopster.wasCalled() && calls[calls.length - 1].context;
+            };
+            //spy api
+            snoopster.returned = function(){
+                return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
+            };
+            //spy api
+            snoopster.threw = function(){
+                return snoopster.wasCalled() && !!calls[calls.length - 1].error;
+            };
+            //spy api
+            snoopster.threw.withMessage = function(message){
+                return snoopster.threw() && calls[calls.length - 1].error.message === message;
+            };
+            //TODO(Jeff): v2.3.0
+            //spy api
+            snoopster.threw.withName = function(val){
+                return snoopster.threw() && calls[calls.length - 1].error.name === val;
+            };
+            //spy calls api
+            snoopster.calls = {
+                count: function(){
+                    return calls.length;
+                },
+                forCall: function(i){
+                    return i >= 0 && i < calls.length && calls[i] || undefined;
+                },
+                //TODO(Jeff): v2.3.0
+                getCall: function(i){
+                    return i >= 0 && i < calls.length && calls[i] || undefined;
+                },
+                all: function(){
+                    return calls;
+                },
+                wasCalledWith: function(value){
+                    return calls.some(function(call){
+                        var args = call.getArgs().args;
+                        return(a_equals_b(value, args));
+                    });
+                },
+                wasCalledWithContext: function(obj){
+                    return calls.some(function(call){
+                        var context = call.context;
+                        return(a_equals_b(obj, context));
+                    });
+                },
+                returned: function(value){
+                    return calls.some(function(call){
+                        var returned = call.getReturned();
+                        return(a_equals_b(value, returned));
+                    });
+                }
+            };
+            //TODO(Jeff): v2.3.0
+            //mock api
+            snoopster._hasExpectations = false;
+            snoopster._expectations = {};
+            snoopster.and.expect = {it: {}};
+            // snoopster.validate = function(){
+            //     if(snoopster._expectations.length){}
+            // };
+            snoopster.and.expect.it.toBeCalled = function(){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toBeCalled = true;
+            };
+            snoopster.and.expect.it.toBeCalledWith = function(){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toBeCalledWith = arguments;
+            };
+            snoopster.and.expect.it.toBeCalledWithContext = function(obj){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toBeCalledWithContext = obj;
+            };
+            snoopster.and.expect.it.toReturn = function(value){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toReturn = value;
+            };
+            snoopster.and.expect.it.toThrow = function(){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toThrow = true;
+            };
+            snoopster.and.expect.it.toThrowWithName = function(name){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toThrowWithName = name;
+            };
+            snoopster.and.expect.it.toThrowWithMessage = function(message){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toThrowWithMessage = message;
+            };
+            snoopster.validate = function(){
+                // if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
+                //     throwException('"validate" expects a spy as its only argument');
+                // }
+                if(!snoopster._hasExpectations){
+                    throwException('"validate" expects a spy with predefined expectation and found none');
+                }
+                if(snoopster._expectations.toBeCalled){
+                    noteExpectation(snoopster);
+                    noteToHaveBeenCalled();
+                }
+                if(snoopster._expectations.toBeCalledWith){
+                    noteExpectation(snoopster);
+                    noteToHaveBeenCalledWith.apply(null, argsToArray(snoopster._expectations.toBeCalledWith));
+                }
+                if (snoopster._expectations.toBeCalledWithContext){
+                    noteExpectation(snoopster);
+                    noteToHaveBeenCalledWithContext(snoopster._expectations.toBeCalledWithContext);
+                }
+                if(snoopster._expectations.toReturn){
+                    noteExpectation(snoopster);
+                    noteToHaveReturned(snoopster._expectations.toReturn);
+                }
+                if(snoopster._expectations.toThrow){
+                    noteExpectation(snoopster);
+                    noteToHaveThrown();
+                }
+                if(snoopster._expectations.toThrowWithName){
+                    noteExpectation(snoopster);
+                    noteToHaveThrown.with.name(snoopster._expectations.toThrowWithName);
+                }
+                if(snoopster._expectations.toThrowWithMessage){
+                    noteExpectation(snoopster);
+                    noteToHaveThrown.with.message(snoopster._expectations.toThrowWithMessage);
+                }
+            };
+            //TODO(Jeff): v2.3.0
+            //if target is a property method then assign snoopster to it
+            if(arguments.length && typeof(arguments[0]) !== 'function' &&
+                typeof(arguments[0]) === 'object'){
+                argObject[argProperty] = snoopster;
             }
-        };
-        //when the 1st parameter is a function it must be returned
-        if(typeof(arguments[0]) === 'function'){
             return snoopster;
-        }else{
-            argObject[argProperty] = snoopster;
         }
-    }
+        /**
+         * @param {object} argObject An object whose properties identified by
+         * the elements in argPropertyNames are to be spies.
+         * @param {array} argPropertyNames An array of strings whose elements
+         * identify the methods in argObject to be spies.
+         * @param {[object]} context An object to use as the context when calling
+         * the spied property methods.
+         */
+        _spy.x = function(argObject, argPropertyNames){
+            var i,
+                len;
+            if(!argObject || typeof(argObject) !== 'object'){
+                throw new Error('expected an object for 1st parameter - found ' +
+                    typeof(argObject));
+            }
+            if(!argPropertyNames || !Array.isArray(argPropertyNames)){
+                throw new Error('expected an array for 2nd parameter - found ' +
+                    typeof(argObject));
+            }
+            if(!argPropertyNames.length){
+                throw new Error('expected an array for 2nd parameter with at ' +
+                    'least one element for 2nd parameter');
+            }
+            for(i = 0, len = argPropertyNames.length; i < len; i++){
+                if(typeof(argPropertyNames[i]) !== 'string'){
+                    throw new Error('expected element ' + i +
+                    ' of 2nd parameter to be a string');
+                }
+                if(!argObject[argPropertyNames[i]]){
+                    throw new Error('expected 1st paramter to have property ' +
+                        argPropertyNames[i]);
+                }
+                if(typeof(argObject[argPropertyNames[i]]) !== 'function'){
+                    throw new Error('expected ' + argPropertyNames[i] +
+                        ' to be a method');
+                }
+            }
+            argPropertyNames.forEach(function(property){
+                spy(argObject, property);
+            });
+        };
+        return _spy;
+    }());
 
     /**
      * It all starts here!
@@ -1593,6 +2215,7 @@
         //have been loaded. Once stable, emit the 'start' event.
         //***Note: config.autoStart can only be false if it set by an
         //external process (e.g. Karma adapter).
+        //TODO(Jeff): v2.3.0 handle a missing test script
         intervalId = setInterval(function(){
             if(queue.length === prevQueueCount){
                 if(queueStableCount > 1 && config.autoStart){
