@@ -1106,8 +1106,8 @@
             window.getUiTestContainerElementId = getUiTestContainerElementId;
             //TODO(Jeff): v2.3.0 renamed spy to spyOn
             window.spyOn = spy;
-            //TODO(Jeff): v2.3.0
-            window.validate = validate;
+            // //TODO(Jeff): v2.3.0
+            // window.validate = validate;
         }else{
             window.Preamble = {
                 configure: configure,
@@ -1121,8 +1121,8 @@
                 getUiTestContainerElementId: getUiTestContainerElementId,
                 //TODO(Jeff): v2.3.0 renamed spy to spyOn
                 spyOn: spy,
-                //TODO(Jeff): v2.3.0
-                validate: validate
+                // //TODO(Jeff): v2.3.0
+                // validate: validate
             };
         }
         //TODO(Jeff):v2.3.0 assert is now always defined, even if not using window globals
@@ -1702,43 +1702,43 @@
         completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
     }
 
-    //TODO(Jeff): v2.3.0 mock validation
-    function validate(mock){
-        if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
-            throwException('"validate" expects a spy as its only argument');
-        }
-        if(!mock._hasExpectations){
-            throwException('"validate" expects a spy with predefined expectation and found none');
-        }
-        if(mock._expectations.toBeCalled){
-            noteExpectation(mock);
-            noteToHaveBeenCalled();
-        }
-        if(mock._expectations.toBeCalledWith){
-            noteExpectation(mock);
-            noteToHaveBeenCalledWith.apply(null, argsToArray(mock._expectations.toBeCalledWith));
-        }
-        if (mock._expectations.toBeCalledWithContext){
-            noteExpectation(mock);
-            noteToHaveBeenCalledWithContext(mock._expectations.toBeCalledWithContext);
-        }
-        if(mock._expectations.toReturn){
-            noteExpectation(mock);
-            noteToHaveReturned(mock._expectations.toReturn);
-        }
-        if(mock._expectations.toThrow){
-            noteExpectation(mock);
-            noteToHaveThrown();
-        }
-        if(mock._expectations.toThrowWithName){
-            noteExpectation(mock);
-            noteToHaveThrown.with.name(mock._expectations.toThrowWithName);
-        }
-        if(mock._expectations.toThrowWithMessage){
-            noteExpectation(mock);
-            noteToHaveThrown.with.message(mock._expectations.toThrowWithMessage);
-        }
-    }
+    // //TODO(Jeff): v2.3.0 mock validation
+    // function validate(mock){
+    //     if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
+    //         throwException('"validate" expects a spy as its only argument');
+    //     }
+    //     if(!mock._hasExpectations){
+    //         throwException('"validate" expects a spy with predefined expectation and found none');
+    //     }
+    //     if(mock._expectations.toBeCalled){
+    //         noteExpectation(mock);
+    //         noteToHaveBeenCalled();
+    //     }
+    //     if(mock._expectations.toBeCalledWith){
+    //         noteExpectation(mock);
+    //         noteToHaveBeenCalledWith.apply(null, argsToArray(mock._expectations.toBeCalledWith));
+    //     }
+    //     if (mock._expectations.toBeCalledWithContext){
+    //         noteExpectation(mock);
+    //         noteToHaveBeenCalledWithContext(mock._expectations.toBeCalledWithContext);
+    //     }
+    //     if(mock._expectations.toReturn){
+    //         noteExpectation(mock);
+    //         noteToHaveReturned(mock._expectations.toReturn);
+    //     }
+    //     if(mock._expectations.toThrow){
+    //         noteExpectation(mock);
+    //         noteToHaveThrown();
+    //     }
+    //     if(mock._expectations.toThrowWithName){
+    //         noteExpectation(mock);
+    //         noteToHaveThrown.with.name(mock._expectations.toThrowWithName);
+    //     }
+    //     if(mock._expectations.toThrowWithMessage){
+    //         noteExpectation(mock);
+    //         noteToHaveThrown.with.message(mock._expectations.toThrowWithName);
+    //     }
+    // }
 
     //TODO(Jeff): v2.3.0
     function Assert(){this.not = new Not();}
@@ -2101,6 +2101,42 @@
             snoopster.and.expect.it.toThrowWithMessage = function(message){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toThrowWithMessage = message;
+            };
+            snoopster.validate = function(){
+                // if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
+                //     throwException('"validate" expects a spy as its only argument');
+                // }
+                if(!snoopster._hasExpectations){
+                    throwException('"validate" expects a spy with predefined expectation and found none');
+                }
+                if(snoopster._expectations.toBeCalled){
+                    noteExpectation(snoopster);
+                    noteToHaveBeenCalled();
+                }
+                if(snoopster._expectations.toBeCalledWith){
+                    noteExpectation(snoopster);
+                    noteToHaveBeenCalledWith.apply(null, argsToArray(snoopster._expectations.toBeCalledWith));
+                }
+                if (snoopster._expectations.toBeCalledWithContext){
+                    noteExpectation(snoopster);
+                    noteToHaveBeenCalledWithContext(snoopster._expectations.toBeCalledWithContext);
+                }
+                if(snoopster._expectations.toReturn){
+                    noteExpectation(snoopster);
+                    noteToHaveReturned(snoopster._expectations.toReturn);
+                }
+                if(snoopster._expectations.toThrow){
+                    noteExpectation(snoopster);
+                    noteToHaveThrown();
+                }
+                if(snoopster._expectations.toThrowWithName){
+                    noteExpectation(snoopster);
+                    noteToHaveThrown.with.name(snoopster._expectations.toThrowWithName);
+                }
+                if(snoopster._expectations.toThrowWithMessage){
+                    noteExpectation(snoopster);
+                    noteToHaveThrown.with.message(snoopster._expectations.toThrowWithMessage);
+                }
             };
             //TODO(Jeff): v2.3.0
             //if target is a property method then assign snoopster to it
