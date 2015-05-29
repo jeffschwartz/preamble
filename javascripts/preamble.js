@@ -1726,6 +1726,18 @@
             noteExpectation(mock);
             noteToHaveReturned(mock._expectations.toReturn);
         }
+        if(mock._expectations.toThrow){
+            noteExpectation(mock);
+            noteToHaveThrown();
+        }
+        if(mock._expectations.toThrowWithName){
+            noteExpectation(mock);
+            noteToHaveThrown.with.name(mock._expectations.toThrowWithName);
+        }
+        if(mock._expectations.toThrowWithMessage){
+            noteExpectation(mock);
+            noteToHaveThrown.with.message(mock._expectations.toThrowWithMessage);
+        }
     }
 
     //TODO(Jeff): v2.3.0
@@ -1917,6 +1929,8 @@
             snoopster.and = {};
             snoopster.and.throw = function(){
                 snoopster._throws = true;
+                //for chaining
+                return snoopster;
             };
             //TODO(Jeff): v2.3.0
             snoopster.and.throw.with = {};
