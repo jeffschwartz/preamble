@@ -191,9 +191,9 @@
                     callback();
                 }
             }else{
-                if(self.callback.length === 2){
+                if(self.callback.length === 1){
                     //Pass done callback as 1st param if configured to use window globals.
-                    self.callback.call(self.context, assert, function(){
+                    self.callback.call(self.context, function(){
                         if(arguments.length && typeof(arguments[0] === 'function')){
                             arguments[0].call(self.context);
                         }
@@ -201,7 +201,7 @@
                         callback();
                     });
                 }else{
-                    self.callback.call(self.context, assert);
+                    self.callback.call(self.context);
                     self.runAssertions();
                     callback();
                 }
