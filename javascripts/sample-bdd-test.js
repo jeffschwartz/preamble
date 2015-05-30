@@ -493,43 +493,36 @@ describe('Preamble comes with 3 types of test dobules', function(){
         it('such as expecting to have been called', function(){
             spyOn(foo, 'someFn').and.expect.it.toBeCalled();
             foo.someFn();
-            // validate(foo.someFn);
             foo.someFn.validate();
         });
         it('such as expecting to have been called with specific values', function(){
             spyOn(foo, 'someFn').and.expect.it.toBeCalledWith('abc', 123);
             foo.someFn('abc', 123);
-            // validate(foo.someFn);
             foo.someFn.validate();
         });
         it('such as expecting to have been call with specific contexts', function(){
             spyOn(foo, 'someFn').and.expect.it.toBeCalledWithContext(foo);
             foo.someFn();
-            // validate(foo.someFn);
             foo.someFn.validate();
         });
         it('such as expecting to have returned a specific value', function(){
             spyOn(foo, 'someFn').and.return(123).and.expect.it.toReturn(123);
             foo.someFn();
-            // validate(foo.someFn);
             foo.someFn.validate();
         });
         it('such as expecting to have thrown an exception', function(){
             spyOn(foo, 'someFn').and.throw().and.expect.it.toThrow();
             foo.someFn();
-            // validate(foo.someFn);
             foo.someFn.validate();
         });
         it('such as expecting to have thrown an exception with a name', function(){
             spyOn(foo, 'someFn').and.throw.with.name('Whoops').and.expect.it.toThrowWithName('Whoops');
             foo.someFn();
-            // validate(foo.someFn);
             foo.someFn.validate();
         });
         it('such as expecting to have thrown an exception with a message', function(){
             spyOn(foo, 'someFn').and.throw.with.message('Whoops!').and.expect.it.toThrowWithMessage('Whoops!');
             foo.someFn();
-            // validate(foo.someFn);
             foo.someFn.validate();
         });
     });
