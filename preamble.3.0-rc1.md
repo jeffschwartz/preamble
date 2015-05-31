@@ -18,12 +18,12 @@ describe('boolean true', function(){
 });
 ```
 
-And this is an example of a simple *asynchronous* test:
+And this is an example of a simple *asynchronous* test. Notice the call to _**done**_:
 
 ```javascript
-describe('running asynchronous tests', function(){
+describe('running an asynchronous test', function(){
     var count = 0;
-    it('calling "done"', function(done){
+    it('and calling "done" to continue', function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
@@ -99,58 +99,36 @@ When the <em><strong>windowGlobals</strong></em> configuration option is set to 
 * getUiTestContainerElement - _Preamble.getUiTestContainerElement_
 * getUiTestContainerElementId - _Preamble.getUiTestContainerElementId_
 
-<p class="warning">In addition to the above, when the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> then spec callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this parameter <em><strong>assert</em></strong> and is the style used in this document.:
-</p>
-
-```javascript
-
-Preamble.it('this is a test', function(assert){
-    assert.equal(...);
-    assert.notEqual(...);
-    assert.isTrue(...);
-    assert.isFalse(...);
-    assert.isTruthy(...);
-    assert.isNotTruthy(...);
-});
-```
-        toEqual: noteToEqualAssertion,
-        toBeTrue: noteToBeTrueAssertion,
-        toBeTruthy: noteToBeTruthyAssertion,
-        toHaveBeenCalled: noteToHaveBeenCalled,
-        toHaveBeenCalledWith: noteToHaveBeenCalledWith,
-        toHaveBeenCalledWithContext: noteToHaveBeenCalledWithContext,
-        toHaveReturned: noteToHaveReturned,
-        toHaveThrown: noteToHaveThrown
 <p class="warning">
 In the documentation that follows descriptions and code examples assume that the <em><strong>windowGlobals</strong></em> configuration option is set to <em>true</em>.
 </p>
 
-### Grouping Tests
+### Suites
 
 #### **describe** *describe(label, callback)*
-**describe** provide structure and *scope* for one or more tests. **label** is a string used to uniquely identify the group. **callback** is a function which contains one or more tests. **callback** also provides *scope* to make data and code accessible to the tests.
+**describe** describes a _suite_ which can contain one or more _specs_. **label** is a string used to uniquely identify the _suite_. **callback** is a function that is called by Preamble to run your _specs_. **callback** also provides structure and scope for one or more _specs_.
 
 ```javascript
-
-describe('Describe a group', function(){
-    var hw = 'Hello World!';
-    it('Hello World!', function(){
-        isTrue(hw === 'Hello World!');
+describe('"describe" describes a "suite" which can contain one or more "specs"', function(){
+    it('and "it" specifies a spec which can contain one or more "matchers"', function(){
+        expect(1).toEqual(1);
     });
-})
+});
 ```
 
-**describe** can also be _nested_ providing fine grained structure for organizing tests:
+### Nesting Suites
+
+_Suites_ can also be _nested_ providing fine grained structure for organizing yout _specs_:
 
 ```javascript
 
-describe('Nested specs', function(){
-    describe('Nested spec 1', function(){
+describe('suites can also be nested', function(){
+    describe('Nested suite 1', function(){
         it('test 1.1', function(){
             isTrue(1);
         });
     });
-    describe('Nested spec 2', function(){
+    describe('Nested suite 2', function(){
         it('test 1.1', function(){
             isTrue(1);
         });
@@ -158,65 +136,34 @@ describe('Nested specs', function(){
 });
 ```
 
-### Tests
+### Specs
 
-#### **it** *it(label, [timeout,] callback([assert,] [done]){...})*
-**it** is used to define one or more _assertions_. **label** is a string used to uniquely identify a test within a _group_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a test (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function which contains one or more assertions and it also provide _scope_ to make data and code accessible to assertions.
-
-<p class="warning"><strong>assert</strong> is optional and is a <em>hash</em> that is alwyas passed as the first argument to <strong>it</strong>'s and <strong>test</strong>'s <strong>callback</strong>'s when the configuration option <em><strong>windowGlobals</strong></em> is set to <em>false</em>. It exposes the assertion API. It is common to name this parameter assert.</p>
+#### **it** *it(label, [timeout,] callback([done]){...})*
+**it** is used to group one or more _expectations_ which are composed by pairing the _actual value_ with a suitable _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
 
 ```javascript
-Preamble.it('this is a test', function(assert){
-    assert.equal(...);
-    assert.notEqual(...);
-    assert.isTrue(...);
-    assert.isFalse(...);
-    assert.isTruthy(...);
-    assert.isNotTruthy(...);
+Preamble.it('a spec contains 1 or more expectations', function(){
+    expect(true).toBeTrue();
+    expect(false).toBeFalse();
+    expect('abc').toEqual('abc');
+    expect(123).not.toEqual('abc');
 });
 ```
-**done** is optional and is a _function_ that is passed as an argument to **it**'s and **test**'s **callback**s and must be called to signal that an _asynchronous_ process has completed. **done**'s '**callback** argument provides scope for one or more assertions.
+**done** is optional and is a _function_ that Preamble passes to **callback** as an argument which your _specs_, _setups_ and _teardowns_ call to signal to Preamble that an _asynchronous_ process has completed. **done** takes a single argument, a _function_, which Preamble calls to run the _spec's expectations_.
 
 ```javascript
-
-describe('A test', function(){
-    it('Hello World!', function(){
-        var hw = 'Hello World!';
-        isTrue(hw === 'Hello World!');
-    });
-});
-```
-
-```javascript
-
 describe('When running an asynchronous test', function(){
     var count = 0;
-    it('calling done signals the asynchronous process has completed ', function(done){
+    it('calling done signals to Preamble that the asynchronous process has completed ', function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
-                equal(count, 100);
+                expect(count).toEqual(100);
             });
         }, 1);
     });
 });
 ```
-
-```javascript
-
-describe('When running an asynchronous test', function(){
-    var count = 0;
-    it('calling done signals the asynchronous process has completed ', 100, function(done){
-        setTimeout(function(){
-            count = 100;
-            done(function(){
-                equal(count, 100);
-            });
-        }, 50);
-    });
-});
-```
-
 ### Setup and Teardown
 
 #### **beforeEach** *beforeEach(callback([done]){...})*
