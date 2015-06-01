@@ -6,24 +6,24 @@ permalink: /preamble/api/3/0/rc1/
 
 ## Introducing Preamble
 
-Preamble is a powerful JavaScript testing framework. Preamble runs in any modern HTML5 compliant browser as well as headless via PhantomJS and has no additional dependencies on any other libraries. Preamble is backed by a very powerful assertion engine that your test scripts interface with through a very simple to use but powerful API, which makes the task of authoring tests very easy, intuitive and fun.
+Preamble v3 is a powerful BDD based JavaScript testing framework that runs in any modern HTML5 compliant browser as well as headless via PhantomJS. Preamble has no additional dependencies on any other libraries and has a very powerful assertion engine that your test suites interface with through a very simple to use but semantically rich and intuitive API.
 
-This is an example of a simple *synchronous* test:
+This is an example of a _synchronous spec_:
 
 ```javascript
-describe('boolean true', function(){
-    it('is true', function(){
+describe('running a spec synchronously', function(){
+    it('and running the expectations', function(){
         expect(true).toBeTrue();
     });
 });
 ```
 
-And this is an example of a simple *asynchronous* test. Notice the call to _**done**_:
+And this is an example of an _asynchronous spec_. Notice the call to _**done**_:
 
 ```javascript
-describe('running an asynchronous test', function(){
+describe('running a spec asynchronously', function(){
     var count = 0;
-    it('and calling "done" to continue', function(done){
+    it('and calling "done" to run the expectations', function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
@@ -38,7 +38,7 @@ describe('running an asynchronous test', function(){
 Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!
 
 ### Run The Sample Test
-After you have cloned the repo you can then run the sample test suite, *javascripts/sample-bdd-test.js*, by opening the *index.html* file in your browser. The index.html file is located in Preamble's root folder.
+After you have cloned the repo you can then run the sample test suite, *javascripts/sample-suite.js*, by opening the *index.html* file in your browser. The index.html file is located in Preamble's root folder.
 
 Running a test suite in the browser produces a report showing the results of running the suite. All suites and specs are presented as *links* and when you click on them Preamble will run them again and display their details, respectively.
 
@@ -46,7 +46,7 @@ To repeat the test you can either refresh the browser or click on the _**run all
 
 If you want to filter out suites and specs that have passed, check the _**Hide passed** checkbox_ located near the top right corner of the page.
 
-After you have run the sample test suite and familiarized yourself with the generated report you can then open up the sample test suite file, *javascripts/sample-bdd-test.js*, in your editor and examine the code to gain insight on writing your own test suites.
+After you have run the sample test suite and familiarized yourself with the generated report you can then open up the sample test suite file, *javascripts/sample-suite.js*, in your favorite editor and examine the code to gain insight on writing your own test suites.
 
 ### index.html
 The only required HTML tags (other than the script tags) are **&lt;div id="preamble-test-container"&gt;&lt;/div&gt;** and **&lt;div id="preamble-ui-container"&gt;&lt;/div&gt;**.
@@ -79,7 +79,7 @@ The only required HTML tags (other than the script tags) are **&lt;div id="pream
     <script src="javascripts/preamble.js"></script>
 
     <!-- Place your test script(s) here, immediately following preamble.js -->
-    <script src="javascripts/sample-bdd-test.js"></script>
+    <script src="javascripts/sample-suite.js"></script>
 </body>
 </html>
 ```
@@ -106,11 +106,11 @@ In the documentation that follows descriptions and code examples assume that the
 ### Suites
 
 #### **describe** *describe(label, callback)*
-**describe** describes a _suite_ which can contain one or more _specs_. **label** is a string used to uniquely identify the _suite_. **callback** is a function that is called by Preamble to run your _specs_. **callback** also provides structure and scope for one or more _specs_.
+**describe** describes a _suite_. **label** is a string used to uniquely identify the _suite_. **callback** is a function that is called by Preamble that provides structure and scope for one or more _specs_.
 
 ```javascript
-describe('"describe" describes a "suite" which can contain one or more "specs"', function(){
-    it('and "it" specifies a spec which can contain one or more "matchers"', function(){
+describe('describes a "suite" which can contain one or more "specs"', function(){
+    it('and "it" specifies a spec which can contain one or more expectations"', function(){
         expect(1).toEqual(1);
     });
 });
@@ -118,19 +118,19 @@ describe('"describe" describes a "suite" which can contain one or more "specs"',
 
 ### Nesting Suites
 
-_Suites_ can also be _nested_ providing fine grained structure for organizing yout _specs_:
+_Suites_ can be _nested_ at any level thereby providing fine grained structure and organization of your _specs_:
 
 ```javascript
 
-describe('suites can also be nested', function(){
-    describe('Nested suite 1', function(){
-        it('test 1.1', function(){
-            isTrue(1);
+describe('suites can  be nested', function(){
+    describe('nested suite 1', function(){
+        it('spec 1.1', function(){
+            expect(1).toBeTruthy();
         });
     });
-    describe('Nested suite 2', function(){
-        it('test 1.1', function(){
-            isTrue(1);
+    describe('nested suite 2', function(){
+        it('spec 2.1', function(){
+            expect(0).not,toBeTruthy();
         });
     });
 });
@@ -139,22 +139,23 @@ describe('suites can also be nested', function(){
 ### Specs
 
 #### **it** *it(label, [timeout,] callback([done]){...})*
-**it** is used to group one or more _expectations_ which are composed by pairing the _actual value_ with a suitable _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is an optional number used to override the default number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
+
+**it** is used to group one or more _expectations_ which are composed by pairing the _actual value_ under test with a suitable _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
 
 ```javascript
-Preamble.it('a spec contains 1 or more expectations', function(){
+it('is used to group one or more expectations', function(){
     expect(true).toBeTrue();
     expect(false).toBeFalse();
     expect('abc').toEqual('abc');
     expect(123).not.toEqual('abc');
 });
 ```
-**done** is optional and is a _function_ that Preamble passes to **callback** as an argument which your _specs_, _setups_ and _teardowns_ call to signal to Preamble that an _asynchronous_ process has completed. **done** takes a single argument, a _function_, which Preamble calls to run the _spec's expectations_.
+**done** is optional and is a _function_ that Preamble passes to **callback** as an argument which your asynchronous _specs_ call to signal to Preamble that their _asynchronous_ processing has completed. **done** takes a single argument, a _function_, which Preamble calls to run the _expectations_.
 
 ```javascript
-describe('When running an asynchronous test', function(){
+describe('specs can be run asynchronously', function(){
     var count = 0;
-    it('calling done signals to Preamble that the asynchronous process has completed ', function(done){
+    it('and calling done signals to Preamble that the asynchronous process has completed ', function(done){
         setTimeout(function(){
             count = 100;
             done(function(){
@@ -169,61 +170,44 @@ describe('When running an asynchronous test', function(){
 #### **beforeEach** *beforeEach(callback([done]){...})*
 #### **afterEach** *afterEach(callback([done]){...})*
 
-**beforeEach** and **afterEach** are used to execute common code _before_ and _after_ each _test_, respectively. Their use enforces the _DRY_ principle. **callback** provides scope for the code that is to be run before or after each test. Values can be passed on to tests by assigning them to **callback**'s context (e.g. this.someValue = someOtherValue).
-
-**done** is optional and is a _function_ that is passed as an argument to the **callbacks** of **beforeEach** and **afterEach** and must be called to signal that an _asynchronous_ setup/teardown process has completed.
+**beforeEach** and **afterEach** are used to execute common code _before_ and _after_ each _spec_, respectively, and their use enforces the _DRY_ principle. **callback** is a function that Preamble will call to execute your _setup_ and _teardown_ code.
 
 ```javascript
-
 describe('Using beforeEach to synchronously execute common code before each test', function(){
     var count = 0;
-    beforeEachTest(function(){
+    beforeEach(function(){
         count = 1;
     });
-    it('Is count 1?', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0');
-        isTrue(count === 1, 'count does equal 1');
-        isTrue((count += 1) === 2, 'count now equals 2');
+    it('count equals 1', function(){
+        expect(count).toEqual(1);
+        count = 2;
     });
-    it('Is count still 2?', function(){
-        isFalse(count === 2, 'nope, it isn\'t still 2');
-        isTrue(count === 1, 'now count equals 1');
+    it('count still equals 1', function(){
+        expect(count).toEqual(1);
     });
 });
 ```
 
 ```javascript
-
 describe('Using afterEach to synchronously execute common code after each test', function(){
     var count = 0;
-    afterEachTest(function(){
+    afterEach(function(){
         count = 1;
     });
-    it('Is count 0?', function(){
-        isTrue(count === 0, 'count does equal 0.');
+    it('count equals 0', function(){
+        expect(count).toEqual(0);
+        count = 2;
     });
-    it('Is count still 0?', function(){
-        isFalse(count === 0, 'count doesn\'t equal 0.');
-        isTrue(count === 1, 'count now equals 1.');
-    });
-});
-```
-
-```javascript
-
-describe('Passing a value from Setup/Teardown on to a tests', function(){
-    beforeEach(function(){
-        this.value = 10;
-    });
-    it('the tests', function(){
-        equal(this.value, 10);
+    it('count still equals 1', function(){
+        expect(count).toEqual(1);
     });
 });
 ```
 
-```javascript
+**done** is optional and is a _function_ that Preamble passes to **callback** as an argument and which your asynchronous _setups_ and _teardowns_ call to signal to Preamble that their _asynchronous_ processing has completed.
 
-describe('Using beforeEach to asynchronously execute common code before each test', function(){
+```javascript
+describe('Using beforeEach to asynchronously execute common code before each spec is called', function(){
     var count = 0;
     beforeEach(function(done){
         setTimeout(function(){
@@ -231,15 +215,14 @@ describe('Using beforeEach to asynchronously execute common code before each tes
             done();
         }, 1);
     });
-    it('beforeEach is called', function(){
-        equal(count, 10);
+    it('count equals 10', function(){
+        expect(count).toEqual(10);
     });
 });
 ```
 
 ```javascript
-
-describe('Using afterEach to asynchronously execute common code after each test', function(){
+describe('Using afterEach to asynchronously execute common code after each spec is called', function(){
     var count = 0;
     afterEach(function(done){
         setTimeout(function(){
@@ -247,38 +230,74 @@ describe('Using afterEach to asynchronously execute common code after each test'
             done();
         }, 1);
     });
-    it('the first asynchronous test', function(done){
-        setTimeout(function(){
-            count = 10;
-            done(function(){
-                isTrue(count === 10);
-            });
-        }, 1);
+    it('this spec expects count to equal 0 and sets count to 10', function(){
+        expect(count).toEqual(0);
+        count = 10;
     });
-    it('but subsequent asynchronous tests', function(done){
-        setTimeout(function(){
-            count *= 100;
-            done(function(){
-                isTrue(count === 100);
-            });
-        }, 1);
+    it('this spec expects count to equal 1', function(){
+        expect(count).toEqual(1);
     });
 });
 ```
 
-```javascript
+### Preventing Specs From Timing Out
 
-describe('Preventing a long running asynchronous Setup/Teardown from timing out a test', function(){
+Preamble will timeout both _synchronous_ and _asynchronout_ _specs_ if they fail to complete within the 10 milisecond _timeout interval_ that Preamble defaults to. To override Preamble's default _timeout interval_ you can do one of or both of the following:
+
+Set the _timeout interval_ for all _specs_ by either using the _javascripts/preamble-config.js_ file or using in-line configuration (see **_Configuration_** below for details on both).
+
+```javascript
+var preambleConfig = {
+    testTimeOutInterval: 25,
+};
+```
+
+Set the _timeout interval_ for individual _specs_ by passing a _timeout interval_ to Preamble when calling _it()_ (see **_Specs_** above for details).
+
+```javascript
+describe('Preventing a spec from timing out', function(){
     var count = 0;
-    beforeEachTest(function(done){
+    beforeEach(function(done){
         setTimeout(function(){
             done(function(){
-                this.count = 10;
+                count = 10;
             });
         }, 50);
     });
-    it('this.count should equal 10', 100, function(){
-        equal(this.count, 10);
+    it('count should equal 10', 60, function(){
+        expect(count).toEqual(10);
+    });
+});
+```
+
+<p class="warning">
+When a spec fails to complete within the <i>timeout interval</i> Preamble will fail that spec but will continue to run all remaining specs unless Preamble is configured to <i>short circuit</i> (see <i>Configuration</i> below for more information about using the <b><i>shortCircuit</i></b> configuration option).
+</p>
+
+### Sharing Variables Using _this_
+
+Variables can be shared between _beforeEach_, _it_ and _afterEach_ (aka a BIA block) by assigning variables to **_this_**. Every first level BIA block share the same blank context and any nested BIA blocks share the same context as their parent BIA blocks.
+
+```javascript
+describe('Sharing values between setups, specs and teardowns using "this"', function(){
+    beforeEach(function(){
+        this.value = 10;
+    });
+    it('this.value should equal 10', function(){
+        expect(this.value).toEqual(10);
+    });
+    describe('works in nested suites also', function(){
+        beforeEach(function(){
+            this.otherValue = 100;
+        });
+        it('this.value should equal 10 and this.otherValue should equal 100', function(){
+            expect(this.value).toEqual(10);
+            expect(this.otherValue).toEqual(100);
+        });
+    });
+    it('this.otherValue should not exist and this.value should equal 10', function(){
+        expect(this.otherValue).toEqual('undefined');
+        expect(this.value).toEqual(10);
     });
 });
 ```
