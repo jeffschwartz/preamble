@@ -103,9 +103,9 @@ When the <em><strong>windowGlobals</strong></em> configuration option is set to 
 In the documentation that follows descriptions and code examples assume that the <em><strong>windowGlobals</strong></em> configuration option is set to <em>true</em>.
 </p>
 
-### Suites
+## Suites
 
-#### **describe** *describe(label, callback)*
+### **describe** *describe(label, callback)*
 **describe** describes a _suite_. **label** is a string used to uniquely identify the _suite_. **callback** is a function that is called by Preamble that provides structure and scope for one or more _specs_.
 
 ```javascript
@@ -116,7 +116,7 @@ describe('describes a "suite" which can contain one or more "specs"', function()
 });
 ```
 
-### Nesting Suites
+## Nesting Suites
 
 _Suites_ can be _nested_ at any level thereby providing fine grained structure and organization of your _specs_:
 
@@ -136,9 +136,9 @@ describe('suites can  be nested', function(){
 });
 ```
 
-### Specs
+## Specs
 
-#### **it** *it(label, [timeout,] callback([done]){...})*
+### **it** *it(label, [timeout,] callback([done]){...})*
 
 **it** is used to group one or more _expectations_ which are composed by pairing the _actual value_ under test with a suitable _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
 
@@ -165,10 +165,10 @@ describe('specs can be run asynchronously', function(){
     });
 });
 ```
-### Setup and Teardown
+## Setup and Teardown
 
-#### **beforeEach** *beforeEach(callback([done]){...})*
-#### **afterEach** *afterEach(callback([done]){...})*
+### **beforeEach** *beforeEach(callback([done]){...})*
+### **afterEach** *afterEach(callback([done]){...})*
 
 **beforeEach** and **afterEach** are used to execute common code _before_ and _after_ each _spec_, respectively, and their use enforces the _DRY_ principle. **callback** is a function that Preamble will call to execute your _setup_ and _teardown_ code.
 
@@ -240,11 +240,11 @@ describe('Using afterEach to asynchronously execute common code after each spec 
 });
 ```
 
-### Preventing Specs From Timing Out
+## Preventing Specs From Timing Out
 
-Preamble will timeout both _synchronous_ and _asynchronout_ _specs_ if they fail to complete within the 10 milisecond _timeout interval_ that Preamble defaults to. To override Preamble's default _timeout interval_ you can do one of or both of the following:
+Preamble will timeout both _synchronous_ and _asynchronout_ _specs_ if they fail to complete within the 10 milisecond _timeout interval_ that Preamble defaults to. To override Preamble's default _timeout interval_ you can:
 
-Set the _timeout interval_ for all _specs_ by either using the _javascripts/preamble-config.js_ file or using in-line configuration (see **_Configuration_** below for details on both).
+Set the _timeout interval_ for all _specs_ by either using the _javascripts/preamble-config.js_ file
 
 ```javascript
 var preambleConfig = {
@@ -252,7 +252,15 @@ var preambleConfig = {
 };
 ```
 
-Set the _timeout interval_ for individual _specs_ by passing a _timeout interval_ to Preamble when calling _it()_ (see **_Specs_** above for details).
+or set the _timeout interval_ for all _specs_ using in-line configuration (see **_Configuration_** below for details on both).
+
+```javascript
+configure({
+    testTimeOutInterval: 25
+});
+```
+
+or set the _timeout interval_ for individual _specs_ by passing a _timeout interval_ to Preamble when calling _it()_ (see **_Specs_** above for details).
 
 ```javascript
 describe('Preventing a spec from timing out', function(){
@@ -274,9 +282,9 @@ describe('Preventing a spec from timing out', function(){
 When a spec fails to complete within the <i>timeout interval</i> Preamble will fail that spec but will continue to run all remaining specs unless Preamble is configured to <i>short circuit</i> (see <i>Configuration</i> below for more information about using the <b><i>shortCircuit</i></b> configuration option).
 </p>
 
-### Sharing Variables Using _this_
+## Sharing Variables Using _this_
 
-Variables can be shared between _beforeEach_, _it_ and _afterEach_ (aka a BIA block) by assigning variables to **_this_**. Every first level BIA block share the same blank context and any nested BIA blocks share the same context as their parent BIA blocks.
+Variables can be shared between _beforeEach_, _it_ and _afterEach_ (aka a BIA sequence) by assigning variables to **_this_**. Every top level BIA sequence shares the same blank context and every nested BIA sequence shares the same context as their parent BIA sequence.
 
 ```javascript
 describe('Sharing values between setups, specs and teardowns using "this"', function(){
@@ -302,38 +310,71 @@ describe('Sharing values between setups, specs and teardowns using "this"', func
 });
 ```
 
-### Assertions
+## Expectations - _expect_, _not_ and _matchers_
 
-<p class="warning">When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> test callback functions are passed a hash as their first parameter through which assertions must be called. It is common to name this parameter <em><strong>assert</em></strong>:
-</p>
+_Expectations_ are declared using **_expect_**, **_not_** if negating and a suitable **_matcher_**.
+
+For example, the expectation that a value is _truthy_ can be expressed as follows:
 
 ```javascript
-Preamble.it('this is a test', function(assert){
-    assert.equal(...);
-    assert.notEqual(...);
-    assert.isTrue(...);
-    assert.isFalse(...);
-    assert.isTruthy(...);
-    assert.isNotTruthy(...);
+describe('the value 1', function(){
+    it('is truthy', function(){
+        expect(1).toBeTruthy();
+    });
 });
 ```
-#### **equal** *equal(value, expectation, label)*
-A strict deep recursive comparison of **value** and **expection**. **value** and **expectation** can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value === expectation && expectation === value then the result will be true. **label** is a string used to uniquely identify the assertion.
 
-#### **notEqual** *notEqual(value, expectation, label)*
-A strict deep recursive comparison of **value** and **expection**. **value** and **expectation** can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if value !== expectation && expectation !== value then the result will be true. **label** is a string used to uniquely identify the assertion.
+and the expectation that a value is _not_ _truthy_ can be expressed as follows (notice the use of the _not_ API to _negate_ the intention of the _toBeTruthy_ matcher):
 
-#### **isTrue** *isTrue(value, label)*
-A strict boolean assertion. Result is true if **value** is true. **label** is a string used to uniquely identify the assertion.
+```javascript
+describe('the value 0', function(){
+    it('is not truthy', function(){
+        expect(0).not.toBeTruthy();
+    });
+});
+```
 
-#### **isFalse** *isFalse(value, label)*
-A strict boolean assertion. Result is true if **value** is false. **label** is a string used to uniquely identify the assertion.
+### **expect** *expect(actual)*
+Call _expect_ passing it the **_actual_** value that is to be matched against using a _matcher_. **_actual_** can be any valid JavaScript primitive value or object (including functions).
 
-#### **isTruthy** *isTruthy(value, label)*
-A non strict boolean assertion. Result is true if **value** is truthy. **label** is a string used to uniquely identify the assertion.
+### **not** *not*
+Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
 
-#### **isNotTruthy** *isNotTruthy(value, label)*
-A non strict boolean assertion. Result is true if **value** is not truthy. **label** is a string used to uniquely identify the assertion.
+### Matchers
+
+#### **toEqual** *toEqual(value)*
+Expectations pass if both the _actual_ value and **_value_** are equal and fail if they aren't equal. A strict deep recursive comparison is made between the _actual_ value and **_value_**, which can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if **_value_** === _actual_ value && _actual_ value === **_value_** then the two objects are considered equal.
+
+ ```javascript
+ var 
+ ```
+
+#### **toBeTrue** *toBeTrue()*
+Expectations pass if the _actual_ value is _true_ and fail if it is _false_. A strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
+
+#### **toBeTruthy** *toBeTruthy()*
+Expectations pass if the _actual_ value is _truthy and fail if it _falsy_. A non strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
+
+#### **toHaveBeenCalled** *toHaveBeenCalled()*
+Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called and fail if it wasn't called.
+
+#### **toHaveBeenCalledWith** *toHaveBeenCalledWith(...theArgs)*
+Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called with **_...theArgs_** arguments and fail if it wasn't called with **_...theArgs_** arguments.
+
+#### **toHaveBeenCalledWithContext** *toHaveBeenCalledWithContext(context)*
+Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called with **_context_** as its _context_ and fail if it wasn't called with **_context_** as its _context_.
+
+#### **toHaveReturned** *toHaveReturned(value)*
+Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), returned **_value_** and fail if it didn't return **_value_**.
+
+#### **toHaveThrown** *toHaveThrown()*
+Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception and fail if it didn't throw an exception.
+
+#### **toHaveThrownWithMessage** *toHaveThrownWithMessage(message)*
+Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception with **_message_** and fail if it didn't throw an exception with **_message_**.
+
+#### **toHaveThrownWithName** *toHaveThrownWithName(name)*
+Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception with **_name_** and fail if it didn't throw an exception with **_name_**.
 
 ### snoop
 
