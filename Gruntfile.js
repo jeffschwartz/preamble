@@ -17,7 +17,7 @@ module.exports = function ( grunt ) {
             files   : [
                 'javascripts/preamble.js',
                 'javascripts/sample-failures-test.js',
-                'javascripts/sample-bdd-test.js',
+                'javascripts/sample-suite.js',
             ]
         },
         shell: {
