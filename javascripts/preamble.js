@@ -1601,7 +1601,7 @@
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(), a.value.threw());
     }
-    noteToHaveThrown.with = {};
+    // noteToHaveThrown.with = {};
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrown assertion
     function noteToNotHaveThrown(){
@@ -1612,47 +1612,47 @@
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(), a.value.threw());
     }
-    noteToNotHaveThrown.with = {};
+    // noteToNotHaveThrown.with = {};
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithName assertion
-    noteToHaveThrown.with.name = function noteToHaveThrownWithName(value){
+    function noteToHaveThrownWithName(value){
         if(arguments.length !== 1){
             throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
-    };
+    }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithName assertion
-    noteToNotHaveThrown.with.name = function noteToNotHaveThrownWithName(value){
+    function noteToNotHaveThrownWithName(value){
         if(arguments.length !== 1){
             throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
-    };
+    }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
-    noteToHaveThrown.with.message = function noteToHaveThrownWithMessage(value){
+    function noteToHaveThrownWithMessage(value){
         if(arguments.length !== 1){
             throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
-    };
+    }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithMessage assertion
-    noteToNotHaveThrown.with.message = function noteToNotHaveThrownWithMessage(value){
+    function noteToNotHaveThrownWithMessage(value){
         if(arguments.length !== 1){
             throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' + arguments.length);
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
-    };
+    }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
     function noteToEqualAssertion(value){
@@ -1751,7 +1751,9 @@
         toHaveBeenCalledWith: noteToHaveBeenCalledWith,
         toHaveBeenCalledWithContext: noteToHaveBeenCalledWithContext,
         toHaveReturned: noteToHaveReturned,
-        toHaveThrown: noteToHaveThrown
+        toHaveThrown: noteToHaveThrown,
+        toHaveThrownWithName: noteToHaveThrownWithName,
+        toHaveThrownWithMessage: noteToHaveThrownWithMessage
     };
 
     //TODO(Jeff): v2.3.0
@@ -1765,7 +1767,9 @@
         toHaveBeenCalledWith: noteToNotHaveBeenCalledWith,
         toHaveBeenCalledWithContext: noteToNotHaveBeenCalledWithContext,
         toHaveReturned: noteToNotHaveReturned,
-        toHaveThrown: noteToNotHaveThrown
+        toHaveThrown: noteToNotHaveThrown,
+        toHaveThrownWithName: noteToNotHaveThrownWithName,
+        toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
     };
 
     //Returns the ui test container element.
@@ -1933,8 +1937,8 @@
                 return snoopster;
             };
             //TODO(Jeff): v2.3.0
-            snoopster.and.throw.with = {};
-            snoopster.and.throw.with.message = function(message){
+            // snoopster.and.throw.with = {};
+            snoopster.and.throwWithMessage = function(message){
                 if(typeof(message) !== 'string'){
                     throw new Error('message expects a string');
                 }
@@ -1943,7 +1947,7 @@
                 //for chaining - spy.throws.with.message().and.with.name();
                 return snoopster;
             };
-            snoopster.and.throw.with.name = function(name){
+            snoopster.and.throwWithName = function(name){
                 if(typeof(name) !== 'string'){
                     throw new Error('name expects a string');
                 }
@@ -2131,11 +2135,11 @@
                 }
                 if(snoopster._expectations.toThrowWithName){
                     noteExpectation(snoopster);
-                    noteToHaveThrown.with.name(snoopster._expectations.toThrowWithName);
+                    noteToHaveThrownWithName(snoopster._expectations.toThrowWithName);
                 }
                 if(snoopster._expectations.toThrowWithMessage){
                     noteExpectation(snoopster);
-                    noteToHaveThrown.with.message(snoopster._expectations.toThrowWithMessage);
+                    noteToHaveThrownWithMessage(snoopster._expectations.toThrowWithMessage);
                 }
             };
             //TODO(Jeff): v2.3.0

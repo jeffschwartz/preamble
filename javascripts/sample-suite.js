@@ -43,9 +43,9 @@ describe('"expect" takes a single value as an argument', function(){
        var someObj = {
            foo: function(){}
        };
-       spyOn(someObj, 'foo').and.throw.with.message('Whoops!');
+       spyOn(someObj, 'foo').and.throwWithMessage('Whoops!');
        someObj.foo();
-       expect(someObj.foo).toHaveThrown.with.message('Whoops!');
+       expect(someObj.foo).toHaveThrownWithMessage('Whoops!');
    });
 });
 
@@ -391,12 +391,12 @@ describe('Running asynchronous tests with afterEachAsync', function(){
 //     });
 //     describe('create a stub', function(){
 //         it('dynamically', function(){
-//             var stub = spyOn().and.throw.with.message('whoops!').and.throw.with.name('Whoops!');
+//             var stub = spyOn().and.throwWithMessage('whoops!').and.throwWithName('Whoops!');
 //             stub();
 //             expect(stub).toHaveBeenCalled();
 //             expect(stub).toHaveThrown();
-//             expect(stub).toHaveThrown.with.message('whoops!');
-//             expect(stub).toHaveThrown.with.name('Whoops!');
+//             expect(stub).toHaveThrownWithMessage('whoops!');
+//             expect(stub).toHaveThrownWithName('Whoops!');
 //         });
 //     });
 // });
@@ -465,14 +465,14 @@ describe('Preamble comes with 3 types of test dobules', function(){
             };
         });
         it('can be defined to throwe an exception with a message when called', function(){
-            spyOn(foo, 'someFn').and.throw.with.message('Whoops!');
+            spyOn(foo, 'someFn').and.throwWithMessage('Whoops!');
             foo.someFn();
-            expect(foo.someFn).toHaveThrown.with.message('Whoops!');
+            expect(foo.someFn).toHaveThrownWithMessage('Whoops!');
         });
         it('can be defined to throw an exception with a name when called', function(){
-            spyOn(foo, 'someFn').and.throw.with.name('Error');
+            spyOn(foo, 'someFn').and.throwWithName('Error');
             foo.someFn();
-            expect(foo.someFn).toHaveThrown.with.name('Error');
+            expect(foo.someFn).toHaveThrownWithName('Error');
         });
         it('can be defined to return a value when called', function(){
             var foobar = {foo: 'foo', bar: 'bar'};
@@ -516,12 +516,12 @@ describe('Preamble comes with 3 types of test dobules', function(){
             foo.someFn.validate();
         });
         it('such as expecting to have thrown an exception with a name', function(){
-            spyOn(foo, 'someFn').and.throw.with.name('Whoops').and.expect.it.toThrowWithName('Whoops');
+            spyOn(foo, 'someFn').and.throwWithName('Whoops').and.expect.it.toThrowWithName('Whoops');
             foo.someFn();
             foo.someFn.validate();
         });
         it('such as expecting to have thrown an exception with a message', function(){
-            spyOn(foo, 'someFn').and.throw.with.message('Whoops!').and.expect.it.toThrowWithMessage('Whoops!');
+            spyOn(foo, 'someFn').and.throwWithMessage('Whoops!').and.expect.it.toThrowWithMessage('Whoops!');
             foo.someFn();
             foo.someFn.validate();
         });
@@ -712,15 +712,15 @@ describe('spying on a method', function(){
                 var foo = this.foo;
                 spyOn(foo, 'someFn').and.callActual();
                 foo.someFn();
-                expect(foo.someFn).toHaveThrown.with.message('something went terribly wrong');
-                expect(foo.someFn).not.toHaveThrown.with.message('something went terribly wrong!');
+                expect(foo.someFn).toHaveThrownWithMessage('something went terribly wrong');
+                expect(foo.someFn).not.toHaveThrownWithMessage('something went terribly wrong!');
             });
             it('if the method threw an exception with a specific name', function(){
                 var foo = this.foo;
                 spyOn(foo, 'someFn').and.callActual();
                 foo.someFn();
-                expect(foo.someFn).toHaveThrown.with.name('Error');
-                expect(foo.someFn).not.toHaveThrown.with.name('ErrorError');
+                expect(foo.someFn).toHaveThrownWithName('Error');
+                expect(foo.someFn).not.toHaveThrownWithName('ErrorError');
             });
         });
     });
@@ -781,24 +781,24 @@ describe('A stub can be configured to throw an exception', function(){
         expect(this.foo.someFn).toHaveThrown();
     });
     it('with a message when it is called', function(){
-        spyOn(this.foo, 'someFn').and.throw.with.message('Holy Batman!');
+        spyOn(this.foo, 'someFn').and.throwWithMessage('Holy Batman!');
         this.foo.someFn();
         expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrown.with.message('Holy Batman!');
+        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
     });
     it('with a name when it is called', function(){
-        spyOn(this.foo, 'someFn').and.throw.with.name('NotBatmanError');
+        spyOn(this.foo, 'someFn').and.throwWithName('NotBatmanError');
         this.foo.someFn();
         expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrown.with.name('NotBatmanError');
+        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
     });
     it('with a message and a name when it is called', function(){
-        spyOn(this.foo, 'someFn').and.throw.with.message('Holy Batman!').
-            and.throw.with.name('NotBatmanError');
+        spyOn(this.foo, 'someFn').and.throwWithMessage('Holy Batman!').
+            and.throwWithName('NotBatmanError');
         this.foo.someFn();
         expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrown.with.message('Holy Batman!');
-        expect(this.foo.someFn).toHaveThrown.with.name('NotBatmanError');
+        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
+        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
     });
 });
 
