@@ -294,9 +294,10 @@
         this.totFailed = 0;
         for (i = 0, len = this.assertions.length; i < len; i++) {
             item = this.assertions[i];
-            //TODO(Jeff): when item.value is a function not sure if it should be called????
-            result = item.assertion(typeof item.value === 'function' &&
-                !item.value._snoopsterMaker ? item.value() : item.value, item.expectation);
+            // //TODO(Jeff): when item.value is a function not sure if it should be called????
+            // result = item.assertion(typeof item.value === 'function' &&
+            //     !item.value._snoopsterMaker ? item.value() : item.value, item.expectation);
+            result = item.assertion(item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             item.explain = result.explain;
@@ -1400,14 +1401,14 @@
     function assertEqual(a, b){
         //return a_equals_b(a, b);
         var result = a_equals_b(a, b);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to equal ' + JSON.stringify(b)};
+        return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to equal ' + argToPrintableValue([b])};
     }
 
     //"strict" a !== b
     function assertNotEqual(a, b){
         //return a_notequals_b(a, b);
         var result = a_notequals_b(a, b);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not equal ' + JSON.stringify(b)};
+        return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to not equal ' + argToPrintableValue([b])};
     }
 
     //"strict" a === true, simple boolean test
