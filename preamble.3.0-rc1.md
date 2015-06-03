@@ -346,35 +346,144 @@ Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
 Expectations pass if both the _actual_ value and **_value_** are equal and fail if they aren't equal. A strict deep recursive comparison is made between the _actual_ value and **_value_**, which can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if **_value_** === _actual_ value && _actual_ value === **_value_** then the two objects are considered equal.
 
  ```javascript
- var 
+describe('Expecting 2 object to be equal using', function(){
+    it('the toEqual matcher' , function(){
+        var obj1 = {iAm: 'Obj1'},
+            obj2 = {iAm: 'Obj2'},
+            obj3 = {iAm: 'Obj3'};
+        expect(obj1).toEqual(obj2);
+        expect(obj2).not.toEqual(obj3);
+    });
+});
  ```
 
 #### **toBeTrue** *toBeTrue()*
 Expectations pass if the _actual_ value is _true_ and fail if it is _false_. A strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
 
+ ```javascript
+describe('Expecting true to be true using', function(){
+    it('the toBeTrue matcher' , function(){
+        expect(true).toBeTrue();
+        expect(false).not.toBeTrue();
+    });
+});
+ ```
+
 #### **toBeTruthy** *toBeTruthy()*
 Expectations pass if the _actual_ value is _truthy and fail if it _falsy_. A non strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
 
+ ```javascript
+describe('Expecting 1 to be truthy using', function(){
+    it('the toBeTruthy matcher' , function(){
+        expect(1).toBeTruthy();
+        expect(0).not.toBeTruthy();
+    });
+});
+ ```
 #### **toHaveBeenCalled** *toHaveBeenCalled()*
 Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called and fail if it wasn't called.
+
+ ```javascript
+describe('Expecting function to have been called using', function(){
+    it('the toHaveBeenCalled matcher' , function(){
+        var spy1 = spyOn(),
+            spy2 = spyOn();
+        spy1();
+        expect(spy1).toHaveBeenCalled();
+        expect(spy2).not.toHaveBeenCalled();
+    });
+});
+ ```
 
 #### **toHaveBeenCalledWith** *toHaveBeenCalledWith(...theArgs)*
 Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called with **_...theArgs_** arguments and fail if it wasn't called with **_...theArgs_** arguments.
 
+ ```javascript
+describe('Expecting function to have been called with specific arguments using', function(){
+    it('the toHaveBeenCalledWith matcher' , function(){
+        var spy = spyOn();
+        spy('abc', 'def');
+        expect(spy).toHaveBeenCalledWith('abc', 'def');
+        expect(spy).not.toHaveBeenCalledWith('def', 'abc');
+    });
+});
+ ```
+
 #### **toHaveBeenCalledWithContext** *toHaveBeenCalledWithContext(context)*
 Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called with **_context_** as its _context_ and fail if it wasn't called with **_context_** as its _context_.
+
+ ```javascript
+describe('Expecting function to have been called with a specific context using', function(){
+    it('the toHaveBeenCalledWithContext matcher' , function(){
+        var someObject = {
+                someFn: function(){}
+            },
+            someOtherObject = {} ;
+        spyOn(someObject, 'someFn');
+        someObject.someFn();
+        expect(spy).toHaveBeenCalledWithContext(someObject);
+        expect(spy).not.toHaveBeenCalledWithContext(someOtherObject);
+    });
+});
+ ```
 
 #### **toHaveReturned** *toHaveReturned(value)*
 Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), returned **_value_** and fail if it didn't return **_value_**.
 
+ ```javascript
+describe('Expecting function to have returned a specific value using', function(){
+    it('the toHaveReturned matcher' , function(){
+        var spy = spyOn().and.return({fName: 'George', lName: 'Washington'};
+        spy();
+        expect(spy).toHaveReturned({fName: 'George', lName: 'Washington'});
+        expect(spy).not.toHaveReturned({fName: 'Washington', lName: 'George'});
+    });
+});
+ ```
+
 #### **toHaveThrown** *toHaveThrown()*
 Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception and fail if it didn't throw an exception.
+
+ ```javascript
+describe('Expecting function to have thrown an exception using', function(){
+    it('the toHaveThrown matcher', function(){
+        var someFn = spyOn(function(arg){ return a + arg; }).and.callActual(),
+            someOtherFn = spyOn(function(arg){ return arg; }).and.callActual();
+        someFn(20);
+        someOtherFn('abc');
+        expect(someFn).toHaveThrown();
+        expect(someOtherFn).not.toHaveThrown();
+    });
+});
+ ```
 
 #### **toHaveThrownWithMessage** *toHaveThrownWithMessage(message)*
 Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception with **_message_** and fail if it didn't throw an exception with **_message_**.
 
+ ```javascript
+describe('Expecting function to have thrown an exception with a message using', function(){
+    it('the toHaveThrownWithMessage matcher', function(){
+        var someFn = spyOn().and.throwWithMessage('Whoops!');
+        someFn();
+        expect(someFn).toHaveThrownWithMessage('Whoops!');
+        expect(someFn).not.toHaveThrownWithMessage('Whoops! That was bad.');
+    });
+});
+ ```
+
 #### **toHaveThrownWithName** *toHaveThrownWithName(name)*
 Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception with **_name_** and fail if it didn't throw an exception with **_name_**.
+
+ ```javascript
+describe('Expecting function to have thrown an exception with a name using', function(){
+    it('the toHaveThrownWithName matcher', function(){
+        var someFn = spyOn().and.throwWithName('Error');
+        someFn();
+        expect(someFn).toHaveThrownWithName('Error');
+        expect(someFn).not.toHaveThrownWithName('MinorError');
+    });
+});
+ ```
 
 ### snoop
 
