@@ -1802,7 +1802,7 @@
                     throw new Error('1st parameter must be a function or an object');
                 }
                 if(typeof(argObject) === 'object' && arguments.length < 2){
-                    throw new Error('expecting 2 or 3 parameters - found ' + arguments.length);
+                    throw new Error('expecting 2 parameters - found ' + arguments.length);
                 }
                 if(typeof(argObject) === 'object' && typeof(argProperty) !== 'string'){
                     throw new Error('2nd parameter must be a string');
