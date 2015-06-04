@@ -2019,7 +2019,7 @@
             //spy api
             snoopster.wasCalled.with = function(val){
                 var args = snoopster.wasCalled() && snoopster.calls.forCall(0).args.args || null;
-               return args === val;
+                return args === val;
             };
             //spy api
             snoopster.contextCalledWith = function(){
