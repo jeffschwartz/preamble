@@ -485,7 +485,75 @@ describe('Expecting function to have thrown an exception with a name using', fun
 });
  ```
 
-### snoop
+## Test Doubles
+Preamble provides an assortment of _test doubles_ including **_spies_**, **_stubs_**, **_fakes_** and **_mocks_**. Rather than providing separate APIs for each, Preamble encapsulates all of them within its _spy_ implementation.
+
+## Spies
+**_Spies_** are _functions_ and _object methods_ that can track all _calls_, _contexts_, _arguments passed_ and _return values_.
+
+### Creating Spies
+Spies are created by calling one of the several forms of **_spyOn()_**.
+
+#### **spyOn** *spyOn()*
+Creates a test double for an anonymous function that is a spy.
+
+```javascript
+describe('Calling spyOn() without arguments', function(){
+   it('creates a test double for an anonymous function that is a spy', function(){
+       var anonFn = spyOn();
+       anonSpy();
+       expect(anonSpy).toHaveBeenCalled();
+   });
+});
+```
+
+#### **spyOn** *spyOn(fn)*
+Creates a test double for **_fn_** that is a spy. **_fn_** is function.
+
+```javascript
+describe('Calling spyOn(fn)', function(){
+   it('creates a test double for fn that is a spy', function(){
+       var someSpy;
+       function someFn(){}
+       someSpy = spyOn(someFn);
+       someSpy();
+       expect(someSpy).toHaveBeenCalled();
+   });
+});
+```
+
+#### **spyOn** *spyOn(object, methodName)*
+Creates a test double for object[methodName] that is a spy. **_object_** is any object and **_methodNmae_** is the name of a method on **_object_**.
+
+```javascript
+describe('Calling spyOn(object, methodName)', function(){
+   it('creates a test double for object[methodName] that is a spy', function(){
+       var someObject = {
+           someFn: function(){}
+       };
+       someSpy = spyOn(someObject, 'someFn');
+       someObject.someFn();
+       expect(someObject.someFn).toHaveBeenCalled();
+   });
+});
+```
+
+### Spy API
+
+## Stubs
+**_Stubs_** are _spies_ that have predefined behaviors (canned responses) and have no underlying implementations of their own.
+
+### Stubs API
+
+## Fakes
+**_Fakes_** are _spies_ that _fake_ implementations and are used as substitutes for expensive dependencies.
+
+### Fakes API
+
+## Mocks
+**_Mocks_** are _spies_ that have predefined expectations and are used to validate behaviors.
+
+### Mocks API
 
 #### **snoop** *snoop(obj, propName)*
 
