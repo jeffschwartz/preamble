@@ -802,6 +802,15 @@ describe('A stub can be configured to throw an exception', function(){
     });
 });
 
+describe('When a stub is configured to be called with a specific context', function(){
+    it('it is called with the correct context', function(){
+        var someObject = {},
+            someFn = spyOn().and.callWithContext(someObject);
+        someFn();
+        expect(someFn).toHaveBeenCalledWithContext(someObject);
+    });
+});
+
 describe('Using a "stub" to test Ajax', function(){
     //simulates a jQuery-like object
     var jQueryNot = {

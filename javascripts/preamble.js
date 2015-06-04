@@ -1801,10 +1801,6 @@
                     typeof(argObject) !== 'object'){
                     throw new Error('1st parameter must be a function or an object');
                 }
-                if(typeof(argObject) === 'function' && arguments.length === 2 &&
-                    typeof(argProperty) !== 'object'){
-                    throw new Error('2nd parameter must be an object');
-                }
                 if(typeof(argObject) === 'object' && arguments.length < 2){
                     throw new Error('expecting 2 or 3 parameters - found ' + arguments.length);
                 }
@@ -1902,7 +1898,7 @@
                 if(snoopster._callActual || snoopster._callFake){
                     fn = snoopster._callFake || targetFn;
                     try{
-                        returned = fn.apply(this, aArgs);
+                        returned = fn.apply(snoopster._callWithContext || this, aArgs);
                     }catch(er){
                         error = er;
                     }
@@ -1919,7 +1915,7 @@
                 }
                 returned = snoopster._returns || returned;
                 // snoopster.args = new Args(aArgs);
-                calls.push(new ACall(this, new Args(aArgs), error, returned));
+                calls.push(new ACall(snoopster._callWithContext || this, new Args(aArgs), error, returned));
                 return returned;
             };
             //TODO(Jeff): v2.3.0
@@ -1932,6 +1928,15 @@
             snoopster._throwsName = '';
             //TODO(Jeff): v2.3.0
             snoopster.and = {};
+            //TODO(Jeff): v2.3.0
+            snoopster._callWithContext = null;
+            snoopster.and.callWithContext = function(context){
+                if(!context || typeof(context) !== 'object'){
+                    throw new Error('callWithContext expects to be called with an object');
+                }
+                snoopster._callWithContext = context;
+                return snoopster;
+            };
             snoopster.and.throw = function(){
                 snoopster._throws = true;
                 //for chaining
