@@ -304,7 +304,7 @@ describe('Sharing values between setups, specs and teardowns using "this"', func
         });
     });
     it('this.otherValue should not exist and this.value should equal 10', function(){
-        expect(this.otherValue).toEqual('undefined');
+        expect(this.otherValue).toEqual(undefined);
         expect(this.value).toEqual(10);
     });
 });
@@ -489,7 +489,7 @@ describe('Expecting function to have thrown an exception with a name using', fun
 Preamble provides an assortment of _test doubles_ including **_spies_**, **_stubs_**, **_fakes_** and **_mocks_**. Rather than providing separate APIs for each, Preamble encapsulates all of them within its _spy_ implementation.
 
 ## Spies
-**_Spies_** are _functions_ and _object methods_ that can track all _calls_, _contexts_, _arguments passed_ and _return values_.
+**_Spies_** are _functions_ and _object methods_ that can track all _calls_, _contexts_, _arguments_ and _return values_.
 
 ### Creating Spies
 Spies are created by calling one of the several forms of **_spyOn()_**.
@@ -508,7 +508,7 @@ describe('Calling spyOn() without arguments', function(){
 ```
 
 #### **spyOn** *spyOn(fn)*
-Creates a test double for **_fn_** that is a spy. **_fn_** is function.
+Creates a test double for **_fn_** that is a spy. **_fn_** is a function.
 
 ```javascript
 describe('Calling spyOn(fn)', function(){
@@ -523,7 +523,7 @@ describe('Calling spyOn(fn)', function(){
 ```
 
 #### **spyOn** *spyOn(object, methodName)*
-Creates a test double for object[methodName] that is a spy. **_object_** is any object and **_methodNmae_** is the name of a method on **_object_**.
+Creates a test double for object[methodName] that is a spy. **_object_** is an object and **_methodNmae_** is the property name of a method on **_object_**.
 
 ```javascript
 describe('Calling spyOn(object, methodName)', function(){
