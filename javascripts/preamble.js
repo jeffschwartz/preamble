@@ -1265,6 +1265,13 @@
     //Assertion runners.
 
     //TODO(Jeff): v2.3.0
+    // mock has expectations
+    function assertMockHasExpectations(a){
+        var result = a_equals_true(a);
+        return {result: result, explain: 'expected mock to have expectations'};
+    }
+
+    //TODO(Jeff): v2.3.0
     // //spy was called (boolean)
     function assertToHaveBeenCalled(a){
         var result = a_equals_true(a);
@@ -1503,6 +1510,17 @@
         pushOntoAssertions(null, null, actual, null, null);
         //return assert for chaining
         return assert;
+    }
+
+    //TODO(Jeff):v2.3.0 BDD only used by mock.validate and not part of the public api
+    function noteMockHasExpectations(){
+        if(arguments.length){
+            throwException('matcher "toHaveBeenCalled" expects no arguments, found ' + arguments.length);
+        }
+
+        var ti = testsIterator,
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertMockHasExpectations, null, stackTraceFromError(), a.value._hasExpectations);
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
@@ -1916,6 +1934,19 @@
                 return returned;
             };
             //TODO(Jeff): v2.3.0
+            //spy api - sets the spy back to its default state
+            snoopster.reset = function() {
+                calls = [];
+                snoopster._resetCalls();
+                snoopster._throws = false;
+                snoopster._throwsMessage = '';
+                snoopster._throwsName = '';
+                snoopster._callWithContext = null;
+                snoopster._hasExpectations = false;
+                snoopster._expectations = {};
+                return snoopster;
+            };
+            //TODO(Jeff): v2.3.0
             snoopster._snoopsterMaker = 'preamble.snoopster';
             //TODO(Jeff): v2.3.0
             //stub api
@@ -1980,6 +2011,7 @@
                 }
                 snoopster._resetCalls();
                 snoopster._callFake = fn;
+                return snoopster;
             };
             //TODO(Jeff): v2.3.0
             //spy api
@@ -2110,12 +2142,12 @@
                 snoopster._expectations.toThrowWithMessage = message;
             };
             snoopster.validate = function(){
-                // if(arguments.length !== 1 || typeof(mock) !== 'function' || !mock._snoopsterMaker){
-                //     throwException('"validate" expects a spy as its only argument');
+                // if(!snoopster._hasExpectations){
+                //     throwException('"validate" expects a spy with predefined expectation and found none');
                 // }
-                if(!snoopster._hasExpectations){
-                    throwException('"validate" expects a spy with predefined expectation and found none');
-                }
+                //Expect the mock to have expectations
+                noteExpectation(snoopster);
+                noteMockHasExpectations();
                 if(snoopster._expectations.toBeCalled){
                     noteExpectation(snoopster);
                     noteToHaveBeenCalled();

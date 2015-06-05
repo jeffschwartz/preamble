@@ -526,6 +526,15 @@ describe('Preamble comes with 3 types of test dobules', function(){
             foo.someFn.validate();
         });
     });
+    // describe('Validate fails', function(){
+    //     it('when a spy has no expectations', function(){
+    //         var someFn = spyOn();
+    //         someFn.validate();
+    //         someFn.and.throwWithName('Whoops').and.expect.it.toThrowWithName('Whoops');
+    //         someFn();
+    //         someFn.validate();
+    //     });
+    // });
 });
 describe('test support multiple mocks', function(){
     var foo = {
@@ -767,10 +776,39 @@ describe('A stub configured to call the actual implementation can be reset', fun
         expect(foo.someFn.returned()).toEqual(123);
         foo.someFn.and.callStub();
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual(void(0));
+        expect(foo.someFn.returned()).toEqual(undefined);
     });
 });
 
+describe('Calling reset() resets a spy, stub, mock to its pristine state - method', function(){
+    var foo = { someFn: function(arg){ return arg; } };
+    it('including all tracking information', function(){
+        spyOn(foo, 'someFn').and.callActual();
+        foo.someFn(123);
+        expect(foo.someFn.returned()).toEqual(123);
+        foo.someFn.and.callStub();
+        foo.someFn(123);
+        expect(foo.someFn.returned()).toEqual(undefined);
+        expect(foo.someFn.calls.count()).toEqual(2);
+        foo.someFn.reset();
+        expect(foo.someFn.calls.count()).toEqual(0);
+    });
+});
+
+describe('Calling reset() resets a spy, stub, mock to its pristine state - function', function(){
+    var someFn = function(arg){ return arg; };
+    it('including all tracking information', function(){
+        someFn = spyOn(someFn).and.callActual();
+        someFn(123);
+        expect(someFn.returned()).toEqual(123);
+        someFn.and.callStub();
+        someFn(123);
+        expect(someFn.returned()).toEqual(undefined);
+        expect(someFn.calls.count()).toEqual(2);
+        someFn.reset();
+        expect(someFn.calls.count()).toEqual(0);
+    });
+});
 describe('A stub can be configured to throw an exception', function(){
     beforeEach(function(){
         this.foo = { someFn: function(){} };
