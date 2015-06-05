@@ -1902,15 +1902,12 @@
                     }catch(er){
                         error = er;
                     }
-                }else{
-                    //TODO(Jeff): v2.3.Error
-                    if(snoopster._throws){
-                        try{
+                }else if(snoopster._throws){
+                    try{
 
-                            throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
-                        }catch(er){
-                            error = er;
-                        }
+                        throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
+                    }catch(er){
+                        error = er;
                     }
                 }
                 returned = snoopster._returns || returned;
