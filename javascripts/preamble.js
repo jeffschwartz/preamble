@@ -1552,9 +1552,9 @@
         }
 
         var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1],
-            aArgs = argsToArray(arguments);
-        completeTheAssertion(assertToHaveBeenCalledWith, aArgs, stackTraceFromError(), a.value.calls.wasCalledWith(aArgs));
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
+            a.value.calls.wasCalledWith.apply(null, arguments));
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
@@ -1564,9 +1564,9 @@
         }
 
         var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1],
-            aArgs = argsToArray(arguments);
-        completeTheAssertion(assertToNotHaveBeenCalledWith, aArgs, stackTraceFromError(), a.value.calls.wasCalledWith(aArgs));
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
+            a.value.calls.wasCalledWith.apply(null, arguments));
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveBeenCalledWithContext assertion
@@ -2086,10 +2086,11 @@
                 all: function(){
                     return calls;
                 },
-                wasCalledWith: function(value){
+                wasCalledWith: function(){
+                    var a = argsToArray(arguments);
                     return calls.some(function(call){
                         var args = call.getArgs().args;
-                        return(a_equals_b(value, args));
+                        return(a_equals_b(a, args));
                     });
                 },
                 wasCalledWithContext: function(obj){
