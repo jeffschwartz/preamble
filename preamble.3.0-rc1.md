@@ -335,7 +335,7 @@ describe('the value 0', function(){
 ```
 
 ### **expect** *expect(actual)*
-Call _expect_ passing it the **_actual_** value that is to be matched against using a _matcher_. **_actual_** can be any valid JavaScript primitive value or object (including functions).
+Call _expect_ passing it the **_actual_** value that is to be matched against the _expected_ value using a _matcher_. **_actual_** can be any valid JavaScript primitive value or object (including functions).
 
 ### **not** *not*
 Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
@@ -343,7 +343,7 @@ Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
 ### Matchers
 
 #### **toEqual** *toEqual(value)*
-Expectations pass if both the _actual_ value and **_value_** are equal and fail if they aren't equal. A strict deep recursive comparison is made between the _actual_ value and **_value_**, which can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if **_value_** === _actual_ value && _actual_ value === **_value_** then the two objects are considered equal.
+Expectations pass if both the _actual_ value and the _expected_ **_value_** are equal and fail if they aren't equal. A strict deep recursive comparison is made between the _actual_ value and the _expected_ **_value_**, which can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if _expected_ **_value_** === _actual_ value and _actual_ value === _expected_ **_value_** then the two objects are considered equal.
 
  ```javascript
 describe('Expecting 2 object to be equal using', function(){
@@ -380,8 +380,9 @@ describe('Expecting 1 to be truthy using', function(){
     });
 });
  ```
+
 #### **toHaveBeenCalled** *toHaveBeenCalled()*
-Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called and fail if it wasn't called.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called and fail if it wasn't called.
 
  ```javascript
 describe('Expecting function to have been called using', function(){
@@ -396,7 +397,7 @@ describe('Expecting function to have been called using', function(){
  ```
 
 #### **toHaveBeenCalledWith** *toHaveBeenCalledWith(...theArgs)*
-Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called with **_...theArgs_** arguments and fail if it wasn't called with **_...theArgs_** arguments.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called with the _expected_ **_...theArgs_** arguments and fail if it wasn't called with _expected_ **_...theArgs_** arguments.
 
  ```javascript
 describe('Expecting function to have been called with specific arguments using', function(){
@@ -410,7 +411,7 @@ describe('Expecting function to have been called with specific arguments using',
  ```
 
 #### **toHaveBeenCalledWithContext** *toHaveBeenCalledWithContext(context)*
-Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), was called with **_context_** as its _context_ and fail if it wasn't called with **_context_** as its _context_.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called with the _expected_ **_context_** as its _context_ and fail if it wasn't called with the _expected_ **_context_** as its _context_.
 
  ```javascript
 describe('Expecting function to have been called with a specific context using', function(){
@@ -428,7 +429,7 @@ describe('Expecting function to have been called with a specific context using',
  ```
 
 #### **toHaveReturned** *toHaveReturned(value)*
-Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), returned **_value_** and fail if it didn't return **_value_**.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), returned the _expected_ **_value_** and fail if it didn't return the _expected_ **_value_**.
 
  ```javascript
 describe('Expecting function to have returned a specific value using', function(){
@@ -442,7 +443,7 @@ describe('Expecting function to have returned a specific value using', function(
  ```
 
 #### **toHaveThrown** *toHaveThrown()*
-Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception and fail if it didn't throw an exception.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception and fail if it didn't throw an exception.
 
  ```javascript
 describe('Expecting function to have thrown an exception using', function(){
@@ -458,7 +459,7 @@ describe('Expecting function to have thrown an exception using', function(){
  ```
 
 #### **toHaveThrownWithMessage** *toHaveThrownWithMessage(message)*
-Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception with **_message_** and fail if it didn't throw an exception with **_message_**.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with the _expected_ **_message_** and fail if it didn't throw an exception with the _expected_ **_message_**.
 
  ```javascript
 describe('Expecting function to have thrown an exception with a message using', function(){
@@ -472,7 +473,7 @@ describe('Expecting function to have thrown an exception with a message using', 
  ```
 
 #### **toHaveThrownWithName** *toHaveThrownWithName(name)*
-Expectations pass if the _actual_ value, which is expected to be a _spy_ (see **_Spies_** below), threw an exception with **_name_** and fail if it didn't throw an exception with **_name_**.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with the _expected_ **_name_** and fail if it didn't throw an exception with the _expected_ **_name_**.
 
  ```javascript
 describe('Expecting function to have thrown an exception with a name using', function(){
