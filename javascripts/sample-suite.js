@@ -627,7 +627,7 @@ describe('spying on more than one method', function(){
         foo.square.and.callActual();
         foo.someFn(2);
         expect(foo.someFn).toHaveBeenCalled();
-        expect(foo.someFn.contextCalledWith()).toEqual(foo);
+        expect(foo.someFn).toHaveBeenCalledWithContext(foo);
         expect(foo.someFn).toHaveBeenCalledWith(2);
         expect(foo.someFn).toHaveReturned(4);
         expect(foo.square).toHaveBeenCalled();
@@ -658,26 +658,26 @@ describe('spying on a method', function(){
         //     var foo = this.foo;
         //     expect(foo.someOtherFn).toHaveBeenCalled();
         // });
-        it('for how many times the method was called', function(){
-            var foo = this.foo;
-            spyOn(foo, 'someFn');
-            foo.someFn();
-            expect(foo.someFn.called()).toEqual(1);
-        });
         it('if the method was called "n" times', function(){
             var foo = this.foo;
             spyOn(foo, 'someFn');
             foo.someFn();
-            expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
-            expect(foo.someFn.wasCalled.nTimes(2)).not.toBeTrue();
+            expect(foo.someFn.calls.count()).toEqual(1);
         });
-        it('for what context the method was called with', function(){
+        // it('if the method was called "n" times', function(){
+        //     var foo = this.foo;
+        //     spyOn(foo, 'someFn');
+        //     foo.someFn();
+        //     expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
+        //     expect(foo.someFn.wasCalled.nTimes(2)).not.toBeTrue();
+        // });
+        it('if the spy was called with a specific context', function(){
             var foo = this.foo,
                 bar = {};
             spyOn(foo, 'someFn');
             foo.someFn();
-            expect(foo.someFn.contextCalledWith()).toEqual(foo);
-            expect(foo.someFn.contextCalledWith()).not.toEqual(bar);
+            expect(foo.someFn.calls.wasCalledWithContext(foo)).toBeTrue();
+            expect(foo.someFn.calls.wasCalledWithContext(bar)).not.toBeTrue();
         });
         it('for the arguments that the method was called with', function(){
             var foo = this.foo,
@@ -740,7 +740,7 @@ describe ('A stub is also a spy and when configured to return a value', function
     it('returns that value', function(){
         spyOn(foo, 'someFn').and.return(13);
         foo.someFn();
-        expect(foo.someFn.returned()).toEqual(13);
+        expect(foo.someFn.calls.returned(13)).toBeTrue();
     });
 });
 
@@ -749,7 +749,7 @@ describe('A stub when configured to call the actual implementation', function(){
     it('calls it', function(){
         spyOn(foo, 'someFn').and.callActual();
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual(123);
+        expect(foo.someFn.calls.returned(123)).toBeTrue();
     });
 });
 
@@ -758,13 +758,13 @@ describe('A stub when configured to call a fake implementation', function(){
     it('calls it', function(){
         spyOn(foo, 'someFn');
         foo.someFn(123);
-        expect(foo.someFn.returned()).not.toEqual(123);
+        expect(foo.someFn.calls.returned(123)).not.toBeTrue();
         foo.someFn.and.callActual();
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual(123);
+        expect(foo.someFn.calls.returned(123)).toBeTrue();
         foo.someFn.and.callFake(function(){ return 'sorry'; });
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual('sorry');
+        expect(foo.someFn.calls.returned('sorry')).toBeTrue();
     });
 });
 
@@ -773,10 +773,10 @@ describe('A stub configured to call the actual implementation can be reset', fun
     it('and it will call the stub', function(){
         spyOn(foo, 'someFn').and.callActual();
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual(123);
+        expect(foo.someFn.calls.returned(123)).toBeTrue();
         foo.someFn.and.callStub();
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual(undefined);
+        expect(foo.someFn.calls.returned(undefined)).toBeTrue();
     });
 });
 
@@ -785,10 +785,10 @@ describe('Calling reset() resets a spy, stub, mock to its pristine state - metho
     it('including all tracking information', function(){
         spyOn(foo, 'someFn').and.callActual();
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual(123);
+        expect(foo.someFn.calls.returned(123)).toBeTrue();
         foo.someFn.and.callStub();
         foo.someFn(123);
-        expect(foo.someFn.returned()).toEqual(undefined);
+        expect(foo.someFn.calls.returned(undefined)).toBeTrue();
         expect(foo.someFn.calls.count()).toEqual(2);
         foo.someFn.reset();
         expect(foo.someFn.calls.count()).toEqual(0);
@@ -800,10 +800,10 @@ describe('Calling reset() resets a spy, stub, mock to its pristine state - funct
     it('including all tracking information', function(){
         someFn = spyOn(someFn).and.callActual();
         someFn(123);
-        expect(someFn.returned()).toEqual(123);
+        expect(someFn.calls.returned(123)).toBeTrue();
         someFn.and.callStub();
         someFn(123);
-        expect(someFn.returned()).toEqual(undefined);
+        expect(someFn.calls.returned(undefined)).toBeTrue();
         expect(someFn.calls.count()).toEqual(2);
         someFn.reset();
         expect(someFn.calls.count()).toEqual(0);
@@ -866,12 +866,12 @@ describe('Using a "stub" to test Ajax', function(){
         var calls;
         spyOn(jQueryNot, 'ajax');
         getToDos(10, function(){});
-        expect(jQueryNot.ajax.wasCalled()).toBeTrue();
+        expect(jQueryNot.ajax).toHaveBeenCalled();
         calls = jQueryNot.ajax.calls;
-        expect(calls.getCall(0).getArgsLength()).toEqual(1);
-        expect(calls.getCall(0).hasArg(0)).toBeTrue();
-        expect(typeof(calls.getCall(0).getArg(0)) === 'object').toBeTrue();
-        expect(calls.getCall(0).getArgProperty(0, 'url')).
+        expect(calls.forCall(0).getArgsLength()).toEqual(1);
+        expect(calls.forCall(0).hasArg(0)).toBeTrue();
+        expect(typeof(calls.forCall(0).getArg(0)) === 'object').toBeTrue();
+        expect(calls.forCall(0).getArgProperty(0, 'url')).
             toEqual('/api/v2/todo/count/10');
     });
 });
@@ -898,12 +898,12 @@ describe('spying on more than one method', function(){
         foo.someFn('Is Preamble great?');
         bar.someFn('Yes it is!');
         foo.someFn('You got that right!');
-        expect(foo.someFn.wasCalled()).toBeTrue();
-        expect(foo.someFn.wasCalled.nTimes(2)).toBeTrue();
-        expect(foo.someFn.wasCalled.nTimes(1)).not.toBeTrue();
-        expect(bar.someFn.wasCalled()).toBeTrue();
-        expect(bar.someFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(bar.someFn.wasCalled.nTimes(2)).not.toBeTrue();
+        expect(foo.someFn).toHaveBeenCalled();
+        expect(foo.someFn.calls.count() === 2).toBeTrue();
+        expect(foo.someFn.calls.count() === 1).not.toBeTrue();
+        expect(bar.someFn).toHaveBeenCalled();
+        expect(bar.someFn.calls.count() === 1).toBeTrue();
+        expect(bar.someFn.calls.count() === 2).not.toBeTrue();
     });
 });
 
@@ -954,21 +954,21 @@ describe('spying on a function', function(){
         var someFn = this.someFn,
             spyFn = spyOn(someFn);
         spyFn();
-        expect(spyFn.wasCalled()).toBeTrue();
-    });
-    it('we can query how many times the method was called', function(){
-        var someFn = this.someFn,
-            spyFn = spyOn(someFn);
-        spyFn();
-        expect(spyFn.called()).toEqual(1);
+        expect(spyFn).toHaveBeenCalled();
     });
     it('we can query the function was called n times', function(){
         var someFn = this.someFn,
             spyFn = spyOn(someFn);
         spyFn();
-        expect(spyFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(spyFn.wasCalled.nTimes(2)).not.toBeTrue();
+        expect(spyFn.calls.count() === 1).toBeTrue();
     });
+    // it('we can query the function was called n times', function(){
+    //     var someFn = this.someFn,
+    //         spyFn = spyOn(someFn);
+    //     spyFn();
+    //     expect(spyFn.calls.`wasCalled.nTimes(1)).toBeTrue();
+    //     expect(spyFn.wasCalled.nTimes(2)).not.toBeTrue();
+    // });
     it('we can query the context the function was called with', function(){
         var someFn = spyOn(),
             foo = {fn: someFn},
@@ -985,7 +985,7 @@ describe('spying on a function', function(){
             call;
         spyFn(arg);
         // expect(jQueryNot.ajax.calls.getCall(0).args.getArgumentsLength()).toEqual(1);
-        call = spyFn.calls.getCall(0);
+        call = spyFn.calls.forCall(0);
         expect(call.getArg(0)).toEqual(arg);
         expect(call.getArg(0)).not.toEqual(arg + '!');
         expect(call.getArg(1)).not.toBeTruthy();
@@ -995,8 +995,8 @@ describe('spying on a function', function(){
             spyFn = spyOn(someFn).and.callActual(),
             arg = 'Preamble rocks!';
         spyFn(arg);
-        expect(spyFn.returned()).toEqual(arg);
-        expect(spyFn.returned()).not.toEqual(arg + '1');
+        expect(spyFn.calls.returned(arg)).toBeTrue();
+        expect(spyFn.calls.returned(arg + 1)).not.toBeTrue();
     });
 });
 
@@ -1009,9 +1009,9 @@ describe('a spy function throws', function(){
     it('we can query the function if threw', function(){
         var spyFn = spyOn(this.someFn).and.callActual();
         spyFn();
-        expect(spyFn.threw()).toBeTrue();
-        expect(spyFn.threw.withMessage('Holy Batman!')).toBeTrue();
-        expect(spyFn.threw.withMessage('Holy Batman!!')).not.toBeTrue();
+        expect(spyFn.calls.threw()).toBeTrue();
+        expect(spyFn.calls.threwWithMessage('Holy Batman!')).toBeTrue();
+        expect(spyFn.calls.threwWithMessage('Holy Batman!!')).not.toBeTrue();
     });
 });
 
@@ -1033,12 +1033,12 @@ describe('spying on more than one function', function(){
         spyFooFn('Is Preamble great?');
         spyBarFn('Yes it is!');
         spyFooFn('You got that right!');
-        expect(spyFooFn.wasCalled()).toBeTrue();
-        expect(spyFooFn.wasCalled.nTimes(2)).toBeTrue();
-        expect(spyFooFn.wasCalled.nTimes(1)).not.toBeTrue();
-        expect(spyBarFn.wasCalled()).toBeTrue();
-        expect(spyBarFn.wasCalled.nTimes(1)).toBeTrue();
-        expect(spyBarFn.wasCalled.nTimes(2)).not.toBeTrue();
+        expect(spyFooFn).toHaveBeenCalled();
+        expect(spyFooFn.calls.count() === 2).toBeTrue();
+        expect(spyFooFn.calls.count() === 1).not.toBeTrue();
+        expect(spyBarFn).toHaveBeenCalled();
+        expect(spyBarFn.calls.count() === 1).toBeTrue();
+        expect(spyBarFn.calls.count() === 2).not.toBeTrue();
     });
 });
 

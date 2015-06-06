@@ -1531,7 +1531,7 @@
 
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalled, null, stackTraceFromError(), a.value.wasCalled());
+        completeTheAssertion(assertToHaveBeenCalled, null, stackTraceFromError(), a.value.calls.count() > 0);
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveBeenCalled assertion
@@ -1542,7 +1542,7 @@
 
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(), a.value.wasCalled());
+        completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(), a.value.calls.count() > 0);
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveBeenCalled assertion
@@ -1618,7 +1618,7 @@
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(), a.value.threw());
+        completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(), a.value.calls.threw());
     }
     // noteToHaveThrown.with = {};
 
@@ -1629,7 +1629,7 @@
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(), a.value.threw());
+        completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(), a.value.calls.threw());
     }
     // noteToNotHaveThrown.with = {};
 
@@ -1640,7 +1640,7 @@
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
+        completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(), a.value.calls.threwWithName(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithName assertion
@@ -1650,7 +1650,7 @@
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(), a.value.threw.withName(value));
+        completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(), a.value.calls.threwWithName(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toHaveThrownWithMessage assertion
@@ -1660,7 +1660,7 @@
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
+        completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(), a.value.calls.threwWithMessage(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toNotHaveThrownWithMessage assertion
@@ -1670,7 +1670,7 @@
         }
         var ti = testsIterator,
             a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(), a.value.threw.withMessage(value));
+        completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(), a.value.calls.threwWithMessage(value));
     }
 
     //TODO(Jeff):v2.3.0 BDD toEqual assertion
@@ -2029,48 +2029,48 @@
                 //for chaining
                 return snoopster;
             };
-            //spy api
-            snoopster.called = function(){
-                return calls.length;
-            };
-            //spy api
-            snoopster.wasCalled = function(){
-                return !!calls.length;
-            };
-            //spy api
-            snoopster.wasCalled.nTimes = function(count){
-                if(arguments.length !== 1){
-                    throw new Error('wasCalled.nTimes expects to be called with an integer');
-                }
-                return calls.length === count;
-            };
-            //TODO(Jeff): v2.3.0
-            //spy api
-            snoopster.wasCalled.with = function(val){
-                var args = snoopster.wasCalled() && snoopster.calls.forCall(0).args.args || null;
-                return args === val;
-            };
-            //spy api
-            snoopster.contextCalledWith = function(){
-                return snoopster.wasCalled() && calls[calls.length - 1].context;
-            };
-            //spy api
-            snoopster.returned = function(){
-                return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
-            };
-            //spy api
-            snoopster.threw = function(){
-                return snoopster.wasCalled() && !!calls[calls.length - 1].error;
-            };
-            //spy api
-            snoopster.threw.withMessage = function(message){
-                return snoopster.threw() && calls[calls.length - 1].error.message === message;
-            };
-            //TODO(Jeff): v2.3.0
-            //spy api
-            snoopster.threw.withName = function(val){
-                return snoopster.threw() && calls[calls.length - 1].error.name === val;
-            };
+            // //spy api
+            // snoopster.called = function(){
+            //     return calls.length;
+            // };
+            // //spy api
+            // snoopster.wasCalled = function(){
+            //     return !!calls.length;
+            // };
+            // //spy api
+            // snoopster.wasCalled.nTimes = function(count){
+            //     if(arguments.length !== 1){
+            //         throw new Error('wasCalled.nTimes expects to be called with an integer');
+            //     }
+            //     return calls.length === count;
+            // };
+            // //TODO(Jeff): v2.3.0
+            // //spy api
+            // snoopster.wasCalled.with = function(val){
+            //     var args = snoopster.wasCalled() && snoopster.calls.forCall(0).args.args || null;
+            //     return args === val;
+            // };
+            // //spy api
+            // snoopster.contextCalledWith = function(){
+            //     return snoopster.wasCalled() && calls[calls.length - 1].context;
+            // };
+            // //spy api
+            // snoopster.returned = function(){
+            //     return snoopster.wasCalled() && calls[calls.length - 1].returned || undefined;
+            // };
+            // //spy api
+            // snoopster.threw = function(){
+            //     return snoopster.wasCalled() && !!calls[calls.length - 1].error;
+            // };
+            // //spy api
+            // snoopster.threw.withMessage = function(message){
+            //     return snoopster.threw() && calls[calls.length - 1].error.message === message;
+            // };
+            // //TODO(Jeff): v2.3.0
+            // //spy api
+            // snoopster.threw.withName = function(val){
+            //     return snoopster.threw() && calls[calls.length - 1].error.name === val;
+            // };
             //spy calls api
             snoopster.calls = {
                 count: function(){
@@ -2080,9 +2080,9 @@
                     return i >= 0 && i < calls.length && calls[i] || undefined;
                 },
                 //TODO(Jeff): v2.3.0
-                getCall: function(i){
-                    return i >= 0 && i < calls.length && calls[i] || undefined;
-                },
+                // getCall: function(i){
+                //     return i >= 0 && i < calls.length && calls[i] || undefined;
+                // },
                 all: function(){
                     return calls;
                 },
@@ -2102,6 +2102,21 @@
                     return calls.some(function(call){
                         var returned = call.getReturned();
                         return(a_equals_b(value, returned));
+                    });
+                },
+                threw: function(){
+                    return calls.some(function(call){
+                        return !!call.error;
+                    });
+                },
+                threwWithName: function(name){
+                    return calls.some(function(call){
+                        return call.error && call.error.name === name;
+                    });
+                },
+                threwWithMessage: function(message){
+                    return calls.some(function(call){
+                        return call.error && call.error.message === message;
                     });
                 }
             };
