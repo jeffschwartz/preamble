@@ -598,6 +598,51 @@ describe('Calling calls.wasCalledWith(...args)', function(){
 });
 ```
 
+#### **calls.wasCalledWithContext** *calls.wasCalledWithContext(object)*
+Returns true if the _spy_ was called with the context **_object_** and false if it was not called with the context **_object_**.
+
+```javascript
+describe('Calling calls.wasCalledWithContext(object)', function(){
+    it('returns true if the spy was called with the context object and false if it was not called with the context object', function(){
+        var someObj = {
+            someFn: function(){}
+        };
+        spyOn(someObj, 'someFn');
+        someObj.someFn();
+        expect(someObj.someFn.calls.wasCalledWithContext(someObj)).toBeTrue();
+    });
+});
+```
+
+#### **calls.returned** *calls.returned(value)*
+Returns true if the _spy_ returned **_value_** and false if it did not return **_value_**.
+
+```javascript
+describe('Calling calls.returned(value)', function(){
+    it('returns true if the spy returned value and false if it did not return value', function(){
+        var someObj = {
+            someFn: function(num){return num;}
+        };
+        spyOn(someObj, 'someFn').and.callActual();
+        someObj.someFn(123);
+        expect(someObj.someFn.calls.returned(123)).toBeTrue();
+    });
+});
+```
+
+#### **calls.threw** *calls.threw()*
+Returns true if the _spy_ threw an exception and false if it did not throw an exception.
+
+```javascript
+describe('Calling calls.threw()', function(){
+    it('Returns true if the spy threw an exception and false if it did not throw an exception', function(){
+        var someFn = spyOn().and.throw();
+        someFn();
+        expect(someFn.calls.threw()).toBeTrue();
+    });
+});
+```
+
 
 #### **reset** *reset()*
 Resets a spy back to its default state.
