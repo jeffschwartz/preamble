@@ -541,7 +541,7 @@ describe('Calling spyOn(object, methodName)', function(){
 
 ### Spy API
 
-#### **calls.called** *calls.count()*
+#### **calls.count** *calls.count()*
 Returns the number of times the spy was called.
 
 ```javascript
