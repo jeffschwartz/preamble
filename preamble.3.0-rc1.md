@@ -500,11 +500,11 @@ Creates a test double for an anonymous function that is a spy.
 
 ```javascript
 describe('Calling spyOn() without arguments', function(){
-   it('creates a test double for an anonymous function that is a spy', function(){
-       var anonFn = spyOn();
-       anonSpy();
-       expect(anonSpy).toHaveBeenCalled();
-   });
+    it('creates a test double for an anonymous function that is a spy', function(){
+        var anonFn = spyOn();
+        anonSpy();
+        expect(anonSpy).toHaveBeenCalled();
+    });
 });
 ```
 
@@ -513,33 +513,106 @@ Creates a test double for **_fn_** that is a spy. **_fn_** is a function.
 
 ```javascript
 describe('Calling spyOn(fn)', function(){
-   it('creates a test double for fn that is a spy', function(){
-       var someSpy;
-       function someFn(){}
-       someSpy = spyOn(someFn);
-       someSpy();
-       expect(someSpy).toHaveBeenCalled();
-   });
+    it('creates a test double for fn that is a spy', function(){
+        var someSpy;
+        function someFn(){}
+        someSpy = spyOn(someFn);
+        someSpy();
+        expect(someSpy).toHaveBeenCalled();
+    });
 });
 ```
 
 #### **spyOn** *spyOn(object, methodName)*
-Creates a test double for object[methodName] that is a spy. **_object_** is an object and **_methodNmae_** is the property name of a method on **_object_**.
+Creates a test double for _object[methodName]_ that is a spy. **_object_** is an object and **_methodNmae_** is the property name of a method on **_object_**.
 
 ```javascript
 describe('Calling spyOn(object, methodName)', function(){
-   it('creates a test double for object[methodName] that is a spy', function(){
-       var someObject = {
+    it('creates a test double for object[methodName] that is a spy', function(){
+        var someObject = {
            someFn: function(){}
-       };
-       someSpy = spyOn(someObject, 'someFn');
-       someObject.someFn();
-       expect(someObject.someFn).toHaveBeenCalled();
-   });
+        };
+        someSpy = spyOn(someObject, 'someFn');
+        someObject.someFn();
+        expect(someObject.someFn).toHaveBeenCalled();
+    });
 });
 ```
 
 ### Spy API
+
+#### **calls.called** *calls.count()*
+Returns the number of times the spy was called.
+
+```javascript
+describe('Calling calls.count()', function(){
+    it('returns the number of times the spy was called', function(){
+        var someFn = spyOn();
+        someFn();
+        expect(someFn.calls.count()).toEqual(1);
+    });
+});
+```
+
+#### **calls.forCall** *calls.forCall(nth)*
+Returns the _ACall_ object (see ACall object below for details) associated with the **_nith_**, an integer, call.
+
+```javascript
+describe('Calling calls.forCall(nth)', function(){
+    it('return an ACall object', function(){
+        var someFn = spyOn(),
+            aCall;
+        someFn();
+        aCall = someFn.calls.forCall(0);
+        expect(aCall.hasOwnProperty('context')).toBeTrue();
+        expect(aCall.hasOwnProperty('args')).toBeTrue();
+        expect(aCall.hasOwnProperty('error')).toBeTrue();
+        expect(aCall.hasOwnProperty('returned')).toBeTrue();
+    });
+});
+```
+
+#### **calls.all** *calls.all()*
+Returns an array of all the _ACall_ objects associated with the _spy_.
+
+```javascript
+describe('Calling calls.all()', function(){
+    it('returns an array of all the ACall objects associated with the spy', function(){
+        var someFn = spyOn();
+        someFn();
+        expect(someFn.calls.all().length).toEqual(1);
+    });
+});
+```
+
+#### **calls.wasCalledWith** *calls.wasCalledWith(...args)*
+Returns true if the _spy_ was called with **_...args_** and false if it was not called with **_...args_**.
+
+```javascript
+describe('Calling calls.wasCalledWith(...args)', function(){
+    it('returns true if the spy was called with args and false if it was not called with args', function(){
+        var someFn = spyOn();
+        someFn(123);
+        expect(someFn.calls.wasCalledWith(123)).toBeTrue();
+    });
+});
+```
+
+
+#### **reset** *reset()*
+Resets a spy back to its default state.
+
+```javascript
+describe('Calling reset', function(){
+    it('resets the spy back to its default state', function(){
+        var someFn = spyOn();
+        someFn();
+        expect(someFn).toHaveBeenCalled();
+        someFn.reset();
+        expect(someFn).not.toHaveBeenCalled();
+    });
+});
+```
 
 ## Stubs
 **_Stubs_** are _spies_ that have predefined behaviors (canned responses) and have no underlying implementations of their own.
