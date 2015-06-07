@@ -755,8 +755,7 @@ describe('Calling getArgsLength()', function(){
 ```
 
 #### **_getArgProperty_** *getArgProperty(nth, propertyName)*
-Returns the value of the propety with **_propertyName_** for the **_nth_** argument that was passed for a specific call to the _spy_.
-
+Returns arguments[**_nth_**] if arguments were passed to a specific call to the _spy_ and **_nth_** >= 0 and **_nth_** <= arguments.length -1 and arguments[**_nth_**] has a property named **_propertyName_**.
 ```javascript
 describe('Calling getProperty(nth, propertyName)', function(){
     it('returns the value of the propety with propertyName for the nth argument that was passed for a specific call to the spy', function(){
@@ -771,8 +770,8 @@ describe('Calling getProperty(nth, propertyName)', function(){
 });
 ```
 
-#### **_hasArgProperty** *hasArgProperty(nth, propertyName)*
-Returns _true_ if the **_nth_** arguments that was passed for a specific call to the _spy_ has the property **_propertyName_** and _false_ if it doesn't.
+#### **_hasArgProperty_** *hasArgProperty(nth, propertyName)*
+Returns _true_ if arguments were passed to a specific call to the _spy_ and **_nth_** >= 0 and **_nth_** <= arguments.length -1 and arguments[**_nth_**] has a property named **_propertyName_**. Returns _false_ otherwise.
 
 ```javascript
 describe('Calling hasArgProperty(nth, propertyName)', function(){
@@ -788,8 +787,7 @@ describe('Calling hasArgProperty(nth, propertyName)', function(){
 });
 ```
 #### **_hasArg_** *hasArg(n)*
-Returns _true_ if arguments were passed to the _spy_ for a specific call and **_n_** is less than or equal to the total number of arguments that were passed - 1 and _false_ otherwise.
-
+Returns _true_ if arguments were passed to a specific call to the _spy_ and n >= 0 and n <= arguments.length -1 and _false_ otherwise.
 ```javascript
 describe('Calling hasArg(n)', function(){
     it('returns true if arguments were passed to the spy and n is less than or equal to the total number of arguments - 1 that were passed for a specific call to the spy and false otherwise', function(){
@@ -819,11 +817,11 @@ describe('Calling getError()', function(){
 });
 ```
 
-#### **_getReturned** *getReturned()*
+#### **_getReturned_** *getReturned()*
 Returns the value returned from a specific call to the _spy_.
 
 ```javascript
-describe('Calling getError()', function(){
+describe('Calling getReturned()', function(){
     it('returns the value returned from a specific call to the spy', function(){
         var someObject = {
             someFn: function(number){return number + 1;}
@@ -835,18 +833,50 @@ describe('Calling getError()', function(){
 });
 ```
 
+## Spy _Args_ API
+An _Args_ object encapsulates all the _arguments_ passed to a specific call to the _spy_. To obtain an Args object for a specific call to the spy call the ACall getArgs method (See ACall API above).
+
+#### **_getLength_** *getLength()*
+Returns the number of _arguments_ that were passed to a specific call to the _spy_.
+
+```javascript
+describe('Calling getLength()', function(){
+    it('Returns the number of arguments that were passed to a specific call to the spy', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().getLength()).toEqual(3);
+    });
+});
+```
+
+#### **_hasArg_** *hasArg(n)*
+Returns _true_ if arguments were passed to a specific call to the _spy_ and n >= 0 and n <= arguments.length -1 and _false_ otherwise.
+
+```javascript
+describe('Calling hasArg(n)', function(){
+    it('returns true if arguments were passed to the spy for a specific call and n is less than or equal to the total number of arguments that were passed - 1 and false otherwise', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
+    });
+});
+```
+
+#### **_getArg_** *getArg(n)*
+Returns _arguments[n]_ if arguments were passed to a specific call to the _spy_ and n >= 0 and n <= arguments.length -1.
+
+```javascript
+describe('Calling getArg(n)', function(){
+    it('returns the nth argument (zero based) if arguments were passed to the spy for a specific call and n is less than or equal to the total number of arguments that were passed - 1 and false otherwise', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
+    });
+});
+```
 
 
-#### **__** **
-#### **__** **
-#### **__** **
-#### **__** **
-#### **__** **
-#### **__** **
-#### **__** **
-#### **__** **
-#### **__** **
-#### **__** **
+
 
 ## Stubs
 **_Stubs_** are _spies_ that have predefined behaviors (canned responses) and have no underlying implementations of their own.
