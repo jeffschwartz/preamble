@@ -539,7 +539,8 @@ describe('Calling spyOn(object, methodName)', function(){
 });
 ```
 
-### Spy API
+### Spy _calls_ API
+Information is accumulated for each call to a _spy_ and the _calls_ API can be used to query that information.
 
 #### **calls.count** *calls.count()*
 Returns the number of times the spy was called.
@@ -555,11 +556,11 @@ describe('Calling calls.count()', function(){
 ```
 
 #### **calls.forCall** *calls.forCall(nth)*
-Returns the _ACall_ object (see ACall object below for details) associated with the **_nith_**, an integer, call.
+Returns the _ACall_ object (see ACall API below for details) associated with the **_nith_**, an integer, call.
 
 ```javascript
 describe('Calling calls.forCall(nth)', function(){
-    it('return an ACall object', function(){
+    it('returns an ACall object', function(){
         var someFn = spyOn(),
             aCall;
         someFn();
@@ -573,7 +574,7 @@ describe('Calling calls.forCall(nth)', function(){
 ```
 
 #### **calls.all** *calls.all()*
-Returns an array of all the _ACall_ objects associated with the _spy_.
+Returns an array of all the _ACall_ objects (see ACall API below for details) associated with the _spy_.
 
 ```javascript
 describe('Calling calls.all()', function(){
@@ -643,6 +644,31 @@ describe('Calling calls.threw()', function(){
 });
 ```
 
+#### **calls.threwWithMessage** *calls.threwWithMessage(message)*
+Returns true if the _spy_ threw an exception with **_message_** and false if it did not throw an exception with **_message_**.
+
+```javascript
+describe('Calling calls.threwWithMessage()', function(){
+    it('Returns true if the spy threw an exception with message and false if it did not throw an exception with message', function(){
+        var someFn = spyOn().and.throwWithMessage('Whoops!');
+        someFn();
+        expect(someFn.calls.threwWithMessage('Whoops!')).toBeTrue();
+    });
+});
+```
+
+#### **calls.threwWithName** *calls.threwWithName(name)*
+Returns true if the _spy_ threw an exception with **_name_** and false if it did not throw an exception with **_name_**.
+
+```javascript
+describe('Calling calls.threwWithName()', function(){
+    it('Returns true if the _spy_ threw an exception with **_name_** and false if it did not throw an exception with **_name_**', function(){
+        var someFn = spyOn().and.throwWithName('Error');
+        someFn();
+        expect(someFn.calls.threwWithName('Error')).toBeTrue();
+    });
+});
+```
 
 #### **reset** *reset()*
 Resets a spy back to its default state.
@@ -658,6 +684,169 @@ describe('Calling reset', function(){
     });
 });
 ```
+
+### Spy _ACall_ API
+
+An _ACall_ object encapsulates the information pertaining to a single call to a _spy_ and the _ACall_ API can be used to query that information.
+
+#### **_getContext_** *getContext()*
+Returns the _context_ that used for a specific call to the _spy_.
+
+```javascript
+describe('Calling getContext()', function(){
+    it('returns the context that used for a specific call to the _spy_', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn();
+        expect(someObject.someFn.calls.forCall(0).getContext()).toEqual(someObject);
+    });
+});
+```
+
+#### **_getArgs_** *getArgs()*
+Returns an _Args_ object (See Args API below) for a specific call to the _spy_.
+
+```javascript
+describe('Calling getArgs()', function(){
+    it('returns an Args object for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn(123);
+        expect(someObject.someFn.calls.forCall(0).getArgs().args).toEqual([123]);
+    });
+});
+```
+
+#### **_getArg_** *getArg(nth)*
+Returns the **_nth_** argument that was passed for a specific call to the _spy_.
+
+```javascript
+describe('Calling getArg(nth)', function(){
+    it('returns the nth argument that was passed for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn(123, 456);
+        expect(someObject.someFn.calls.forCall(0).getArg(0)).toEqual(123);
+        expect(someObject.someFn.calls.forCall(0).getArg(1)).toEqual(456);
+    });
+});
+```
+
+#### **_getArgsLength_** *getArgsLength()*
+Returns the number of arguments that were passed for a specific call to the _spy_.
+
+```javascript
+describe('Calling getArgsLength()', function(){
+    it('returns the number of arguments that were passed for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn(123, 456);
+        expect(someObject.someFn.calls.forCall(0).getArgsLength()).toEqual(2);
+    });
+});
+```
+
+#### **_getArgProperty_** *getArgProperty(nth, propertyName)*
+Returns the value of the propety with **_propertyName_** for the **_nth_** argument that was passed for a specific call to the _spy_.
+
+```javascript
+describe('Calling getProperty(nth, propertyName)', function(){
+    it('returns the value of the propety with propertyName for the nth argument that was passed for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn({fName: 'Abraham', lName: 'Lincoln'});
+        expect(someObject.someFn.calls.forCall(0).getArgProperty(0, 'fName')).toEqual('Abraham');
+        expect(someObject.someFn.calls.forCall(0).getArgProperty(0, 'lName')).toEqual('Lincoln');
+    });
+});
+```
+
+#### **_hasArgProperty** *hasArgProperty(nth, propertyName)*
+Returns _true_ if the **_nth_** arguments that was passed for a specific call to the _spy_ has the property **_propertyName_** and _false_ if it doesn't.
+
+```javascript
+describe('Calling hasArgProperty(nth, propertyName)', function(){
+    it('returns true if the nth arguments that was passed for a specific call to the spy has the property propertyName and false if it does not', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn({fName: 'Abraham', lName: 'Lincoln'});
+        expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'fName')).toBeTrue();
+        expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'lName')).toBeTrue();
+    });
+});
+```
+#### **_hasArg_** *hasArg(n)*
+Returns _true_ if arguments were passed to the _spy_ for a specific call and **_n_** is less than or equal to the total number of arguments that were passed - 1 and _false_ otherwise.
+
+```javascript
+describe('Calling hasArg(n)', function(){
+    it('returns true if arguments were passed to the spy and n is less than or equal to the total number of arguments - 1 that were passed for a specific call to the spy and false otherwise', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn('123', 123);
+        expect(someObject.someFn.calls.forCall(0).hasArg(0)).toBeTrue();
+        expect(someObject.someFn.calls.forCall(0).hasArg(1)).toBeTrue();
+    });
+});
+```
+#### **_getError_** *getError()*
+Returns the _error_ associated with a specific call to the _spy_.
+
+```javascript
+describe('Calling getError()', function(){
+    it('returns the error associated with a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(number){return number + a;}
+        };
+        spyOn(someObject, 'someFn').and.callActual();
+        someObject.someFn(123);
+        expect(someObject.someFn.calls.forCall(0).getError()).toBeTruthy();
+    });
+});
+```
+
+#### **_getReturned** *getReturned()*
+Returns the value returned from a specific call to the _spy_.
+
+```javascript
+describe('Calling getError()', function(){
+    it('returns the value returned from a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(number){return number + 1;}
+        };
+        spyOn(someObject, 'someFn').and.callActual();
+        someObject.someFn(123);
+        expect(someObject.someFn.calls.forCall(0).getReturned()).toEqual(124);
+    });
+});
+```
+
+
+
+#### **__** **
+#### **__** **
+#### **__** **
+#### **__** **
+#### **__** **
+#### **__** **
+#### **__** **
+#### **__** **
+#### **__** **
+#### **__** **
 
 ## Stubs
 **_Stubs_** are _spies_ that have predefined behaviors (canned responses) and have no underlying implementations of their own.
