@@ -2134,30 +2134,37 @@
             snoopster.and.expect.it.toBeCalled = function(){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toBeCalled = true;
+                return snoopster;
             };
             snoopster.and.expect.it.toBeCalledWith = function(){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toBeCalledWith = arguments;
+                return snoopster;
             };
             snoopster.and.expect.it.toBeCalledWithContext = function(obj){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toBeCalledWithContext = obj;
+                return snoopster;
             };
             snoopster.and.expect.it.toReturn = function(value){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toReturn = value;
+                return snoopster;
             };
             snoopster.and.expect.it.toThrow = function(){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toThrow = true;
+                return snoopster;
             };
             snoopster.and.expect.it.toThrowWithName = function(name){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toThrowWithName = name;
+                return snoopster;
             };
             snoopster.and.expect.it.toThrowWithMessage = function(message){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toThrowWithMessage = message;
+                return snoopster;
             };
             snoopster.validate = function(){
                 // if(!snoopster._hasExpectations){
