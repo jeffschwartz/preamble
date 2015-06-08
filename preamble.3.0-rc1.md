@@ -84,7 +84,6 @@ The only required HTML tags (other than the script tags) are **&lt;div id="pream
 </html>
 ```
 
-## API
 <p class="warning">
 When the <em><strong>windowGlobals</strong></em> configuration option is set to <em>false</em> the following API functions must be called as properties of the global <em>Preamble</em> object:
 </p>
@@ -150,6 +149,7 @@ it('is used to group one or more expectations', function(){
     expect(123).not.toEqual('abc');
 });
 ```
+
 **done** is optional and is a _function_ that Preamble passes to **callback** as an argument which your asynchronous _specs_ call to signal to Preamble that their _asynchronous_ processing has completed. **done** takes a single argument, a _function_, which Preamble calls to run the _expectations_.
 
 ```javascript
@@ -493,14 +493,14 @@ Preamble provides an assortment of _test doubles_ including **_spies_**, **_stub
 **_Spies_** are _functions_ and _object methods_ that can track all _calls_, _contexts_, _arguments_ and _return values_.
 
 ### Creating Spies
-Spies are created by calling one of the several forms of **_spyOn()_**.
+Spies are created by calling one of the several forms of **_spyOn()_ or by calling **_spyOn.x()_**.
 
 #### **spyOn** *spyOn()*
-Creates a test double for an anonymous function that is a spy.
+Creates a _spy_ from an anonymous function.
 
 ```javascript
 describe('Calling spyOn() without arguments', function(){
-    it('creates a test double for an anonymous function that is a spy', function(){
+    it('creates a spy from an anonymous function', function(){
         var anonFn = spyOn();
         anonSpy();
         expect(anonSpy).toHaveBeenCalled();
@@ -509,11 +509,11 @@ describe('Calling spyOn() without arguments', function(){
 ```
 
 #### **spyOn** *spyOn(fn)*
-Creates a test double for **_fn_** that is a spy. **_fn_** is a function.
+Creates a _spy_ from the function **_fn_**.
 
 ```javascript
 describe('Calling spyOn(fn)', function(){
-    it('creates a test double for fn that is a spy', function(){
+    it('creates a spy from the function fn', function(){
         var someSpy;
         function someFn(){}
         someSpy = spyOn(someFn);
@@ -524,11 +524,27 @@ describe('Calling spyOn(fn)', function(){
 ```
 
 #### **spyOn** *spyOn(object, methodName)*
-Creates a test double for _object[methodName]_ that is a spy. **_object_** is an object and **_methodNmae_** is the property name of a method on **_object_**.
+Creates a spy from _object[methodName]_.
 
 ```javascript
 describe('Calling spyOn(object, methodName)', function(){
-    it('creates a test double for object[methodName] that is a spy', function(){
+    it('creates a spy from object[methodName]', function(){
+        var someObject = {
+           someFn: function(){}
+        };
+        someSpy = spyOn(someObject, 'someFn');
+        someObject.someFn();
+        expect(someObject.someFn).toHaveBeenCalled();
+    });
+});
+```
+
+#### **spyOn.x** *spyOn.x(object, methodNames)*
+Creates a _spy_ from _object[methodName]_ for each _methodName_ found in the array **_methodNames_**.
+
+```javascript
+describe('Calling spyOn.x(object, methodNames)', function(){
+    it('creates a spy from object[methodName] for each methodName found in the array methodNames', function(){
         var someObject = {
            someFn: function(){}
         };
@@ -1133,43 +1149,48 @@ describe('Calling and.expect.it.toThrowWithMessage('Whoops!')', function(){
 });
 ```
 
-### UI Tests
+## UI Tests
 Preamble adds the _div element_ with the default id of _**ui-test-container**_ to the DOM. Use of this element is reserved specifically for UI tests and Preamble itself never adds content to it nor does it ever modify its content. This element's _ID_ can be overridden via configuration (please see **Configuration** below).
 
-#### getUiTestContainerElement()
+### getUiTestContainerElement()
 Returns the UI test container DOM element.
 
 ```javascript
 var uiTestContainerElement = getUiTestContainerElement();
 ```
 
-#### getUiTestContainerElementId()
+### getUiTestContainerElementId()
 Returns the id of the UI test container DOM element.
 
 ```javascript
 var elUiTestContainerElement = document.getElementById(getUiTestContainerElementId());
 ```
 
-### Configuration Using preamble-config.js
+## Configuration Using preamble-config.js
 The following configuration options can be overridden in the _**preamble-config.js**_ file located in the _javascripts_ folder:
 
-#### **windowGlobals**
+### **windowGlobals**
 Default value = true. Set to false if you don't want to pollute the global name space and instead use the two global vars 'Preamble' and 'assert'.
-#### **testTimeOutInterval**
+
+### **testTimeOutInterval**
 Default value = 10 milliseconds. This is the value Preamble uses to wait before it times out a test. This value includes the time allocated to setup (beforeEach), teardown (afterEach) and the actual test (it or test).
-#### **name**
+
+### **name**
 Default value = 'Test'. Override this to display a meaningful name for your tests.
-#### **uiTestContainerId**
+
+### **uiTestContainerId**
 Default value = 'ui-test-container'. Override this to use a different ID for the UI test container DOM element.
-#### **hidePassedTests**
+
+### **hidePassedTests**
 Default value = false. Set it to true to hide passed tests.
-#### **shortCircuit** <span class="added"><small>v2.1.0</small></span>
+
+### **shortCircuit** <span class="added"><small>v2.1.0</small></span>
 Default value = false. Set it to true to cause Preamble to imediately terminate running any further tests and to then produce its coverage, summary and detail report. This is a convenient option to use if your suites take a long time to run.
 
-### In-line Configuration
+## In-line Configuration
 Begining with v2.0, you can call _**configure**_ directly from within your test scripts.:
 
-#### **configure** *configure(hash)*
+### **configure** *configure(hash)*
 Call _**configure**_ passing a _**hash**_ containing _properties_ and their associated _values_ for the configuration options to be overriden.
 <p class="warning">Place the call to <em>configure</em> at the very <strong><em>top</em></strong> of your test script file.</p>
 <p class="warning">Please note that the <em><strong>windowGlobals</strong></em> configuration option can only be overriden by setting its value in the <em>preamble-config.js</em> configuration file and that it cannot be overriden using <em>in-line</em> configuration. Please see <em>Configuration Using preamble-config.js</em> above.</p>
@@ -1188,7 +1209,7 @@ configure({
 .
 ```
 
-### Running Headless With PhantomJS
+## Running Headless With PhantomJS
 
 <p class="warning">Please note that Preamble v2 requires PhantomJS v2.0.0 or better.</p>
 <p class="warning">Please note that if you are installing the PhantomJS v2 <em>binary distribution</em> on a Mac you may need to follow the directions given <a href="https://github.com/ariya/phantomjs/issues/12900#issuecomment-74073057" target="_blank">here</a>.</p>
