@@ -1018,18 +1018,117 @@ describe('Calling and.callFake(fn)', function(){
 ```
 
 ## Mocks
-**_Mocks_** are _spies_ that have predefined expectations and are used to validate behaviors. Add predefine expectations using the _and.expect.it_ API. Vaidate mocks by calling _validate()_.
+**_Mocks_** are _spies_ that have predefined expectations and are used to validate behaviors. Add predefine expectations using the _and.expect.it_ API. Vaidate mocks by calling _mock.validate()_.
 
 ### Mocks API
 
 #### **_and.expect.it.toBeCalled_** *and.expect.it.toBeCalled()*
+Sets the expectation that the _mock_ must be called.
 
 ```javascript
 describe('Calling and.expect.it.toBeCalled()', function(){
-    it('creates a Mock expecting to be called', function(){
+    it('sets the expectation that the mock must be called', function(){
         var mock = spyOn().and.expect.it.toBeCalled();
         mock();
         mock.validate();
+    });
+});
+```
+
+#### **_and.expect.it.toBeCalledWith_** *and.expect.it.toBeCalledWith(...args)*
+Sets the expectation that the _mock_ must be called with specific arguments.
+
+```javascript
+describe('Calling and.expect.it.toBeCalledWith("abc", 123, {zip: "55555"})', function(){
+    it('sets the expectation that the mock must be called with "abc", 123, {zip: "55555"}', function(){
+        var mock = spyOn().and.expect.it.toBeCalledWith('abc', 123, {zip: '55555'});
+        mock('abc', 123, {zip: '55555'});
+        mock.validate();
+    });
+});
+```
+
+#### **_and.expect.it.toBeCalledWithContext_** *and.expect.it.toBeCalledWithContext(object)*
+Set the expectation that the mock will be called with its context set to **_object_**.
+
+```javascript
+describe('Calling and.expect.it.toBeCalledWithContext(object)', function(){
+    it('sets the expectation that the mock must be called with its context set to object', function(){
+        var someObject = {
+                someFn: function(){}
+            },
+            someOtherObject = {};
+        someObject.someFn = someObject.someFn.bind(someOtherObject);
+        spyOn(someObject, 'someFn').and.expect.it.toBeCalledWithContext(someObject);
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+```
+
+#### **_and.expect.it.toReturn** *and.expect.it.toReturn(value)*
+Set the expectation that the mock will return **_value_**.
+
+```javascript
+describe('Calling and.expect.it.toReturn(value)', function(){
+    it('sets the expectation that the mock must return value', function(){
+        var someObject = {
+                someFn: function(){return {fName: 'Tom', lName: 'Sawyer'};}
+            };
+        spyOn(someObject, 'someFn').and.callActual().
+            and.expect.it.toReturn({fName: 'Tom', lName: 'Sawyer'});
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+```
+
+#### **_and.expect.it.toThrow** *and.expect.it.toThrow()*
+Set the expectation that the mock must throw an exception when called.
+
+```javascript
+describe('Calling and.expect.it.toThrow()', function(){
+    it('sets the expectation that the mock must throw an exception when called', function(){
+        var someObject = {
+                someFn: function(){ throw new Error('Whoops!');}
+            };
+        spyOn(someObject, 'someFn').and.callActual().
+            and.expect.it.toThrow();
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+```
+
+#### **_and.expect.it.toThrowWithName** *and.expect.it.toThrowWithName(name)*
+Set the expectation that the mock must throw an exception with **_name_** when called.
+
+```javascript
+describe('Calling and.expect.it.toThrowWithName(name)', function(){
+    it('sets the expectation that the mock must throw an exception with name when called', function(){
+        var someObject = {
+                someFn: function(){}
+            };
+        spyOn(someObject, 'someFn').and.throwWithName('Error').
+            and.expect.it.toThrowWithName('Error');
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+```
+
+#### **_and.expect.it.toThrowWithMessage** *and.expect.it.toThrowWithMessage(message)*
+Set the expectation that the mock must throw an exception with **_message_** when called.
+
+```javascript
+describe('Calling and.expect.it.toThrowWithMessage('Whoops!')', function(){
+    it('sets the expectation that the mock must throw an exception with message when called', function(){
+        var someObject = {
+                someFn: function(){}
+            };
+        spyOn(someObject, 'someFn').and.throwWithMessage('Whoops!').
+            and.expect.it.toThrowWithMessage('Whoops!'); someObject.someFn();
+        someObject.someFn.validate();
     });
 });
 ```
