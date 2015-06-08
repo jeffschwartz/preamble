@@ -790,7 +790,7 @@ describe('Calling reset() resets a spy, stub, mock to its pristine state - metho
         foo.someFn(123);
         expect(foo.someFn.calls.returned(undefined)).toBeTrue();
         expect(foo.someFn.calls.count()).toEqual(2);
-        foo.someFn.reset();
+        foo.someFn.and.reset();
         expect(foo.someFn.calls.count()).toEqual(0);
     });
 });
@@ -805,7 +805,7 @@ describe('Calling reset() resets a spy, stub, mock to its pristine state - funct
         someFn(123);
         expect(someFn.calls.returned(undefined)).toBeTrue();
         expect(someFn.calls.count()).toEqual(2);
-        someFn.reset();
+        someFn.and.reset();
         expect(someFn.calls.count()).toEqual(0);
     });
 });

@@ -1936,8 +1936,18 @@
                 return returned;
             };
             //TODO(Jeff): v2.3.0
+            snoopster._snoopsterMaker = 'preamble.snoopster';
+            //TODO(Jeff): v2.3.0
+            //stub api
+            //TODO(Jeff): v2.3.0
+            snoopster._throws = false;
+            snoopster._throwsMessage = '';
+            snoopster._throwsName = '';
+            //TODO(Jeff): v2.3.0
+            snoopster.and = {};
+            //TODO(Jeff): v2.3.0
             //spy api - sets the spy back to its default state
-            snoopster.reset = function() {
+            snoopster.and.reset = function() {
                 calls = [];
                 snoopster._resetCalls();
                 snoopster._throws = false;
@@ -1948,16 +1958,6 @@
                 snoopster._expectations = {};
                 return snoopster;
             };
-            //TODO(Jeff): v2.3.0
-            snoopster._snoopsterMaker = 'preamble.snoopster';
-            //TODO(Jeff): v2.3.0
-            //stub api
-            //TODO(Jeff): v2.3.0
-            snoopster._throws = false;
-            snoopster._throwsMessage = '';
-            snoopster._throwsName = '';
-            //TODO(Jeff): v2.3.0
-            snoopster.and = {};
             //TODO(Jeff): v2.3.0
             snoopster._callWithContext = null;
             snoopster.and.callWithContext = function(context){
