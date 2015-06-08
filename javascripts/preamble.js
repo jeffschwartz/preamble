@@ -1928,7 +1928,9 @@
                         error = er;
                     }
                 }
-                returned = snoopster._returns || returned;
+                if(!snoopster._callActual){
+                    returned = snoopster._returns || returned;
+                }
                 // snoopster.args = new Args(aArgs);
                 calls.push(new ACall(snoopster._callWithContext || this, new Args(aArgs), error, returned));
                 return returned;
