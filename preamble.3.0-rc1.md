@@ -1018,9 +1018,21 @@ describe('Calling and.callFake(fn)', function(){
 ```
 
 ## Mocks
-**_Mocks_** are _spies_ that have predefined expectations and are used to validate behaviors.
+**_Mocks_** are _spies_ that have predefined expectations and are used to validate behaviors. Add predefine expectations using the _and.expect.it_ API. Vaidate mocks by calling _validate()_.
 
 ### Mocks API
+
+#### **_and.expect.it.toBeCalled_** *and.expect.it.toBeCalled()*
+
+```javascript
+describe('Calling and.expect.it.toBeCalled()', function(){
+    it('creates a Mock expecting to be called', function(){
+        var mock = spyOn().and.expect.it.toBeCalled();
+        mock();
+        mock.validate();
+    });
+});
+```
 
 ### UI Tests
 Preamble adds the _div element_ with the default id of _**ui-test-container**_ to the DOM. Use of this element is reserved specifically for UI tests and Preamble itself never adds content to it nor does it ever modify its content. This element's _ID_ can be overridden via configuration (please see **Configuration** below).
