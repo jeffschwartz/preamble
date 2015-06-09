@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: devguide
 title: v3.0-rc1 API Developer Guide
 permalink: /preamble/api/3/0/rc1/
 ---
@@ -139,7 +139,7 @@ describe('suites can  be nested', function(){
 
 ### **it** *it(label, [timeout,] callback([done]){...})*
 
-**it** is used to group one or more _expectations_ which are composed by pairing the _actual value_ under test with a suitable _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
+**it** is used to group one or more _expectations_ which are composed by pairing the _actual value_ under test with an appropriate _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
 
 ```javascript
 it('is used to group one or more expectations', function(){
@@ -313,9 +313,10 @@ describe('Sharing values between setups, specs and teardowns using "this"', func
 
 ## Expectations - _expect_, _not_ and _matchers_
 
-_Expectations_ are declared using **_expect_**, **_not_** if negating and a suitable **_matcher_**.
+_Expectations_ are declared using **_expect_**, **_not_** if negating, and an appropriate **_matcher_**.
 
-For example, the expectation that a value is _truthy_ can be expressed as follows:
+### **expect** *expect(actual)*
+Call _expect_ passing it the **_actual_** value that is to be matched against the _expected_ value using a _matcher_. **_actual_** can be any valid JavaScript primitive value or object (including functions).
 
 ```javascript
 describe('the value 1', function(){
@@ -325,7 +326,8 @@ describe('the value 1', function(){
 });
 ```
 
-and the expectation that a value is _not_ _truthy_ can be expressed as follows (notice the use of the _not_ API to _negate_ the intention of the _toBeTruthy_ matcher):
+### **not** *not*
+Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
 
 ```javascript
 describe('the value 0', function(){
@@ -334,12 +336,6 @@ describe('the value 0', function(){
     });
 });
 ```
-
-### **expect** *expect(actual)*
-Call _expect_ passing it the **_actual_** value that is to be matched against the _expected_ value using a _matcher_. **_actual_** can be any valid JavaScript primitive value or object (including functions).
-
-### **not** *not*
-Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
 
 ## Matchers
 
@@ -525,7 +521,7 @@ describe('Calling spyOn(fn)', function(){
 ```
 
 ### **spyOn** *spyOn(object, methodName)*
-Creates a spy from _object[methodName]_.
+Creates a spy from **_object[methodName]_**.
 
 ```javascript
 describe('Calling spyOn(object, methodName)', function(){
@@ -547,11 +543,14 @@ Creates a _spy_ from _object[methodName]_ for each _methodName_ found in the arr
 describe('Calling spyOn.x(object, methodNames)', function(){
     it('creates a spy from object[methodName] for each methodName found in the array methodNames', function(){
         var someObject = {
-           someFn: function(){}
+           someFn: function(){},
+           someOtherFn: function(){}
         };
-        someSpy = spyOn(someObject, 'someFn');
+        spyOn.x(someObject, ['someFn', 'someOtherFn']);
         someObject.someFn();
         expect(someObject.someFn).toHaveBeenCalled();
+        someObject.someOtherFn();
+        expect(someObject.someOtherFn).toHaveBeenCalled();
     });
 });
 ```
