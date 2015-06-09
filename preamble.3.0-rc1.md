@@ -34,10 +34,10 @@ describe('running a spec asynchronously', function(){
 });
 ```
 
-### Installing Preamble
+## Installing Preamble
 Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!
 
-### Run The Sample Test
+## Run The Sample Test
 After you have cloned the repo you can then run the sample test suite, *javascripts/sample-suite.js*, by opening the *index.html* file in your browser. The index.html file is located in Preamble's root folder.
 
 Running a test suite in the browser produces a report showing the results of running the suite. All suites and specs are presented as *links* and when you click on them Preamble will run them again and display their details, respectively.
@@ -48,7 +48,7 @@ If you want to filter out suites and specs that have passed, check the _**Hide p
 
 After you have run the sample test suite and familiarized yourself with the generated report you can then open up the sample test suite file, *javascripts/sample-suite.js*, in your favorite editor and examine the code to gain insight on writing your own test suites.
 
-### index.html
+## index.html
 The only required HTML tags (other than the script tags) are **&lt;div id="preamble-test-container"&gt;&lt;/div&gt;** and **&lt;div id="preamble-ui-container"&gt;&lt;/div&gt;**.
 
 ```html
@@ -165,6 +165,7 @@ describe('specs can be run asynchronously', function(){
     });
 });
 ```
+
 ## Setup and Teardown
 
 ### **beforeEach** *beforeEach(callback([done]){...})*
@@ -340,9 +341,9 @@ Call _expect_ passing it the **_actual_** value that is to be matched against th
 ### **not** *not*
 Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
 
-### Matchers
+## Matchers
 
-#### **toEqual** *toEqual(value)*
+### **toEqual** *toEqual(value)*
 Expectations pass if both the _actual_ value and the _expected_ **_value_** are equal and fail if they aren't equal. A strict deep recursive comparison is made between the _actual_ value and the _expected_ **_value_**, which can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if _expected_ **_value_** === _actual_ value and _actual_ value === _expected_ **_value_** then the two objects are considered equal.
 
  ```javascript
@@ -357,7 +358,7 @@ describe('Expecting 2 object to be equal using', function(){
 });
  ```
 
-#### **toBeTrue** *toBeTrue()*
+### **toBeTrue** *toBeTrue()*
 Expectations pass if the _actual_ value is _true_ and fail if it is _false_. A strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
 
  ```javascript
@@ -369,7 +370,7 @@ describe('Expecting true to be true using', function(){
 });
  ```
 
-#### **toBeTruthy** *toBeTruthy()*
+### **toBeTruthy** *toBeTruthy()*
 Expectations pass if the _actual_ value is _truthy and fail if it _falsy_. A non strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
 
  ```javascript
@@ -381,7 +382,7 @@ describe('Expecting 1 to be truthy using', function(){
 });
  ```
 
-#### **toHaveBeenCalled** *toHaveBeenCalled()*
+### **toHaveBeenCalled** *toHaveBeenCalled()*
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called and fail if it wasn't called.
 
  ```javascript
@@ -396,7 +397,7 @@ describe('Expecting function to have been called using', function(){
 });
  ```
 
-#### **toHaveBeenCalledWith** *toHaveBeenCalledWith(...theArgs)*
+### **toHaveBeenCalledWith** *toHaveBeenCalledWith(...theArgs)*
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called with the _expected_ **_...theArgs_** arguments and fail if it wasn't called with _expected_ **_...theArgs_** arguments.
 
  ```javascript
@@ -410,7 +411,7 @@ describe('Expecting function to have been called with specific arguments using',
 });
  ```
 
-#### **toHaveBeenCalledWithContext** *toHaveBeenCalledWithContext(context)*
+### **toHaveBeenCalledWithContext** *toHaveBeenCalledWithContext(context)*
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called with the _expected_ **_context_** as its _context_ and fail if it wasn't called with the _expected_ **_context_** as its _context_.
 
  ```javascript
@@ -428,7 +429,7 @@ describe('Expecting function to have been called with a specific context using',
 });
  ```
 
-#### **toHaveReturned** *toHaveReturned(value)*
+### **toHaveReturned** *toHaveReturned(value)*
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), returned the _expected_ **_value_** and fail if it didn't return the _expected_ **_value_**.
 
  ```javascript
@@ -442,7 +443,7 @@ describe('Expecting function to have returned a specific value using', function(
 });
  ```
 
-#### **toHaveThrown** *toHaveThrown()*
+### **toHaveThrown** *toHaveThrown()*
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception and fail if it didn't throw an exception.
 
  ```javascript
@@ -458,7 +459,7 @@ describe('Expecting function to have thrown an exception using', function(){
 });
  ```
 
-#### **toHaveThrownWithMessage** *toHaveThrownWithMessage(message)*
+### **toHaveThrownWithMessage** *toHaveThrownWithMessage(message)*
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with the _expected_ **_message_** and fail if it didn't throw an exception with the _expected_ **_message_**.
 
  ```javascript
@@ -472,7 +473,7 @@ describe('Expecting function to have thrown an exception with a message using', 
 });
  ```
 
-#### **toHaveThrownWithName** *toHaveThrownWithName(name)*
+### **toHaveThrownWithName** *toHaveThrownWithName(name)*
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with the _expected_ **_name_** and fail if it didn't throw an exception with the _expected_ **_name_**.
 
  ```javascript
@@ -492,10 +493,10 @@ Preamble provides an assortment of _test doubles_ including **_spies_**, **_stub
 ## Spies
 **_Spies_** are _functions_ and _object methods_ that can track all _calls_, _contexts_, _arguments_ and _return values_.
 
-### Creating Spies
+## Creating Spies
 Spies are created by calling one of the several forms of **_spyOn()_ or by calling **_spyOn.x()_**.
 
-#### **spyOn** *spyOn()*
+### **spyOn** *spyOn()*
 Creates a _spy_ from an anonymous function.
 
 ```javascript
@@ -508,7 +509,7 @@ describe('Calling spyOn() without arguments', function(){
 });
 ```
 
-#### **spyOn** *spyOn(fn)*
+### **spyOn** *spyOn(fn)*
 Creates a _spy_ from the function **_fn_**.
 
 ```javascript
@@ -523,7 +524,7 @@ describe('Calling spyOn(fn)', function(){
 });
 ```
 
-#### **spyOn** *spyOn(object, methodName)*
+### **spyOn** *spyOn(object, methodName)*
 Creates a spy from _object[methodName]_.
 
 ```javascript
@@ -539,7 +540,7 @@ describe('Calling spyOn(object, methodName)', function(){
 });
 ```
 
-#### **spyOn.x** *spyOn.x(object, methodNames)*
+### **spyOn.x** *spyOn.x(object, methodNames)*
 Creates a _spy_ from _object[methodName]_ for each _methodName_ found in the array **_methodNames_**.
 
 ```javascript
@@ -555,10 +556,10 @@ describe('Calling spyOn.x(object, methodNames)', function(){
 });
 ```
 
-### Spy _calls_ API
+## Spy _calls_ API
 Information is accumulated for each call to a _spy_ and the _calls_ API can be used to query that information.
 
-#### **calls.count** *calls.count()*
+### **calls.count** *calls.count()*
 Returns the number of times the spy was called.
 
 ```javascript
@@ -571,7 +572,7 @@ describe('Calling calls.count()', function(){
 });
 ```
 
-#### **calls.forCall** *calls.forCall(nth)*
+### **calls.forCall** *calls.forCall(nth)*
 Returns the _ACall_ object (see ACall API below for details) associated with the **_nith_**, an integer, call.
 
 ```javascript
@@ -589,7 +590,7 @@ describe('Calling calls.forCall(nth)', function(){
 });
 ```
 
-#### **calls.all** *calls.all()*
+### **calls.all** *calls.all()*
 Returns an array of all the _ACall_ objects (see ACall API below for details) associated with the _spy_.
 
 ```javascript
@@ -602,7 +603,7 @@ describe('Calling calls.all()', function(){
 });
 ```
 
-#### **calls.wasCalledWith** *calls.wasCalledWith(...args)*
+### **calls.wasCalledWith** *calls.wasCalledWith(...args)*
 Returns true if the _spy_ was called with **_...args_** and false if it was not called with **_...args_**.
 
 ```javascript
@@ -615,7 +616,7 @@ describe('Calling calls.wasCalledWith(...args)', function(){
 });
 ```
 
-#### **calls.wasCalledWithContext** *calls.wasCalledWithContext(object)*
+### **calls.wasCalledWithContext** *calls.wasCalledWithContext(object)*
 Returns true if the _spy_ was called with the context **_object_** and false if it was not called with the context **_object_**.
 
 ```javascript
@@ -631,7 +632,7 @@ describe('Calling calls.wasCalledWithContext(object)', function(){
 });
 ```
 
-#### **calls.returned** *calls.returned(value)*
+### **calls.returned** *calls.returned(value)*
 Returns true if the _spy_ returned **_value_** and false if it did not return **_value_**.
 
 ```javascript
@@ -647,7 +648,7 @@ describe('Calling calls.returned(value)', function(){
 });
 ```
 
-#### **calls.threw** *calls.threw()*
+### **calls.threw** *calls.threw()*
 Returns true if the _spy_ threw an exception and false if it did not throw an exception.
 
 ```javascript
@@ -660,7 +661,7 @@ describe('Calling calls.threw()', function(){
 });
 ```
 
-#### **calls.threwWithMessage** *calls.threwWithMessage(message)*
+### **calls.threwWithMessage** *calls.threwWithMessage(message)*
 Returns true if the _spy_ threw an exception with **_message_** and false if it did not throw an exception with **_message_**.
 
 ```javascript
@@ -673,7 +674,7 @@ describe('Calling calls.threwWithMessage()', function(){
 });
 ```
 
-#### **calls.threwWithName** *calls.threwWithName(name)*
+### **calls.threwWithName** *calls.threwWithName(name)*
 Returns true if the _spy_ threw an exception with **_name_** and false if it did not throw an exception with **_name_**.
 
 ```javascript
@@ -686,7 +687,7 @@ describe('Calling calls.threwWithName()', function(){
 });
 ```
 
-#### **reset** *reset()*
+### **reset** *reset()*
 Resets a spy back to its default state.
 
 ```javascript
@@ -701,11 +702,11 @@ describe('Calling reset', function(){
 });
 ```
 
-### Spy _ACall_ API
+## Spy _ACall_ API
 
 An _ACall_ object encapsulates the information pertaining to a single specfic call to a _spy_ and the _ACall_ API can be used to query that information. To obtain an ACall object for a single specific call to a _spy_ call the calls API forCall method (See calls API above).
 
-#### **_getContext_** *getContext()*
+### **_getContext_** *getContext()*
 Returns the _context_ that was used for a specific call to the _spy_.
 
 ```javascript
@@ -721,7 +722,7 @@ describe('Calling getContext()', function(){
 });
 ```
 
-#### **_getArgs_** *getArgs()*
+### **_getArgs_** *getArgs()*
 Returns an _Args_ object (See Args API below) for a specific call to the _spy_.
 
 ```javascript
@@ -737,7 +738,7 @@ describe('Calling getArgs()', function(){
 });
 ```
 
-#### **_getArg_** *getArg(nth)*
+### **_getArg_** *getArg(nth)*
 Works like arguments[**_nth_**] for a specific call to the _spy_.
 
 ```javascript
@@ -754,7 +755,7 @@ describe('Calling getArg(nth)', function(){
 });
 ```
 
-#### **_getArgsLength_** *getArgsLength()*
+### **_getArgsLength_** *getArgsLength()*
 Works like arguments.length for a specific call to the _spy_.
 
 ```javascript
@@ -770,7 +771,7 @@ describe('Calling getArgsLength()', function(){
 });
 ```
 
-#### **_getArgProperty_** *getArgProperty(nth, propertyName)*
+### **_getArgProperty_** *getArgProperty(nth, propertyName)*
 Works like arguments[**_nth_**][**_propertyName_**] for a specific call to the _spy_.
 
 ```javascript
@@ -787,7 +788,7 @@ describe('Calling getProperty(nth, propertyName)', function(){
 });
 ```
 
-#### **_hasArgProperty_** *hasArgProperty(nth, propertyName)*
+### **_hasArgProperty_** *hasArgProperty(nth, propertyName)*
 Works like !!arguments[**_nth_**][**_propertyName_**] for a specific call to the _spy_.
 
 ```javascript
@@ -804,7 +805,7 @@ describe('Calling hasArgProperty(nth, propertyName)', function(){
 });
 ```
 
-#### **_hasArg_** *hasArg(n)*
+### **_hasArg_** *hasArg(n)*
 Works like !!arguments[**_nth_**] for a specific call to the _spy_.
 
 ```javascript
@@ -820,7 +821,7 @@ describe('Calling hasArg(n)', function(){
     });
 });
 ```
-#### **_getError_** *getError()*
+### **_getError_** *getError()*
 Returns the _error_ associated with a specific call to the _spy_.
 
 ```javascript
@@ -836,7 +837,7 @@ describe('Calling getError()', function(){
 });
 ```
 
-#### **_getReturned_** *getReturned()*
+### **_getReturned_** *getReturned()*
 Returns the value returned from a specific call to the _spy_.
 
 ```javascript
@@ -852,10 +853,10 @@ describe('Calling getReturned()', function(){
 });
 ```
 
-### Spy _Args_ API
+## Spy _Args_ API
 An _Args_ object encapsulates all the _arguments_ passed to a specific call to the _spy_. To obtain an Args object for a specific call to the spy call the ACall getArgs method (See ACall API above).
 
-#### **_getLength_** *getLength()*
+### **_getLength_** *getLength()*
 Works like arguments.length.
 
 ```javascript
@@ -868,7 +869,7 @@ describe('Calling getLength()', function(){
 });
 ```
 
-#### **_hasArg_** *hasArg(n)*
+### **_hasArg_** *hasArg(n)*
 Works like !!arguments[**_nth_**].
 
 ```javascript
@@ -881,7 +882,7 @@ describe('Calling hasArg(n)', function(){
 });
 ```
 
-#### **_getArg_** *getArg(n)*
+### **_getArg_** *getArg(n)*
 Works like arguments[**_nth_**].
 
 ```javascript
@@ -894,7 +895,7 @@ describe('Calling getArg(n)', function(){
 });
 ```
 
-#### **_hasArgProperty_** *hasArgProperty(nth, propertyName)*
+### **_hasArgProperty_** *hasArgProperty(nth, propertyName)*
 Works like !!arguments[**_nth_**][**_propertyName_**].
 
 ```javascript
@@ -907,7 +908,7 @@ describe('Calling hasArgProperty(nth, propertyName)', function(){
 });
 ```
 
-#### **_getArgProperty_** *getArgProperty(nth, propertyName)*
+### **_getArgProperty_** *getArgProperty(nth, propertyName)*
 Works like arguments[**_nth_**][**_propertyName_**].
 
 ```javascript
@@ -923,9 +924,9 @@ describe('Calling getArgProperty(nth, propertyName)', function(){
 ## Stubs
 **_Stubs_** are _spies_ that have predefined behaviors (canned responses) and have no underlying implementations of their own. Predefine behaviors are added to _spies_ using the _and_ API.
 
-### Stubs API
+## Stubs API
 
-#### **_and.callWithContext_** *and.callWithContext(object)*
+### **_and.callWithContext_** *and.callWithContext(object)*
 The _spy_ is called using **_object_** as its context (_this_).
 
 ```javascript
@@ -939,7 +940,7 @@ describe('Calling and.callWithContext(object)', function(){
 });
 ```
 
-#### **_and.throw_** *and.throw()*
+### **_and.throw_** *and.throw()*
 Throws an exception when the _spy_ is called.
 
 ```javascript
@@ -952,7 +953,7 @@ describe('Calling and.throw()', function(){
 });
 ```
 
-#### **_and.throwWithMessage_** *and.throwWithMessage(message)*
+### **_and.throwWithMessage_** *and.throwWithMessage(message)*
 The _spy_ throws an exception with **_message_** when it is called.
 
 ```javascript
@@ -965,7 +966,7 @@ describe('Calling and.throwWithMessage(message)', function(){
 });
 ```
 
-#### **_and.throwWithName_** *and.throwWithName(name)*
+### **_and.throwWithName_** *and.throwWithName(name)*
 The _spy_ throws an exception with **_name_** when it is called.
 
 ```javascript
@@ -978,7 +979,7 @@ describe('Calling and.throwWithName(name)', function(){
 });
 ```
 
-#### **_and.return_** *and.return(value)*
+### **_and.return_** *and.return(value)*
 The _spy_ returns **_value_** when it is called.
 
 ```javascript
@@ -991,7 +992,7 @@ describe('Calling and.return(value)', function(){
 });
 ```
 
-#### **_and.callActual_** *and.callActual()*
+### **_and.callActual_** *and.callActual()*
 The **_actual_** implementation is called when the _spy_ is called.
 
 ```javascript
@@ -1011,13 +1012,12 @@ describe('Calling and.callActual()', function(){
 });
 ```
 
-
 ## Fakes
 **_Fakes_** are _spies_ with fake implementations and can be used as substitutes for _expensive_ dependencies. **_Fakes__** are created using the _and_ API.
 
-### Fakes API
+## Fakes API
 
-#### **_and.callFake_** *and.callFake(fn)*
+### **_and.callFake_** *and.callFake(fn)*
 Creates a fake with **_fn_** as its implementation.
 
 ```javascript
@@ -1036,9 +1036,9 @@ describe('Calling and.callFake(fn)', function(){
 ## Mocks
 **_Mocks_** are _spies_ that have predefined expectations and are used to validate behaviors. Add predefine expectations using the _and.expect.it_ API. Vaidate mocks by calling _mock.validate()_.
 
-### Mocks API
+## Mocks API
 
-#### **_and.expect.it.toBeCalled_** *and.expect.it.toBeCalled()*
+### **_and.expect.it.toBeCalled_** *and.expect.it.toBeCalled()*
 Sets the expectation that the _mock_ must be called.
 
 ```javascript
@@ -1051,7 +1051,7 @@ describe('Calling and.expect.it.toBeCalled()', function(){
 });
 ```
 
-#### **_and.expect.it.toBeCalledWith_** *and.expect.it.toBeCalledWith(...args)*
+### **_and.expect.it.toBeCalledWith_** *and.expect.it.toBeCalledWith(...args)*
 Sets the expectation that the _mock_ must be called with specific arguments.
 
 ```javascript
@@ -1064,7 +1064,7 @@ describe('Calling and.expect.it.toBeCalledWith("abc", 123, {zip: "55555"})', fun
 });
 ```
 
-#### **_and.expect.it.toBeCalledWithContext_** *and.expect.it.toBeCalledWithContext(object)*
+### **_and.expect.it.toBeCalledWithContext_** *and.expect.it.toBeCalledWithContext(object)*
 Set the expectation that the mock will be called with its context set to **_object_**.
 
 ```javascript
@@ -1082,7 +1082,7 @@ describe('Calling and.expect.it.toBeCalledWithContext(object)', function(){
 });
 ```
 
-#### **_and.expect.it.toReturn** *and.expect.it.toReturn(value)*
+### **_and.expect.it.toReturn** *and.expect.it.toReturn(value)*
 Set the expectation that the mock will return **_value_**.
 
 ```javascript
@@ -1099,7 +1099,7 @@ describe('Calling and.expect.it.toReturn(value)', function(){
 });
 ```
 
-#### **_and.expect.it.toThrow** *and.expect.it.toThrow()*
+### **_and.expect.it.toThrow** *and.expect.it.toThrow()*
 Set the expectation that the mock must throw an exception when called.
 
 ```javascript
@@ -1116,7 +1116,7 @@ describe('Calling and.expect.it.toThrow()', function(){
 });
 ```
 
-#### **_and.expect.it.toThrowWithName** *and.expect.it.toThrowWithName(name)*
+### **_and.expect.it.toThrowWithName** *and.expect.it.toThrowWithName(name)*
 Set the expectation that the mock must throw an exception with **_name_** when called.
 
 ```javascript
@@ -1133,7 +1133,7 @@ describe('Calling and.expect.it.toThrowWithName(name)', function(){
 });
 ```
 
-#### **_and.expect.it.toThrowWithMessage** *and.expect.it.toThrowWithMessage(message)*
+### **_and.expect.it.toThrowWithMessage** *and.expect.it.toThrowWithMessage(message)*
 Set the expectation that the mock must throw an exception with **_message_** when called.
 
 ```javascript
