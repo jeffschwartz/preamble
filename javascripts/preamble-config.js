@@ -5,7 +5,7 @@
 
 // var preambleConfig = {
 //     windowGlobals: true,
-//     testTimeOutInterval: 10,
+//     timeoutInterval: 10,
 //     name: 'Test',
 //     uiTestContainerId: 'ui-test-container',
 //     hidePassedTests: false,
