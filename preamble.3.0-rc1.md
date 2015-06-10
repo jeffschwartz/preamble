@@ -319,8 +319,8 @@ _Expectations_ are declared using **_expect_**, **_not_** if negating, and an ap
 Call _expect_ passing it the **_actual_** value that is to be matched against the _expected_ value using a _matcher_. **_actual_** can be any valid JavaScript primitive value or object (including functions).
 
 ```javascript
-describe('the value 1', function(){
-    it('is truthy', function(){
+describe('Calling expect', function(){
+    it('sets the actual value for the expectation', function(){
         expect(1).toBeTruthy();
     });
 });
@@ -330,8 +330,8 @@ describe('the value 1', function(){
 Use **_not_** to negate the intention of a _matcher_ (See _Matchers_ below).
 
 ```javascript
-describe('the value 0', function(){
-    it('is not truthy', function(){
+describe('Using not', function(){
+    it('negates the intention of a matcher', function(){
         expect(0).not.toBeTruthy();
     });
 });
@@ -343,10 +343,10 @@ describe('the value 0', function(){
 Expectations pass if both the _actual_ value and the _expected_ **_value_** are equal and fail if they aren't equal. A strict deep recursive comparison is made between the _actual_ value and the _expected_ **_value_**, which can be any valid JavaScript primitive value or object (including functions). When comparing objects the comparison is made such that if _expected_ **_value_** === _actual_ value and _actual_ value === _expected_ **_value_** then the two objects are considered equal.
 
  ```javascript
-describe('Expecting 2 object to be equal using', function(){
-    it('the toEqual matcher' , function(){
-        var obj1 = {iAm: 'Obj1'},
-            obj2 = {iAm: 'Obj2'},
+describe('Calling toEqual', function(){
+    it('sets the expectation that the actual and expected values are equal' , function(){
+        var obj1 = {iAm: 'I am!'},
+            obj2 = {iAm: 'I am!'},
             obj3 = {iAm: 'Obj3'};
         expect(obj1).toEqual(obj2);
         expect(obj2).not.toEqual(obj3);
@@ -358,8 +358,8 @@ describe('Expecting 2 object to be equal using', function(){
 Expectations pass if the _actual_ value is _true_ and fail if it is _false_. A strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
 
  ```javascript
-describe('Expecting true to be true using', function(){
-    it('the toBeTrue matcher' , function(){
+describe('Calling toBeTrue', function(){
+    it('sets the expectation that the actual value is true' , function(){
         expect(true).toBeTrue();
         expect(false).not.toBeTrue();
     });
@@ -370,8 +370,8 @@ describe('Expecting true to be true using', function(){
 Expectations pass if the _actual_ value is _truthy and fail if it _falsy_. A non strict boolean evaluation is made on the _actual_ value and returns _true_ or _false_.
 
  ```javascript
-describe('Expecting 1 to be truthy using', function(){
-    it('the toBeTruthy matcher' , function(){
+describe('Calling toBeTruthy', function(){
+    it('sets the expectation that the actual value is truthy' , function(){
         expect(1).toBeTruthy();
         expect(0).not.toBeTruthy();
     });
@@ -382,8 +382,8 @@ describe('Expecting 1 to be truthy using', function(){
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called and fail if it wasn't called.
 
  ```javascript
-describe('Expecting function to have been called using', function(){
-    it('the toHaveBeenCalled matcher' , function(){
+describe('Calling toHaveBeenCalled', function(){
+    it('sets the expectation that the actual value, a function, was called' , function(){
         var spy1 = spyOn(),
             spy2 = spyOn();
         spy1();
@@ -397,8 +397,8 @@ describe('Expecting function to have been called using', function(){
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called with the _expected_ **_...theArgs_** arguments and fail if it wasn't called with _expected_ **_...theArgs_** arguments.
 
  ```javascript
-describe('Expecting function to have been called with specific arguments using', function(){
-    it('the toHaveBeenCalledWith matcher' , function(){
+describe('Calling toHaveBeenCalledWith', function(){
+    it('sets the expectation that the actual value, a function, was called with specific arguments' , function(){
         var spy = spyOn();
         spy('abc', 'def');
         expect(spy).toHaveBeenCalledWith('abc', 'def');
@@ -411,16 +411,16 @@ describe('Expecting function to have been called with specific arguments using',
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), was called with the _expected_ **_context_** as its _context_ and fail if it wasn't called with the _expected_ **_context_** as its _context_.
 
  ```javascript
-describe('Expecting function to have been called with a specific context using', function(){
-    it('the toHaveBeenCalledWithContext matcher' , function(){
+describe('Calling toHaveBeenCalledWithContext', function(){
+    it('sets the expectation that the actual value, a function, was called with a specific context' , function(){
         var someObject = {
                 someFn: function(){}
             },
             someOtherObject = {} ;
         spyOn(someObject, 'someFn');
         someObject.someFn();
-        expect(spy).toHaveBeenCalledWithContext(someObject);
-        expect(spy).not.toHaveBeenCalledWithContext(someOtherObject);
+        expect(someObject.someFn).toHaveBeenCalledWithContext(someObject);
+        expect(someObject.someFn).not.toHaveBeenCalledWithContext(someOtherObject);
     });
 });
  ```
@@ -429,9 +429,9 @@ describe('Expecting function to have been called with a specific context using',
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), returned the _expected_ **_value_** and fail if it didn't return the _expected_ **_value_**.
 
  ```javascript
-describe('Expecting function to have returned a specific value using', function(){
-    it('the toHaveReturned matcher' , function(){
-        var spy = spyOn().and.return({fName: 'George', lName: 'Washington'};
+describe('Calling toHaveReturned', function(){
+    it('sets the expectation that the actual value, a function, returned a specific value' , function(){
+        var spy = spyOn().and.return({fName: 'George', lName: 'Washington'});
         spy();
         expect(spy).toHaveReturned({fName: 'George', lName: 'Washington'});
         expect(spy).not.toHaveReturned({fName: 'Washington', lName: 'George'});
@@ -443,8 +443,8 @@ describe('Expecting function to have returned a specific value using', function(
 Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception and fail if it didn't throw an exception.
 
  ```javascript
-describe('Expecting function to have thrown an exception using', function(){
-    it('the toHaveThrown matcher', function(){
+describe('Calling toHaveThrown', function(){
+    it('sets the expectation that the actual value, a function, threw an exception', function(){
         var someFn = spyOn(function(arg){ return a + arg; }).and.callActual(),
             someOtherFn = spyOn(function(arg){ return arg; }).and.callActual();
         someFn(20);
@@ -456,11 +456,11 @@ describe('Expecting function to have thrown an exception using', function(){
  ```
 
 ### **toHaveThrownWithMessage** *toHaveThrownWithMessage(message)*
-Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with the _expected_ **_message_** and fail if it didn't throw an exception with the _expected_ **_message_**.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with a specific **_message_** and fail if it didn't throw an exception with a specific **_message_**.
 
  ```javascript
-describe('Expecting function to have thrown an exception with a message using', function(){
-    it('the toHaveThrownWithMessage matcher', function(){
+describe('Calling toHaveThrownWithMessage', function(){
+    it('sets the expectation that the actual value, a function, threw an exception with a specific message', function(){
         var someFn = spyOn().and.throwWithMessage('Whoops!');
         someFn();
         expect(someFn).toHaveThrownWithMessage('Whoops!');
@@ -470,11 +470,11 @@ describe('Expecting function to have thrown an exception with a message using', 
  ```
 
 ### **toHaveThrownWithName** *toHaveThrownWithName(name)*
-Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with the _expected_ **_name_** and fail if it didn't throw an exception with the _expected_ **_name_**.
+Expectations pass if the _actual_ value, which must be a _spy_ (see **_Spies_** below), threw an exception with a specific **_name_** and fail if it didn't throw an exception with a specific **_name_**.
 
  ```javascript
-describe('Expecting function to have thrown an exception with a name using', function(){
-    it('the toHaveThrownWithName matcher', function(){
+describe('Calling toHaveThrownWithName', function(){
+    it('sets the expectation that the actual value, a function, threw an exception with a specific name', function(){
         var someFn = spyOn().and.throwWithName('Error');
         someFn();
         expect(someFn).toHaveThrownWithName('Error');
@@ -499,8 +499,8 @@ Creates a _spy_ from an anonymous function.
 describe('Calling spyOn() without arguments', function(){
     it('creates a spy from an anonymous function', function(){
         var anonFn = spyOn();
-        anonSpy();
-        expect(anonSpy).toHaveBeenCalled();
+        anonFn();
+        expect(anonFn).toHaveBeenCalled();
     });
 });
 ```
@@ -529,7 +529,7 @@ describe('Calling spyOn(object, methodName)', function(){
         var someObject = {
            someFn: function(){}
         };
-        someSpy = spyOn(someObject, 'someFn');
+        spyOn(someObject, 'someFn');
         someObject.someFn();
         expect(someObject.someFn).toHaveBeenCalled();
     });
@@ -690,12 +690,12 @@ describe('Calling calls.threwWithName()', function(){
 Resets a spy back to its default state.
 
 ```javascript
-describe('Calling reset', function(){
+describe('Calling and.reset', function(){
     it('resets the spy back to its default state', function(){
         var someFn = spyOn();
         someFn();
         expect(someFn).toHaveBeenCalled();
-        someFn.reset();
+        someFn.and.reset();
         expect(someFn).not.toHaveBeenCalled();
     });
 });
@@ -915,7 +915,7 @@ describe('Calling getArgProperty(nth, propertyName)', function(){
     it('works like arguments[nth][propertyName]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
-        expect(someFn.calls.forCall(0).getArgs().getArgProperty(2, 'zip')).equal(55555);
+        expect(someFn.calls.forCall(0).getArgs().getArgProperty(2, 'zip')).toEqual(55555);
     });
 });
 ```
@@ -1022,9 +1022,9 @@ Creates a fake with **_fn_** as its implementation.
 ```javascript
 describe('Calling and.callFake(fn)', function(){
     it('creates a fake with fn as its implementation', function(){
-       var someObject = {
-           someFn: function(){return false;}
-       }
+        var someObject = {
+                someFn: function(){return false;}
+            };
        spyOn(someObject, 'someFn').and.callFake(function(){return true;});
        someObject.someFn();
        expect(someObject.someFn).toHaveReturned(true);
@@ -1136,7 +1136,7 @@ describe('Calling and.expect.it.toThrowWithName(name)', function(){
 Set the expectation that the mock must throw an exception with **_message_** when called.
 
 ```javascript
-describe('Calling and.expect.it.toThrowWithMessage('Whoops!')', function(){
+describe('Calling and.expect.it.toThrowWithMessage("Whoops!")', function(){
     it('sets the expectation that the mock must throw an exception with message when called', function(){
         var someObject = {
                 someFn: function(){}
