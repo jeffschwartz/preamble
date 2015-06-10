@@ -4,10 +4,11 @@
 
 /**
  * inline configuration
- * NOTE: inline configuration cannot be use to set "windowGlobals"!
+ * NOTE: inline configuration cannot be used to set "windowGlobals"!
  */
 configure({
     name: 'Sample BDD Suite',
+    timeoutInterval: 50,
     hidePassedTests: false
 });
 
@@ -107,1066 +108,561 @@ describe('Preventing a spec from timing out', function(){
     var count = 0;
     beforeEach(function(done){
         setTimeout(function(){
-            done(function(){
-                count = 10;
-            });
-        }, 50);
+            count = 10;
+            done();
+        }, 100);
     });
-    it('count should equal 10', 60, function(){
+    it('by passing a timeout value when calling "it"', function(){
         expect(count).toEqual(10);
-    });
+    }, 120);
 });
 
-
-
-
-
-//---------------------------------
-
-describe('"expect" takes a single value as an argument', function(){
-    it('such as a number', function(){
-        expect(1).toEqual(1);
-    });
-    it('such as a string', function(){
-        expect('abc').toEqual('abc');
-    });
-   it('such as an object', function(){
-       expect({iAm: 'anObject'}).toEqual({iAm: 'anObject'});
-   });
-   it('such as a function which is a spy', function(){
-       var aSpy = spyOn(function(){ return 'abc'; }).and.callActual();
-       aSpy();
-       expect(aSpy).toHaveReturned('abc');
-   });
-   it('such as a method which is a spy', function(){
-       var someObj = {
-           foo: function(){}
-       };
-       spyOn(someObj, 'foo').and.throwWithMessage('Whoops!');
-       someObj.foo();
-       expect(someObj.foo).toHaveThrownWithMessage('Whoops!');
-   });
-});
-
-describe('Preamble has numerous matchers', function(){
-    it('the "toEqual" matcher sets the expected value and uses a deep recursive comparison to assert that the actual value and the expected value are equal (===)' , function(){
-        var anObj1 = {iAm: 'some object to compare to'},
-            anObj2 = {iAm: 'some object to compare to'};
-        expect(anObj1).toEqual(anObj2);
-    });
-    it('the "toBeTrue" matcher uses a strict boolean comparison to assert that the actual value is boolen true', function(){
-        expect(true).toBeTrue();
-    });
-    it('the "toBeTruthy" matcher uses a truthy comparison to assert that the actual value is truthy', function(){
-        expect({}).toBeTruthy();
-    });
-    it('the "toHaveBeenCalled" matcher is used to assert that a function was called', function(){
-        var someFn = spyOn(function(){}).and.callActual();
-        someFn();
-        expect(someFn).toHaveBeenCalled();
-    });
-    it('the "toHaveReturned" matcher is used to assert that a function returned a particular value', function(){
-        var someFn = spyOn(function(){return 'abc';}).and.callActual();
-        someFn();
-        expect(someFn).toHaveReturned('abc');
-    });
-    it('the "toHaveThrown" matcher is used to assert that a function threw an exception', function(){
-        var someFn = spyOn(function(arg){ return a + arg; }).and.callActual();
-        someFn('abc');
-        expect(someFn).toHaveThrown();
-    });
-});
-
-describe('Preamble also has a "not" qualifier', function(){
-    it('the "not.toEqual" expression is used to assert that the actual value and the expected value are not equal (!==)', function(){
-        var anObj1 = {iAm: 'anObj1'},
-            anObj2 = {iAm: 'anObj2'};
-        expect(anObj1).not.toEqual(anObj2);
-    });
-    it('the "not.toBeTrue" expression is used to assert that the actual value is boolen false', function(){
-        expect(false).not.toBeTrue();
-    });
-    it('the "not.toBeTruthy" expression is used to assert that the actual value is not truthy', function(){
-        expect('').not.toBeTruthy();
-    });
-    it('the "not.toHaveBeenCalled" expression is used to assert that a function was not called', function(){
-        var someFn = spyOn().and.callActual();
-        someFn();
-        expect(someFn).toHaveBeenCalled();
-    });
-    it('the "not.toHaveReturned" expression is used to assert that a function did not return a particular value', function(){
-        var someFn = spyOn(function(){return 'abc';}).and.callActual();
-        someFn();
-        expect(someFn).toHaveReturned('abc');
-    });
-    it('the "not.toHaveThrown" expression is used to assert that a function did not throw an exception', function(){
-        var someFn = spyOn(function(arg){ return a + arg; }).and.callActual();
-        someFn('abc');
-        expect(someFn).toHaveThrown();
-    });
-});
-
-describe('specs can be nested within specs', function(){
+describe('Sharing values between setups, specs and teardowns using "this"', function(){
     beforeEach(function(){
         this.value = 10;
     });
-    afterEach(function(){
-        this.isCrazy = true;
+    it('this.value should equal 10', function(){
+        expect(this.value).toEqual(10);
     });
-    describe('Nested spec 1', function(){
-        it('nested spec 1: test 1', function(){
-            expect(this.value).toEqual(10);
-        });
-        it('isCrazy is true', function(){
-            expect(typeof(this.isCrazy) === 'undefined').toBeTrue();
-        });
-    });
-    describe('Nested spec 2', function(){
+    describe('works in nested suites also', function(){
         beforeEach(function(){
-            this.foo = 'bar';
+            this.otherValue = 100;
         });
-        afterEach(function(){
-            this.xx = 'xx';
-        });
-        it('nested spec 2: test 1', function(){
+        it('this.value should equal 10 and this.otherValue should equal 100', function(){
             expect(this.value).toEqual(10);
-            expect(this.foo).toEqual('bar');
-        });
-        it('nested spec 2: test 2', function(){
-            expect(this.value).toEqual(10);
-            expect(this.foo).toEqual('bar');
-            expect(typeof(this.xx) === 'undefined').toBeTrue();
-        });
-        describe('Nested spec 3', function(){
-            beforeEach(function(){
-                this.flim = 'flam';
-            });
-            it('nested spec 3: test 1', function(){
-                expect(this.value).toEqual(10);
-                expect(this.foo).toEqual('bar');
-                expect(this.flim).toEqual('flam');
-            });
+            expect(this.otherValue).toEqual(100);
         });
     });
-});
-
-describe('Evaluating boolean assertions', function(){
-    it('bollean true', function(){
-        expect(true).toBeTrue();
-    });
-    it('boolean false', function(){
-        expect(false).not.toBeTrue();
-    });
-});
-
-describe('Evaluating truthy assertions', function(){
-    it('undefined', function(){
-        var undef;
-        expect(undef).not.toBeTruthy();
-    });
-    it('objects', function(){
-        var def = {};
-        expect(def).toBeTruthy();
-    });
-    it('numeric values other than 0', function(){
-        var one = 1;
-        expect(one).toBeTruthy();
-    });
-    it('numeric vaules that are 0', function(){
-        var zero = 0;
-        expect(zero).not.toBeTruthy();
-    });
-    it('non empty strings', function(){
-        expect('not empty string').toBeTruthy();
-    });
-    it('empty strings', function(){
-        expect('').not.toBeTruthy();
-    });
-});
-
-describe('Evaluating strict, deep recursive comparison assertions', function(){
-    var char = 'b';
-    var a = {a: 'a', b: 'b'};
-    var b = {a: 'a', b: b};
-    var c = {a: 'a', b: 'b'};
-    it('2 objects with exactly the same properties and property values', function(){
-        expect(a).toEqual(c);
-    });
-    it('2 objects with different properties or property values', function(){
-        expect(a).not.toEqual(b);
-    });
-    it('2 value types whose values are the same', function(){
-        expect(char).toEqual('b');
-    });
-    it('2 value types whose values are  not the same', function(){
-        expect(char).not.toEqual(a);
-    });
-});
-
-describe('Running synchronous tests with beforeEach', function(){
-    var count = 0;
-    beforeEach(function(){
-        count = 100;
-    });
-    it('beforeEach is called', function(){
-        expect(count).toEqual(100);
-    });
-});
-
-describe('Passing a value from beforeEach to tests', function(){
-    beforeEach(function(){
-        this.value = 10;
-    });
-    it('the tests', function(){
+    it('this.otherValue should not exist and this.value should equal 10', function(){
+        expect(this.otherValue).toEqual(undefined);
         expect(this.value).toEqual(10);
     });
 });
 
-describe('Running synchronous tests with afterEachTest', function(){
-    var count = 0;
-    afterEach(function(){
-        count = 100;
-    });
-    it('the first test', function(){
-        expect(count).toEqual(0);
-    });
-    it('but subsequent tests', function(){
-        expect(count).toEqual(100);
+describe('Calling expect', function(){
+    it('sets the actual value for the expectation', function(){
+        expect(1).toBeTruthy();
     });
 });
 
-describe('Running asynchronous tests', function(){
-    var count = 0;
-    it('calling whenDone', function(done){
-        setTimeout(function(){
-            count = 100;
-            done(function(){
-                expect(count).toEqual(100);
-            });
-        }, 1);
+describe('Using not', function(){
+    it('negates the intention of a matcher', function(){
+        expect(0).not.toBeTruthy();
     });
 });
 
-describe('Running asynchronous tests with beforeEachAsync', function(){
-    var count = 0;
-    beforeEach(function(done){
-        setTimeout(function(){
-            count = 10;
-            done();
-        }, 1);
-    });
-    it('beforeEachAsync is called', function(done){
-        setTimeout(function(){
-            count *= 10;
-            done(function(){
-                expect(count).toEqual(100);
-            });
-        }, 1);
+describe('Calling toEqual', function(){
+    it('sets the expectation that the actual and expected values are equal' , function(){
+        var obj1 = {iAm: 'I am!'},
+            obj2 = {iAm: 'I am!'},
+            obj3 = {iAm: 'Obj3'};
+        expect(obj1).toEqual(obj2);
+        expect(obj2).not.toEqual(obj3);
     });
 });
 
-describe('Passing a value from beforeEachAsync to asynchronous tests', function(){
-    beforeEach(function(done){
-        var self = this;
-        setTimeout(function(){
-            self.value = 10;
-            done();
-        }, 1);
-    });
-    it('the asynchronous tests', function(done){
-        setTimeout(function(){
-            //some asynchronous process...
-            done(function(){
-                expect(this.value).toEqual(10);
-            });
-        }, 1);
+describe('Calling toBeTrue', function(){
+    it('sets the expectation that the actual value is true' , function(){
+        expect(true).toBeTrue();
+        expect(false).not.toBeTrue();
     });
 });
 
-describe('Running asynchronous tests with afterEachAsync', function(){
-    var count = 0;
-    afterEach(function(done){
-        setTimeout(function(){
-            count = 1;
-            done();
-        }, 1);
-    });
-    it('the first asynchronous test', function(done){
-        setTimeout(function(){
-            count = 10;
-            done(function(){
-                expect(count).toEqual(10);
-            });
-        }, 1);
-    });
-    it('but subsequent asynchronous tests', function(done){
-        setTimeout(function(){
-            count *= 100;
-            done(function(){
-                expect(count).toEqual(100);
-            });
-        }, 1);
+describe('Calling toBeTruthy', function(){
+    it('sets the expectation that the actual value is truthy' , function(){
+        expect(1).toBeTruthy();
+        expect(0).not.toBeTruthy();
     });
 });
 
-// describe('Spies are test doubles', function(){
-//     beforeEach(function(){
-//         this.foo = {
-//             someFn: function(arg){
-//                 return arg;
-//             },
-//             someOtherFn: function () {}
-//         };
-//     });
-//     describe('which can stub any method or function', function(){
-//         describe('and can track all calls, contexts used, arguments passed and return values', function(){
-//             it('tracks all calls', function(){
-//                 var foo = this.foo;
-//                 spyOn(foo, 'someFn');
-//                 foo.someFn();
-//                 expect(foo.someFn).toHaveBeenCalled();
-//             });
-//             it('tracks how many times it was called', function(){
-//                 var foo = this.foo;
-//                 spyOn(foo, 'someFn');
-//                 foo.someFn();
-//                 expect(foo.someFn.called()).toEqual(1);
-//             });
-//             it('tracks if it was called "n" times', function(){
-//                 var foo = this.foo;
-//                 spyOn(foo, 'someFn');
-//                 foo.someFn();
-//                 expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
-//                 expect(foo.someFn.wasCalled.nTimes(2)).not.toBeTrue();
-//             });
-//             it('tracks what context it was called with', function(){
-//                 var foo = this.foo,
-//                     bar = {};
-//                 spyOn(foo, 'someFn');
-//                 foo.someFn();
-//                 expect(foo.someFn.contextCalledWith()).toEqual(foo);
-//                 expect(foo.someFn.contextCalledWith()).not.toEqual(bar);
-//             });
-//             it('tracks the arguments that it was called with', function(){
-//                 var foo = this.foo,
-//                     arg = 'Preamble rocks!';
-//                 spyOn(foo, 'someFn');
-//                 foo.someFn(arg);
-//                 expect(foo.someFn).toHaveBeenCalledWith(arg);
-//                 expect(foo.someFn).not.toHaveBeenCalledWith(arg + '!');
-//             });
-//             it('tracks what it returned', function(){
-//                 var foo = this.foo,
-//                     arg = 'Preamble rocks!';
-//                 spyOn(foo, 'someFn').and.callActual();
-//                 foo.someFn(arg);
-//                 expect(foo.someFn).toHaveReturned(arg);
-//                 spyOn(foo, 'someOtherFn').and.callActual();
-//                 expect(foo.someOtherFn).not.toHaveReturned(arg);
-//             });
-//         });
-//         describe('and be used as a "mock"', function(){
-//             var os = {
-//                 rmProperty: function(obj, propName){
-//                     delete obj[propName];
-//                 }
-//             };
-//             function doSomeThing(){
-//                 var anObj = {
-//                         a: 'a',
-//                         b: 'b'
-//                     };
-//                 os.rmProperty(anObj, 'a');
-//             }
-//             it('mocks rmProperty', function(){
-//                 spyOn(os, 'rmProperty').and.return(true);
-//                 // os.rmProperty.returns(true);
-//                 doSomeThing();
-//                 expect(os.rmProperty).toHaveBeenCalled();
-//                 // expect(os.rmProperty).toHaveBeenCalled.with.
-//                 expect(os.rmProperty).toHaveReturned(true);
-//             });
-//         });
-//     });
-//     describe('create a stub', function(){
-//         it('dynamically', function(){
-//             var stub = spyOn().and.throwWithMessage('whoops!').and.throwWithName('Whoops!');
-//             stub();
-//             expect(stub).toHaveBeenCalled();
-//             expect(stub).toHaveThrown();
-//             expect(stub).toHaveThrownWithMessage('whoops!');
-//             expect(stub).toHaveThrownWithName('Whoops!');
-//         });
-//     });
-// });
-
-/**
- * Preamble's test doubles
- * 1) Spies are function and object property methods that can track all calls,
- * contexts used, arguments passed and return values.
- * 2) Stubs are spies that have predefined behaviors.
- * 3) Mocks are stubs (and therefore they are also spies) which are used to
- * validate behavior.
- */
-
-describe('Preamble comes with 3 types of test dobules', function(){
-    describe('Spies are functions and object methods that can track all', function(){
-        var bar = function(){ return true; },
-            foo;
-        beforeEach(function(){
-            foo = {
-                someFn: function someFn(){
-                    return arguments;
-                }
-            };
-            spyOn(foo, 'someFn').and.callActual();
-            foo.someFn(123);
-            foo.someFn('abc', {a: '123456'});
-            foo.someFn(bar);
-        });
-        describe('calls', function(){
-           it('knows it was called', function(){
-               expect(foo.someFn).toHaveBeenCalled();
-           });
-        });
-        describe('contexts called with', function(){
-            it('knows what context it was called with', function(){
-               expect(foo.someFn).toHaveBeenCalledWithContext(foo);
-            });
-        });
-        describe('arguments passed', function(){
-            it('knows what arguments were passed to it', function(){
-                expect(foo.someFn).toHaveBeenCalledWith(123);
-                expect(foo.someFn).toHaveBeenCalledWith('abc', {a: '123456'});
-                expect(foo.someFn).toHaveBeenCalledWith(bar);
-            });
-        });
-        // describe('arguments not passed', function(){
-        //     it('knows what arguments were not passed to it', function(){
-        //        expect(foo.someFn).not.toHaveBeenCalledWith('abc');
-        //     });
-        // });
-        describe('return values', function(){
-            it('knows what it returned', function(){
-                expect(foo.someFn).toHaveReturned([123]);
-                expect(foo.someFn).toHaveReturned(['abc', {a: '123456'}]);
-                expect(foo.someFn).toHaveReturned([bar]);
-            });
-        });
-    });
-    describe('Stubs are spies but also have pre defined behavior', function(){
-        var foo;
-        beforeEach(function(){
-            foo = {
-                someFn: function someFn(arg){
-                    return arg;
-                }
-            };
-        });
-        it('can be defined to throwe an exception with a message when called', function(){
-            spyOn(foo, 'someFn').and.throwWithMessage('Whoops!');
-            foo.someFn();
-            expect(foo.someFn).toHaveThrownWithMessage('Whoops!');
-        });
-        it('can be defined to throw an exception with a name when called', function(){
-            spyOn(foo, 'someFn').and.throwWithName('Error');
-            foo.someFn();
-            expect(foo.someFn).toHaveThrownWithName('Error');
-        });
-        it('can be defined to return a value when called', function(){
-            var foobar = {foo: 'foo', bar: 'bar'};
-            spyOn(foo, 'someFn').and.return(foobar);
-            foo.someFn();
-            expect(foo.someFn).toHaveReturned(foobar);
-        });
-    });
-    describe('Mocks are stubs but also have pre defined expectations that can be validated', function(){
-        var foo;
-        beforeEach(function(){
-            foo = {
-                someFn: function someFn(arg){
-                    return arg;
-                }
-            };
-        });
-        it('such as expecting to have been called', function(){
-            spyOn(foo, 'someFn').and.expect.it.toBeCalled();
-            foo.someFn();
-            foo.someFn.validate();
-        });
-        it('such as expecting to have been called with specific values', function(){
-            spyOn(foo, 'someFn').and.expect.it.toBeCalledWith('abc', 123);
-            foo.someFn('abc', 123);
-            foo.someFn.validate();
-        });
-        it('such as expecting to have been call with specific contexts', function(){
-            spyOn(foo, 'someFn').and.expect.it.toBeCalledWithContext(foo);
-            foo.someFn();
-            foo.someFn.validate();
-        });
-        it('such as expecting to have returned a specific value', function(){
-            spyOn(foo, 'someFn').and.return(123).and.expect.it.toReturn(123);
-            foo.someFn();
-            foo.someFn.validate();
-        });
-        it('such as expecting to have thrown an exception', function(){
-            spyOn(foo, 'someFn').and.throw().and.expect.it.toThrow();
-            foo.someFn();
-            foo.someFn.validate();
-        });
-        it('such as expecting to have thrown an exception with a name', function(){
-            spyOn(foo, 'someFn').and.throwWithName('Whoops').and.expect.it.toThrowWithName('Whoops');
-            foo.someFn();
-            foo.someFn.validate();
-        });
-        it('such as expecting to have thrown an exception with a message', function(){
-            spyOn(foo, 'someFn').and.throwWithMessage('Whoops!').and.expect.it.toThrowWithMessage('Whoops!');
-            foo.someFn();
-            foo.someFn.validate();
-        });
-    });
-    // describe('Validate fails', function(){
-    //     it('when a spy has no expectations', function(){
-    //         var someFn = spyOn();
-    //         someFn.validate();
-    //         someFn.and.throwWithName('Whoops').and.expect.it.toThrowWithName('Whoops');
-    //         someFn();
-    //         someFn.validate();
-    //     });
-    // });
-});
-describe('test support multiple mocks', function(){
-    var foo = {
-        someFn1: function(){},
-        someFn2: function(){}
-    };
-    spyOn(foo, 'someFn1').and.return('abc').and.expect.it.toReturn('abc');
-    spyOn(foo, 'someFn2').and.throw().and.expect.it.toThrow();
-    foo.someFn1();
-    foo.someFn2();
-    it('someFn1 and someFn2 should not colide', function(){
-        foo.someFn1.validate();
-        foo.someFn2.validate();
-        expect(foo.someFn1).not.toHaveThrown();
-        expect(foo.someFn2).not.toHaveReturned('abc');
+describe('Calling toHaveBeenCalled', function(){
+    it('sets the expectation that the actual value, a function, was called' , function(){
+        var spy1 = spyOn(),
+            spy2 = spyOn();
+        spy1();
+        expect(spy1).toHaveBeenCalled();
+        expect(spy2).not.toHaveBeenCalled();
     });
 });
-describe('spyOn.x can be used to spyOn on multiple methods', function(){
-    var fi;
-    beforeEach(function(){
-        fi = {
-            someFn: function someFn(number){
-                return this.someOtherFn(number + 1) + 1;
+
+describe('Calling toHaveBeenCalledWith', function(){
+    it('sets the expectation that the actual value, a function, was called with specific arguments' , function(){
+        var spy = spyOn();
+        spy('abc', 'def');
+        expect(spy).toHaveBeenCalledWith('abc', 'def');
+        expect(spy).not.toHaveBeenCalledWith('def', 'abc');
+    });
+});
+
+describe('Calling toHaveBeenCalledWithContext', function(){
+    it('sets the expectation that the actual value, a function, was called with a specific context' , function(){
+        var someObject = {
+                someFn: function(){}
             },
-            someOtherFn: function (number) {
-                return number + 1;
-            }
-        };
-        spyOn.x(fi, ['someFn', 'someOtherFn']);
-    });
-    describe('calls', function(){
-        it('knows it was called', function(){
-            fi.someFn(1);
-            fi.someOtherFn(1);
-            expect(fi.someFn).toHaveBeenCalled();
-            expect(fi.someOtherFn).toHaveBeenCalled();
-        });
-    });
-    describe('contexts called with', function(){
-        it('knows what context it was called with', function(){
-            fi.someFn(1);
-            fi.someOtherFn(1);
-            expect(fi.someFn).toHaveBeenCalledWithContext(fi);
-            expect(fi.someOtherFn).toHaveBeenCalledWithContext(fi);
-        });
-    });
-    describe('arguments passed', function(){
-        it('knows what arguments were passed to it', function(){
-            fi.someFn.and.callActual();
-            fi.someOtherFn.and.callActual();
-            fi.someFn(1);
-            expect(fi.someFn).toHaveBeenCalledWith(1);
-            expect(fi.someOtherFn).toHaveBeenCalledWith(2);
-        });
-    });
-    describe('returned values', function(){
-        it('knows what they returned', function(){
-            fi.someFn.and.callActual();
-            fi.someOtherFn.and.callActual();
-            fi.someFn(1);
-            expect(fi.someOtherFn).toHaveReturned(3);
-            expect(fi.someFn).toHaveReturned(4);
-        });
-    });
-});
-describe('spying on more than one method', function(){
-    var foo,
-        bar;
-    beforeEach(function(){
-        foo = {
-            someFn: function(num){
-                return this.square(num);
-            },
-            square: function(num){
-                return num * num;
-            }
-        };
-        bar = {
-            someFn: function(num){
-                return this.square(num);
-            },
-            square: function(num){
-                return num * num;
-            }
-        };
-    });
-    it('with spy.x', function(){
-        spyOn.x(foo, ['someFn', 'square']);
-        foo.someFn.and.callActual();
-        foo.square.and.callActual();
-        foo.someFn(2);
-        expect(foo.someFn).toHaveBeenCalled();
-        expect(foo.someFn).toHaveBeenCalledWithContext(foo);
-        expect(foo.someFn).toHaveBeenCalledWith(2);
-        expect(foo.someFn).toHaveReturned(4);
-        expect(foo.square).toHaveBeenCalled();
-        expect(foo.square).toHaveBeenCalledWith(2);
-        expect(foo.square).toHaveReturned(4);
+            someOtherObject = {} ;
+        spyOn(someObject, 'someFn');
+        someObject.someFn();
+        expect(someObject.someFn).toHaveBeenCalledWithContext(someObject);
+        expect(someObject.someFn).not.toHaveBeenCalledWithContext(someOtherObject);
     });
 });
 
-describe('spying on a method', function(){
-    beforeEach(function(){
-        this.foo = {
-            someFn: function(arg){
-                return arg;
-            },
-            someOtherFn: function(arg){
-                return arg;
-            }
-        };
-    });
-    describe('we can query', function(){
-        it('if the method was called', function(){
-            var foo = this.foo;
-            spyOn(foo, 'someFn');
-            foo.someFn();
-            expect(foo.someFn).toHaveBeenCalled();
-        });
-        // it('if the method was called using an anonymous spy', function(){
-        //     var foo = this.foo;
-        //     expect(foo.someOtherFn).toHaveBeenCalled();
-        // });
-        it('if the method was called "n" times', function(){
-            var foo = this.foo;
-            spyOn(foo, 'someFn');
-            foo.someFn();
-            expect(foo.someFn.calls.count()).toEqual(1);
-        });
-        // it('if the method was called "n" times', function(){
-        //     var foo = this.foo;
-        //     spyOn(foo, 'someFn');
-        //     foo.someFn();
-        //     expect(foo.someFn.wasCalled.nTimes(1)).toBeTrue();
-        //     expect(foo.someFn.wasCalled.nTimes(2)).not.toBeTrue();
-        // });
-        it('if the spy was called with a specific context', function(){
-            var foo = this.foo,
-                bar = {};
-            spyOn(foo, 'someFn');
-            foo.someFn();
-            expect(foo.someFn.calls.wasCalledWithContext(foo)).toBeTrue();
-            expect(foo.someFn.calls.wasCalledWithContext(bar)).not.toBeTrue();
-        });
-        it('for the arguments that the method was called with', function(){
-            var foo = this.foo,
-                arg = 'Preamble rocks!';
-            spyOn(foo, 'someFn');
-            foo.someFn(arg);
-            expect(foo.someFn).toHaveBeenCalledWith(arg);
-            expect(foo.someFn).not.toHaveBeenCalledWith(arg + '!');
-        });
-        it('for what the method returned', function(){
-            var foo = this.foo,
-                arg = 'Preamble rocks!';
-            spyOn(foo, 'someFn').and.callActual();
-            foo.someFn(arg);
-            expect(foo.someFn).toHaveReturned(arg);
-        });
-        it('for what the method did not return', function(){
-            var foo = this.foo,
-                arg = 'Preamble rocks!';
-            spyOn(foo, 'someFn').and.callActual();
-            foo.someFn(arg);
-            expect(foo.someFn).not.toHaveReturned(arg + '!');
-        });
-    });
-    describe('and if it throws an exception', function(){
-        beforeEach(function(){
-            this.foo = {
-                someFn: function(){
-                    throw new Error('something went terribly wrong');
-                }
-            };
-        });
-        describe('we can query', function(){
-            it('if it does throw', function(){
-                var foo = this.foo;
-                spyOn(foo, 'someFn').and.callActual();
-                foo.someFn();
-                expect(foo.someFn).toHaveThrown();
-            });
-            it('if the method threw an exception with a specific message', function(){
-                var foo = this.foo;
-                spyOn(foo, 'someFn').and.callActual();
-                foo.someFn();
-                expect(foo.someFn).toHaveThrownWithMessage('something went terribly wrong');
-                expect(foo.someFn).not.toHaveThrownWithMessage('something went terribly wrong!');
-            });
-            it('if the method threw an exception with a specific name', function(){
-                var foo = this.foo;
-                spyOn(foo, 'someFn').and.callActual();
-                foo.someFn();
-                expect(foo.someFn).toHaveThrownWithName('Error');
-                expect(foo.someFn).not.toHaveThrownWithName('ErrorError');
-            });
-        });
+describe('Calling toHaveReturned', function(){
+    it('sets the expectation that the actual value, a function, returned a specific value' , function(){
+        var spy = spyOn().and.return({fName: 'George', lName: 'Washington'});
+        spy();
+        expect(spy).toHaveReturned({fName: 'George', lName: 'Washington'});
+        expect(spy).not.toHaveReturned({fName: 'Washington', lName: 'George'});
     });
 });
 
-describe ('A stub is also a spy and when configured to return a value', function(){
-    var foo = { someFn: function(){ return 25; } };
-    it('returns that value', function(){
-        spyOn(foo, 'someFn').and.return(13);
-        foo.someFn();
-        expect(foo.someFn.calls.returned(13)).toBeTrue();
+describe('Calling toHaveThrown', function(){
+    it('sets the expectation that the actual value, a function, threw an exception', function(){
+        var someFn = spyOn(function(arg){ return a + arg; }).and.callActual(),
+            someOtherFn = spyOn(function(arg){ return arg; }).and.callActual();
+        someFn(20);
+        someOtherFn('abc');
+        expect(someFn).toHaveThrown();
+        expect(someOtherFn).not.toHaveThrown();
     });
 });
 
-describe('A stub when configured to call the actual implementation', function(){
-    var foo = { someFn: function(arg){ return arg; } };
-    it('calls it', function(){
-        spyOn(foo, 'someFn').and.callActual();
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned(123)).toBeTrue();
-    });
-});
-
-describe('A stub when configured to call a fake implementation', function(){
-    var foo = { someFn: function(arg){ return arg; } };
-    it('calls it', function(){
-        spyOn(foo, 'someFn');
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned(123)).not.toBeTrue();
-        foo.someFn.and.callActual();
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned(123)).toBeTrue();
-        foo.someFn.and.callFake(function(){ return 'sorry'; });
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned('sorry')).toBeTrue();
-    });
-});
-
-describe('A stub configured to call the actual implementation can be reset', function(){
-    var foo = { someFn: function(arg){ return arg; } };
-    it('and it will call the stub', function(){
-        spyOn(foo, 'someFn').and.callActual();
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned(123)).toBeTrue();
-        foo.someFn.and.callStub();
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned(undefined)).toBeTrue();
-    });
-});
-
-describe('Calling reset() resets a spy, stub, mock to its pristine state - method', function(){
-    var foo = { someFn: function(arg){ return arg; } };
-    it('including all tracking information', function(){
-        spyOn(foo, 'someFn').and.callActual();
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned(123)).toBeTrue();
-        foo.someFn.and.callStub();
-        foo.someFn(123);
-        expect(foo.someFn.calls.returned(undefined)).toBeTrue();
-        expect(foo.someFn.calls.count()).toEqual(2);
-        foo.someFn.and.reset();
-        expect(foo.someFn.calls.count()).toEqual(0);
-    });
-});
-
-describe('Calling reset() resets a spy, stub, mock to its pristine state - function', function(){
-    var someFn = function(arg){ return arg; };
-    it('including all tracking information', function(){
-        someFn = spyOn(someFn).and.callActual();
-        someFn(123);
-        expect(someFn.calls.returned(123)).toBeTrue();
-        someFn.and.callStub();
-        someFn(123);
-        expect(someFn.calls.returned(undefined)).toBeTrue();
-        expect(someFn.calls.count()).toEqual(2);
-        someFn.and.reset();
-        expect(someFn.calls.count()).toEqual(0);
-    });
-});
-describe('A stub can be configured to throw an exception', function(){
-    beforeEach(function(){
-        this.foo = { someFn: function(){} };
-    });
-    it('when it is called', function(){
-        spyOn(this.foo, 'someFn').and.throw();
-        this.foo.someFn();
-        expect(this.foo.someFn).toHaveThrown();
-    });
-    it('with a message when it is called', function(){
-        spyOn(this.foo, 'someFn').and.throwWithMessage('Holy Batman!');
-        this.foo.someFn();
-        expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
-    });
-    it('with a name when it is called', function(){
-        spyOn(this.foo, 'someFn').and.throwWithName('NotBatmanError');
-        this.foo.someFn();
-        expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
-    });
-    it('with a message and a name when it is called', function(){
-        spyOn(this.foo, 'someFn').and.throwWithMessage('Holy Batman!').
-            and.throwWithName('NotBatmanError');
-        this.foo.someFn();
-        expect(this.foo.someFn).toHaveThrown();
-        expect(this.foo.someFn).toHaveThrownWithMessage('Holy Batman!');
-        expect(this.foo.someFn).toHaveThrownWithName('NotBatmanError');
-    });
-});
-
-describe('When a stub is configured to be called with a specific context', function(){
-    it('it is called with the correct context', function(){
-        var someObject = {},
-            someFn = spyOn().and.callWithContext(someObject);
+describe('Calling toHaveThrownWithMessage', function(){
+    it('sets the expectation that the actual value, a function, threw an exception with a specific message', function(){
+        var someFn = spyOn().and.throwWithMessage('Whoops!');
         someFn();
-        expect(someFn).toHaveBeenCalledWithContext(someObject);
+        expect(someFn).toHaveThrownWithMessage('Whoops!');
+        expect(someFn).not.toHaveThrownWithMessage('Whoops! That was bad.');
     });
 });
 
-describe('Using a "stub" to test Ajax', function(){
-    //simulates a jQuery-like object
-    var jQueryNot = {
-        ajax: function(){}
-    };
-    function getToDos(count, callback){
-        jQueryNot.ajax({
-            url: '/api/v2/todo/count/' + count,
-            success: function(toDos){
-                callback(null, toDos);
-            }
-        });
-    }
-    it('without triggering a network call', function(){
-        var calls;
-        spyOn(jQueryNot, 'ajax');
-        getToDos(10, function(){});
-        expect(jQueryNot.ajax).toHaveBeenCalled();
-        calls = jQueryNot.ajax.calls;
-        expect(calls.forCall(0).getArgsLength()).toEqual(1);
-        expect(calls.forCall(0).hasArg(0)).toBeTrue();
-        expect(typeof(calls.forCall(0).getArg(0)) === 'object').toBeTrue();
-        expect(calls.forCall(0).getArgProperty(0, 'url')).
-            toEqual('/api/v2/todo/count/10');
+describe('Calling toHaveThrownWithName', function(){
+    it('sets the expectation that the actual value, a function, threw an exception with a specific name', function(){
+        var someFn = spyOn().and.throwWithName('Error');
+        someFn();
+        expect(someFn).toHaveThrownWithName('Error');
+        expect(someFn).not.toHaveThrownWithName('MinorError');
     });
 });
 
-describe('spying on more than one method', function(){
-    beforeEach(function(){
-        this.foo = {
-            someFn: function(arg){
-                return arg;
-            }
+describe('Calling spyOn() without arguments', function(){
+    it('creates a spy from an anonymous function', function(){
+        var anonFn = spyOn();
+        anonFn();
+        expect(anonFn).toHaveBeenCalled();
+    });
+});
+
+describe('Calling spyOn(fn)', function(){
+    it('creates a spy from the function fn', function(){
+        var someSpy;
+        function someFn(){}
+        someSpy = spyOn(someFn);
+        someSpy();
+        expect(someSpy).toHaveBeenCalled();
+    });
+});
+
+describe('Calling spyOn(object, methodName)', function(){
+    it('creates a spy from object[methodName]', function(){
+        var someObject = {
+           someFn: function(){}
         };
-        this.bar = {
-            someFn: function(arg){
-                return arg;
-            }
-        };
-    });
-
-    it('spies are isolated and there are no side effects', function(){
-        var foo = this.foo,
-            bar = this.bar;
-        spyOn(foo, 'someFn');
-        spyOn(bar, 'someFn');
-        foo.someFn('Is Preamble great?');
-        bar.someFn('Yes it is!');
-        foo.someFn('You got that right!');
-        expect(foo.someFn).toHaveBeenCalled();
-        expect(foo.someFn.calls.count() === 2).toBeTrue();
-        expect(foo.someFn.calls.count() === 1).not.toBeTrue();
-        expect(bar.someFn).toHaveBeenCalled();
-        expect(bar.someFn.calls.count() === 1).toBeTrue();
-        expect(bar.someFn.calls.count() === 2).not.toBeTrue();
+        spyOn(someObject, 'someFn');
+        someObject.someFn();
+        expect(someObject.someFn).toHaveBeenCalled();
     });
 });
 
-describe('using spy\'s "calls" api with methods', function(){
-    var i,
-        foo = {
-            someFn: function(arg){
-                return arg;
-            }
-        },
-        bar ={},
-        n = 3,
-        aCall;
-    spyOn(foo, 'someFn').and.callActual();
-    for(i = 0; i < n; i++){
-        foo.someFn(i) ;
-    }
-    it('count() returns the right count', function(){
-        expect(foo.someFn.calls.count()).toEqual(n);
-    });
-    it('all() returns an array with the right number of elements', function(){
-        expect(foo.someFn.calls.all().length).toEqual(n);
-    });
-    it('forCall(n) returns the correct element', function(){
-        for(i = 0; i < n; i++){
-            aCall = foo.someFn.calls.forCall(i);
-            expect(aCall.context).toEqual(foo);
-            expect(aCall.context).not.toEqual(bar);
-            expect(aCall.getArg(0)).toEqual(i);
-            expect(aCall.getArg(0)).not.toEqual(n);
-            expect(aCall.error).not.toBeTruthy();
-            expect(aCall.returned).toEqual(i);
-            expect(aCall.returned).not.toEqual(n);
-        }
+describe('Calling spyOn.x(object, methodNames)', function(){
+    it('creates a spy from object[methodName] for each methodName found in the array methodNames', function(){
+        var someObject = {
+           someFn: function(){},
+           someOtherFn: function(){}
+        };
+        spyOn.x(someObject, ['someFn', 'someOtherFn']);
+        someObject.someFn();
+        expect(someObject.someFn).toHaveBeenCalled();
+        someObject.someOtherFn();
+        expect(someObject.someOtherFn).toHaveBeenCalled();
     });
 });
 
-/**
- *v2.3.0 support spying on standalone functions
- */
-describe('spying on a function', function(){
-    beforeEach(function(){
-        this.someFn = function(arg){
-                return arg;
-        };
+describe('Calling calls.count()', function(){
+    it('returns the number of times the spy was called', function(){
+        var someFn = spyOn();
+        someFn();
+        expect(someFn.calls.count()).toEqual(1);
     });
-    it('we can query if the function was called', function(){
-        var someFn = this.someFn,
-            spyFn = spyOn(someFn);
-        spyFn();
-        expect(spyFn).toHaveBeenCalled();
-    });
-    it('we can query the function was called n times', function(){
-        var someFn = this.someFn,
-            spyFn = spyOn(someFn);
-        spyFn();
-        expect(spyFn.calls.count() === 1).toBeTrue();
-    });
-    // it('we can query the function was called n times', function(){
-    //     var someFn = this.someFn,
-    //         spyFn = spyOn(someFn);
-    //     spyFn();
-    //     expect(spyFn.calls.`wasCalled.nTimes(1)).toBeTrue();
-    //     expect(spyFn.wasCalled.nTimes(2)).not.toBeTrue();
-    // });
-    it('we can query the context the function was called with', function(){
+});
+
+describe('Calling calls.forCall(nth)', function(){
+    it('returns an ACall object', function(){
         var someFn = spyOn(),
-            foo = {fn: someFn},
-            bar = {fn: someFn};
-        foo.fn(123);
-        bar.fn(123);
-        expect(someFn.calls.forCall(0).context).toEqual(foo);
-        expect(someFn.calls.forCall(1).context).toEqual(bar);
-    });
-    it('we can query for the arguments that the function was called with', function(){
-        var someFn = this.someFn,
-            spyFn = spyOn(someFn),
-            arg = 'Preamble rocks!',
-            call;
-        spyFn(arg);
-        // expect(jQueryNot.ajax.calls.getCall(0).args.getArgumentsLength()).toEqual(1);
-        call = spyFn.calls.forCall(0);
-        expect(call.getArg(0)).toEqual(arg);
-        expect(call.getArg(0)).not.toEqual(arg + '!');
-        expect(call.getArg(1)).not.toBeTruthy();
-    });
-    it('we can query for what the function returned', function(){
-        var someFn = this.someFn,
-            spyFn = spyOn(someFn).and.callActual(),
-            arg = 'Preamble rocks!';
-        spyFn(arg);
-        expect(spyFn.calls.returned(arg)).toBeTrue();
-        expect(spyFn.calls.returned(arg + 1)).not.toBeTrue();
+            aCall;
+        someFn();
+        aCall = someFn.calls.forCall(0);
+        expect(aCall.hasOwnProperty('context')).toBeTrue();
+        expect(aCall.hasOwnProperty('args')).toBeTrue();
+        expect(aCall.hasOwnProperty('error')).toBeTrue();
+        expect(aCall.hasOwnProperty('returned')).toBeTrue();
     });
 });
 
-describe('a spy function throws', function(){
-    beforeEach(function(){
-        this.someFn = function(){
-            throw new Error('Holy Batman!');
-        };
-    });
-    it('we can query the function if threw', function(){
-        var spyFn = spyOn(this.someFn).and.callActual();
-        spyFn();
-        expect(spyFn.calls.threw()).toBeTrue();
-        expect(spyFn.calls.threwWithMessage('Holy Batman!')).toBeTrue();
-        expect(spyFn.calls.threwWithMessage('Holy Batman!!')).not.toBeTrue();
+describe('Calling calls.all()', function(){
+    it('returns an array of all the ACall objects associated with the spy', function(){
+        var someFn = spyOn();
+        someFn();
+        expect(someFn.calls.all().length).toEqual(1);
     });
 });
 
-describe('spying on more than one function', function(){
-    beforeEach(function(){
-        this.fooFn = function(arg){
-            return arg;
-        };
-        this.barFn = function(arg){
-            return arg;
-        };
-    });
-
-    it('spies are isolated and there are no side effects', function(){
-        var fooFn = this.fooFn,
-            barFn = this.barFn,
-            spyFooFn = spyOn(fooFn),
-            spyBarFn = spyOn(barFn);
-        spyFooFn('Is Preamble great?');
-        spyBarFn('Yes it is!');
-        spyFooFn('You got that right!');
-        expect(spyFooFn).toHaveBeenCalled();
-        expect(spyFooFn.calls.count() === 2).toBeTrue();
-        expect(spyFooFn.calls.count() === 1).not.toBeTrue();
-        expect(spyBarFn).toHaveBeenCalled();
-        expect(spyBarFn.calls.count() === 1).toBeTrue();
-        expect(spyBarFn.calls.count() === 2).not.toBeTrue();
+describe('Calling calls.wasCalledWith(...args)', function(){
+    it('returns true if the spy was called with args and false if it was not called with args', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.wasCalledWith(123, 'abc', {zip: 55555})).toBeTrue();
     });
 });
 
-describe('using spy\'s "calls" api with functions', function(){
-    var i,
-        foo = function(arg){
-            return arg;
-        },
-        n = 3,
-        aCall,
-        spyFooFn = spyOn(foo).and.callActual();
-    for(i = 0; i < n; i++){
-        spyFooFn(i) ;
-    }
-    it('count() returns the right count', function(){
-        expect(spyFooFn.calls.count()).toEqual(n);
+describe('Calling calls.wasCalledWithContext(object)', function(){
+    it('returns true if the spy was called with the context object and false if it was not called with the context object', function(){
+        var someObj = {
+            someFn: function(){}
+        };
+        spyOn(someObj, 'someFn');
+        someObj.someFn();
+        expect(someObj.someFn.calls.wasCalledWithContext(someObj)).toBeTrue();
     });
-    it('all() returns an array with the right number of elements', function(){
-        expect(spyFooFn.calls.all().length).toEqual(n);
+});
+
+describe('Calling calls.returned(value)', function(){
+    it('returns true if the spy returned value and false if it did not return value', function(){
+        var someObj = {
+            someFn: function(num){return num;}
+        };
+        spyOn(someObj, 'someFn').and.callActual();
+        someObj.someFn(123);
+        expect(someObj.someFn.calls.returned(123)).toBeTrue();
     });
-    it('forCall(n) returns the correct element', function(){
-        for(i = 0; i < n; i++){
-            aCall = spyFooFn.calls.forCall(i);
-            // expect(aCall.args.getArgument(0)).toEqual(i);
-            expect(aCall.getArg(0)).toEqual(i);
-            expect(aCall.getArg(0)).not.toEqual(n);
-            expect(aCall.error).not.toBeTruthy();
-            expect(aCall.returned).toEqual(i);
-            expect(aCall.returned).not.toEqual(n);
-        }
+});
+
+describe('Calling calls.threw()', function(){
+    it('Returns true if the spy threw an exception and false if it did not throw an exception', function(){
+        var someFn = spyOn().and.throw();
+        someFn();
+        expect(someFn.calls.threw()).toBeTrue();
+    });
+});
+
+describe('Calling calls.threwWithMessage()', function(){
+    it('Returns true if the spy threw an exception with message and false if it did not throw an exception with message', function(){
+        var someFn = spyOn().and.throwWithMessage('Whoops!');
+        someFn();
+        expect(someFn.calls.threwWithMessage('Whoops!')).toBeTrue();
+    });
+});
+
+describe('Calling calls.threwWithName()', function(){
+    it('Returns true if the _spy_ threw an exception with **_name_** and false if it did not throw an exception with **_name_**', function(){
+        var someFn = spyOn().and.throwWithName('Error');
+        someFn();
+        expect(someFn.calls.threwWithName('Error')).toBeTrue();
+    });
+});
+
+describe('Calling reset', function(){
+    it('resets the spy back to its default state', function(){
+        var someFn = spyOn();
+        someFn();
+        expect(someFn).toHaveBeenCalled();
+        someFn.and.reset();
+        expect(someFn).not.toHaveBeenCalled();
+    });
+});
+
+describe('Calling getContext()', function(){
+    it('returns the context that was used for a specific call to the _spy_', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn();
+        expect(someObject.someFn.calls.forCall(0).getContext()).toEqual(someObject);
+    });
+});
+
+describe('Calling getArgs()', function(){
+    it('returns an Args object for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn(123);
+        expect(someObject.someFn.calls.forCall(0).getArgs().args).toEqual([123]);
+    });
+});
+
+describe('Calling getArg(nth)', function(){
+    it('works like arguments[nth] for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn(123, 456);
+        expect(someObject.someFn.calls.forCall(0).getArg(0)).toEqual(123);
+        expect(someObject.someFn.calls.forCall(0).getArg(1)).toEqual(456);
+    });
+});
+
+describe('Calling getArgsLength()', function(){
+    it('works like arguments.length for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn(123, 456);
+        expect(someObject.someFn.calls.forCall(0).getArgsLength()).toEqual(2);
+    });
+});
+
+describe('Calling getProperty(nth, propertyName)', function(){
+    it('works like arguments[nth][propertyName] for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn({fName: 'Abraham', lName: 'Lincoln'});
+        expect(someObject.someFn.calls.forCall(0).getArgProperty(0, 'fName')).toEqual('Abraham');
+        expect(someObject.someFn.calls.forCall(0).getArgProperty(0, 'lName')).toEqual('Lincoln');
+    });
+});
+
+describe('Calling hasArgProperty(nth, propertyName)', function(){
+    it('works like !!arguments[nth][propertyName] for a specific call to the _spy_', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn({fName: 'Abraham', lName: 'Lincoln'});
+        expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'fName')).toBeTrue();
+        expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'lName')).toBeTrue();
+    });
+});
+
+describe('Calling hasArg(n)', function(){
+    it('works like !!arguments[nth] for a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(){}
+        };
+        spyOn(someObject, 'someFn');
+        someObject.someFn('123', 123);
+        expect(someObject.someFn.calls.forCall(0).hasArg(0)).toBeTrue();
+        expect(someObject.someFn.calls.forCall(0).hasArg(1)).toBeTrue();
+    });
+});
+
+describe('Calling getError()', function(){
+    it('returns the error associated with a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(number){return number + a;}
+        };
+        spyOn(someObject, 'someFn').and.callActual();
+        someObject.someFn(123);
+        expect(someObject.someFn.calls.forCall(0).getError()).toBeTruthy();
+    });
+});
+
+describe('Calling getReturned()', function(){
+    it('returns the value returned from a specific call to the spy', function(){
+        var someObject = {
+            someFn: function(number){return number + 1;}
+        };
+        spyOn(someObject, 'someFn').and.callActual();
+        someObject.someFn(123);
+        expect(someObject.someFn.calls.forCall(0).getReturned()).toEqual(124);
+    });
+});
+
+describe('Calling getLength()', function(){
+    it('works like arguments.length', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().getLength()).toEqual(3);
+    });
+});
+
+describe('Calling hasArg(n)', function(){
+    it('works like !!arguments[nth]', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
+    });
+});
+
+describe('Calling getArg(n)', function(){
+    it('works like arguments[nth]', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
+    });
+});
+
+describe('Calling hasArgProperty(nth, propertyName)', function(){
+    it('works like !!arguments[nth][propertyName]', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().hasArgProperty(2, 'zip')).toBeTrue();
+    });
+});
+
+describe('Calling getArgProperty(nth, propertyName)', function(){
+    it('works like arguments[nth][propertyName]', function(){
+        var someFn = spyOn();
+        someFn(123, 'abc', {zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().getArgProperty(2, 'zip')).toEqual(55555);
+    });
+});
+
+describe('Calling and.callWithContext(object)', function(){
+    it('the spy is called using object as its context (this)', function(){
+        var context = {},
+            someFn = spyOn().and.callWithContext(context);
+        someFn();
+        expect(someFn).toHaveBeenCalledWithContext(context);
+    });
+});
+
+describe('Calling and.throw()', function(){
+    it('throws an exception when the _spy_ is called', function(){
+        var someFn = spyOn().and.throw();
+        someFn();
+        expect(someFn).toHaveThrown();
+    });
+});
+
+describe('Calling and.throwWithMessage(message)', function(){
+    it('the spy throws an exception with message when it is called', function(){
+        var someFn = spyOn().and.throwWithMessage('Whoops!');
+        someFn();
+        expect(someFn).toHaveThrownWithMessage('Whoops!');
+    });
+});
+
+describe('Calling and.throwWithName(name)', function(){
+    it('the spy throws an exception with name when it is called', function(){
+        var someFn = spyOn().and.throwWithName('Error');
+        someFn();
+        expect(someFn).toHaveThrownWithName('Error');
+    });
+});
+
+describe('Calling and.return(value)', function(){
+    it('the spy returns value when it is called', function(){
+        var someFn = spyOn().and.return({zip: 55555});
+        someFn();
+        expect(someFn).toHaveReturned({zip: 55555});
+    });
+});
+
+describe('Calling and.callActual()', function(){
+    it('the actual implementation is called when the spy is called', function(){
+        var someFn = function(n){
+                return n + 1;
+            },
+            stub;
+       stub = spyOn(someFn).and.return(1);
+       stub(100);
+       expect(stub).toHaveReturned(1);
+       stub.and.callActual();
+       stub(100);
+       expect(stub).toHaveReturned(101);
+    });
+});
+
+describe('Calling and.callFake(fn)', function(){
+    it('creates a fake with fn as its implementation', function(){
+        var someObject = {
+                someFn: function(){return false;}
+            };
+       spyOn(someObject, 'someFn').and.callFake(function(){return true;});
+       someObject.someFn();
+       expect(someObject.someFn).toHaveReturned(true);
+    });
+});
+
+describe('Calling and.expect.it.toBeCalled()', function(){
+    it('sets the expectation that the mock must be called', function(){
+        var mock = spyOn().and.expect.it.toBeCalled();
+        mock();
+        mock.validate();
+    });
+});
+
+describe('Calling and.expect.it.toBeCalledWith("abc", 123, {zip: "55555"})', function(){
+    it('sets the expectation that the mock must be called with "abc", 123, {zip: "55555"}', function(){
+        var mock = spyOn().and.expect.it.toBeCalledWith('abc', 123, {zip: '55555'});
+        mock('abc', 123, {zip: '55555'});
+        mock.validate();
+    });
+});
+
+describe('Calling and.expect.it.toBeCalledWithContext(object)', function(){
+    it('sets the expectation that the mock must be called with its context set to object', function(){
+        var someObject = {
+                someFn: function(){}
+            },
+            someOtherObject = {};
+        someObject.someFn = someObject.someFn.bind(someOtherObject);
+        spyOn(someObject, 'someFn').and.expect.it.toBeCalledWithContext(someObject);
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+
+describe('Calling and.expect.it.toReturn(value)', function(){
+    it('sets the expectation that the mock must return value', function(){
+        var someObject = {
+                someFn: function(){return {fName: 'Tom', lName: 'Sawyer'};}
+            };
+        spyOn(someObject, 'someFn').and.callActual().
+            and.expect.it.toReturn({fName: 'Tom', lName: 'Sawyer'});
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+
+describe('Calling and.expect.it.toThrow()', function(){
+    it('sets the expectation that the mock must throw an exception when called', function(){
+        var someObject = {
+                someFn: function(){ throw new Error('Whoops!');}
+            };
+        spyOn(someObject, 'someFn').and.callActual().
+            and.expect.it.toThrow();
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+
+describe('Calling and.expect.it.toThrowWithName(name)', function(){
+    it('sets the expectation that the mock must throw an exception with name when called', function(){
+        var someObject = {
+                someFn: function(){}
+            };
+        spyOn(someObject, 'someFn').and.throwWithName('Error').
+            and.expect.it.toThrowWithName('Error');
+        someObject.someFn();
+        someObject.someFn.validate();
+    });
+});
+
+describe('Calling and.expect.it.toThrowWithMessage("Whoops!")', function(){
+    it('sets the expectation that the mock must throw an exception with message when called', function(){
+        var someObject = {
+                someFn: function(){}
+            };
+        spyOn(someObject, 'someFn').and.throwWithMessage('Whoops!').
+            and.expect.it.toThrowWithMessage('Whoops!'); someObject.someFn();
+        someObject.someFn.validate();
     });
 });
