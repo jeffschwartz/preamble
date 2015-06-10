@@ -105,11 +105,11 @@ In the documentation that follows descriptions and code examples assume that the
 ## Suites
 
 ### **describe** *describe(label, callback)*
-**describe** describes a _suite_. **label** is a string used to uniquely identify the _suite_. **callback** is a function that is called by Preamble that provides structure and scope for one or more _specs_.
+**describe** is used to describe a _suite_ which can contain one or more _specs_. **label** is a string used to uniquely identify the _suite_. **callback** is a function that is called by Preamble that provides structure and scope for one or more _specs_.
 
 ```javascript
-describe('describes a "suite" which can contain one or more "specs"', function(){
-    it('and "it" specifies a spec which can contain one or more expectations"', function(){
+describe('"describe" is used to describe a suite which can contain one or more specs', function(){
+    it('and "it" is used to describe a spec and is used to group one or more expectations"', function(){
         expect(1).toEqual(1);
     });
 });
@@ -129,7 +129,7 @@ describe('suites can  be nested', function(){
     });
     describe('nested suite 2', function(){
         it('spec 2.1', function(){
-            expect(0).not,toBeTruthy();
+            expect(0).not.toBeTruthy();
         });
     });
 });
@@ -139,10 +139,10 @@ describe('suites can  be nested', function(){
 
 ### **it** *it(label, [timeout,] callback([done]){...})*
 
-**it** is used to group one or more _expectations_ which are composed by pairing the _actual value_ under test with an appropriate _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
+**it** is used to describe a _spec_ and is used to group one or more _expectations_, which are composed by pairing the _actual value_ under test with an appropriate _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
 
 ```javascript
-it('is used to group one or more expectations', function(){
+it('"it" is used to describe a spec and is used to group one or more expectations', function(){
     expect(true).toBeTrue();
     expect(false).toBeFalse();
     expect('abc').toEqual('abc');
