@@ -11,4 +11,4 @@ highlighter: pygments
 exclude: ['README.md']
 
 # GitHub info
-preamble_version: v2
+preamble_version: v3

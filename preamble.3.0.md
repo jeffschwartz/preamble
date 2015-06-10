@@ -1,7 +1,7 @@
 ---
 layout: devguide
-title: v3.0-rc1 API Developer Guide
-permalink: /preamble/api/3/0/rc1/
+title: v3.0 API Developer Guide
+permalink: /preamble/api/3/0/
 ---
 
 ## Introducing Preamble
