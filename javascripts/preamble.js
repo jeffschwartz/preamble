@@ -858,11 +858,11 @@
         /**
          * Registers a test.
          * @param {string} label, describes the test/spec.
-         * @param {integer} timeLimit, optional, the amount of time
-         * the test is allowed to run before timing out the test.
          * @param {function} callback, called to run the test.
+         * @param {integer} timeoutInterval, optional, the amount of time
+         * the test is allowed to run before timing out the test.
          */
-        runner.test = function(label, timeLimit, callback){
+        runner.test = function(label, callback, timeoutInterval ){
             var tst,
                 parentGroup,
                 id,
@@ -871,9 +871,9 @@
                 cb,
                 stackTrace;
             if(arguments.length < 2){
-                throwException('requires 2 or 3 arguments, found ' + arguments.length);
+                throwException('requires at least 2 arguments, found ' + arguments.length);
             }
-            tl = arguments.length === 3 && timeLimit || config.timeoutInterval;
+            tl = arguments.length === 3 && timeoutInterval || config.timeoutInterval;
             cb = arguments.length === 3 && callback || arguments[1];
             parentGroup = groupStack[groupStack.length - 1];
             id = uniqueId();
