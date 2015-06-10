@@ -97,17 +97,17 @@
      * @param {[Group] parentGroups
      * @param {string} path
      * @param {string} label
-     * @param {integer} testTimeOutInterval
+     * @param {integer} timeoutInterval
      * @param {function} callback
      */
-    function Test(parentGroups, id, path, label, stackTrace, testTimeOutInterval, callback){
+    function Test(parentGroups, id, path, label, stackTrace, timeoutInterval, callback){
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
         this.parentGroup = parentGroups[parentGroups.length - 1];
         this.id = id;
         this.path = path;
         this.label = label;
         this.stackTrace = stackTrace;
-        this.testTimeOutInterval = testTimeOutInterval;
+        this.timeoutInterval = timeoutInterval;
         this.callback = callback;
         this.assertions = []; //contains assertions
         this.duration = 0;
@@ -250,7 +250,7 @@
                     //test.parentGroup.passed = false;
                     //callback();
                 }
-            }, test.testTimeOutInterval);
+            }, test.timeoutInterval);
 
             //Run the before callbacks, test callback and after callbacks.
             //Note to self: Since this can fire after the test has already timed
@@ -496,7 +496,7 @@
                     });
                 }else if(item.totFailed === -1){
                     failed = testFailureMarkup.
-                        replace(/{{explain}}/, 'test timed out').
+                        replace(/{{explain}}/, 'spec timed out').
                         replace(/{{stacktrace}}/, stackTrace(item.stackTrace));
                     html = html.slice(0, -5) + failed + html.slice(-5);
                 }
@@ -858,11 +858,11 @@
         /**
          * Registers a test.
          * @param {string} label, describes the test/spec.
-         * @param {integer} timeLimit, optional, the amount of time
-         * the test is allowed to run before timing out the test.
          * @param {function} callback, called to run the test.
+         * @param {integer} timeoutInterval, optional, the amount of time
+         * the test is allowed to run before timing out the test.
          */
-        runner.test = function(label, timeLimit, callback){
+        runner.test = function(label, callback, timeoutInterval ){
             var tst,
                 parentGroup,
                 id,
@@ -871,9 +871,9 @@
                 cb,
                 stackTrace;
             if(arguments.length < 2){
-                throwException('requires 2 or 3 arguments, found ' + arguments.length);
+                throwException('requires at least 2 arguments, found ' + arguments.length);
             }
-            tl = arguments.length === 3 && timeLimit || config.testTimeOutInterval;
+            tl = arguments.length === 3 && timeoutInterval || config.timeoutInterval;
             cb = arguments.length === 3 && callback || arguments[1];
             parentGroup = groupStack[groupStack.length - 1];
             id = uniqueId();
@@ -1032,13 +1032,13 @@
     function configure(){
         /**
          * Default configuration options - override these in your config file
-         * (e.g. var preambleConfig = {testTimeOutInterval: 20}) or in-line in your tests.
+         * (e.g. var preambleConfig = {timeoutInterval: 10}) or in-line in your tests.
          *
          * windowGlobals: (default true) - set to false to not use window globals
          * (i.e. non browser environment). *IMPORTANT - USING IN-LINE CONFIGURATION
          * TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED*.
          *
-         * testTimeOutInterval: (default 10 milliseconds) - set to some other number
+         * timeoutInterval: (default 50 milliseconds) - set to some other number
          * of milliseconds to wait before a test is timed out. This number is applied
          * to all tests and can be selectively overridden by individual tests.
          *
@@ -1062,7 +1062,7 @@
          */
         var defaultConfig = {
                 windowGlobals: true,
-                testTimeOutInterval: 10,
+                timeoutInterval: 50,
                 name: 'Suite',
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
