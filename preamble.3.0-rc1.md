@@ -139,12 +139,12 @@ describe('suites can  be nested', function(){
 
 ### **it** *it(label, [timeout,] callback([done]){...})*
 
-**it** is used to describe a _spec_ and is used to group one or more _expectations_, which are composed by pairing the _actual value_ under test with an appropriate _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see testTimeOutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
+**it** is used to describe a _spec_ and is used to group one or more _expectations_, which are composed by pairing the _actual value_ under test with an appropriate _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see timeoutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
 
 ```javascript
 it('"it" is used to describe a spec and is used to group one or more expectations', function(){
     expect(true).toBeTrue();
-    expect(false).toBeFalse();
+    expect(false).not.toBeTrue();
     expect('abc').toEqual('abc');
     expect(123).not.toEqual('abc');
 });
@@ -249,7 +249,7 @@ Set the _timeout interval_ for all _specs_ by either using the _javascripts/prea
 
 ```javascript
 var preambleConfig = {
-    testTimeOutInterval: 25,
+    timeoutInterval: 25,
 };
 ```
 
@@ -257,7 +257,7 @@ or set the _timeout interval_ for all _specs_ using in-line configuration (see *
 
 ```javascript
 configure({
-    testTimeOutInterval: 25
+    timeoutInterval: 25
 });
 ```
 
@@ -1171,7 +1171,7 @@ The following configuration options can be overridden in the _**preamble-config.
 ### **windowGlobals**
 Default value = true. Set to false if you don't want to pollute the global name space and instead use the two global vars 'Preamble' and 'assert'.
 
-### **testTimeOutInterval**
+### **timeoutInterval**
 Default value = 10 milliseconds. This is the value Preamble uses to wait before it times out a test. This value includes the time allocated to setup (beforeEach), teardown (afterEach) and the actual test (it or test).
 
 ### **name**
@@ -1200,7 +1200,7 @@ Call _**configure**_ passing a _**hash**_ containing _properties_ and their asso
 configure({
     name: 'Sample Test Suite',
     hidePassedTests: true,
-    testTimeOutInterval: 100
+    timeoutInterval: 100
 });
 
 .
