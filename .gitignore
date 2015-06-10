@@ -14,3 +14,4 @@ Gemfile.lock
 .sass-cache
 _site/
 images/
+javascripts/test-doubles.js

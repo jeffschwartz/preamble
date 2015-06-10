@@ -2,11 +2,11 @@
   "name": "preamble",
   "title": "Preamble",
   "description": "A powerful JavaScript testing framework backed by a powerful assertion engine that your test scripts interface with through a simple to use but powerful API. Preamble makes the task of authoring tests easy, intuitive and even fun.",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "author": {
     "name": "Jeffrey Schwartz",
     "email": "jefftschwartz@gmail.com",
-    "url": "http://adoseofjavascript.com/about/"
+    "url": "https://github.com/jeffschwartz"
   },
   "homepage": "http://jeffschwartz.github.io/preamble/",
   "repository": {
@@ -21,11 +21,13 @@
     "preamble",
     "javascript",
     "testing",
+    "bdd",
     "framework"
   ],
   "devDependencies": {
-    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-jshint": "~0.10.0",
     "grunt-contrib-less": "~0.11.0",
-    "grunt-contrib-jshint": "~0.10.0"
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-shell": "^1.1.2"
   }
 }
