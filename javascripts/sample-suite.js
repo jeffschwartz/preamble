@@ -8,21 +8,120 @@
  */
 configure({
     name: 'Sample BDD Suite',
-    hidePassedTests: true,
-    testTimeOutInterval: 500
+    hidePassedTests: false
 });
 
-describe('"describe" describes a "suite" which can contains one or more "specs"', function(){
-    it('and "it" specifies a spec which can contain one or more "assertions"', function(){
-        expect(1).toEqual(1);
+describe('"describe" is used to describe a suite which can contain one or more specs', function(){
+    it('and "it" is used to describe a spec and is used to group one or more expectations"', function(){
+        expect(true).toBeTrue();
+        expect(false).not.toBeTrue();
+        expect('abc').toEqual('abc');
+        expect(123).not.toEqual('abc');
     });
 });
 
-describe('Assertions are composed using "expect" to set the actual value and a matcher', function(){
-    it('"expect" sets the "actual" value & the matcher applies a condition against that', function(){
-        expect(1).toEqual(1);
+describe('suites can  be nested', function(){
+    describe('nested suite 1', function(){
+        it('spec 1.1', function(){
+            expect(1).toBeTruthy();
+        });
+    });
+    describe('nested suite 2', function(){
+        it('spec 2.1', function(){
+            expect(0).not.toBeTruthy();
+        });
     });
 });
+
+describe('specs can be run asynchronously', function(){
+var count = 0;
+    it('and calling done signals to Preamble that the asynchronous process has completed ', function(done){
+        setTimeout(function(){
+            count = 100;
+            done(function(){
+                expect(count).toEqual(100);
+            });
+        }, 1);
+    });
+});
+
+describe('Using beforeEach to synchronously execute common code before each test', function(){
+    var count = 0;
+    beforeEach(function(){
+        count = 1;
+    });
+    it('count equals 1', function(){
+        expect(count).toEqual(1);
+        count = 2;
+    });
+    it('count still equals 1', function(){
+        expect(count).toEqual(1);
+    });
+});
+
+describe('Using afterEach to synchronously execute common code after each test', function(){
+    var count = 0;
+    afterEach(function(){
+        count = 1;
+    });
+    it('count equals 0', function(){
+        expect(count).toEqual(0);
+        count = 2;
+    });
+    it('count still equals 1', function(){
+        expect(count).toEqual(1);
+    });
+});
+
+describe('Using beforeEach to asynchronously execute common code before each spec is called', function(){
+    var count = 0;
+    beforeEach(function(done){
+        setTimeout(function(){
+            count = 10;
+            done();
+        }, 1);
+    });
+    it('count equals 10', function(){
+        expect(count).toEqual(10);
+    });
+});
+
+describe('Using afterEach to asynchronously execute common code after each spec is called', function(){
+    var count = 0;
+    afterEach(function(done){
+        setTimeout(function(){
+            count = 1;
+            done();
+        }, 1);
+    });
+    it('this spec expects count to equal 0 and sets count to 10', function(){
+        expect(count).toEqual(0);
+        count = 10;
+    });
+    it('this spec expects count to equal 1', function(){
+        expect(count).toEqual(1);
+    });
+});
+
+describe('Preventing a spec from timing out', function(){
+    var count = 0;
+    beforeEach(function(done){
+        setTimeout(function(){
+            done(function(){
+                count = 10;
+            });
+        }, 50);
+    });
+    it('count should equal 10', 60, function(){
+        expect(count).toEqual(10);
+    });
+});
+
+
+
+
+
+//---------------------------------
 
 describe('"expect" takes a single value as an argument', function(){
     it('such as a number', function(){

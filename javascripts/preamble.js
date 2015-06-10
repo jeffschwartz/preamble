@@ -496,7 +496,7 @@
                     });
                 }else if(item.totFailed === -1){
                     failed = testFailureMarkup.
-                        replace(/{{explain}}/, 'test timed out').
+                        replace(/{{explain}}/, 'spec timed out').
                         replace(/{{stacktrace}}/, stackTrace(item.stackTrace));
                     html = html.slice(0, -5) + failed + html.slice(-5);
                 }
