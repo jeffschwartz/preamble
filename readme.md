@@ -5,6 +5,7 @@
 **_Preamble_** is a powerful JavaScript BDD testing framework backed by a powerful assertion engine that your suites interface with through a simple to use but powerful API. Preamble makes the task of authoring tests easy, intuitive and even fun.
 
 **_Preamble v3.0.0_** introduces numerous new API features and enhancements:
+
 1. A rich BDD semantic API
 2. Enhanced support for test doubles: spies, stubs, fakes, and mocks.
 
