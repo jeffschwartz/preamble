@@ -1038,7 +1038,7 @@
          * (i.e. non browser environment). *IMPORTANT - USING IN-LINE CONFIGURATION
          * TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED*.
          *
-         * timeoutInterval: (default 10 milliseconds) - set to some other number
+         * timeoutInterval: (default 50 milliseconds) - set to some other number
          * of milliseconds to wait before a test is timed out. This number is applied
          * to all tests and can be selectively overridden by individual tests.
          *
@@ -1062,7 +1062,7 @@
          */
         var defaultConfig = {
                 windowGlobals: true,
-                timeoutInterval: 10,
+                timeoutInterval: 50,
                 name: 'Suite',
                 uiTestContainerId: 'ui-test-container',
                 hidePassedTests: false,
