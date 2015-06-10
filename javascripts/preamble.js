@@ -1,11 +1,11 @@
-//Preamble v3.0.0-rc1 (Pern)
+//Preamble v3.0.0)
 //(c) 2013 - 2015 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v3.0.0-rc1 (Pern)',
+    var version = 'v3.0.0',
         //Merged configuration options.
         config = {},
         queue=[],
