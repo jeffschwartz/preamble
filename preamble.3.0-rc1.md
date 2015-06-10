@@ -137,9 +137,9 @@ describe('suites can  be nested', function(){
 
 ## Specs
 
-### **it** *it(label, [timeout,] callback([done]){...})*
+### **it** *it(label, callback([done]){...}, [timeoutInterval])*
 
-**it** is used to describe a _spec_ and is used to group one or more _expectations_, which are composed by pairing the _actual value_ under test with an appropriate _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeout** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see timeoutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
+**it** is used to describe a _spec_ and is used to group one or more _expectations_, which are composed by pairing the _actual value_ under test with an appropriate _matcher_. **label** is a string used to uniquely identify the _spec_ within a _suite_. **timeoutInterval** is optional and if provided it overrides Preamble's default _timeout interval_ which is the number of miliseconds Preamble waits before timing out a spec (please see timeoutInterval in the Configuration section below for details). **callback** is a function called by Preamble which contains one or more _expectations_ and which also provides _scope_ to make data and code accessible to _expectations_.
 
 ```javascript
 it('"it" is used to describe a spec and is used to group one or more expectations', function(){
@@ -243,13 +243,13 @@ describe('Using afterEach to asynchronously execute common code after each spec 
 
 ## Preventing Specs From Timing Out
 
-Preamble will timeout both _synchronous_ and _asynchronout_ _specs_ if they fail to complete within the 10 milisecond _timeout interval_ that Preamble defaults to. To override Preamble's default _timeout interval_ you can:
+Preamble will timeout both _synchronous_ and _asynchronout_ _specs_ if they fail to complete within the 50 milisecond _timeout interval_ that Preamble defaults to. To override Preamble's default _timeout interval_ you can:
 
-Set the _timeout interval_ for all _specs_ by either using the _javascripts/preamble-config.js_ file
+Set the _timeout interval_ for all _specs_ by modifying the _javascripts/preamble-config.js_ file
 
 ```javascript
 var preambleConfig = {
-    timeoutInterval: 25,
+    timeoutInterval: 100
 };
 ```
 
@@ -257,11 +257,11 @@ or set the _timeout interval_ for all _specs_ using in-line configuration (see *
 
 ```javascript
 configure({
-    timeoutInterval: 25
+    timeoutInterval: 100
 });
 ```
 
-or set the _timeout interval_ for individual _specs_ by passing a _timeout interval_ to Preamble when calling _it()_ (see **_Specs_** above for details).
+or set the _timeout interval_ for individual _specs_ by passing a _timeout interval_ (an integer) to Preamble when calling _it()_ (see **_Specs_** above for details).
 
 ```javascript
 describe('Preventing a spec from timing out', function(){
@@ -271,11 +271,11 @@ describe('Preventing a spec from timing out', function(){
             done(function(){
                 count = 10;
             });
-        }, 50);
+        }, 80);
     });
-    it('count should equal 10', 60, function(){
+    it('count should equal 10', function(){
         expect(count).toEqual(10);
-    });
+    }, 100);
 });
 ```
 
@@ -1172,7 +1172,7 @@ The following configuration options can be overridden in the _**preamble-config.
 Default value = true. Set to false if you don't want to pollute the global name space and instead use the two global vars 'Preamble' and 'assert'.
 
 ### **timeoutInterval**
-Default value = 10 milliseconds. This is the value Preamble uses to wait before it times out a test. This value includes the time allocated to setup (beforeEach), teardown (afterEach) and the actual test (it or test).
+Default value = 50 milliseconds. This is the value Preamble uses to wait before it times out a test. This value includes the time allocated to setup (beforeEach), teardown (afterEach) and the actual test (it or test).
 
 ### **name**
 Default value = 'Test'. Override this to display a meaningful name for your tests.
