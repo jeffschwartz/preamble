@@ -1690,13 +1690,13 @@
                 return  this.args.length ? this.args.length : 0;
             };
             Args.prototype.hasArg = function(i){
-                return this.getLength() > i ? true : false;
+                return i >= 0 && this.getLength() > i ? true : false;
             };
             Args.prototype.getArg = function(i){
                 return this.hasArg(i) ? this.args[i] : null;
             };
             Args.prototype.hasArgProperty = function(i, propertyName){
-                return this.hasArg(i) && this.args[i][propertyName] ? true : false;
+                return this.hasArg(i) && propertyName in this.args[i] ? true : false;
             };
             Args.prototype.getArgProperty = function(i, propertyName){
                 return this.hasArgProperty(i, propertyName) ? this.args[i][propertyName] : null;
