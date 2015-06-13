@@ -371,7 +371,7 @@ describe('Calling calls.threwWithName()', function(){
     });
 });
 
-describe('Calling reset', function(){
+describe('Calling and.reset()', function(){
     it('resets the spy back to its default state', function(){
         var someFn = spyOn();
         someFn();
@@ -381,7 +381,7 @@ describe('Calling reset', function(){
     });
 });
 
-describe('Calling getContext()', function(){
+describe('Calling calls.forCall(i).getContext()', function(){
     it('returns the context that was used for a specific call to the _spy_', function(){
         var someObject = {
             someFn: function(){}
@@ -392,7 +392,7 @@ describe('Calling getContext()', function(){
     });
 });
 
-describe('Calling getArgs()', function(){
+describe('Calling calls.forCall(i).getArgs()', function(){
     it('returns an Args object for a specific call to the spy', function(){
         var someObject = {
             someFn: function(){}
@@ -403,7 +403,7 @@ describe('Calling getArgs()', function(){
     });
 });
 
-describe('Calling getArg(nth)', function(){
+describe('Calling calls.forCall(i).getArg(nth)', function(){
     it('works like arguments[nth] for a specific call to the spy', function(){
         var someObject = {
             someFn: function(){}
@@ -415,7 +415,7 @@ describe('Calling getArg(nth)', function(){
     });
 });
 
-describe('Calling getArgsLength()', function(){
+describe('Calling calls.forCall(i).getArgsLength()', function(){
     it('works like arguments.length for a specific call to the spy', function(){
         var someObject = {
             someFn: function(){}
@@ -426,7 +426,7 @@ describe('Calling getArgsLength()', function(){
     });
 });
 
-describe('Calling getProperty(nth, propertyName)', function(){
+describe('Calling calls.forCall(i).getProperty(nth, propertyName)', function(){
     it('works like arguments[nth][propertyName] for a specific call to the spy', function(){
         var someObject = {
             someFn: function(){}
@@ -438,8 +438,8 @@ describe('Calling getProperty(nth, propertyName)', function(){
     });
 });
 
-describe('Calling hasArgProperty(nth, propertyName)', function(){
-    it('works like !!arguments[nth][propertyName] for a specific call to the _spy_', function(){
+describe('Calling calls.forCall(i).hasArgProperty(nth, propertyName)', function(){
+    it('works like propertyName in arguments[nth] for a specific call to the _spy_', function(){
         var someObject = {
             someFn: function(){}
         };
@@ -447,10 +447,11 @@ describe('Calling hasArgProperty(nth, propertyName)', function(){
         someObject.someFn({fName: 'Abraham', lName: 'Lincoln'});
         expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'fName')).toBeTrue();
         expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'lName')).toBeTrue();
+        expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'address')).not.toBeTrue();
     });
 });
 
-describe('Calling hasArg(n)', function(){
+describe('Calling calls.forCall(i).hasArg(n)', function(){
     it('works like !!arguments[nth] for a specific call to the spy', function(){
         var someObject = {
             someFn: function(){}
@@ -462,7 +463,7 @@ describe('Calling hasArg(n)', function(){
     });
 });
 
-describe('Calling getError()', function(){
+describe('Calling calls.forCall(i).getError()', function(){
     it('returns the error associated with a specific call to the spy', function(){
         var someObject = {
             someFn: function(number){return number + a;}
@@ -473,7 +474,7 @@ describe('Calling getError()', function(){
     });
 });
 
-describe('Calling getReturned()', function(){
+describe('Calling calls.forCall(i).getReturned()', function(){
     it('returns the value returned from a specific call to the spy', function(){
         var someObject = {
             someFn: function(number){return number + 1;}
@@ -484,7 +485,7 @@ describe('Calling getReturned()', function(){
     });
 });
 
-describe('Calling getLength()', function(){
+describe('Calling calls.forCall(i).getArgs().getLength()', function(){
     it('works like arguments.length', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
@@ -492,31 +493,34 @@ describe('Calling getLength()', function(){
     });
 });
 
-describe('Calling hasArg(n)', function(){
+describe('Calling calls.forCall(i).getArgs().hasArg(n)', function(){
     it('works like !!arguments[nth]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
         expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
+        expect(someFn.calls.forCall(0).getArgs().hasArg(3)).not.toBeTrue();
     });
 });
 
-describe('Calling getArg(n)', function(){
+describe('Calling calls.forCall(i).getArgs().getArg(n)', function(){
     it('works like arguments[nth]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
-        expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
+        expect(someFn.calls.forCall(0).getArgs().getArg(2)).toEqual({zip: 55555});
+        expect(someFn.calls.forCall(0).getArgs().getArg(2)).not.toEqual({zip: 11111});
     });
 });
 
-describe('Calling hasArgProperty(nth, propertyName)', function(){
-    it('works like !!arguments[nth][propertyName]', function(){
+describe('Calling calls.forCall(i).getArgs().hasArgProperty(nth, propertyName)', function(){
+    it('works like propertyName in arguments[nth]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
         expect(someFn.calls.forCall(0).getArgs().hasArgProperty(2, 'zip')).toBeTrue();
+        expect(someFn.calls.forCall(0).getArgs().hasArgProperty(2, 'address')).not.toBeTrue();
     });
 });
 
-describe('Calling getArgProperty(nth, propertyName)', function(){
+describe('Calling calls.forCall(i).getArgs().getArgProperty(nth, propertyName)', function(){
     it('works like arguments[nth][propertyName]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
