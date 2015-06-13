@@ -1,3 +1,8 @@
+v3.0.1
+Bug Fixes
+o Fixed bug in Args.prototype.hasArgProperty and ACall.prototype.hasArgProperty
+methods that would cause them to fail.
+
 v3.0.0
 Enhancements
 o BDD all the way!
