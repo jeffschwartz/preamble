@@ -853,7 +853,7 @@ describe('Calling getReturned()', function(){
 ```
 
 ## Spy _Args_ API
-An _Args_ object encapsulates all the _arguments_ passed to a specific call to the _spy_. To obtain an Args object for a specific call to the spy call the ACall getArgs method (See ACall API above).
+An _Args_ object encapsulates all the _arguments_ passed to a specific call to the _spy_. To obtain an Args object call the _ACall getArgs_ method (See _ACall_ API above).
 
 ### **_getLength_** *getLength()*
 Works like arguments.length.
@@ -889,7 +889,7 @@ describe('Calling getArg(n)', function(){
     it('works like arguments[nth]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
-        expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
+        expect(someFn.calls.forCall(0).getArgs().getArg(2)).toEqual(55555);
     });
 });
 ```
@@ -921,16 +921,16 @@ describe('Calling getArgProperty(nth, propertyName)', function(){
 ```
 
 ## Stubs
-**_Stubs_** are _spies_ that have predefined behaviors (canned responses) and have no underlying implementations of their own. Predefine behaviors are added to _spies_ using the _and_ API.
+**_Stubs_** are _spies_ that have predefined behaviors (canned responses) and by default they do not call their actual underlying implementations. Predefine behaviors are added by using the _and_ API.
 
 ## Stubs API
 
 ### **_and.callWithContext_** *and.callWithContext(object)*
-The _spy_ is called using **_object_** as its context (_this_).
+Instructs the _stub_ to use **_object_** as its context (_this_) when it is called.
 
 ```javascript
 describe('Calling and.callWithContext(object)', function(){
-    it('the spy is called using object as its context (this)', function(){
+    it('instructs the stub to use object as its context (this) when it is called', function(){
         var context = {},
             someFn = spyOn().and.callWithContext(context);
         someFn();
@@ -940,11 +940,11 @@ describe('Calling and.callWithContext(object)', function(){
 ```
 
 ### **_and.throw_** *and.throw()*
-Throws an exception when the _spy_ is called.
+Instructs the _stub_ to throw an exception when it is called.
 
 ```javascript
 describe('Calling and.throw()', function(){
-    it('throws an exception when the _spy_ is called', function(){
+    it('instructs the stub to throw an exception when it is called', function(){
         var someFn = spyOn().and.throw();
         someFn();
         expect(someFn).toHaveThrown();
@@ -953,11 +953,11 @@ describe('Calling and.throw()', function(){
 ```
 
 ### **_and.throwWithMessage_** *and.throwWithMessage(message)*
-The _spy_ throws an exception with **_message_** when it is called.
+Instructs the _stub_ to throw an exception with **_message_** when it is called.
 
 ```javascript
 describe('Calling and.throwWithMessage(message)', function(){
-    it('the spy throws an exception with message when it is called', function(){
+    it('instructs the stub to throw an exception with message when it is called', function(){
         var someFn = spyOn().and.throwWithMessage('Whoops!');
         someFn();
         expect(someFn).toHaveThrownWithMessage('Whoops!');
@@ -966,11 +966,11 @@ describe('Calling and.throwWithMessage(message)', function(){
 ```
 
 ### **_and.throwWithName_** *and.throwWithName(name)*
-The _spy_ throws an exception with **_name_** when it is called.
+Instructs the _stub_ to throw an exception with **_name_** when it is called.
 
 ```javascript
 describe('Calling and.throwWithName(name)', function(){
-    it('the spy throws an exception with name when it is called', function(){
+    it('instructs the stub to throw an exception with name when it is called', function(){
         var someFn = spyOn().and.throwWithName('Error');
         someFn();
         expect(someFn).toHaveThrownWithName('Error');
@@ -979,11 +979,11 @@ describe('Calling and.throwWithName(name)', function(){
 ```
 
 ### **_and.return_** *and.return(value)*
-The _spy_ returns **_value_** when it is called.
+Instructs the _stub_ to return **_value_** when it is called.
 
 ```javascript
 describe('Calling and.return(value)', function(){
-    it('the spy returns value when it is called', function(){
+    it('instructs the stub to return value when it is called', function(){
         var someFn = spyOn().and.return({zip: 55555});
         someFn();
         expect(someFn).toHaveReturned({zip: 55555});
@@ -992,11 +992,11 @@ describe('Calling and.return(value)', function(){
 ```
 
 ### **_and.callActual_** *and.callActual()*
-The **_actual_** implementation is called when the _spy_ is called.
+Instructs the _stub_ to call its **_actual_** underlying implementation when it is called.
 
 ```javascript
 describe('Calling and.callActual()', function(){
-    it('the actual implementation is called when the spy is called', function(){
+    it('instructs the stub to call its actual underlying implementation when it is called', function(){
         var someFn = function(n){
                 return n + 1;
             },
@@ -1012,7 +1012,7 @@ describe('Calling and.callActual()', function(){
 ```
 
 ## Fakes
-**_Fakes_** are _spies_ with fake implementations and can be used as substitutes for _expensive_ dependencies. **_Fakes__** are created using the _and_ API.
+**_Fakes_** are _stubs_ (and therefore also _spies_) with fake implementations that can be used as substitutes for _expensive_ dependencies. **_Fakes__** are created using the _and_ API.
 
 ## Fakes API
 
@@ -1023,17 +1023,22 @@ Creates a fake with **_fn_** as its implementation.
 describe('Calling and.callFake(fn)', function(){
     it('creates a fake with fn as its implementation', function(){
         var someObject = {
-                someFn: function(){return false;}
+                someExpensiveProcess: function(){
+                    .
+                    .
+                    .
+                    return true;
+                }
             };
-       spyOn(someObject, 'someFn').and.callFake(function(){return true;});
-       someObject.someFn();
-       expect(someObject.someFn).toHaveReturned(true);
+       spyOn(someObject, 'someExpensiveProcess').and.callFake(function(){return true;});
+       someObject.someExpensiveProcess();
+       expect(someObject.someExpensiveProcess).toHaveReturned(true);
     });
 });
 ```
 
 ## Mocks
-**_Mocks_** are _spies_ that have predefined expectations and are used to validate behaviors. Add predefine expectations using the _and.expect.it_ API. Vaidate mocks by calling _mock.validate()_.
+**_Mocks_** are _stubs_ (and therefore also _spies_) that have predefined expectations and are used to validate behaviors. Add predefined expectations to mocks using the _and.expect.it_ API and validate mocks by calling _aMock.validate()_. A _spec_ fails if _aMock.validate()_ fails.
 
 ## Mocks API
 
@@ -1043,28 +1048,28 @@ Sets the expectation that the _mock_ must be called.
 ```javascript
 describe('Calling and.expect.it.toBeCalled()', function(){
     it('sets the expectation that the mock must be called', function(){
-        var mock = spyOn().and.expect.it.toBeCalled();
-        mock();
-        mock.validate();
+        var aMock = spyOn().and.expect.it.toBeCalled();
+        aMock();
+        aMock.validate();
     });
 });
 ```
 
 ### **_and.expect.it.toBeCalledWith_** *and.expect.it.toBeCalledWith(...args)*
-Sets the expectation that the _mock_ must be called with specific arguments.
+Sets the expectation that the _mock_ must be called with specific arguments **_...args_**.
 
 ```javascript
-describe('Calling and.expect.it.toBeCalledWith("abc", 123, {zip: "55555"})', function(){
-    it('sets the expectation that the mock must be called with "abc", 123, {zip: "55555"}', function(){
-        var mock = spyOn().and.expect.it.toBeCalledWith('abc', 123, {zip: '55555'});
-        mock('abc', 123, {zip: '55555'});
-        mock.validate();
+describe('Calling and.expect.it.toBeCalledWith(...args)', function(){
+    it('sets the expectation that the mock must be called with ...args', function(){
+        var aMock = spyOn().and.expect.it.toBeCalledWith('abc', 123, {zip: '55555'});
+        aMock('abc', 123, {zip: '55555'});
+        aMock.validate();
     });
 });
 ```
 
 ### **_and.expect.it.toBeCalledWithContext_** *and.expect.it.toBeCalledWithContext(object)*
-Set the expectation that the mock will be called with its context set to **_object_**.
+Set the expectation that the _mock_ will be called with its context set to **_object_**.
 
 ```javascript
 describe('Calling and.expect.it.toBeCalledWithContext(object)', function(){
@@ -1082,7 +1087,7 @@ describe('Calling and.expect.it.toBeCalledWithContext(object)', function(){
 ```
 
 ### **_and.expect.it.toReturn** *and.expect.it.toReturn(value)*
-Set the expectation that the mock will return **_value_**.
+Set the expectation that the _mock_ will return **_value_**.
 
 ```javascript
 describe('Calling and.expect.it.toReturn(value)', function(){
@@ -1099,7 +1104,7 @@ describe('Calling and.expect.it.toReturn(value)', function(){
 ```
 
 ### **_and.expect.it.toThrow** *and.expect.it.toThrow()*
-Set the expectation that the mock must throw an exception when called.
+Set the expectation that the _mock_ must throw an exception when called.
 
 ```javascript
 describe('Calling and.expect.it.toThrow()', function(){
@@ -1116,7 +1121,7 @@ describe('Calling and.expect.it.toThrow()', function(){
 ```
 
 ### **_and.expect.it.toThrowWithName** *and.expect.it.toThrowWithName(name)*
-Set the expectation that the mock must throw an exception with **_name_** when called.
+Set the expectation that the _mock_ must throw an exception with **_name_** when called.
 
 ```javascript
 describe('Calling and.expect.it.toThrowWithName(name)', function(){
@@ -1133,10 +1138,10 @@ describe('Calling and.expect.it.toThrowWithName(name)', function(){
 ```
 
 ### **_and.expect.it.toThrowWithMessage** *and.expect.it.toThrowWithMessage(message)*
-Set the expectation that the mock must throw an exception with **_message_** when called.
+Set the expectation that the _mock_ must throw an exception with **_message_** when called.
 
 ```javascript
-describe('Calling and.expect.it.toThrowWithMessage("Whoops!")', function(){
+describe('Calling and.expect.it.toThrowWithMessage(message)', function(){
     it('sets the expectation that the mock must throw an exception with message when called', function(){
         var someObject = {
                 someFn: function(){}
@@ -1169,28 +1174,28 @@ var elUiTestContainerElement = document.getElementById(getUiTestContainerElement
 The following configuration options can be overridden in the _**preamble-config.js**_ file located in the _javascripts_ folder:
 
 ### **windowGlobals**
-Default value = true. Set to false if you don't want to pollute the global name space and instead use the two global vars 'Preamble' and 'assert'.
+Default value = true. Set to false if you don't want to pollute the global name space and instead want to use the one global variable 'Preamble'.
 
 ### **timeoutInterval**
-Default value = 50 milliseconds. This is the value Preamble uses to wait before it times out a test. This value includes the time allocated to setup (beforeEach), teardown (afterEach) and the actual test (it or test).
+Default value = 50 milliseconds. This is the value Preamble uses to wait for a spec to complete. This value includes the time allocated to setup (beforeEach), teardown (afterEach) and the actual spec.
 
 ### **name**
-Default value = 'Test'. Override this to display a meaningful name for your tests.
+Default value = 'Test'. Override this to display a meaningful _name_ for your suite in the output report.
 
 ### **uiTestContainerId**
 Default value = 'ui-test-container'. Override this to use a different ID for the UI test container DOM element.
 
 ### **hidePassedTests**
-Default value = false. Set it to true to hide passed tests.
+Default value = false. Set it to true to hide passed specs.
 
 ### **shortCircuit** <span class="added"><small>v2.1.0</small></span>
-Default value = false. Set it to true to cause Preamble to imediately terminate running any further tests and to then produce its coverage, summary and detail report. This is a convenient option to use if your suites take a long time to run.
+Default value = false. Set it to true to instruct Preamble to terminate running any further specs upon the first spec failure. This is a convenient option to use if your suites take a long time to run.
 
 ## In-line Configuration
-Begining with v2.0, you can call _**configure**_ directly from within your test scripts.:
+Begining with v2.0, you can call _**configure**_ directly from within your test scripts.
 
 ### **configure** *configure(hash)*
-Call _**configure**_ passing a _**hash**_ containing _properties_ and their associated _values_ for the configuration options to be overriden.
+Call _**configure**_ passing a _**hash**_ containing the _properties_ and their associated _values_ for the configuration options to be overriden (see **_Configuration Using preamble-config.js_** above for descriptions of all the available configuration options).
 <p class="warning">Place the call to <em>configure</em> at the very <strong><em>top</em></strong> of your test script file.</p>
 <p class="warning">Please note that the <em><strong>windowGlobals</strong></em> configuration option can only be overriden by setting its value in the <em>preamble-config.js</em> configuration file and that it cannot be overriden using <em>in-line</em> configuration. Please see <em>Configuration Using preamble-config.js</em> above.</p>
 
@@ -1198,7 +1203,7 @@ Call _**configure**_ passing a _**hash**_ containing _properties_ and their asso
 //Place the call to configure at the top of your test script file
 
 configure({
-    name: 'Sample Test Suite',
+    name: 'Sample Suite',
     hidePassedTests: true,
     timeoutInterval: 100
 });
@@ -1210,9 +1215,9 @@ configure({
 
 ## Running Headless With PhantomJS
 
-<p class="warning">Please note that Preamble v2 requires PhantomJS v2.0.0 or better.</p>
+<p class="warning">Please note that since v2 Preamble requires PhantomJS v2.0.0 or better.</p>
 <p class="warning">Please note that if you are installing the PhantomJS v2 <em>binary distribution</em> on a Mac you may need to follow the directions given <a href="https://github.com/ariya/phantomjs/issues/12900#issuecomment-74073057" target="_blank">here</a>.</p>
-Beginning with v2 you can run _headless_ tests with Preamble using <a href="http://phantomjs.org" target="_blank">PhantomJS</a> v2. The following example assumes that you already have PhantomJS installed and that it can be found on the path.
+You can run Preamble _headless_ using <a href="http://phantomjs.org" target="_blank">PhantomJS</a>. The following example assumes that you already have PhantomJS installed and that it can be found on the path.
 
 1. Open up a terminal and change to your test's root folder.
 2. From the command line enter _"path/to/phantomjs javascripts/phantom-runner.js index.html"_ which should produce output similar to the example below:
