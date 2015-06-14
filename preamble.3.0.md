@@ -788,11 +788,11 @@ describe('Calling getProperty(nth, propertyName)', function(){
 ```
 
 ### **_hasArgProperty_** *hasArgProperty(nth, propertyName)*
-Works like !!arguments[**_nth_**][**_propertyName_**] for a specific call to the _spy_.
+Works like **_propertyName_** in arguments[**_nth_**] for a specific call to the _spy_.
 
 ```javascript
 describe('Calling hasArgProperty(nth, propertyName)', function(){
-    it('works like !!arguments[nth][propertyName] for a specific call to the _spy_', function(){
+    it('works like propertyName in arguments[nth] for a specific call to the _spy_', function(){
         var someObject = {
             someFn: function(){}
         };
@@ -800,6 +800,7 @@ describe('Calling hasArgProperty(nth, propertyName)', function(){
         someObject.someFn({fName: 'Abraham', lName: 'Lincoln'});
         expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'fName')).toBeTrue();
         expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'lName')).toBeTrue();
+        expect(someObject.someFn.calls.forCall(0).hasArgProperty(0, 'address')).not.toBeTrue();
     });
 });
 ```
@@ -889,20 +890,21 @@ describe('Calling getArg(n)', function(){
     it('works like arguments[nth]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
-        expect(someFn.calls.forCall(0).getArgs().getArg(2)).toEqual(55555);
+        expect(someFn.calls.forCall(0).getArgs().getArg(2)).toEqual({zip: 55555});
     });
 });
 ```
 
 ### **_hasArgProperty_** *hasArgProperty(nth, propertyName)*
-Works like !!arguments[**_nth_**][**_propertyName_**].
+Works like **_propertyName_** in arguments[**_nth_**].
 
 ```javascript
 describe('Calling hasArgProperty(nth, propertyName)', function(){
-    it('works like !!arguments[nth][propertyName]', function(){
+    it('works like propertyName in arguments[nth]', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
         expect(someFn.calls.forCall(0).getArgs().hasArgProperty(2, 'zip')).toBeTrue();
+        expect(someFn.calls.forCall(0).getArgs().hasArgProperty(2, 'address')).not.toBeTrue();
     });
 });
 ```
