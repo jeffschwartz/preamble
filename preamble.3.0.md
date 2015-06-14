@@ -870,7 +870,7 @@ describe('Calling getLength()', function(){
 ```
 
 ### **_hasArg_** *hasArg(n)*
-Works like !!arguments[**_nth_**].
+Works like **_n_** >= 0 && **_n_** < arguments.length.
 
 ```javascript
 describe('Calling hasArg(n)', function(){
@@ -1088,7 +1088,7 @@ describe('Calling and.expect.it.toBeCalledWithContext(object)', function(){
 });
 ```
 
-### **_and.expect.it.toReturn** *and.expect.it.toReturn(value)*
+### **_and.expect.it.toReturn_** *and.expect.it.toReturn(value)*
 Set the expectation that the _mock_ will return **_value_**.
 
 ```javascript
@@ -1105,7 +1105,7 @@ describe('Calling and.expect.it.toReturn(value)', function(){
 });
 ```
 
-### **_and.expect.it.toThrow** *and.expect.it.toThrow()*
+### **_and.expect.it.toThrow_** *and.expect.it.toThrow()*
 Set the expectation that the _mock_ must throw an exception when called.
 
 ```javascript
@@ -1122,7 +1122,7 @@ describe('Calling and.expect.it.toThrow()', function(){
 });
 ```
 
-### **_and.expect.it.toThrowWithName** *and.expect.it.toThrowWithName(name)*
+### **_and.expect.it.toThrowWithName_** *and.expect.it.toThrowWithName(name)*
 Set the expectation that the _mock_ must throw an exception with **_name_** when called.
 
 ```javascript
@@ -1139,7 +1139,7 @@ describe('Calling and.expect.it.toThrowWithName(name)', function(){
 });
 ```
 
-### **_and.expect.it.toThrowWithMessage** *and.expect.it.toThrowWithMessage(message)*
+### **_and.expect.it.toThrowWithMessage_** *and.expect.it.toThrowWithMessage(message)*
 Set the expectation that the _mock_ must throw an exception with **_message_** when called.
 
 ```javascript
