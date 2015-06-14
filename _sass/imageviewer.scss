@@ -1,7 +1,19 @@
 .imageviewer-img {
     margin: 0 auto;
-    opacity: 1;
     border: none;
     max-width: 100%;
     vertical-align: middle;
+    opacity: 1;
+    webkit-transition: opacity 2s;
+    moz-transition: opacity 2s;
+    o-transition: opacity 2s;
+    transition: opacity 2s;
+}
+
+.imageviewer-img-hidden {
+    opacity: .1;
+}
+
+.imageviewer-img-visible {
+    opacity: 1;
 }

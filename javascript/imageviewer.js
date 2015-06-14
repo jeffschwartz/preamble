@@ -8,48 +8,58 @@
             images = el.getAttribute('data-images').split(','),
             delay = el.getAttribute('data-delay') || 500,
             bp = '',
+            visibleClasses = 'imageviewer-img imageviewer-img-visible',
+            hiddenClasses = 'imageviewer-img imageviewer-img-hidden',
+            transitionState,
+            transitionEvent,
             index;
 
-        function addStylesToEl(el, elStyles){
-            var st = el.style;
-            elStyles.forEach(function(style){
-                st[style[0]] = style[1];
-            });
-        }
-
-        function fadeIn(){
-            var opacity = 0,
-                tid;
-            el.setAttribute('src', images[index]);
-            tid = setInterval(function(){
-                opacity += 0.01;
-                addStylesToEl(el, [['opacity', opacity]]);
-                if(opacity >= 1){
-                    clearInterval(tid);
-                    pause(el);
+        function getTransitionedEvent(){
+            var transitions = {
+                    'WebkitTransition' :'webkitTransitionEnd',
+                    'MozTransition'    :'transitionend',
+                    'MSTransition'     :'msTransitionEnd',
+                    'OTransition'      :'oTransitionEnd',
+                    'transition'       :'transitionEnd'
+                };
+            function parse(){
+                for(var t in transitions){
+                    if( el.style[t] !== undefined ){
+                      transitionEvent = transitions[t];
+                      return transitionEvent;
+                    }
                 }
-            }, 10);
+            }
+            return transitionEvent || parse();
         }
 
-        function pause(){
-           setTimeout(function(){
-              fadeOut(el);
-           }, delay);
+        function yieldAndThen(fn, miliseconds){
+            setTimeout(function(){
+                fn();
+            }, miliseconds === undefined ? delay : miliseconds);
         }
 
-        function fadeOut(){
-            var opacity = 1,
-                tid;
-            tid = setInterval(function(){
-                opacity -= 0.01;
-                addStylesToEl(el, [['opacity', opacity]]);
-                if(opacity <= 0){
-                    clearInterval(tid);
-                    index += 1;
-                    index = index > images.length - 1 ? 0 : index;
-                    fadeIn(el);
-                }
-            }, 10);
+        function transitioned(){
+            el.addEventListener(transitionEvent, transitioned, false);
+            switch (transitionState) {
+                case 'visible':
+                    // el.setAttribute('class', hiddenClasses);
+                    yieldAndThen(function(){
+                        el.setAttribute('class', hiddenClasses);
+                        transitionState = 'hidden';
+                    });
+                    break;
+                case 'hidden':
+                    // el.setAttribute('class', visibleClasses);
+                    yieldAndThen(function(){
+                        index += 1;
+                        index = index > images.length - 1 ? 0 : index;
+                        el.setAttribute('src', images[index]);
+                        el.setAttribute('class', visibleClasses);
+                        transitionState = 'visible';
+                    }, 0);
+                    break;
+            }
         }
 
         bp = basePath[basePath.length - 1];
@@ -61,14 +71,16 @@
             return bp + img;
         })  ;
 
+        //add handler for the transitioned event
+        el.addEventListener(getTransitionedEvent(), transitioned, false);
+
         //Show the 1st image
         index = 0;
         el.setAttribute('src', images[index]);
-
-        //... and pause
-        setTimeout(function(){
-            pause();
-        }, 1);
+        transitionState = 'hidden';
+        yieldAndThen(function(){
+            el.setAttribute('class', hiddenClasses);
+        });
 
     }
 
