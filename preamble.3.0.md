@@ -806,11 +806,11 @@ describe('Calling hasArgProperty(nth, propertyName)', function(){
 ```
 
 ### **_hasArg_** *hasArg(n)*
-Works like !!arguments[**_nth_**] for a specific call to the _spy_.
+Works like **_n_** >= 0 && **_n_** < arguments.length for a specific call to the _spy_.
 
 ```javascript
 describe('Calling hasArg(n)', function(){
-    it('works like !!arguments[nth] for a specific call to the spy', function(){
+    it('works like n >= 0 && n < arguments.length for a specific call to the spy', function(){
         var someObject = {
             someFn: function(){}
         };
@@ -870,11 +870,11 @@ describe('Calling getLength()', function(){
 ```
 
 ### **_hasArg_** *hasArg(n)*
-Works like **_n_** >= 0 && **_n_** < arguments.length.
+Works like **_n_** >= 0 && **_n_** < arguments.length for a specific call to the _spy_.
 
 ```javascript
 describe('Calling hasArg(n)', function(){
-    it('works like !!arguments[nth]', function(){
+    it('works like n >= 0 && n < arguments.length for a specific call to the spy', function(){
         var someFn = spyOn();
         someFn(123, 'abc', {zip: 55555});
         expect(someFn.calls.forCall(0).getArgs().hasArg(2)).toBeTrue();
