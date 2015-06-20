@@ -1077,12 +1077,17 @@ Set the expectation that the _mock_ will be called with its context set to **_ob
 describe('Calling and.expect.it.toBeCalledWithContext(object)', function(){
     it('sets the expectation that the mock must be called with its context set to object', function(){
         var someObject = {
-                someFn: function(){}
+                someFn: function(){return this.sayHi();},
+                sayHi: function(){return 'Hello';}
             },
-            someOtherObject = {};
-        someObject.someFn = someObject.someFn.bind(someOtherObject);
-        spyOn(someObject, 'someFn').and.expect.it.toBeCalledWithContext(someObject);
-        someObject.someFn();
+            someOtherObject = {
+                sayHi: function(){return 'Hello World!';}
+            };
+        spyOn(someObject, 'someFn').
+            and.callActual().
+            and.expect.it.toBeCalledWithContext(someOtherObject).
+            and.expect.it.toReturn('Hello World!');
+        someObject.someFn.call(someOtherObject);
         someObject.someFn.validate();
     });
 });
