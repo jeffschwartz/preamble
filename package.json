@@ -2,7 +2,7 @@
   "name": "preamble",
   "title": "Preamble",
   "description": "A powerful JavaScript testing framework backed by a powerful assertion engine that your test scripts interface with through a simple to use but powerful API. Preamble makes the task of authoring tests easy, intuitive and even fun.",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "author": {
     "name": "Jeffrey Schwartz",
     "email": "jefftschwartz@gmail.com",

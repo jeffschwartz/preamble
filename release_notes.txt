@@ -1,3 +1,7 @@
+v3.0.2
+Bug Fixes
+o Corrected 'toBeCalledWithContext(object)' suite in sample-suite.js.
+
 v3.0.1
 Bug Fixes
 o Fixed bug in Args.prototype.hasArgProperty and ACall.prototype.hasArgProperty
