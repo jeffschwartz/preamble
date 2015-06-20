@@ -1,4 +1,4 @@
-# Preamble v3.0.1
+# Preamble v3.0.2
 
 ### JavaScript BDD Testing Framework
 
