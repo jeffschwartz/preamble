@@ -1,3 +1,9 @@
+v3.0.3
+Enhancements
+o When calling expect(fn), where fn is an ordinary function and not a spy, fn is
+now first converted to a spy, then called, and then the spy is used as the
+actual value for the expectation.
+
 v3.0.2
 Bug Fixes
 o Corrected 'toBeCalledWithContext(object)' suite in sample-suite.js.

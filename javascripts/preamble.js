@@ -1,11 +1,11 @@
-//Preamble v3.0.2)
+//Preamble v3.0.3)
 //(c) 2013 - 2015 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v3.0.2',
+    var version = 'v3.0.3',
         //Merged configuration options.
         config = {},
         queue=[],
