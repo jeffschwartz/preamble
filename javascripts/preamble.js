@@ -1,11 +1,11 @@
-//Preamble v3.0.2)
+//Preamble v3.0.3)
 //(c) 2013 - 2015 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
 (function(window, undefined){
     'use strict';
 
     //Version
-    var version = 'v3.0.2',
+    var version = 'v3.0.3',
         //Merged configuration options.
         config = {},
         queue=[],
@@ -1428,6 +1428,10 @@
     function noteExpectation(actual){
         if(arguments.length !== 1){
             throwException('"expect" requires 1 argument, found ' + arguments.length);
+        }
+        if(typeof(actual) === 'function' && !('_snoopsterMaker' in actual)){
+           actual = spy(actual).and.callActual();
+           actual();
         }
         //push partial assertion (only the value) info onto the assertion table
         pushOntoAssertions(null, null, actual, null, null);

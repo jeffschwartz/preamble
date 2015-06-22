@@ -176,7 +176,7 @@ describe('Calling toBeTruthy', function(){
 });
 
 describe('Calling toHaveBeenCalled', function(){
-    it('sets the expectation that the actual value, a function, was called' , function(){
+    it('sets the expectation that the actual value, a spy, was called' , function(){
         var spy1 = spyOn(),
             spy2 = spyOn();
         spy1();
@@ -186,7 +186,7 @@ describe('Calling toHaveBeenCalled', function(){
 });
 
 describe('Calling toHaveBeenCalledWith', function(){
-    it('sets the expectation that the actual value, a function, was called with specific arguments' , function(){
+    it('sets the expectation that the actual value, a spy, was called with specific arguments' , function(){
         var spy = spyOn();
         spy('abc', 'def');
         expect(spy).toHaveBeenCalledWith('abc', 'def');
@@ -195,7 +195,7 @@ describe('Calling toHaveBeenCalledWith', function(){
 });
 
 describe('Calling toHaveBeenCalledWithContext', function(){
-    it('sets the expectation that the actual value, a function, was called with a specific context' , function(){
+    it('sets the expectation that the actual value, a spy, was called with a specific context' , function(){
         var someObject = {
                 someFn: function(){}
             },
@@ -208,7 +208,7 @@ describe('Calling toHaveBeenCalledWithContext', function(){
 });
 
 describe('Calling toHaveReturned', function(){
-    it('sets the expectation that the actual value, a function, returned a specific value' , function(){
+    it('sets the expectation that the actual value, a spy, returned a specific value' , function(){
         var spy = spyOn().and.return({fName: 'George', lName: 'Washington'});
         spy();
         expect(spy).toHaveReturned({fName: 'George', lName: 'Washington'});
@@ -217,7 +217,7 @@ describe('Calling toHaveReturned', function(){
 });
 
 describe('Calling toHaveThrown', function(){
-    it('sets the expectation that the actual value, a function, threw an exception', function(){
+    it('sets the expectation that the actual value, a spy, threw an exception', function(){
         var someFn = spyOn(function(arg){ return a + arg; }).and.callActual(),
             someOtherFn = spyOn(function(arg){ return arg; }).and.callActual();
         someFn(20);
@@ -227,8 +227,17 @@ describe('Calling toHaveThrown', function(){
     });
 });
 
+describe('Calling toHaveThrown when the actual is an ordinary function', function(){
+    it('sets the expectation that the actual value, an ordinary function, threw an exception', function(){
+        var someFn = function(i){return i + a;};
+        expect(function(){
+           someFn();
+        }).toHaveThrown();
+    });
+});
+
 describe('Calling toHaveThrownWithMessage', function(){
-    it('sets the expectation that the actual value, a function, threw an exception with a specific message', function(){
+    it('sets the expectation that the actual value, a spy, threw an exception with a specific message', function(){
         var someFn = spyOn().and.throwWithMessage('Whoops!');
         someFn();
         expect(someFn).toHaveThrownWithMessage('Whoops!');
@@ -237,7 +246,7 @@ describe('Calling toHaveThrownWithMessage', function(){
 });
 
 describe('Calling toHaveThrownWithName', function(){
-    it('sets the expectation that the actual value, a function, threw an exception with a specific name', function(){
+    it('sets the expectation that the actual value, a spy, threw an exception with a specific name', function(){
         var someFn = spyOn().and.throwWithName('Error');
         someFn();
         expect(someFn).toHaveThrownWithName('Error');
