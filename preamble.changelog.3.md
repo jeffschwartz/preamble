@@ -14,16 +14,18 @@ value is set to the _spy_.
 
 ### v3.0.2
 #### Bug Fixes
-* Fixes an eroneous suite in sample-suite.js only. No changes to preamble.js
-itself were made. You can ignore this if you aren't concerned with the content
-of sample-suite.js having changed. Documentation also updated to reflect this
-change.
+* Fixes an eroneous suite in _sample-suite.js_ only. No changes to preamble.js
+itself were made. **_You can ignore this release_** if you aren't concerned with
+the content of sample-suite.js having changed. Documentation also updated to
+reflect this change.
 
 ### v3.0.1
 #### Bug Fixes
-* Fixes ACall.prototype.hasArgPropety and Args.hasArgProperty methods.
+* Fixes **_ACall.prototype.hasArgPropety_** and
+**_Args.prototype.hasArgProperty_** methods.
 
 ### v3.0.0
 #### Enhancements
-* BDD all the way!
-* Enhanced support for test doubles: spies, stubs, fakes and mocks.
+* **_BDD all the way!_**
+* Enhanced support for _test doubles_: **_spies_**, **_stubs_**, **_fakes_** and
+**_mocks_**.
