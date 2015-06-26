@@ -20,6 +20,15 @@ module.exports = function ( grunt ) {
                 'javascripts/sample-suite.js',
             ]
         },
+        browserify : {
+            dist : {
+                files : {
+                    'dist/bundle.js' : ['javascripts/*.js']
+                }
+            },
+            options : {
+            }
+        },
         shell: {
             phantomjs: {
                 command: 'phantomjs javascripts/phantom-runner.js index.html',
@@ -43,6 +52,13 @@ module.exports = function ( grunt ) {
                     interrupt : true
                 }
             },
+            browserify : {
+                files   : ['javascripts/*.js'],
+                tasks   : ['jshint'],
+                options : {
+                    interrupt : true
+                }
+            },
             test : {
                 files   : ['javascripts/preamble.js', 'javascripts/sample-bdd-test.js'],
                 tasks   : ['shell:phantomjs'],
@@ -58,6 +74,7 @@ module.exports = function ( grunt ) {
     grunt.loadNpmTasks( 'grunt-contrib-watch' );
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-browserify');
 
     // Default task(s).
     grunt.registerTask( 'default', ['watch'] );
