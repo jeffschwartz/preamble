@@ -39,17 +39,15 @@
         Function.prototype.bind = function(oThis){
             if(typeof this !== 'function'){
                 // closest thing possible to the ECMAScript 5 internal IsCallable function
-                throw new TypeError(
-                    'Function.prototype.bind - what is trying to be bound is not callable'
+                throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable'
                 );
             }
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
                 FNOP = function(){},
                 fBound = function(){
-                    return fToBind.apply(this instanceof FNOP && oThis ?
-                        this : oThis, aArgs.concat(Array.prototype.slice
-                            .call(arguments)));
+                    return fToBind.apply(this instanceof FNOP && oThis ? this :
+                        oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
                 };
             FNOP.prototype = this.prototype;
             fBound.prototype = new FNOP();
@@ -329,16 +327,13 @@
      * @constructor
      */
     function HtmlReporter(fnShowHidePassedTests){
-        this.preambleTestContainer = document.getElementById(
-            'preamble-test-container');
-        this.preambleUiContainer = document.getElementById(
-            'preamble-ui-container');
+        this.preambleTestContainer = document.getElementById('preamble-test-container');
+        this.preambleUiContainer = document.getElementById('preamble-ui-container');
         this.showHidePassedTests = fnShowHidePassedTests;
         this.init();
         on('configchanged', function(topic, args){
             //Add structure to the document and show the header.
-            this.updateHeader(args.name, 'Preamble ' + version,
-                args.uiTestContainerId);
+            this.updateHeader(args.name, 'Preamble ' + version, args.uiTestContainerId);
         }, this);
     }
 
@@ -388,15 +383,11 @@
      * @param {string} version
      * @param {string} uiTestContainerId
      */
-    HtmlReporter.prototype.updateHeader = function(name, version,
-        uiTestContainerId){
-        document.getElementById('name')
-            .innerHTML = name;
-        document.getElementById('version')
-            .innerHTML = version;
-        this.preambleUiContainer.innerHTML =
-            '<div id="{{id}}" class="ui-test-container"></div>'.
-        replace(/{{id}}/, uiTestContainerId);
+    HtmlReporter.prototype.updateHeader = function(name, version, uiTestContainerId){
+        document.getElementById('name').innerHTML = name;
+        document.getElementById('version').innerHTML = version;
+        this.preambleUiContainer.innerHTML = '<div id="{{id}}" class="ui-test-container"></div>'.
+            replace(/{{id}}/, uiTestContainerId);
     };
 
     /**
@@ -405,15 +396,13 @@
      */
     HtmlReporter.prototype.coverage = function(tests){
         var show = 'Ran {{tt}}',
-            elStatusContainer = document.getElementById(
-                'preamble-status-container'),
+            elStatusContainer = document.getElementById('preamble-status-container'),
             coverage,
             hpt;
         //Show groups and tests coverage in the header.
         show = show.replace(/{{tt}}/, tests.length - tests.totBypassed);
         if(config.testingShortCircuited){
-            show += (tests.length - tests.totBypassed) &&
-                ' of {{tbpt}}';
+            show += (tests.length - tests.totBypassed) && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         } else if(runtimeFilter.group){
             show += runtimeFilter.group && ' of {{tbpt}}';
@@ -428,18 +417,15 @@
         hpt = loadPageVar('hpt');
         hpt = hpt === '' && config.hidePassedTests || hpt === 'true' &&
             true || hpt === 'false' && false;
-        coverage = coverage.replace(/{{checked}}/, hpt && 'checked' ||
-            '');
+        coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
         //Preserve error message that replaces 'Building queue. Please wait...'.
         if(elStatusContainer.innerHTML ===
-            '<div class="summary">Building queue. Please wait...</div>'
-        ){
+            '<div class="summary">Building queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
         } else {
             elStatusContainer.innerHTML += coverage;
         }
-        document.getElementById('coverage')
-            .style.display = 'block';
+        document.getElementById('coverage').style.display = 'block';
     };
 
     /**
@@ -456,17 +442,14 @@
         el.innerHTML = s;
         el.style.display = 'table-cell';
         if(tests.result){
-            html =
-                '<div id="preamble-results-summary-passed" class="summary-passed">' +
+            html = '<div id="preamble-results-summary-passed" class="summary-passed">' +
                 'All specs passed' + '</div>';
         } else {
-            html =
-                '<div id="preamble-results-summary-failed" class="summary-failed">' +
+            html = '<div id="preamble-results-summary-failed" class="summary-failed">' +
                 tests.totTestsFailed + pluralize(' spec', tests.totTestsFailed) +
                 ' failed.</div>';
         }
-        document.getElementById('preamble-status-container')
-            .insertAdjacentHTML('beforeend', html);
+        document.getElementById('preamble-status-container').insertAdjacentHTML('beforeend', html);
     };
 
     /**
@@ -476,15 +459,15 @@
     HtmlReporter.prototype.details = function(queue){
         var rc = document.getElementById('preamble-results-container'),
             groupContainerMarkup =
-            '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
+                '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup =
-            '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
+                '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup =
-            '<ul class="tests-container" data-passed="{{passed}}"></ul>',
+                '<ul class="tests-container" data-passed="{{passed}}"></ul>',
             testAnchorMarkup =
-            '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
+                '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
             testFailureMarkup =
-            '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
+                '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
             failed = '',
             parentGroup,
@@ -492,81 +475,50 @@
         queue.forEach(function(item){
             if(item instanceof(Group)){
                 //Add groups to the DOM.
-                html = '' + groupContainerMarkup.
-                replace(/{{passed}}/, item.passed)
-                    .
-                replace(/{{id}}/, item.path);
-                html = html.slice(0, -5) + groupAnchorMarkup.
-                replace(/{{passed}}/, item.bypass ? ' bypassed' :
-                        item.passed ? '' : ' failed')
-                    .
-                replace('{{grouphref}}', encodeURI(item.pathFromParentGroupLabels()))
-                    .
-                replace(/{{label}}/, item.label) + html.slice(-
-                    5);
+                html = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed).replace(/{{id}}/, item.path);
+                html = html.slice(0, -5) + groupAnchorMarkup.replace(/{{passed}}/,
+                    item.bypass ? ' bypassed' : item.passed ? '' : ' failed').replace('{{grouphref}}',
+                    encodeURI(item.pathFromParentGroupLabels())).replace(/{{label}}/, item.label) + html.slice(- 5);
                 html = html;
                 if(!item.parentGroups.length){
                     rc.insertAdjacentHTML('beforeend', html);
                 } else {
-                    parentGroup = item.parentGroups[item.parentGroups
-                        .length - 1];
+                    parentGroup = item.parentGroups[item.parentGroups.length - 1];
                     el = document.getElementById(parentGroup.path);
                     el.insertAdjacentHTML('beforeend', html);
                 }
             } else {
                 //Add tests to the DOM.
-                html = '' + testContainerMarkup.
-                replace(/{{passed}}/, item.totFailed ? 'false' :
-                    'true');
-                html = html.slice(0, -5) + testAnchorMarkup.
-                replace(/{{passed}}/, item.bypass ?
-                        'test-bypassed' : item.totFailed ?
-                        'failed' : 'passed')
-                    .
-                replace('{{grouphref}}', encodeURI(item.parentGroup
-                        .pathFromParentGroupLabels()))
-                    .
-                replace('{{testhref}}', encodeURI(item.label))
-                    .
-                replace(/{{label}}/, item.label) + html.slice(-
-                    5);
+                html = '' + testContainerMarkup.replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
+                html = html.slice(0, -5) + testAnchorMarkup.replace(/{{passed}}/, item.bypass ?
+                    'test-bypassed' : item.totFailed ? 'failed' : 'passed').replace('{{grouphref}}',
+                    encodeURI(item.parentGroup.pathFromParentGroupLabels())).replace('{{testhref}}',
+                    encodeURI(item.label)).replace(/{{label}}/, item.label) + html.slice(-5);
                 //Show failed assertions and their stacks.
                 if(item.totFailed > 0){
                     item.assertions.forEach(function(assertion){
                         if(!assertion.result){
-                            failed = testFailureMarkup.
-                            replace(/{{explain}}/,
-                                    assertion.explain)
-                                .
-                            replace(/{{stacktrace}}/,
-                                stackTrace(
-                                    assertion.stackTrace
-                                ));
-                            html = html.slice(0, -5) +
-                                failed + html.slice(-5);
+                            failed = testFailureMarkup.replace(/{{explain}}/,
+                                assertion.explain).replace(/{{stacktrace}}/,
+                                stackTrace(assertion.stackTrace ));
+                            html = html.slice(0, -5) + failed + html.slice(-5);
                         }
                     });
                 } else if(item.totFailed === -1){
-                    failed = testFailureMarkup.
-                    replace(/{{explain}}/, 'spec timed out')
-                        .
-                    replace(/{{stacktrace}}/, stackTrace(item.stackTrace));
-                    html = html.slice(0, -5) + failed + html.slice(-
-                        5);
+                    failed = testFailureMarkup.replace(/{{explain}}/,
+                        'spec timed out').replace(/{{stacktrace}}/,
+                        stackTrace(item.stackTrace));
+                    html = html.slice(0, -5) + failed + html.slice(-5);
                 }
                 el = document.getElementById(item.parentGroup.path);
                 el.insertAdjacentHTML('beforeend', html);
             }
         });
         this.showHidePassedTests();
-        document.getElementById('preamble-results-container')
-            .style.display = 'block';
-        domAddEventHandler(document.getElementById('hidePassedTests'),
-            'click', hptClickHandler);
+        document.getElementById('preamble-results-container').style.display = 'block';
+        domAddEventHandler(document.getElementById('hidePassedTests'), 'click', hptClickHandler);
         //Delegate all click events to the test container element.
-        domAddEventHandler(document.getElementById(
-                'preamble-test-container'), 'click',
-            runClickHandler);
+        domAddEventHandler(document.getElementById('preamble-test-container'), 'click', runClickHandler);
     };
 
     // /**
@@ -883,10 +835,8 @@
                 } else {
                     path = obj.parentGroup.pathFromParentGroupLabels();
                     s = path.substr(0, runtimeFilter.group.length);
-                    return s === runtimeFilter.group &&
-                        runtimeFilter.test === '' ||
-                        s === runtimeFilter.group && runtimeFilter.test ===
-                        obj.label;
+                    return s === runtimeFilter.group && runtimeFilter.test === '' ||
+                        s === runtimeFilter.group && runtimeFilter.test === obj.label;
                 }
             }
         }
@@ -901,13 +851,11 @@
                 id,
                 path;
             if(arguments.length !== 2){
-                throwException('requires 2 arguments, found ' +
-                    arguments.length);
+                throwException('requires 2 arguments, found ' + arguments.length);
             }
             id = uniqueId();
             path = groupStack.getPath() + '/' + id;
-            grp = new Group(groupStack, id, path, label,
-                callback);
+            grp = new Group(groupStack, id, path, label, callback);
             grp.bypass = !filter(grp);
             queue.push(grp);
             groupStack.push(grp);
@@ -945,20 +893,15 @@
                 cb,
                 stackTrace;
             if(arguments.length < 2){
-                throwException(
-                    'requires at least 2 arguments, found ' +
-                    arguments.length);
+                throwException('requires at least 2 arguments, found ' + arguments.length);
             }
-            tl = arguments.length === 3 && timeoutInterval ||
-                config.timeoutInterval;
-            cb = arguments.length === 3 && callback ||
-                arguments[1];
+            tl = arguments.length === 3 && timeoutInterval || config.timeoutInterval;
+            cb = arguments.length === 3 && callback || arguments[1];
             parentGroup = groupStack[groupStack.length - 1];
             id = uniqueId();
             path = groupStack.getPath() + '/' + id;
             stackTrace = stackTraceFromError();
-            tst = new Test(groupStack, id, path, label,
-                stackTrace, tl, cb, config.windowGlobals);
+            tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, config.windowGlobals);
             tst.bypass = !filter(tst);
             queue.push(tst);
         };
@@ -970,8 +913,7 @@
     //Get URL query string param...thanks MDN.
     function loadPageVar(sVar){
         return decodeURI(window.location.search.replace(new RegExp(
-            '^(?:.*[&\\?]' + encodeURI(sVar)
-            .replace(/[\.\+\*]/g, '\\$&') +
+            '^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') +
             '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
     }
 
@@ -988,8 +930,7 @@
             html = '<p class="failed">An error occurred,  "' + arguments[0] +
                 '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
         }
-        document.getElementById('preamble-status-container')
-            .innerHTML = html;
+        document.getElementById('preamble-status-container').innerHTML = html;
     }
 
     /**
@@ -999,8 +940,7 @@
      */
     function pluralize(word, count){
         var pluralizer = arguments === 2 ? arguments[1] : 's';
-        return count === 0 ? word + pluralizer : count > 1 ? word +
-            pluralizer : word;
+        return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
 
     function merge(){
@@ -1011,8 +951,7 @@
             var prop;
             for(prop in target){
                 if(target.hasOwnProperty(prop)){
-                    result[prop] = source.hasOwnProperty(prop) ?
-                        source[prop] : target[prop];
+                    result[prop] = source.hasOwnProperty(prop) ? source[prop] : target[prop];
                 }
             }
         });
@@ -1047,8 +986,8 @@
             if(attributes && attributes.length){
                 attributes = attributes.split(' ');
                 for(ii = 0, ll = attributes.length; ii < ll; ii++){
-                    if(attributes[ii] === 'group-container' || attributes[
-                            ii] === 'tests-container'){
+                    if(attributes[ii] === 'group-container' ||
+                    attributes[ ii] === 'tests-container'){
                         elContainers.push(elUls[i]);
                     }
                 }
@@ -1057,17 +996,14 @@
         if(document.getElementById('hidePassedTests')
             .checked){
             elContainers.forEach(function(elContainer){
-                if(elContainer.getAttribute('data-passed') ===
-                    'true'){
+                if(elContainer.getAttribute('data-passed') === 'true'){
                     classes = elContainer.getAttribute('class');
-                    elContainer.setAttribute('class', classes +
-                        ' hidden');
+                    elContainer.setAttribute('class', classes + ' hidden');
                 }
             });
         } else {
             elContainers.forEach(function(elContainer){
-                if(elContainer.getAttribute('data-passed') ===
-                    'true'){
+                if(elContainer.getAttribute('data-passed') === 'true'){
                     classes = elContainer.getAttribute('class');
                     attributes = classes.split(' ');
                     classes = [];
@@ -1106,8 +1042,7 @@
         //Only respond to delegated anchor tag click events.
         if(evt.target.tagName === 'A'){
             evt.stopPropagation();
-            checked = document.getElementById('hidePassedTests')
-                .checked;
+            checked = document.getElementById('hidePassedTests').checked;
             if(config.hidePassedTests !== checked){
                 evt.preventDefault();
                 href = evt.target.getAttribute('href');
@@ -1188,8 +1123,7 @@
             window.it = queueBuilder.test;
             window.expect = noteExpectation;
             window.getUiTestContainerElement = getUiTestContainerElement;
-            window.getUiTestContainerElementId =
-                getUiTestContainerElementId;
+            window.getUiTestContainerElementId = getUiTestContainerElementId;
             window.spyOn = spy;
         } else {
             window.Preamble = {
@@ -1212,8 +1146,7 @@
         window.Preamble.__ext__.config = config;
         //publish config event.
         emit('configchanged', {
-            name: config.name,
-            uiTestContainerId: config.uiTestContainerId
+            name: config.name, uiTestContainerId: config.uiTestContainerId
         });
     }
 
@@ -1224,8 +1157,7 @@
         //... and filter out all references to preamble.js.
         return matches.reduce(function(previousValue, currentValue){
             if(currentValue.search(/preamble.js/) === -1){
-                return previousValue + '<p class="stacktrace">' +
-                    currentValue + '</p>';
+                return previousValue + '<p class="stacktrace">' + currentValue + '</p>';
             } else {
                 return previousValue;
             }
@@ -1274,15 +1206,13 @@
         }
         for(prop in a){
             if(a.hasOwnProperty(prop) && b.hasOwnProperty(prop)){
-                if(typeof a[prop] === 'object' && typeof b[prop] ===
-                    'object'){
+                if(typeof a[prop] === 'object' && typeof b[prop] === 'object'){
                     if(!compareObjects(a[prop], b[prop])){
                         return false;
                     }
                     continue;
                 }
-                if(typeof a[prop] === 'object' || typeof b[prop] ===
-                    'object'){
+                if(typeof a[prop] === 'object' || typeof b[prop] === 'object'){
                     return false;
                 }
                 if(a[prop] !== b[prop]){
@@ -1344,28 +1274,19 @@
 
     function assertMockHasExpectations(a){
         var result = a_equals_true(a);
-        return {
-            result: result,
-            explain: 'expected mock to have expectations'
-        };
+        return {result: result, explain: 'expected mock to have expectations'};
     }
 
     function assertToHaveBeenCalled(a){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to have been called'
-        };
+        return {result: result, explain: 'expected spy to have been called'};
     }
 
     function assertToNotHaveBeenCalled(a){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to not have been called'
-        };
+        return {result: result, explain: 'expected spy to not have been called'};
     }
 
     function argToPrintableValue(a){
@@ -1393,193 +1314,126 @@
         var result = a_equals_true(a);
         // var result = a.wasCalled();
         return {
-            result: result,
-            explain: 'expected spy to have been called with ' + /*JSON.stringify(b)*/
-                argToPrintableValue(b)
-        };
+            result: result, explain: 'expected spy to have been called with ' + argToPrintableValue(b)};
     }
 
     function assertToNotHaveBeenCalledWith(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
         return {
-            result: result,
-            explain: 'expected spy to not have been called with ' + /*JSON.stringify(b)*/
-                argToPrintableValue(b)
-        };
+            result: result, explain: 'expected spy to not have been called with ' + argToPrintableValue(b)};
     }
 
     function assertToHaveBeenCalledWithContext(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to have been called with context ' +
-                JSON.stringify(b)
-        };
+        return {result: result, explain: 'expected spy to have been called with context ' + JSON.stringify(b)};
     }
 
     function assertToNotHaveBeenCalledWithContext(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to not have been called with context ' +
-                JSON.stringify(b)
-        };
+        return {result: result, explain: 'expected spy to not have been called with context ' + JSON.stringify(b)};
     }
 
     function assertToHaveReturned(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to have returned ' + argToPrintableValue(
-                [b])
-        };
+        return {result: result, explain: 'expected spy to have returned ' + argToPrintableValue([b])};
     }
 
     function assertToNotHaveReturned(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to not have returned ' +
-                argToPrintableValue([b])
-        };
+        return {result: result, explain: 'expected spy to not have returned ' + argToPrintableValue([b])};
     }
 
     function assertToHaveThrown(a){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to have thrown an exception'
-        };
+        return {result: result, explain: 'expected spy to have thrown an exception'};
     }
 
     function assertToNotHaveThrown(a){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to not have thrown an exception'
-        };
+        return {result: result, explain: 'expected spy to not have thrown an exception'};
     }
 
     function assertToHaveThrownWithName(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to have thrown an exception with the name ' +
-                JSON.stringify(b)
-        };
+        return {result: result, explain: 'expected spy to have thrown an exception with the name ' + JSON.stringify(b)};
     }
 
     function assertToNotHaveThrownWithName(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to not have thrown an exception with the name ' +
-                JSON.stringify(b)
-        };
+        return {result: result, explain: 'expected spy to not have thrown an exception with the name ' + JSON.stringify(b)};
     }
 
     function assertToHaveThrownWithMessage(a, b){
         var result = a_equals_true(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to have thrown an exception with the message ' +
-                JSON.stringify(b)
-        };
+        return {result: result, explain: 'expected spy to have thrown an exception with the message ' + JSON.stringify(b)};
     }
 
     function assertToNotHaveThrownWithMessage(a, b){
         var result = a_equals_false(a);
         // var result = a.wasCalled();
-        return {
-            result: result,
-            explain: 'expected spy to not have thrown an exception with the message ' +
-                JSON.stringify(b)
-        };
+        return {result: result, explain: 'expected spy to not have thrown an exception with the message ' + JSON.stringify(b)};
     }
 
     function assertEqual(a, b){
         //return a_equals_b(a, b);
         var result = a_equals_b(a, b);
-        return {
-            result: result,
-            explain: 'expected ' + argToPrintableValue([a]) + ' to equal ' +
-                argToPrintableValue([b])
-        };
+        return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to equal ' + argToPrintableValue([b])};
     }
 
     function assertNotEqual(a, b){
         //return a_notequals_b(a, b);
         var result = a_notequals_b(a, b);
-        return {
-            result: result,
-            explain: 'expected ' + argToPrintableValue([a]) +
-                ' to not equal ' + argToPrintableValue([b])
-        };
+        return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to not equal ' + argToPrintableValue([b])};
     }
 
     function assertIsTrue(a){
         //return a_equals_true(a);
         var result = a_equals_true(a);
-        return {
-            result: result,
-            explain: 'expected ' + JSON.stringify(a) + ' to be true'
-        };
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true' };
     }
 
     function assertIsFalse(a){
         //return a_equals_false(a);
         var result = a_equals_false(a);
-        return {
-            result: result,
-            explain: 'expected ' + JSON.stringify(a) + ' to be false'
-        };
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
     }
 
     function assertIsTruthy(a){
         //return a_is_truthy(a);
         var result = a_is_truthy(a);
-        return {
-            result: result,
-            explain: 'expected ' + JSON.stringify(a) + ' to be truthy'
-        };
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
     }
 
     function assertIsNotTruthy(a){
         //return a_is_not_truthy(a);
         var result = a_is_not_truthy(a);
-        return {
-            result: result,
-            explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'
-        };
+        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
     }
 
     function pushOntoAssertions(assertion, assertionLabel, value,
         expectation, stackTrace){
-        testsIterator.get()
-            .assertions.push({
-                assertion: assertion,
-                assertionLabel: assertionLabel,
-                value: value,
-                expectation: expectation,
-                stackTrace: stackTrace
-            });
+        testsIterator.get().assertions.push({
+            assertion: assertion,
+            assertionLabel: assertionLabel,
+            value: value,
+            expectation: expectation,
+            stackTrace: stackTrace
+        });
     }
 
     function completeTheAssertion(assertion, value, stackTrace, actual){
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
+            a = ti.get().assertions[ti.get().assertions.length - 1];
         a.assertion = assertion;
         a.expectation = value;
         a.stackTrace = stackTrace;
@@ -1609,12 +1463,10 @@
 
     function noteExpectation(actual){
         if(arguments.length !== 1){
-            throwException('"expect" requires 1 argument, found ' +
-                arguments.length);
+            throwException('"expect" requires 1 argument, found ' + arguments.length);
         }
         if(typeof(actual) === 'function' && !('_snoopsterMaker' in actual)){
-            actual = spy(actual)
-                .and.callActual();
+            actual = spy(actual).and.callActual();
             actual();
         }
         //push partial assertion (only the value) info onto the assertion table
@@ -1626,224 +1478,172 @@
     //only used by mock.validate and not part of the public api
     function noteMockHasExpectations(){
         if(arguments.length){
-            throwException(
-                'matcher "toHaveBeenCalled" expects no arguments, found ' +
+            throwException('matcher "toHaveBeenCalled" expects no arguments, found ' +
                 arguments.length);
         }
 
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
+            a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertMockHasExpectations, null,
             stackTraceFromError(), a.value._hasExpectations);
     }
 
     function noteToHaveBeenCalled(){
         if(arguments.length){
-            throwException(
-                'matcher "toHaveBeenCalled" expects no arguments, found ' +
+            throwException('matcher "toHaveBeenCalled" expects no arguments, found ' +
                 arguments.length);
         }
 
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalled, null,
-            stackTraceFromError(), a.value.calls.count() > 0);
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalled, null, stackTraceFromError(),
+            a.value.calls.count() > 0);
     }
 
     function noteToNotHaveBeenCalled(){
         if(arguments.length){
-            throwException(
-                'matcher "toNotHaveBeenCalled" expects no arguments, found ' +
+            throwException('matcher "toNotHaveBeenCalled" expects no arguments, found ' +
                 arguments.length);
         }
 
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalled, null,
-            stackTraceFromError(), a.value.calls.count() > 0);
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(),
+            a.value.calls.count() > 0);
     }
 
     function noteToHaveBeenCalledWith(){
         if(!arguments.length){
-            throwException(
-                'matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none'
-            );
+            throwException('matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none');
         }
 
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalledWith, argsToArray(
-                arguments), stackTraceFromError(),
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
             a.value.calls.wasCalledWith.apply(null, arguments));
     }
 
     function noteToNotHaveBeenCalledWith(){
         if(!arguments.length){
-            throwException(
-                'matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none'
-            );
+            throwException('matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none');
         }
 
         var ti = testsIterator,
             a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalledWith, argsToArray(
-                arguments), stackTraceFromError(),
+            .assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
             a.value.calls.wasCalledWith.apply(null, arguments));
     }
 
     function noteToHaveBeenCalledWithContext(context){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
+            throwException( 'matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
                 arguments.length);
         }
 
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalledWithContext, context,
-            stackTraceFromError(), a.value.calls.wasCalledWithContext(
-                context));
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveBeenCalledWithContext, context, stackTraceFromError(),
+            a.value.calls.wasCalledWithContext(context));
     }
 
     function noteToNotHaveBeenCalledWithContext(context){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
+            throwException('matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
                 arguments.length);
         }
 
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalledWithContext, context,
-            stackTraceFromError(), a.value.calls.wasCalledWithContext(
-                context));
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveBeenCalledWithContext, context, stackTraceFromError(),
+            a.value.calls.wasCalledWithContext(context));
     }
 
     function noteToHaveReturned(value){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toHaveReturned" expects 1 arguments, found none'
-            );
+            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToHaveReturned, value,
-            stackTraceFromError(), a.value.calls.returned(value));
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveReturned, value, stackTraceFromError(),
+            a.value.calls.returned(value));
     }
 
     function noteToNotHaveReturned(value){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toHaveReturned" expects 1 arguments, found none'
-            );
+            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveReturned, value,
-            stackTraceFromError(), a.value.calls.returned(value));
+            a = ti.get().assertions[ti.get() .assertions.length - 1];
+        completeTheAssertion(assertToNotHaveReturned, value, stackTraceFromError(),
+            a.value.calls.returned(value));
     }
 
     function noteToHaveThrown(){
         if(arguments.length){
-            throwException(
-                'matcher "toHaveThrown" expects no arguments, found ' +
+            throwException('matcher "toHaveThrown" expects no arguments, found ' +
                 arguments.length);
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
+            a = ti.get().assertions[ti.get().assertions.length - 1];
         completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(),
             a.value.calls.threw());
     }
 
     function noteToNotHaveThrown(){
         if(arguments.length){
-            throwException(
-                'matcher "toNotHaveThrown" expects no arguments, found ' +
+            throwException('matcher "toNotHaveThrown" expects no arguments, found ' +
                 arguments.length);
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrown, true,
-            stackTraceFromError(), a.value.calls.threw());
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(),
+            a.value.calls.threw());
     }
 
     function noteToHaveThrownWithName(value){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toHaveThrownWithName" requires 1 argument, found ' +
+            throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' +
                 arguments.length);
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithName, value,
-            stackTraceFromError(), a.value.calls.threwWithName(value));
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(),
+            a.value.calls.threwWithName(value));
     }
 
     function noteToNotHaveThrownWithName(value){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toNotHaveThrownWithName" requires 1 argument, found ' +
+            throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' +
                 arguments.length);
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithName, value,
-            stackTraceFromError(), a.value.calls.threwWithName(value));
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(),
+            a.value.calls.threwWithName(value));
     }
 
     function noteToHaveThrownWithMessage(value){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toHaveThrownWithMessage" requires 1 argument, found ' +
+            throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' +
                 arguments.length);
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithMessage, value,
-            stackTraceFromError(), a.value.calls.threwWithMessage(value)
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(),
+            a.value.calls.threwWithMessage(value)
         );
     }
 
     function noteToNotHaveThrownWithMessage(value){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' +
+            throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' +
                 arguments.length);
         }
         var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get()
-                .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithMessage, value,
-            stackTraceFromError(), a.value.calls.threwWithMessage(value)
+            a = ti.get().assertions[ti.get().assertions.length - 1];
+        completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(),
+            a.value.calls.threwWithMessage(value)
         );
     }
 
@@ -1857,8 +1657,7 @@
 
     function noteToNotEqualAssertion(value){
         if(arguments.length !== 1){
-            throwException(
-                'matcher "toNotEqual" requires 1 argument, found ' +
+            throwException('matcher "toNotEqual" requires 1 argument, found ' +
                 arguments.length);
         }
         completeTheAssertion(assertNotEqual, value, stackTraceFromError());
@@ -1866,8 +1665,7 @@
 
     function noteToBeTrueAssertion(){
         if(arguments.length){
-            throwException(
-                'matcher "toBeTrue;" expects no arguments, found ' +
+            throwException('matcher "toBeTrue;" expects no arguments, found ' +
                 arguments.length);
         }
         completeTheAssertion(assertIsTrue, true, stackTraceFromError());
@@ -1875,8 +1673,7 @@
 
     function noteToBeFalseAssertion(){
         if(arguments.length){
-            throwException(
-                'matcher "toBeFalse;" expects no arguments, found ' +
+            throwException('matcher "toBeFalse;" expects no arguments, found ' +
                 arguments.length);
         }
         completeTheAssertion(assertIsFalse, true, stackTraceFromError());
@@ -1884,8 +1681,7 @@
 
     function noteToBeTruthyAssertion(){
         if(arguments.length){
-            throwException(
-                'matcher "toBeTruthy" expects no arguments, found ' +
+            throwException('matcher "toBeTruthy" expects no arguments, found ' +
                 arguments.length);
         }
         completeTheAssertion(assertIsTruthy, true, stackTraceFromError());
@@ -1893,8 +1689,7 @@
 
     function noteToNotBeTruthyAssertion(){
         if(arguments.length){
-            throwException(
-                'matcher "toNotBeTruthy" expects no arguments, found ' +
+            throwException('matcher "toNotBeTruthy" expects no arguments, found ' +
                 arguments.length);
         }
         completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
@@ -1903,6 +1698,7 @@
     function Assert(){
         this.not = new Not();
     }
+
     Assert.prototype = {
         constructor: Assert,
         toEqual: noteToEqualAssertion,
@@ -1948,27 +1744,17 @@
                 snoopster,
                 calls = [];
             if(arguments.length){
-                if(typeof(argObject) !== 'function' &&
-                    typeof(argObject) !== 'object'){
-                    throw new Error(
-                        '1st parameter must be a function or an object'
-                    );
+                if(typeof(argObject) !== 'function' && typeof(argObject) !== 'object'){
+                    throw new Error('1st parameter must be a function or an object');
                 }
-                if(typeof(argObject) === 'object' && arguments.length <
-                    2){
-                    throw new Error(
-                        'expecting 2 parameters - found ' +
-                        arguments.length);
+                if(typeof(argObject) === 'object' && arguments.length < 2){
+                    throw new Error('expecting 2 parameters - found ' + arguments.length);
                 }
-                if(typeof(argObject) === 'object' && typeof(
-                        argProperty) !== 'string'){
-                    throw new Error(
-                        '2nd parameter must be a string');
+                if(typeof(argObject) === 'object' && typeof(argProperty) !== 'string'){
+                    throw new Error('2nd parameter must be a string');
                 }
-                if(typeof(argObject) === 'object' && typeof(
-                        argObject[argProperty]) !== 'function'){
-                    throw new Error('expected ' + argProperty +
-                        ' to be a method');
+                if(typeof(argObject) === 'object' && typeof(argObject[argProperty]) !== 'function'){
+                    throw new Error('expected ' + argProperty + ' to be a method');
                 }
             }
             //spy api
@@ -1979,21 +1765,16 @@
                 return this.args.length ? this.args.length : 0;
             };
             Args.prototype.hasArg = function(i){
-                return i >= 0 && this.getLength() > i ? true :
-                    false;
+                return i >= 0 && this.getLength() > i ? true : false;
             };
             Args.prototype.getArg = function(i){
                 return this.hasArg(i) ? this.args[i] : null;
             };
-            Args.prototype.hasArgProperty = function(i,
-                propertyName){
-                return this.hasArg(i) && propertyName in this.args[
-                    i] ? true : false;
+            Args.prototype.hasArgProperty = function(i, propertyName){
+                return this.hasArg(i) && propertyName in this.args[i] ? true : false;
             };
-            Args.prototype.getArgProperty = function(i,
-                propertyName){
-                return this.hasArgProperty(i, propertyName) ?
-                    this.args[i][propertyName] : null;
+            Args.prototype.getArgProperty = function(i, propertyName){
+                return this.hasArgProperty(i, propertyName) ? this.args[i][propertyName] : null;
             };
             //spy api
             function ACall(context, args, error, returned){
@@ -2014,12 +1795,10 @@
             ACall.prototype.getArgsLength = function(){
                 return this.args.getLength();
             };
-            ACall.prototype.getArgProperty = function(i,
-                propertyName){
+            ACall.prototype.getArgProperty = function(i, propertyName){
                 return this.args.getArgProperty(i, propertyName);
             };
-            ACall.prototype.hasArgProperty = function(i,
-                propertyName){
+            ACall.prototype.hasArgProperty = function(i, propertyName){
                 return this.args.hasArgProperty(i, propertyName);
             };
             ACall.prototype.hasArg = function(i){
@@ -2032,12 +1811,10 @@
                 return this.returned;
             };
             targetFn = arguments.length === 0 ? function(){} :
-                typeof(arguments[0]) === 'function' ? argObject :
-                argObject[argProperty];
+                typeof(arguments[0]) === 'function' ? argObject : argObject[argProperty];
             //spy api - tracking
             snoopster = function(){
-                var aArgs = arguments.length && argsToArray(
-                        arguments) || [],
+                var aArgs = arguments.length && argsToArray(arguments) || [],
                     fn,
                     error,
                     returned;
@@ -2049,16 +1826,13 @@
                 if(snoopster._callActual || snoopster._callFake){
                     fn = snoopster._callFake || targetFn;
                     try {
-                        returned = fn.apply(snoopster._callWithContext ||
-                            this, aArgs);
+                        returned = fn.apply(snoopster._callWithContext || this, aArgs);
                     } catch (er){
                         error = er;
                     }
                 } else if(snoopster._throws){
                     try {
-
-                        throw new ThrowsException(snoopster._throwsMessage,
-                            snoopster._throwsName);
+                        throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
                     } catch (er){
                         error = er;
                     }
@@ -2067,9 +1841,7 @@
                     returned = snoopster._returns || returned;
                 }
                 // snoopster.args = new Args(aArgs);
-                calls.push(new ACall(snoopster._callWithContext ||
-                    this, new Args(aArgs), error,
-                    returned));
+                calls.push(new ACall(snoopster._callWithContext || this, new Args(aArgs), error, returned));
                 return returned;
             };
             snoopster._snoopsterMaker = 'preamble.snoopster';
@@ -2093,9 +1865,7 @@
             snoopster._callWithContext = null;
             snoopster.and.callWithContext = function(context){
                 if(!context || typeof(context) !== 'object'){
-                    throw new Error(
-                        'callWithContext expects to be called with an object'
-                    );
+                    throw new Error('callWithContext expects to be called with an object');
                 }
                 snoopster._callWithContext = context;
                 return snoopster;
@@ -2137,9 +1907,7 @@
             snoopster._callFake = null;
             snoopster.and.callFake = function(fn){
                 if(fn && typeof(fn) !== 'function'){
-                    throw new Error(
-                        'callFake expects to be called with a function'
-                    );
+                    throw new Error('callFake expects to be called with a function');
                 }
                 snoopster._resetCalls();
                 snoopster._callFake = fn;
@@ -2165,8 +1933,7 @@
                     return calls.length;
                 },
                 forCall: function(i){
-                    return i >= 0 && i < calls.length &&
-                        calls[i] || undefined;
+                    return i >= 0 && i < calls.length && calls[i] || undefined;
                 },
                 all: function(){
                     return calls;
@@ -2174,23 +1941,20 @@
                 wasCalledWith: function(){
                     var a = argsToArray(arguments);
                     return calls.some(function(call){
-                        var args = call.getArgs()
-                            .args;
+                        var args = call.getArgs().args;
                         return (a_equals_b(a, args));
                     });
                 },
                 wasCalledWithContext: function(obj){
                     return calls.some(function(call){
                         var context = call.context;
-                        return (a_equals_b(obj,
-                            context));
+                        return (a_equals_b(obj, context));
                     });
                 },
                 returned: function(value){
                     return calls.some(function(call){
                         var returned = call.getReturned();
-                        return (a_equals_b(value,
-                            returned));
+                        return (a_equals_b(value, returned));
                     });
                 },
                 threw: function(){
@@ -2200,14 +1964,12 @@
                 },
                 threwWithName: function(name){
                     return calls.some(function(call){
-                        return call.error && call.error
-                            .name === name;
+                        return call.error && call.error.name === name;
                     });
                 },
                 threwWithMessage: function(message){
                     return calls.some(function(call){
-                        return call.error && call.error
-                            .message === message;
+                        return call.error && call.error.message === message;
                     });
                 }
             };
@@ -2224,17 +1986,14 @@
             };
             snoopster.and.expect.it.toBeCalledWith = function(){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toBeCalledWith =
-                    arguments;
+                snoopster._expectations.toBeCalledWith = arguments;
                 return snoopster;
             };
-            snoopster.and.expect.it.toBeCalledWithContext =
-                function(obj){
-                    snoopster._hasExpectations = true;
-                    snoopster._expectations.toBeCalledWithContext =
-                        obj;
-                    return snoopster;
-                };
+            snoopster.and.expect.it.toBeCalledWithContext = function(obj){
+                snoopster._hasExpectations = true;
+                snoopster._expectations.toBeCalledWithContext = obj;
+                return snoopster;
+            };
             snoopster.and.expect.it.toReturn = function(value){
                 snoopster._hasExpectations = true;
                 snoopster._expectations.toReturn = value;
@@ -2250,11 +2009,9 @@
                 snoopster._expectations.toThrowWithName = name;
                 return snoopster;
             };
-            snoopster.and.expect.it.toThrowWithMessage = function(
-                message){
+            snoopster.and.expect.it.toThrowWithMessage = function(message){
                 snoopster._hasExpectations = true;
-                snoopster._expectations.toThrowWithMessage =
-                    message;
+                snoopster._expectations.toThrowWithMessage = message;
                 return snoopster;
             };
             snoopster.validate = function(){
@@ -2271,13 +2028,12 @@
                 if(snoopster._expectations.toBeCalledWith){
                     noteExpectation(snoopster);
                     noteToHaveBeenCalledWith.apply(null,
-                        argsToArray(snoopster._expectations
-                            .toBeCalledWith));
+                        argsToArray(snoopster._expectations.toBeCalledWith));
                 }
                 if(snoopster._expectations.toBeCalledWithContext){
                     noteExpectation(snoopster);
-                    noteToHaveBeenCalledWithContext(snoopster._expectations
-                        .toBeCalledWithContext);
+                    noteToHaveBeenCalledWithContext(
+                        snoopster._expectations.toBeCalledWithContext);
                 }
                 if(snoopster._expectations.toReturn){
                     noteExpectation(snoopster);
@@ -2289,17 +2045,14 @@
                 }
                 if(snoopster._expectations.toThrowWithName){
                     noteExpectation(snoopster);
-                    noteToHaveThrownWithName(snoopster._expectations
-                        .toThrowWithName);
+                    noteToHaveThrownWithName(snoopster._expectations.toThrowWithName);
                 }
                 if(snoopster._expectations.toThrowWithMessage){
                     noteExpectation(snoopster);
-                    noteToHaveThrownWithMessage(snoopster._expectations
-                        .toThrowWithMessage);
+                    noteToHaveThrownWithMessage(snoopster._expectations.toThrowWithMessage);
                 }
             };
-            if(arguments.length && typeof(arguments[0]) !==
-                'function' &&
+            if(arguments.length && typeof(arguments[0]) !== 'function' &&
                 typeof(arguments[0]) === 'object'){
                 argObject[argProperty] = snoopster;
             }
@@ -2317,19 +2070,15 @@
             var i,
                 len;
             if(!argObject || typeof(argObject) !== 'object'){
-                throw new Error(
-                    'expected an object for 1st parameter - found ' +
+                throw new Error('expected an object for 1st parameter - found ' +
                     typeof(argObject));
             }
-            if(!argPropertyNames || !Array.isArray(
-                    argPropertyNames)){
-                throw new Error(
-                    'expected an array for 2nd parameter - found ' +
+            if(!argPropertyNames || !Array.isArray(argPropertyNames)){
+                throw new Error('expected an array for 2nd parameter - found ' +
                     typeof(argObject));
             }
             if(!argPropertyNames.length){
-                throw new Error(
-                    'expected an array for 2nd parameter with at ' +
+                throw new Error('expected an array for 2nd parameter with at ' +
                     'least one element for 2nd parameter');
             }
             for(i = 0, len = argPropertyNames.length; i < len; i++){
@@ -2338,14 +2087,11 @@
                         ' of 2nd parameter to be a string');
                 }
                 if(!argObject[argPropertyNames[i]]){
-                    throw new Error(
-                        'expected 1st paramter to have property ' +
+                    throw new Error('expected 1st paramter to have property ' +
                         argPropertyNames[i]);
                 }
-                if(typeof(argObject[argPropertyNames[i]]) !==
-                    'function'){
-                    throw new Error('expected ' +
-                        argPropertyNames[i] +
+                if(typeof(argObject[argPropertyNames[i]]) !== 'function'){
+                    throw new Error('expected ' + argPropertyNames[i] +
                         ' to be a method');
                 }
             }
