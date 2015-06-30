@@ -21,12 +21,9 @@ module.exports = function ( grunt ) {
             ]
         },
         browserify : {
-            dist : {
-                files : {
-                    'dist/bundle.js' : ['javascripts/*.js']
-                }
-            },
-            options : {
+            js: {
+                src: 'src/javascripts/preamble.js',
+                dest: 'dist/preamble.js'
             }
         },
         shell: {
@@ -53,8 +50,8 @@ module.exports = function ( grunt ) {
                 }
             },
             browserify : {
-                files   : ['javascripts/*.js'],
-                tasks   : ['jshint'],
+                files   : ['src/**.js'],
+                tasks   : ['browserify'],
                 options : {
                     interrupt : true
                 }
