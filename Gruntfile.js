@@ -15,14 +15,13 @@ module.exports = function ( grunt ) {
                 jshintrc: true
             },
             files   : [
-                'javascripts/preamble.js',
-                'javascripts/sample-failures-test.js',
-                'javascripts/sample-suite.js',
+                'src/javascripts/**.js',
+                'javascripts/sample-suite.js'
             ]
         },
         browserify : {
             js: {
-                src: 'src/javascripts/preamble.js',
+                src: 'src/javascripts/main.js',
                 dest: 'dist/preamble.js'
             }
         },
@@ -43,26 +42,27 @@ module.exports = function ( grunt ) {
                 }
             },
             js : {
-                files   : ['javascripts/*.js'],
+                files   : ['src/javascripts/**.js'],
                 tasks   : ['jshint'],
                 options : {
                     interrupt : true
                 }
             },
             browserify : {
-                files   : ['src/**.js'],
+                files   : ['src/javascripts/**.js'],
                 tasks   : ['browserify'],
                 options : {
                     interrupt : true
                 }
-            },
-            test : {
-                files   : ['javascripts/preamble.js', 'javascripts/sample-bdd-test.js'],
-                tasks   : ['shell:phantomjs'],
-                options : {
-                    interrupt : true
-                }
             }
+            // ,
+            // test : {
+            //     files   : ['javascripts/preamble.js', 'javascripts/sample-bdd-test.js'],
+            //     tasks   : ['shell:phantomjs'],
+            //     options : {
+            //         interrupt : true
+            //     }
+            // }
         }
     });
 
