@@ -42,14 +42,14 @@ module.exports = function ( grunt ) {
                 }
             },
             js : {
-                files   : ['src/javascripts/**.js'],
+                files   : ['src/javascripts/**/*.js'],
                 tasks   : ['jshint'],
                 options : {
                     interrupt : true
                 }
             },
             browserify : {
-                files   : ['src/javascripts/**.js'],
+                files   : ['src/javascripts/**/*.js'],
                 tasks   : ['browserify'],
                 options : {
                     interrupt : true
