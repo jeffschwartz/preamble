@@ -14,21 +14,28 @@
         queueStableInterval = 1,
         reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
         reporter,
-        spy,
-        assert,
+        // assert,
         intervalId,
         runtimeFilter,
-        stackTraceProperty,
+        // stackTraceProperty,
         queueBuilder,
         // pubsub,
         tests,
-        testsIterator,
         //TODO(JS): requires that eventually may not be needed to be declared here
         Iterator = require('./core/iterator.js'),
+        // testsIterator = require('./core/globals.js'),
         Group = require('./core/group.js'),
         Test = require('./core/test.js'),
+        AssertApi = require('./core/assertapi.js'),
+        spyOn = require('./core/spy.js'),
         emit = require('./core/emit.js'),
-        on = require('./core/on.js');
+        on = require('./core/on.js'),
+        notations = require('./core/expectations/notations.js'),
+        globals = require('./core/globals.js'),
+        helpers = require('./core/helpers.js');
+        // argsToArray = require('./core/helpers').argsToArray,
+        // throwException = require('./core/helpers').throwException,
+        // compare = require('./core/helpers').compare;
 
     /**
      * Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
@@ -55,13 +62,13 @@
         };
     }
 
-    function argsToArray(argArguments){
-        return [].slice.call(argArguments, 0);
-    }
+    // function argsToArray(argArguments){
+    //     return [].slice.call(argArguments, 0);
+    // }
 
-    function throwException(errMessage){
-        throw new Error(errMessage);
-    }
+    // function throwException(errMessage){
+    //     throw new Error(errMessage);
+    // }
 
     // /**
     //  * A group.
@@ -651,7 +658,7 @@
     });
 
     on('runTests', function(topic, callback){
-        testsIterator = new Iterator(tests);
+        globals.testsIterator = new Iterator(tests);
 
         function runTest(test, callback){
             if(test.bypass){
@@ -668,8 +675,8 @@
         }
 
         function runTests(callback){
-            if(testsIterator.hasNext()){
-                runTest(testsIterator.getNext(), function(totFailed){
+            if(globals.testsIterator.hasNext()){
+                runTest(globals.testsIterator.getNext(), function(totFailed){
                     if(totFailed && config.shortCircuit){
                         //If totFailed and shortCircuit then abort
                         //further testing!
@@ -900,7 +907,7 @@
             parentGroup = groupStack[groupStack.length - 1];
             id = uniqueId();
             path = groupStack.getPath() + '/' + id;
-            stackTrace = stackTraceFromError();
+            stackTrace = helpers.stackTraceFromError();
             tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, config.windowGlobals);
             tst.bypass = !filter(tst);
             queue.push(tst);
@@ -908,7 +915,7 @@
 
         //Return the module, exposing the runner.
         return runner;
-    }(queue, throwException));
+    }(queue, helpers.throwException));
 
     //Get URL query string param...thanks MDN.
     function loadPageVar(sVar){
@@ -1110,7 +1117,7 @@
             test: loadPageVar('test')
         };
         //Capture exception's stack trace property.
-        setStackTraceProperty();
+        helpers.setStackTraceProperty();
         //Handle global errors.
         window.onerror = errorHandler;
         //If the windowGlabals config option is false then window globals will
@@ -1121,10 +1128,10 @@
             window.beforeEach = queueBuilder.beforeEachTest;
             window.afterEach = queueBuilder.afterEachTest;
             window.it = queueBuilder.test;
-            window.expect = noteExpectation;
+            window.expect = notations.noteExpectation;
             window.getUiTestContainerElement = getUiTestContainerElement;
             window.getUiTestContainerElementId = getUiTestContainerElementId;
-            window.spyOn = spy;
+            window.spyOn = spyOn;
         } else {
             window.Preamble = {
                 configure: configure,
@@ -1132,13 +1139,13 @@
                 beforeEach: queueBuilder.beforeEachTest,
                 afterEach: queueBuilder.afterEachTest,
                 it: queueBuilder.test,
-                expect: noteExpectation,
+                expect: notations.noteExpectation,
                 getUiTestContainerElement: getUiTestContainerElement,
                 getUiTestContainerElementId: getUiTestContainerElementId,
-                spyOn: spy,
+                spyOn: spyOn,
             };
         }
-        assert = new Assert();
+        globals.assert = new AssertApi();
         window.Preamble = window.Preamble || {};
         //For use by external processes.
         window.Preamble.__ext__ = {};
@@ -1164,569 +1171,570 @@
         }, '');
     }
 
-    function compareArrays(a, b){
-        var i,
-            len;
-        if(Array.isArray(a) && Array.isArray(b)){
-            if(a.length !== b.length){
-                return false;
-            }
-            for(i = 0, len = a.length; i < len; i++){
-                if(typeof a[i] === 'object' && typeof b[i] === 'object'){
-                    if(!compare(a[i], b[i])){
-                        return false;
-                    }
-                    continue;
-                }
-                if(typeof a[i] === 'object' || typeof b[i] === 'object'){
-                    return false;
-                }
-                if(Array.isArray(a[i]) && Array.isArray(b[i])){
-                    if(!compareArrays(a[i], b[i])){
-                        return false;
-                    }
-                    continue;
-                }
-                if(Array.isArray(a[i]) || Array.isArray(b[i])){
-                    return false;
-                }
-                if(a[i] !== b[i]){
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    function compareObjects(a, b){
-        var prop;
-        if(compareArrays(a, b)){
-            return true;
-        }
-        for(prop in a){
-            if(a.hasOwnProperty(prop) && b.hasOwnProperty(prop)){
-                if(typeof a[prop] === 'object' && typeof b[prop] === 'object'){
-                    if(!compareObjects(a[prop], b[prop])){
-                        return false;
-                    }
-                    continue;
-                }
-                if(typeof a[prop] === 'object' || typeof b[prop] === 'object'){
-                    return false;
-                }
-                if(a[prop] !== b[prop]){
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    function compare(a, b){
-        return compareObjects(a, b) && compareObjects(b, a);
-    }
-
-    //Assertions.
-
-    function a_equals_b(a, b){
-        if(typeof a === 'object' && typeof b === 'object'){
-            //Both are object so compare their properties.
-            if(compare(a, b)){
-                return true;
-            }
-        }
-        if(typeof a === 'object' || typeof b === 'object'){
-            //One is an object and the other isn't.
-            return false;
-        }
-        //Both are not object so just compare values.
-        return a === b;
-    }
-
-    function a_notequals_b(a, b){
-        return !a_equals_b(a, b);
-    }
-
-    //Simple boolean test.
-    function a_equals_true(a){
-        return a === true;
-    }
-
-    //Simple boolean test.
-    function a_equals_false(a){
-        return a === false;
-    }
-
-    //Simple boolean test.
-    function a_is_truthy(a){
-        return (a);
-    }
-
-    //Simple boolean test.
-    function a_is_not_truthy(a){
-        return (!a);
-    }
-
-    //Assertion runners.
-
-    function assertMockHasExpectations(a){
-        var result = a_equals_true(a);
-        return {result: result, explain: 'expected mock to have expectations'};
-    }
-
-    function assertToHaveBeenCalled(a){
-        var result = a_equals_true(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have been called'};
-    }
-
-    function assertToNotHaveBeenCalled(a){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have been called'};
-    }
-
-    function argToPrintableValue(a){
-        var s = '';
-        a.forEach(function(el){
-            s = s.length ? s + ',' : s;
-            switch (typeof(el)){
-                case 'string':
-                    s += '\'' + el + '\'';
-                    break;
-                case 'function':
-                    s += 'function';
-                    break;
-                case 'object':
-                    s += JSON.stringify(el);
-                    break;
-                default:
-                    s += el;
-            }
-        });
-        return s;
-    }
-
-    function assertToHaveBeenCalledWith(a, b){
-        var result = a_equals_true(a);
-        // var result = a.wasCalled();
-        return {
-            result: result, explain: 'expected spy to have been called with ' + argToPrintableValue(b)};
-    }
-
-    function assertToNotHaveBeenCalledWith(a, b){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {
-            result: result, explain: 'expected spy to not have been called with ' + argToPrintableValue(b)};
-    }
-
-    function assertToHaveBeenCalledWithContext(a, b){
-        var result = a_equals_true(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have been called with context ' + JSON.stringify(b)};
-    }
-
-    function assertToNotHaveBeenCalledWithContext(a, b){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have been called with context ' + JSON.stringify(b)};
-    }
-
-    function assertToHaveReturned(a, b){
-        var result = a_equals_true(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have returned ' + argToPrintableValue([b])};
-    }
-
-    function assertToNotHaveReturned(a, b){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have returned ' + argToPrintableValue([b])};
-    }
-
-    function assertToHaveThrown(a){
-        var result = a_equals_true(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have thrown an exception'};
-    }
-
-    function assertToNotHaveThrown(a){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have thrown an exception'};
-    }
-
-    function assertToHaveThrownWithName(a, b){
-        var result = a_equals_true(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have thrown an exception with the name ' + JSON.stringify(b)};
-    }
-
-    function assertToNotHaveThrownWithName(a, b){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have thrown an exception with the name ' + JSON.stringify(b)};
-    }
-
-    function assertToHaveThrownWithMessage(a, b){
-        var result = a_equals_true(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to have thrown an exception with the message ' + JSON.stringify(b)};
-    }
-
-    function assertToNotHaveThrownWithMessage(a, b){
-        var result = a_equals_false(a);
-        // var result = a.wasCalled();
-        return {result: result, explain: 'expected spy to not have thrown an exception with the message ' + JSON.stringify(b)};
-    }
-
-    function assertEqual(a, b){
-        //return a_equals_b(a, b);
-        var result = a_equals_b(a, b);
-        return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to equal ' + argToPrintableValue([b])};
-    }
-
-    function assertNotEqual(a, b){
-        //return a_notequals_b(a, b);
-        var result = a_notequals_b(a, b);
-        return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to not equal ' + argToPrintableValue([b])};
-    }
-
-    function assertIsTrue(a){
-        //return a_equals_true(a);
-        var result = a_equals_true(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true' };
-    }
-
-    function assertIsFalse(a){
-        //return a_equals_false(a);
-        var result = a_equals_false(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
-    }
-
-    function assertIsTruthy(a){
-        //return a_is_truthy(a);
-        var result = a_is_truthy(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
-    }
-
-    function assertIsNotTruthy(a){
-        //return a_is_not_truthy(a);
-        var result = a_is_not_truthy(a);
-        return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
-    }
-
-    function pushOntoAssertions(assertion, assertionLabel, value,
-        expectation, stackTrace){
-        testsIterator.get().assertions.push({
-            assertion: assertion,
-            assertionLabel: assertionLabel,
-            value: value,
-            expectation: expectation,
-            stackTrace: stackTrace
-        });
-    }
-
-    function completeTheAssertion(assertion, value, stackTrace, actual){
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        a.assertion = assertion;
-        a.expectation = value;
-        a.stackTrace = stackTrace;
-        a.value = typeof(actual) === 'undefined' ? a.value : actual;
-    }
-
-    function setStackTraceProperty(){
-        try {
-            throw new Error('woops');
-        } catch (error){
-            stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
-                'stacktrace' : undefined;
-        }
-    }
-
-    function stackTraceFromError(){
-        var stack = null;
-        if(stackTraceProperty){
-            try {
-                throw new Error();
-            } catch (error){
-                stack = error[stackTraceProperty];
-            }
-        }
-        return stack;
-    }
-
-    function noteExpectation(actual){
-        if(arguments.length !== 1){
-            throwException('"expect" requires 1 argument, found ' + arguments.length);
-        }
-        if(typeof(actual) === 'function' && !('_snoopsterMaker' in actual)){
-            actual = spy(actual).and.callActual();
-            actual();
-        }
-        //push partial assertion (only the value) info onto the assertion table
-        pushOntoAssertions(null, null, actual, null, null);
-        //return assert for chaining
-        return assert;
-    }
-
-    //only used by mock.validate and not part of the public api
-    function noteMockHasExpectations(){
-        if(arguments.length){
-            throwException('matcher "toHaveBeenCalled" expects no arguments, found ' +
-                arguments.length);
-        }
-
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertMockHasExpectations, null,
-            stackTraceFromError(), a.value._hasExpectations);
-    }
-
-    function noteToHaveBeenCalled(){
-        if(arguments.length){
-            throwException('matcher "toHaveBeenCalled" expects no arguments, found ' +
-                arguments.length);
-        }
-
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalled, null, stackTraceFromError(),
-            a.value.calls.count() > 0);
-    }
-
-    function noteToNotHaveBeenCalled(){
-        if(arguments.length){
-            throwException('matcher "toNotHaveBeenCalled" expects no arguments, found ' +
-                arguments.length);
-        }
-
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(),
-            a.value.calls.count() > 0);
-    }
-
-    function noteToHaveBeenCalledWith(){
-        if(!arguments.length){
-            throwException('matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none');
-        }
-
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
-            a.value.calls.wasCalledWith.apply(null, arguments));
-    }
-
-    function noteToNotHaveBeenCalledWith(){
-        if(!arguments.length){
-            throwException('matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none');
-        }
-
-        var ti = testsIterator,
-            a = ti.get()
-            .assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
-            a.value.calls.wasCalledWith.apply(null, arguments));
-    }
-
-    function noteToHaveBeenCalledWithContext(context){
-        if(arguments.length !== 1){
-            throwException( 'matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
-                arguments.length);
-        }
-
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveBeenCalledWithContext, context, stackTraceFromError(),
-            a.value.calls.wasCalledWithContext(context));
-    }
-
-    function noteToNotHaveBeenCalledWithContext(context){
-        if(arguments.length !== 1){
-            throwException('matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
-                arguments.length);
-        }
-
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveBeenCalledWithContext, context, stackTraceFromError(),
-            a.value.calls.wasCalledWithContext(context));
-    }
-
-    function noteToHaveReturned(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveReturned, value, stackTraceFromError(),
-            a.value.calls.returned(value));
-    }
-
-    function noteToNotHaveReturned(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toHaveReturned" expects 1 arguments, found none');
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get() .assertions.length - 1];
-        completeTheAssertion(assertToNotHaveReturned, value, stackTraceFromError(),
-            a.value.calls.returned(value));
-    }
-
-    function noteToHaveThrown(){
-        if(arguments.length){
-            throwException('matcher "toHaveThrown" expects no arguments, found ' +
-                arguments.length);
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(),
-            a.value.calls.threw());
-    }
-
-    function noteToNotHaveThrown(){
-        if(arguments.length){
-            throwException('matcher "toNotHaveThrown" expects no arguments, found ' +
-                arguments.length);
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(),
-            a.value.calls.threw());
-    }
-
-    function noteToHaveThrownWithName(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' +
-                arguments.length);
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(),
-            a.value.calls.threwWithName(value));
-    }
-
-    function noteToNotHaveThrownWithName(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' +
-                arguments.length);
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(),
-            a.value.calls.threwWithName(value));
-    }
-
-    function noteToHaveThrownWithMessage(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' +
-                arguments.length);
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(),
-            a.value.calls.threwWithMessage(value)
-        );
-    }
-
-    function noteToNotHaveThrownWithMessage(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' +
-                arguments.length);
-        }
-        var ti = testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
-        completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(),
-            a.value.calls.threwWithMessage(value)
-        );
-    }
-
-    function noteToEqualAssertion(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toEqual" requires 1 argument, found ' +
-                arguments.length);
-        }
-        completeTheAssertion(assertEqual, value, stackTraceFromError());
-    }
-
-    function noteToNotEqualAssertion(value){
-        if(arguments.length !== 1){
-            throwException('matcher "toNotEqual" requires 1 argument, found ' +
-                arguments.length);
-        }
-        completeTheAssertion(assertNotEqual, value, stackTraceFromError());
-    }
-
-    function noteToBeTrueAssertion(){
-        if(arguments.length){
-            throwException('matcher "toBeTrue;" expects no arguments, found ' +
-                arguments.length);
-        }
-        completeTheAssertion(assertIsTrue, true, stackTraceFromError());
-    }
-
-    function noteToBeFalseAssertion(){
-        if(arguments.length){
-            throwException('matcher "toBeFalse;" expects no arguments, found ' +
-                arguments.length);
-        }
-        completeTheAssertion(assertIsFalse, true, stackTraceFromError());
-    }
-
-    function noteToBeTruthyAssertion(){
-        if(arguments.length){
-            throwException('matcher "toBeTruthy" expects no arguments, found ' +
-                arguments.length);
-        }
-        completeTheAssertion(assertIsTruthy, true, stackTraceFromError());
-    }
-
-    function noteToNotBeTruthyAssertion(){
-        if(arguments.length){
-            throwException('matcher "toNotBeTruthy" expects no arguments, found ' +
-                arguments.length);
-        }
-        completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
-    }
-
-    function Assert(){
-        this.not = new Not();
-    }
-
-    Assert.prototype = {
-        constructor: Assert,
-        toEqual: noteToEqualAssertion,
-        toBeTrue: noteToBeTrueAssertion,
-        toBeTruthy: noteToBeTruthyAssertion,
-        toHaveBeenCalled: noteToHaveBeenCalled,
-        toHaveBeenCalledWith: noteToHaveBeenCalledWith,
-        toHaveBeenCalledWithContext: noteToHaveBeenCalledWithContext,
-        toHaveReturned: noteToHaveReturned,
-        toHaveThrown: noteToHaveThrown,
-        toHaveThrownWithName: noteToHaveThrownWithName,
-        toHaveThrownWithMessage: noteToHaveThrownWithMessage
-    };
-
-    function Not(){}
-    Not.prototype = {
-        constructor: Not,
-        toEqual: noteToNotEqualAssertion,
-        toBeTrue: noteToBeFalseAssertion,
-        toBeTruthy: noteToNotBeTruthyAssertion,
-        toHaveBeenCalled: noteToNotHaveBeenCalled,
-        toHaveBeenCalledWith: noteToNotHaveBeenCalledWith,
-        toHaveBeenCalledWithContext: noteToNotHaveBeenCalledWithContext,
-        toHaveReturned: noteToNotHaveReturned,
-        toHaveThrown: noteToNotHaveThrown,
-        toHaveThrownWithName: noteToNotHaveThrownWithName,
-        toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
-    };
+    // function compareArrays(a, b){
+    //     var i,
+    //         len;
+    //     if(Array.isArray(a) && Array.isArray(b)){
+    //         if(a.length !== b.length){
+    //             return false;
+    //         }
+    //         for(i = 0, len = a.length; i < len; i++){
+    //             if(typeof a[i] === 'object' && typeof b[i] === 'object'){
+    //                 if(!compare(a[i], b[i])){
+    //                     return false;
+    //                 }
+    //                 continue;
+    //             }
+    //             if(typeof a[i] === 'object' || typeof b[i] === 'object'){
+    //                 return false;
+    //             }
+    //             if(Array.isArray(a[i]) && Array.isArray(b[i])){
+    //                 if(!compareArrays(a[i], b[i])){
+    //                     return false;
+    //                 }
+    //                 continue;
+    //             }
+    //             if(Array.isArray(a[i]) || Array.isArray(b[i])){
+    //                 return false;
+    //             }
+    //             if(a[i] !== b[i]){
+    //                 return false;
+    //             }
+    //         }
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
+    // function compareObjects(a, b){
+    //     var prop;
+    //     if(compareArrays(a, b)){
+    //         return true;
+    //     }
+    //     for(prop in a){
+    //         if(a.hasOwnProperty(prop) && b.hasOwnProperty(prop)){
+    //             if(typeof a[prop] === 'object' && typeof b[prop] === 'object'){
+    //                 if(!compareObjects(a[prop], b[prop])){
+    //                     return false;
+    //                 }
+    //                 continue;
+    //             }
+    //             if(typeof a[prop] === 'object' || typeof b[prop] === 'object'){
+    //                 return false;
+    //             }
+    //             if(a[prop] !== b[prop]){
+    //                 return false;
+    //             }
+    //         } else {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
+
+    // function compare(a, b){
+    //     return compareObjects(a, b) && compareObjects(b, a);
+    // }
+
+    // //Assertions.
+    //
+    // function a_equals_b(a, b){
+    //     if(typeof a === 'object' && typeof b === 'object'){
+    //         //Both are object so compare their properties.
+    //         if(compare(a, b)){
+    //             return true;
+    //         }
+    //     }
+    //     if(typeof a === 'object' || typeof b === 'object'){
+    //         //One is an object and the other isn't.
+    //         return false;
+    //     }
+    //     //Both are not object so just compare values.
+    //     return a === b;
+    // }
+    //
+    // function a_notequals_b(a, b){
+    //     return !a_equals_b(a, b);
+    // }
+    //
+    // //Simple boolean test.
+    // function a_equals_true(a){
+    //     return a === true;
+    // }
+    //
+    // //Simple boolean test.
+    // function a_equals_false(a){
+    //     return a === false;
+    // }
+    //
+    // //Simple boolean test.
+    // function a_is_truthy(a){
+    //     return (a);
+    // }
+    //
+    // //Simple boolean test.
+    // function a_is_not_truthy(a){
+    //     return (!a);
+    // }
+
+    // //Assertion runners.
+    //
+    // function assertMockHasExpectations(a){
+    //     var result = a_equals_true(a);
+    //     return {result: result, explain: 'expected mock to have expectations'};
+    // }
+    //
+    // function assertToHaveBeenCalled(a){
+    //     var result = a_equals_true(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to have been called'};
+    // }
+    //
+    // function assertToNotHaveBeenCalled(a){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to not have been called'};
+    // }
+    //
+    // function argToPrintableValue(a){
+    //     var s = '';
+    //     a.forEach(function(el){
+    //         s = s.length ? s + ',' : s;
+    //         switch (typeof(el)){
+    //             case 'string':
+    //                 s += '\'' + el + '\'';
+    //                 break;
+    //             case 'function':
+    //                 s += 'function';
+    //                 break;
+    //             case 'object':
+    //                 s += JSON.stringify(el);
+    //                 break;
+    //             default:
+    //                 s += el;
+    //         }
+    //     });
+    //     return s;
+    // }
+    //
+    // function assertToHaveBeenCalledWith(a, b){
+    //     var result = a_equals_true(a);
+    //     // var result = a.wasCalled();
+    //     return {
+    //         result: result, explain: 'expected spy to have been called with ' + argToPrintableValue(b)};
+    // }
+    //
+    // function assertToNotHaveBeenCalledWith(a, b){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {
+    //         result: result, explain: 'expected spy to not have been called with ' + argToPrintableValue(b)};
+    // }
+    //
+    // function assertToHaveBeenCalledWithContext(a, b){
+    //     var result = a_equals_true(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to have been called with context ' + JSON.stringify(b)};
+    // }
+    //
+    // function assertToNotHaveBeenCalledWithContext(a, b){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to not have been called with context ' + JSON.stringify(b)};
+    // }
+    //
+    // function assertToHaveReturned(a, b){
+    //     var result = a_equals_true(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to have returned ' + argToPrintableValue([b])};
+    // }
+    //
+    // function assertToNotHaveReturned(a, b){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to not have returned ' + argToPrintableValue([b])};
+    // }
+    //
+    // function assertToHaveThrown(a){
+    //     var result = a_equals_true(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to have thrown an exception'};
+    // }
+    //
+    // function assertToNotHaveThrown(a){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to not have thrown an exception'};
+    // }
+    //
+    // function assertToHaveThrownWithName(a, b){
+    //     var result = a_equals_true(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to have thrown an exception with the name ' + JSON.stringify(b)};
+    // }
+    //
+    // function assertToNotHaveThrownWithName(a, b){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to not have thrown an exception with the name ' + JSON.stringify(b)};
+    // }
+    //
+    // function assertToHaveThrownWithMessage(a, b){
+    //     var result = a_equals_true(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to have thrown an exception with the message ' + JSON.stringify(b)};
+    // }
+    //
+    // function assertToNotHaveThrownWithMessage(a, b){
+    //     var result = a_equals_false(a);
+    //     // var result = a.wasCalled();
+    //     return {result: result, explain: 'expected spy to not have thrown an exception with the message ' + JSON.stringify(b)};
+    // }
+    //
+    // function assertEqual(a, b){
+    //     //return a_equals_b(a, b);
+    //     var result = a_equals_b(a, b);
+    //     return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to equal ' + argToPrintableValue([b])};
+    // }
+    //
+    // function assertNotEqual(a, b){
+    //     //return a_notequals_b(a, b);
+    //     var result = a_notequals_b(a, b);
+    //     return {result: result, explain: 'expected ' + argToPrintableValue([a]) + ' to not equal ' + argToPrintableValue([b])};
+    // }
+    //
+    // function assertIsTrue(a){
+    //     //return a_equals_true(a);
+    //     var result = a_equals_true(a);
+    //     return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be true' };
+    // }
+    //
+    // function assertIsFalse(a){
+    //     //return a_equals_false(a);
+    //     var result = a_equals_false(a);
+    //     return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be false'};
+    // }
+    //
+    // function assertIsTruthy(a){
+    //     //return a_is_truthy(a);
+    //     var result = a_is_truthy(a);
+    //     return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to be truthy'};
+    // }
+    //
+    // function assertIsNotTruthy(a){
+    //     //return a_is_not_truthy(a);
+    //     var result = a_is_not_truthy(a);
+    //     return {result: result, explain: 'expected ' + JSON.stringify(a) + ' to not be truthy'};
+    // }
+
+    // function pushOntoAssertions(assertion, assertionLabel, value,
+    //     expectation, stackTrace){
+    //     testsIterator.get().assertions.push({
+    //         assertion: assertion,
+    //         assertionLabel: assertionLabel,
+    //         value: value,
+    //         expectation: expectation,
+    //         stackTrace: stackTrace
+    //     });
+    // }
+    //
+    // function completeTheAssertion(assertion, value, stackTrace, actual){
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     a.assertion = assertion;
+    //     a.expectation = value;
+    //     a.stackTrace = stackTrace;
+    //     a.value = typeof(actual) === 'undefined' ? a.value : actual;
+    // }
+    //
+    // function setStackTraceProperty(){
+    //     try {
+    //         throw new Error('woops');
+    //     } catch (error){
+    //         require('./globals.js').stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
+    //             'stacktrace' : undefined;
+    //     }
+    // }
+    //
+    // function stackTraceFromError(){
+    //     var stackTraceProperty = require('./globals.js').stackTraceProperty,
+    //         stack = null;
+    //     if(stackTraceProperty){
+    //         try {
+    //             throw new Error();
+    //         } catch (error){
+    //             stack = error[stackTraceProperty];
+    //         }
+    //     }
+    //     return stack;
+    // }
+    //
+    // function noteExpectation(actual){
+    //     if(arguments.length !== 1){
+    //         throwException('"expect" requires 1 argument, found ' + arguments.length);
+    //     }
+    //     if(typeof(actual) === 'function' && !('_snoopsterMaker' in actual)){
+    //         actual = spy(actual).and.callActual();
+    //         actual();
+    //     }
+    //     //push partial assertion (only the value) info onto the assertion table
+    //     pushOntoAssertions(null, null, actual, null, null);
+    //     //return assert for chaining
+    //     return assert;
+    // }
+    //
+    // //only used by mock.validate and not part of the public api
+    // function noteMockHasExpectations(){
+    //     if(arguments.length){
+    //         throwException('matcher "toHaveBeenCalled" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertMockHasExpectations, null,
+    //         stackTraceFromError(), a.value._hasExpectations);
+    // }
+    //
+    // function noteToHaveBeenCalled(){
+    //     if(arguments.length){
+    //         throwException('matcher "toHaveBeenCalled" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToHaveBeenCalled, null, stackTraceFromError(),
+    //         a.value.calls.count() > 0);
+    // }
+    //
+    // function noteToNotHaveBeenCalled(){
+    //     if(arguments.length){
+    //         throwException('matcher "toNotHaveBeenCalled" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveBeenCalled, null, stackTraceFromError(),
+    //         a.value.calls.count() > 0);
+    // }
+    //
+    // function noteToHaveBeenCalledWith(){
+    //     if(!arguments.length){
+    //         throwException('matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none');
+    //     }
+    //
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
+    //         a.value.calls.wasCalledWith.apply(null, arguments));
+    // }
+    //
+    // function noteToNotHaveBeenCalledWith(){
+    //     if(!arguments.length){
+    //         throwException('matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none');
+    //     }
+    //
+    //     var ti = testsIterator,
+    //         a = ti.get()
+    //         .assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
+    //         a.value.calls.wasCalledWith.apply(null, arguments));
+    // }
+    //
+    // function noteToHaveBeenCalledWithContext(context){
+    //     if(arguments.length !== 1){
+    //         throwException( 'matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
+    //             arguments.length);
+    //     }
+    //
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToHaveBeenCalledWithContext, context, stackTraceFromError(),
+    //         a.value.calls.wasCalledWithContext(context));
+    // }
+    //
+    // function noteToNotHaveBeenCalledWithContext(context){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toHaveBeenCalledWithContext" expects 1 arguments, found ' +
+    //             arguments.length);
+    //     }
+    //
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveBeenCalledWithContext, context, stackTraceFromError(),
+    //         a.value.calls.wasCalledWithContext(context));
+    // }
+    //
+    // function noteToHaveReturned(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toHaveReturned" expects 1 arguments, found none');
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToHaveReturned, value, stackTraceFromError(),
+    //         a.value.calls.returned(value));
+    // }
+    //
+    // function noteToNotHaveReturned(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toHaveReturned" expects 1 arguments, found none');
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get() .assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveReturned, value, stackTraceFromError(),
+    //         a.value.calls.returned(value));
+    // }
+    //
+    // function noteToHaveThrown(){
+    //     if(arguments.length){
+    //         throwException('matcher "toHaveThrown" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToHaveThrown, true, stackTraceFromError(),
+    //         a.value.calls.threw());
+    // }
+    //
+    // function noteToNotHaveThrown(){
+    //     if(arguments.length){
+    //         throwException('matcher "toNotHaveThrown" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveThrown, true, stackTraceFromError(),
+    //         a.value.calls.threw());
+    // }
+    //
+    // function noteToHaveThrownWithName(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' +
+    //             arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToHaveThrownWithName, value, stackTraceFromError(),
+    //         a.value.calls.threwWithName(value));
+    // }
+    //
+    // function noteToNotHaveThrownWithName(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' +
+    //             arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveThrownWithName, value, stackTraceFromError(),
+    //         a.value.calls.threwWithName(value));
+    // }
+    //
+    // function noteToHaveThrownWithMessage(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' +
+    //             arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToHaveThrownWithMessage, value, stackTraceFromError(),
+    //         a.value.calls.threwWithMessage(value)
+    //     );
+    // }
+    //
+    // function noteToNotHaveThrownWithMessage(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' +
+    //             arguments.length);
+    //     }
+    //     var ti = testsIterator,
+    //         a = ti.get().assertions[ti.get().assertions.length - 1];
+    //     completeTheAssertion(assertToNotHaveThrownWithMessage, value, stackTraceFromError(),
+    //         a.value.calls.threwWithMessage(value)
+    //     );
+    // }
+    //
+    // function noteToEqualAssertion(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toEqual" requires 1 argument, found ' +
+    //             arguments.length);
+    //     }
+    //     completeTheAssertion(assertEqual, value, stackTraceFromError());
+    // }
+    //
+    // function noteToNotEqualAssertion(value){
+    //     if(arguments.length !== 1){
+    //         throwException('matcher "toNotEqual" requires 1 argument, found ' +
+    //             arguments.length);
+    //     }
+    //     completeTheAssertion(assertNotEqual, value, stackTraceFromError());
+    // }
+    //
+    // function noteToBeTrueAssertion(){
+    //     if(arguments.length){
+    //         throwException('matcher "toBeTrue;" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //     completeTheAssertion(assertIsTrue, true, stackTraceFromError());
+    // }
+    //
+    // function noteToBeFalseAssertion(){
+    //     if(arguments.length){
+    //         throwException('matcher "toBeFalse;" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //     completeTheAssertion(assertIsFalse, true, stackTraceFromError());
+    // }
+    //
+    // function noteToBeTruthyAssertion(){
+    //     if(arguments.length){
+    //         throwException('matcher "toBeTruthy" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //     completeTheAssertion(assertIsTruthy, true, stackTraceFromError());
+    // }
+    //
+    // function noteToNotBeTruthyAssertion(){
+    //     if(arguments.length){
+    //         throwException('matcher "toNotBeTruthy" expects no arguments, found ' +
+    //             arguments.length);
+    //     }
+    //     completeTheAssertion(assertIsNotTruthy, true, stackTraceFromError());
+    // }
+
+    // function Assert(){
+    //     this.not = new Not();
+    // }
+    //
+    // Assert.prototype = {
+    //     constructor: Assert,
+    //     toEqual: noteToEqualAssertion,
+    //     toBeTrue: noteToBeTrueAssertion,
+    //     toBeTruthy: noteToBeTruthyAssertion,
+    //     toHaveBeenCalled: noteToHaveBeenCalled,
+    //     toHaveBeenCalledWith: noteToHaveBeenCalledWith,
+    //     toHaveBeenCalledWithContext: noteToHaveBeenCalledWithContext,
+    //     toHaveReturned: noteToHaveReturned,
+    //     toHaveThrown: noteToHaveThrown,
+    //     toHaveThrownWithName: noteToHaveThrownWithName,
+    //     toHaveThrownWithMessage: noteToHaveThrownWithMessage
+    // };
+    //
+    // function Not(){}
+    // Not.prototype = {
+    //     constructor: Not,
+    //     toEqual: noteToNotEqualAssertion,
+    //     toBeTrue: noteToBeFalseAssertion,
+    //     toBeTruthy: noteToNotBeTruthyAssertion,
+    //     toHaveBeenCalled: noteToNotHaveBeenCalled,
+    //     toHaveBeenCalledWith: noteToNotHaveBeenCalledWith,
+    //     toHaveBeenCalledWithContext: noteToNotHaveBeenCalledWithContext,
+    //     toHaveReturned: noteToNotHaveReturned,
+    //     toHaveThrown: noteToNotHaveThrown,
+    //     toHaveThrownWithName: noteToNotHaveThrownWithName,
+    //     toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
+    // };
 
     //Returns the ui test container element.
     function getUiTestContainerElement(){
@@ -1738,369 +1746,369 @@
         return config.uiTestContainerId;
     }
 
-    spy = (function(){
-        function _spy(argObject, argProperty){
-            var targetFn,
-                snoopster,
-                calls = [];
-            if(arguments.length){
-                if(typeof(argObject) !== 'function' && typeof(argObject) !== 'object'){
-                    throw new Error('1st parameter must be a function or an object');
-                }
-                if(typeof(argObject) === 'object' && arguments.length < 2){
-                    throw new Error('expecting 2 parameters - found ' + arguments.length);
-                }
-                if(typeof(argObject) === 'object' && typeof(argProperty) !== 'string'){
-                    throw new Error('2nd parameter must be a string');
-                }
-                if(typeof(argObject) === 'object' && typeof(argObject[argProperty]) !== 'function'){
-                    throw new Error('expected ' + argProperty + ' to be a method');
-                }
-            }
-            //spy api
-            function Args(aArgs){
-                this.args = aArgs;
-            }
-            Args.prototype.getLength = function(){
-                return this.args.length ? this.args.length : 0;
-            };
-            Args.prototype.hasArg = function(i){
-                return i >= 0 && this.getLength() > i ? true : false;
-            };
-            Args.prototype.getArg = function(i){
-                return this.hasArg(i) ? this.args[i] : null;
-            };
-            Args.prototype.hasArgProperty = function(i, propertyName){
-                return this.hasArg(i) && propertyName in this.args[i] ? true : false;
-            };
-            Args.prototype.getArgProperty = function(i, propertyName){
-                return this.hasArgProperty(i, propertyName) ? this.args[i][propertyName] : null;
-            };
-            //spy api
-            function ACall(context, args, error, returned){
-                this.context = context;
-                this.args = args;
-                this.error = error;
-                this.returned = returned;
-            }
-            ACall.prototype.getContext = function(){
-                return this.context;
-            };
-            ACall.prototype.getArgs = function(){
-                return this.args;
-            };
-            ACall.prototype.getArg = function(i){
-                return this.args.getArg(i);
-            };
-            ACall.prototype.getArgsLength = function(){
-                return this.args.getLength();
-            };
-            ACall.prototype.getArgProperty = function(i, propertyName){
-                return this.args.getArgProperty(i, propertyName);
-            };
-            ACall.prototype.hasArgProperty = function(i, propertyName){
-                return this.args.hasArgProperty(i, propertyName);
-            };
-            ACall.prototype.hasArg = function(i){
-                return this.args.hasArg(i);
-            };
-            ACall.prototype.getError = function(){
-                return this.error;
-            };
-            ACall.prototype.getReturned = function(){
-                return this.returned;
-            };
-            targetFn = arguments.length === 0 ? function(){} :
-                typeof(arguments[0]) === 'function' ? argObject : argObject[argProperty];
-            //spy api - tracking
-            snoopster = function(){
-                var aArgs = arguments.length && argsToArray(arguments) || [],
-                    fn,
-                    error,
-                    returned;
-
-                function ThrowsException(message, name){
-                    this.message = message;
-                    this.name = name;
-                }
-                if(snoopster._callActual || snoopster._callFake){
-                    fn = snoopster._callFake || targetFn;
-                    try {
-                        returned = fn.apply(snoopster._callWithContext || this, aArgs);
-                    } catch (er){
-                        error = er;
-                    }
-                } else if(snoopster._throws){
-                    try {
-                        throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
-                    } catch (er){
-                        error = er;
-                    }
-                }
-                if(!snoopster._callActual){
-                    returned = snoopster._returns || returned;
-                }
-                // snoopster.args = new Args(aArgs);
-                calls.push(new ACall(snoopster._callWithContext || this, new Args(aArgs), error, returned));
-                return returned;
-            };
-            snoopster._snoopsterMaker = 'preamble.snoopster';
-            //stub api
-            snoopster._throws = false;
-            snoopster._throwsMessage = '';
-            snoopster._throwsName = '';
-            snoopster.and = {};
-            //spy api - sets the spy back to its default state
-            snoopster.and.reset = function(){
-                calls = [];
-                snoopster._resetCalls();
-                snoopster._throws = false;
-                snoopster._throwsMessage = '';
-                snoopster._throwsName = '';
-                snoopster._callWithContext = null;
-                snoopster._hasExpectations = false;
-                snoopster._expectations = {};
-                return snoopster;
-            };
-            snoopster._callWithContext = null;
-            snoopster.and.callWithContext = function(context){
-                if(!context || typeof(context) !== 'object'){
-                    throw new Error('callWithContext expects to be called with an object');
-                }
-                snoopster._callWithContext = context;
-                return snoopster;
-            };
-            snoopster.and.throw = function(){
-                snoopster._throws = true;
-                //for chaining
-                return snoopster;
-            };
-            snoopster.and.throwWithMessage = function(message){
-                if(typeof(message) !== 'string'){
-                    throw new Error('message expects a string');
-                }
-                snoopster._throws = true;
-                snoopster._throwsMessage = message;
-                //for chaining - spy.throws.with.message().and.with.name();
-                return snoopster;
-            };
-            snoopster.and.throwWithName = function(name){
-                if(typeof(name) !== 'string'){
-                    throw new Error('name expects a string');
-                }
-                snoopster._throws = true;
-                snoopster._throwsName = name;
-                //for chaining - spy.throws.with.message().and.with.name();
-                return snoopster;
-            };
-            snoopster.and.return = function(ret){
-                snoopster._returns = ret;
-                //for chaining
-                return snoopster;
-            };
-            //spy api
-            snoopster._resetCalls = function(){
-                snoopster._callFake = null;
-                snoopster._callActual = this._callStub = false;
-            };
-            //spy api
-            snoopster._callFake = null;
-            snoopster.and.callFake = function(fn){
-                if(fn && typeof(fn) !== 'function'){
-                    throw new Error('callFake expects to be called with a function');
-                }
-                snoopster._resetCalls();
-                snoopster._callFake = fn;
-                return snoopster;
-            };
-            //spy api
-            snoopster._callActual = false;
-            snoopster.and.callActual = function(){
-                snoopster._resetCalls();
-                snoopster._callActual = true;
-                //for chaining
-                return snoopster;
-            };
-            //spy api
-            snoopster.and.callStub = function(){
-                snoopster._resetCalls();
-                snoopster._callActual = false;
-                //for chaining
-                return snoopster;
-            };
-            snoopster.calls = {
-                count: function(){
-                    return calls.length;
-                },
-                forCall: function(i){
-                    return i >= 0 && i < calls.length && calls[i] || undefined;
-                },
-                all: function(){
-                    return calls;
-                },
-                wasCalledWith: function(){
-                    var a = argsToArray(arguments);
-                    return calls.some(function(call){
-                        var args = call.getArgs().args;
-                        return (a_equals_b(a, args));
-                    });
-                },
-                wasCalledWithContext: function(obj){
-                    return calls.some(function(call){
-                        var context = call.context;
-                        return (a_equals_b(obj, context));
-                    });
-                },
-                returned: function(value){
-                    return calls.some(function(call){
-                        var returned = call.getReturned();
-                        return (a_equals_b(value, returned));
-                    });
-                },
-                threw: function(){
-                    return calls.some(function(call){
-                        return !!call.error;
-                    });
-                },
-                threwWithName: function(name){
-                    return calls.some(function(call){
-                        return call.error && call.error.name === name;
-                    });
-                },
-                threwWithMessage: function(message){
-                    return calls.some(function(call){
-                        return call.error && call.error.message === message;
-                    });
-                }
-            };
-            //mock api
-            snoopster._hasExpectations = false;
-            snoopster._expectations = {};
-            snoopster.and.expect = {
-                it: {}
-            };
-            snoopster.and.expect.it.toBeCalled = function(){
-                snoopster._hasExpectations = true;
-                snoopster._expectations.toBeCalled = true;
-                return snoopster;
-            };
-            snoopster.and.expect.it.toBeCalledWith = function(){
-                snoopster._hasExpectations = true;
-                snoopster._expectations.toBeCalledWith = arguments;
-                return snoopster;
-            };
-            snoopster.and.expect.it.toBeCalledWithContext = function(obj){
-                snoopster._hasExpectations = true;
-                snoopster._expectations.toBeCalledWithContext = obj;
-                return snoopster;
-            };
-            snoopster.and.expect.it.toReturn = function(value){
-                snoopster._hasExpectations = true;
-                snoopster._expectations.toReturn = value;
-                return snoopster;
-            };
-            snoopster.and.expect.it.toThrow = function(){
-                snoopster._hasExpectations = true;
-                snoopster._expectations.toThrow = true;
-                return snoopster;
-            };
-            snoopster.and.expect.it.toThrowWithName = function(name){
-                snoopster._hasExpectations = true;
-                snoopster._expectations.toThrowWithName = name;
-                return snoopster;
-            };
-            snoopster.and.expect.it.toThrowWithMessage = function(message){
-                snoopster._hasExpectations = true;
-                snoopster._expectations.toThrowWithMessage = message;
-                return snoopster;
-            };
-            snoopster.validate = function(){
-                // if(!snoopster._hasExpectations){
-                //     throwException('"validate" expects a spy with predefined expectation and found none');
-                // }
-                //Expect the mock to have expectations
-                noteExpectation(snoopster);
-                noteMockHasExpectations();
-                if(snoopster._expectations.toBeCalled){
-                    noteExpectation(snoopster);
-                    noteToHaveBeenCalled();
-                }
-                if(snoopster._expectations.toBeCalledWith){
-                    noteExpectation(snoopster);
-                    noteToHaveBeenCalledWith.apply(null,
-                        argsToArray(snoopster._expectations.toBeCalledWith));
-                }
-                if(snoopster._expectations.toBeCalledWithContext){
-                    noteExpectation(snoopster);
-                    noteToHaveBeenCalledWithContext(
-                        snoopster._expectations.toBeCalledWithContext);
-                }
-                if(snoopster._expectations.toReturn){
-                    noteExpectation(snoopster);
-                    noteToHaveReturned(snoopster._expectations.toReturn);
-                }
-                if(snoopster._expectations.toThrow){
-                    noteExpectation(snoopster);
-                    noteToHaveThrown();
-                }
-                if(snoopster._expectations.toThrowWithName){
-                    noteExpectation(snoopster);
-                    noteToHaveThrownWithName(snoopster._expectations.toThrowWithName);
-                }
-                if(snoopster._expectations.toThrowWithMessage){
-                    noteExpectation(snoopster);
-                    noteToHaveThrownWithMessage(snoopster._expectations.toThrowWithMessage);
-                }
-            };
-            if(arguments.length && typeof(arguments[0]) !== 'function' &&
-                typeof(arguments[0]) === 'object'){
-                argObject[argProperty] = snoopster;
-            }
-            return snoopster;
-        }
-        /**
-         * @param {object} argObject An object whose properties identified by
-         * the elements in argPropertyNames are to be spies.
-         * @param {array} argPropertyNames An array of strings whose elements
-         * identify the methods in argObject to be spies.
-         * @param {[object]} context An object to use as the context when calling
-         * the spied property methods.
-         */
-        _spy.x = function(argObject, argPropertyNames){
-            var i,
-                len;
-            if(!argObject || typeof(argObject) !== 'object'){
-                throw new Error('expected an object for 1st parameter - found ' +
-                    typeof(argObject));
-            }
-            if(!argPropertyNames || !Array.isArray(argPropertyNames)){
-                throw new Error('expected an array for 2nd parameter - found ' +
-                    typeof(argObject));
-            }
-            if(!argPropertyNames.length){
-                throw new Error('expected an array for 2nd parameter with at ' +
-                    'least one element for 2nd parameter');
-            }
-            for(i = 0, len = argPropertyNames.length; i < len; i++){
-                if(typeof(argPropertyNames[i]) !== 'string'){
-                    throw new Error('expected element ' + i +
-                        ' of 2nd parameter to be a string');
-                }
-                if(!argObject[argPropertyNames[i]]){
-                    throw new Error('expected 1st paramter to have property ' +
-                        argPropertyNames[i]);
-                }
-                if(typeof(argObject[argPropertyNames[i]]) !== 'function'){
-                    throw new Error('expected ' + argPropertyNames[i] +
-                        ' to be a method');
-                }
-            }
-            argPropertyNames.forEach(function(property){
-                spy(argObject, property);
-            });
-        };
-        return _spy;
-    }());
+    // spy = (function(){
+    //     function _spy(argObject, argProperty){
+    //         var targetFn,
+    //             snoopster,
+    //             calls = [];
+    //         if(arguments.length){
+    //             if(typeof(argObject) !== 'function' && typeof(argObject) !== 'object'){
+    //                 throw new Error('1st parameter must be a function or an object');
+    //             }
+    //             if(typeof(argObject) === 'object' && arguments.length < 2){
+    //                 throw new Error('expecting 2 parameters - found ' + arguments.length);
+    //             }
+    //             if(typeof(argObject) === 'object' && typeof(argProperty) !== 'string'){
+    //                 throw new Error('2nd parameter must be a string');
+    //             }
+    //             if(typeof(argObject) === 'object' && typeof(argObject[argProperty]) !== 'function'){
+    //                 throw new Error('expected ' + argProperty + ' to be a method');
+    //             }
+    //         }
+    //         //spy api
+    //         function Args(aArgs){
+    //             this.args = aArgs;
+    //         }
+    //         Args.prototype.getLength = function(){
+    //             return this.args.length ? this.args.length : 0;
+    //         };
+    //         Args.prototype.hasArg = function(i){
+    //             return i >= 0 && this.getLength() > i ? true : false;
+    //         };
+    //         Args.prototype.getArg = function(i){
+    //             return this.hasArg(i) ? this.args[i] : null;
+    //         };
+    //         Args.prototype.hasArgProperty = function(i, propertyName){
+    //             return this.hasArg(i) && propertyName in this.args[i] ? true : false;
+    //         };
+    //         Args.prototype.getArgProperty = function(i, propertyName){
+    //             return this.hasArgProperty(i, propertyName) ? this.args[i][propertyName] : null;
+    //         };
+    //         //spy api
+    //         function ACall(context, args, error, returned){
+    //             this.context = context;
+    //             this.args = args;
+    //             this.error = error;
+    //             this.returned = returned;
+    //         }
+    //         ACall.prototype.getContext = function(){
+    //             return this.context;
+    //         };
+    //         ACall.prototype.getArgs = function(){
+    //             return this.args;
+    //         };
+    //         ACall.prototype.getArg = function(i){
+    //             return this.args.getArg(i);
+    //         };
+    //         ACall.prototype.getArgsLength = function(){
+    //             return this.args.getLength();
+    //         };
+    //         ACall.prototype.getArgProperty = function(i, propertyName){
+    //             return this.args.getArgProperty(i, propertyName);
+    //         };
+    //         ACall.prototype.hasArgProperty = function(i, propertyName){
+    //             return this.args.hasArgProperty(i, propertyName);
+    //         };
+    //         ACall.prototype.hasArg = function(i){
+    //             return this.args.hasArg(i);
+    //         };
+    //         ACall.prototype.getError = function(){
+    //             return this.error;
+    //         };
+    //         ACall.prototype.getReturned = function(){
+    //             return this.returned;
+    //         };
+    //         targetFn = arguments.length === 0 ? function(){} :
+    //             typeof(arguments[0]) === 'function' ? argObject : argObject[argProperty];
+    //         //spy api - tracking
+    //         snoopster = function(){
+    //             var aArgs = arguments.length && argsToArray(arguments) || [],
+    //                 fn,
+    //                 error,
+    //                 returned;
+    //
+    //             function ThrowsException(message, name){
+    //                 this.message = message;
+    //                 this.name = name;
+    //             }
+    //             if(snoopster._callActual || snoopster._callFake){
+    //                 fn = snoopster._callFake || targetFn;
+    //                 try {
+    //                     returned = fn.apply(snoopster._callWithContext || this, aArgs);
+    //                 } catch (er){
+    //                     error = er;
+    //                 }
+    //             } else if(snoopster._throws){
+    //                 try {
+    //                     throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
+    //                 } catch (er){
+    //                     error = er;
+    //                 }
+    //             }
+    //             if(!snoopster._callActual){
+    //                 returned = snoopster._returns || returned;
+    //             }
+    //             // snoopster.args = new Args(aArgs);
+    //             calls.push(new ACall(snoopster._callWithContext || this, new Args(aArgs), error, returned));
+    //             return returned;
+    //         };
+    //         snoopster._snoopsterMaker = 'preamble.snoopster';
+    //         //stub api
+    //         snoopster._throws = false;
+    //         snoopster._throwsMessage = '';
+    //         snoopster._throwsName = '';
+    //         snoopster.and = {};
+    //         //spy api - sets the spy back to its default state
+    //         snoopster.and.reset = function(){
+    //             calls = [];
+    //             snoopster._resetCalls();
+    //             snoopster._throws = false;
+    //             snoopster._throwsMessage = '';
+    //             snoopster._throwsName = '';
+    //             snoopster._callWithContext = null;
+    //             snoopster._hasExpectations = false;
+    //             snoopster._expectations = {};
+    //             return snoopster;
+    //         };
+    //         snoopster._callWithContext = null;
+    //         snoopster.and.callWithContext = function(context){
+    //             if(!context || typeof(context) !== 'object'){
+    //                 throw new Error('callWithContext expects to be called with an object');
+    //             }
+    //             snoopster._callWithContext = context;
+    //             return snoopster;
+    //         };
+    //         snoopster.and.throw = function(){
+    //             snoopster._throws = true;
+    //             //for chaining
+    //             return snoopster;
+    //         };
+    //         snoopster.and.throwWithMessage = function(message){
+    //             if(typeof(message) !== 'string'){
+    //                 throw new Error('message expects a string');
+    //             }
+    //             snoopster._throws = true;
+    //             snoopster._throwsMessage = message;
+    //             //for chaining - spy.throws.with.message().and.with.name();
+    //             return snoopster;
+    //         };
+    //         snoopster.and.throwWithName = function(name){
+    //             if(typeof(name) !== 'string'){
+    //                 throw new Error('name expects a string');
+    //             }
+    //             snoopster._throws = true;
+    //             snoopster._throwsName = name;
+    //             //for chaining - spy.throws.with.message().and.with.name();
+    //             return snoopster;
+    //         };
+    //         snoopster.and.return = function(ret){
+    //             snoopster._returns = ret;
+    //             //for chaining
+    //             return snoopster;
+    //         };
+    //         //spy api
+    //         snoopster._resetCalls = function(){
+    //             snoopster._callFake = null;
+    //             snoopster._callActual = this._callStub = false;
+    //         };
+    //         //spy api
+    //         snoopster._callFake = null;
+    //         snoopster.and.callFake = function(fn){
+    //             if(fn && typeof(fn) !== 'function'){
+    //                 throw new Error('callFake expects to be called with a function');
+    //             }
+    //             snoopster._resetCalls();
+    //             snoopster._callFake = fn;
+    //             return snoopster;
+    //         };
+    //         //spy api
+    //         snoopster._callActual = false;
+    //         snoopster.and.callActual = function(){
+    //             snoopster._resetCalls();
+    //             snoopster._callActual = true;
+    //             //for chaining
+    //             return snoopster;
+    //         };
+    //         //spy api
+    //         snoopster.and.callStub = function(){
+    //             snoopster._resetCalls();
+    //             snoopster._callActual = false;
+    //             //for chaining
+    //             return snoopster;
+    //         };
+    //         snoopster.calls = {
+    //             count: function(){
+    //                 return calls.length;
+    //             },
+    //             forCall: function(i){
+    //                 return i >= 0 && i < calls.length && calls[i] || undefined;
+    //             },
+    //             all: function(){
+    //                 return calls;
+    //             },
+    //             wasCalledWith: function(){
+    //                 var a = argsToArray(arguments);
+    //                 return calls.some(function(call){
+    //                     var args = call.getArgs().args;
+    //                     return (a_equals_b(a, args));
+    //                 });
+    //             },
+    //             wasCalledWithContext: function(obj){
+    //                 return calls.some(function(call){
+    //                     var context = call.context;
+    //                     return (a_equals_b(obj, context));
+    //                 });
+    //             },
+    //             returned: function(value){
+    //                 return calls.some(function(call){
+    //                     var returned = call.getReturned();
+    //                     return (a_equals_b(value, returned));
+    //                 });
+    //             },
+    //             threw: function(){
+    //                 return calls.some(function(call){
+    //                     return !!call.error;
+    //                 });
+    //             },
+    //             threwWithName: function(name){
+    //                 return calls.some(function(call){
+    //                     return call.error && call.error.name === name;
+    //                 });
+    //             },
+    //             threwWithMessage: function(message){
+    //                 return calls.some(function(call){
+    //                     return call.error && call.error.message === message;
+    //                 });
+    //             }
+    //         };
+    //         //mock api
+    //         snoopster._hasExpectations = false;
+    //         snoopster._expectations = {};
+    //         snoopster.and.expect = {
+    //             it: {}
+    //         };
+    //         snoopster.and.expect.it.toBeCalled = function(){
+    //             snoopster._hasExpectations = true;
+    //             snoopster._expectations.toBeCalled = true;
+    //             return snoopster;
+    //         };
+    //         snoopster.and.expect.it.toBeCalledWith = function(){
+    //             snoopster._hasExpectations = true;
+    //             snoopster._expectations.toBeCalledWith = arguments;
+    //             return snoopster;
+    //         };
+    //         snoopster.and.expect.it.toBeCalledWithContext = function(obj){
+    //             snoopster._hasExpectations = true;
+    //             snoopster._expectations.toBeCalledWithContext = obj;
+    //             return snoopster;
+    //         };
+    //         snoopster.and.expect.it.toReturn = function(value){
+    //             snoopster._hasExpectations = true;
+    //             snoopster._expectations.toReturn = value;
+    //             return snoopster;
+    //         };
+    //         snoopster.and.expect.it.toThrow = function(){
+    //             snoopster._hasExpectations = true;
+    //             snoopster._expectations.toThrow = true;
+    //             return snoopster;
+    //         };
+    //         snoopster.and.expect.it.toThrowWithName = function(name){
+    //             snoopster._hasExpectations = true;
+    //             snoopster._expectations.toThrowWithName = name;
+    //             return snoopster;
+    //         };
+    //         snoopster.and.expect.it.toThrowWithMessage = function(message){
+    //             snoopster._hasExpectations = true;
+    //             snoopster._expectations.toThrowWithMessage = message;
+    //             return snoopster;
+    //         };
+    //         snoopster.validate = function(){
+    //             // if(!snoopster._hasExpectations){
+    //             //     throwException('"validate" expects a spy with predefined expectation and found none');
+    //             // }
+    //             //Expect the mock to have expectations
+    //             noteExpectation(snoopster);
+    //             noteMockHasExpectations();
+    //             if(snoopster._expectations.toBeCalled){
+    //                 noteExpectation(snoopster);
+    //                 noteToHaveBeenCalled();
+    //             }
+    //             if(snoopster._expectations.toBeCalledWith){
+    //                 noteExpectation(snoopster);
+    //                 noteToHaveBeenCalledWith.apply(null,
+    //                     argsToArray(snoopster._expectations.toBeCalledWith));
+    //             }
+    //             if(snoopster._expectations.toBeCalledWithContext){
+    //                 noteExpectation(snoopster);
+    //                 noteToHaveBeenCalledWithContext(
+    //                     snoopster._expectations.toBeCalledWithContext);
+    //             }
+    //             if(snoopster._expectations.toReturn){
+    //                 noteExpectation(snoopster);
+    //                 noteToHaveReturned(snoopster._expectations.toReturn);
+    //             }
+    //             if(snoopster._expectations.toThrow){
+    //                 noteExpectation(snoopster);
+    //                 noteToHaveThrown();
+    //             }
+    //             if(snoopster._expectations.toThrowWithName){
+    //                 noteExpectation(snoopster);
+    //                 noteToHaveThrownWithName(snoopster._expectations.toThrowWithName);
+    //             }
+    //             if(snoopster._expectations.toThrowWithMessage){
+    //                 noteExpectation(snoopster);
+    //                 noteToHaveThrownWithMessage(snoopster._expectations.toThrowWithMessage);
+    //             }
+    //         };
+    //         if(arguments.length && typeof(arguments[0]) !== 'function' &&
+    //             typeof(arguments[0]) === 'object'){
+    //             argObject[argProperty] = snoopster;
+    //         }
+    //         return snoopster;
+    //     }
+    //     /**
+    //      * @param {object} argObject An object whose properties identified by
+    //      * the elements in argPropertyNames are to be spies.
+    //      * @param {array} argPropertyNames An array of strings whose elements
+    //      * identify the methods in argObject to be spies.
+    //      * @param {[object]} context An object to use as the context when calling
+    //      * the spied property methods.
+    //      */
+    //     _spy.x = function(argObject, argPropertyNames){
+    //         var i,
+    //             len;
+    //         if(!argObject || typeof(argObject) !== 'object'){
+    //             throw new Error('expected an object for 1st parameter - found ' +
+    //                 typeof(argObject));
+    //         }
+    //         if(!argPropertyNames || !Array.isArray(argPropertyNames)){
+    //             throw new Error('expected an array for 2nd parameter - found ' +
+    //                 typeof(argObject));
+    //         }
+    //         if(!argPropertyNames.length){
+    //             throw new Error('expected an array for 2nd parameter with at ' +
+    //                 'least one element for 2nd parameter');
+    //         }
+    //         for(i = 0, len = argPropertyNames.length; i < len; i++){
+    //             if(typeof(argPropertyNames[i]) !== 'string'){
+    //                 throw new Error('expected element ' + i +
+    //                     ' of 2nd parameter to be a string');
+    //             }
+    //             if(!argObject[argPropertyNames[i]]){
+    //                 throw new Error('expected 1st paramter to have property ' +
+    //                     argPropertyNames[i]);
+    //             }
+    //             if(typeof(argObject[argPropertyNames[i]]) !== 'function'){
+    //                 throw new Error('expected ' + argPropertyNames[i] +
+    //                     ' to be a method');
+    //             }
+    //         }
+    //         argPropertyNames.forEach(function(property){
+    //             spy(argObject, property);
+    //         });
+    //     };
+    //     return _spy;
+    // }());
 
     /**
      * It all starts here!
