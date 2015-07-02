@@ -7,8 +7,8 @@
     //Version
     var version = 'v3.0.3',
         //Merged configuration options.
-        config = {},
-        queue = [],
+        // config = {},
+        // queue = [],
         prevQueueCount = 0,
         queueStableCount = 0,
         queueStableInterval = 1,
@@ -16,9 +16,9 @@
         reporter,
         // assert,
         intervalId,
-        runtimeFilter,
+        // runtimeFilter,
         // stackTraceProperty,
-        queueBuilder,
+        // queueBuilder,
         // pubsub,
         tests,
         //TODO(JS): requires that eventually may not be needed to be declared here
@@ -26,11 +26,13 @@
         // testsIterator = require('./core/globals.js'),
         Group = require('./core/group.js'),
         Test = require('./core/test.js'),
-        AssertApi = require('./core/assertapi.js'),
-        spyOn = require('./core/spy.js'),
+        // AssertApi = require('./core/assertapi.js'),
+        // spyOn = require('./core/spy.js'),
         emit = require('./core/emit.js'),
         on = require('./core/on.js'),
-        notations = require('./core/expectations/notations.js'),
+        configure = require('./core/configure.js'),
+        // queueBuilder = require('./core/queuebuilder.js'),
+        // notations = require('./core/expectations/notations.js'),
         globals = require('./core/globals.js'),
         helpers = require('./core/helpers.js');
         // argsToArray = require('./core/helpers').argsToArray,
@@ -372,7 +374,7 @@
             '</div>' +
             '<div class="table">' +
             '<section id="preamble-status-container">' +
-            '<div class="summary">Building queue. Please wait...</div>' +
+            '<div class="summary">Building globals.queue. Please wait...</div>' +
             '</section>' +
             '</div>' +
             '</header>' +
@@ -408,11 +410,11 @@
             hpt;
         //Show groups and tests coverage in the header.
         show = show.replace(/{{tt}}/, tests.length - tests.totBypassed);
-        if(config.testingShortCircuited){
+        if(globals.config.testingShortCircuited){
             show += (tests.length - tests.totBypassed) && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
-        } else if(runtimeFilter.group){
-            show += runtimeFilter.group && ' of {{tbpt}}';
+        } else if(globals.runtimeFilter.group){
+            show += globals.runtimeFilter.group && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         }
         show += pluralize(' spec', tests.length);
@@ -421,13 +423,13 @@
             '<input id="hidePassedTests" type="checkbox" {{checked}}></div>' +
             ' - <a id="runAll" href="?"> run all</a>' +
             '</div>';
-        hpt = loadPageVar('hpt');
-        hpt = hpt === '' && config.hidePassedTests || hpt === 'true' &&
+        hpt = helpers.loadPageVar('hpt');
+        hpt = hpt === '' && globals.config.hidePassedTests || hpt === 'true' &&
             true || hpt === 'false' && false;
         coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
-        //Preserve error message that replaces 'Building queue. Please wait...'.
+        //Preserve error message that replaces 'Building globals.queue. Please wait...'.
         if(elStatusContainer.innerHTML ===
-            '<div class="summary">Building queue. Please wait...</div>'){
+            '<div class="summary">Building globals.queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
         } else {
             elStatusContainer.innerHTML += coverage;
@@ -642,7 +644,7 @@
 
     //Initialize.
     on('start', function(){
-        tests = queue.filter(function(item){
+        tests = globals.queue.filter(function(item){
             return item instanceof Test;
         });
         tests.result = true;
@@ -677,7 +679,7 @@
         function runTests(callback){
             if(globals.testsIterator.hasNext()){
                 runTest(globals.testsIterator.getNext(), function(totFailed){
-                    if(totFailed && config.shortCircuit){
+                    if(totFailed && globals.config.shortCircuit){
                         //If totFailed and shortCircuit then abort
                         //further testing!
                         emit('testingShortCircuited');
@@ -700,7 +702,7 @@
         //Set the "bypass" property for all groups and
         //tests that arent related to this test to true.
         var queueIterator, queueObj;
-        queueIterator = new Iterator(queue);
+        queueIterator = new Iterator(globals.queue);
         while (queueIterator.hasNext()){
             queueObj = queueIterator.getNext();
             //Groups that haven't run will have their passed property set to true.
@@ -714,13 +716,13 @@
         }
         //Set flag in config to indicate that testing has
         //been aborted due to short circuit condition.
-        config.testingShortCircuited = true;
+        globals.config.testingShortCircuited = true;
     });
 
     on('end', function(){
         //Record how many tests were bypassed.
         tests.totBypassed = 0;
-        if(runtimeFilter.group || config.testingShortCircuited){
+        if(globals.runtimeFilter.group || globals.config.testingShortCircuited){
             tests.totBypassed = tests.reduce(function(prevValue, t){
                 return t.bypass ? prevValue + 1 : prevValue;
             }, 0);
@@ -731,11 +733,11 @@
                 1 : prevValue;
         }, 0);
         tests.result = tests.totTestsFailed === 0;
-        queue.end = Date.now();
-        tests.duration = queue.end - queue.start;
+        globals.queue.end = Date.now();
+        tests.duration = globals.queue.end - globals.queue.start;
         reporter.coverage(tests);
         reporter.summary(tests);
-        reporter.details(queue);
+        reporter.details(globals.queue);
     });
 
     // iteratorFactory = (function(){
@@ -800,145 +802,145 @@
     //     return _iteratorFactory;
     // }());
 
-    /**
-     * Process for building the queue.
-     * @param {array} - queue, filled with Groups and Tests.
-     * @param {function} - trhowException, a function called to throw an exception.
-     */
-    queueBuilder = (function(queue, throwException){
+    // /**
+    //  * Process for building the globals.queue.
+    //  * @param {array} - queue, filled with Groups and Tests.
+    //  * @param {function} - trhowException, a function called to throw an exception.
+    //  */
+    // queueBuilder = (function(queue, throwException){
+    //
+    //     var runner = {},
+    //         groupStack = [],
+    //         uniqueId = (function(){
+    //             var i = 0;
+    //             return function(){
+    //                 return i += 1;
+    //             };
+    //         }());
+    //
+    //     groupStack.getPath = function(){
+    //         var result = this.reduce(function(prevValue, group){
+    //             return prevValue + '/' + group.id;
+    //         }, '');
+    //         return result;
+    //     };
+    //
+    //     /**
+    //      * Returns true if there is no run time filter
+    //      * or if obj matches the run time filter.
+    //      * Returns false otherwise.
+    //      * @param {object} obj, either a Test or a Group.
+    //      */
+    //     function filter(obj){
+    //         var path = '',
+    //             s;
+    //         if(!globals.runtimeFilter.group){
+    //             return true;
+    //         } else {
+    //             if(obj instanceof(Group)){
+    //                 path = obj.pathFromParentGroupLabels();
+    //                 s = path.substr(0, globals.runtimeFilter.group.length);
+    //                 return s === globals.runtimeFilter.group;
+    //             } else {
+    //                 path = obj.parentGroup.pathFromParentGroupLabels();
+    //                 s = path.substr(0, globals.runtimeFilter.group.length);
+    //                 return s === globals.runtimeFilter.group && globals.runtimeFilter.test === '' ||
+    //                     s === globals.runtimeFilter.group && globals.runtimeFilter.test === obj.label;
+    //             }
+    //         }
+    //     }
+    //
+    //     /**
+    //      * Registers a group.
+    //      * @param {string} label, describes the group/suite.
+    //      * @param {function} callback,  called to run befores, test and afters.
+    //      */
+    //     runner.group = function(label, callback){
+    //         var grp,
+    //             id,
+    //             path;
+    //         if(arguments.length !== 2){
+    //             throwException('requires 2 arguments, found ' + arguments.length);
+    //         }
+    //         id = uniqueId();
+    //         path = groupStack.getPath() + '/' + id;
+    //         grp = new Group(groupStack, id, path, label, callback);
+    //         grp.bypass = !filter(grp);
+    //         globals.queue.push(grp);
+    //         groupStack.push(grp);
+    //         grp.callback();
+    //         groupStack.pop();
+    //     };
+    //
+    //     /**
+    //      * Registers a before each test process.
+    //      * @param {function} callback,  called before running a test.
+    //      */
+    //     runner.beforeEachTest = function(callback){
+    //         var parentGroup = groupStack[groupStack.length - 1];
+    //         parentGroup.beforeEachTest = callback;
+    //     };
+    //
+    //     runner.afterEachTest = function(callback){
+    //         var parentGroup = groupStack[groupStack.length - 1];
+    //         parentGroup.afterEachTest = callback;
+    //     };
+    //
+    //     /**
+    //      * Registers a test.
+    //      * @param {string} label, describes the test/spec.
+    //      * @param {function} callback, called to run the test.
+    //      * @param {integer} timeoutInterval, optional, the amount of time
+    //      * the test is allowed to run before timing out the test.
+    //      */
+    //     runner.test = function(label, callback, timeoutInterval){
+    //         var tst,
+    //             parentGroup,
+    //             id,
+    //             path,
+    //             tl,
+    //             cb,
+    //             stackTrace;
+    //         if(arguments.length < 2){
+    //             throwException('requires at least 2 arguments, found ' + arguments.length);
+    //         }
+    //         tl = arguments.length === 3 && timeoutInterval || config.timeoutInterval;
+    //         cb = arguments.length === 3 && callback || arguments[1];
+    //         parentGroup = groupStack[groupStack.length - 1];
+    //         id = uniqueId();
+    //         path = groupStack.getPath() + '/' + id;
+    //         stackTrace = helpers.stackTraceFromError();
+    //         tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, config.windowGlobals);
+    //         tst.bypass = !filter(tst);
+    //         globals.queue.push(tst);
+    //     };
+    //
+    //     //Return the module, exposing the runner.
+    //     return runner;
+    // }(queue, helpers.throwException));
 
-        var runner = {},
-            groupStack = [],
-            uniqueId = (function(){
-                var i = 0;
-                return function(){
-                    return i += 1;
-                };
-            }());
+    // //Get URL query string param...thanks MDN.
+    // function loadPageVar(sVar){
+    //     return decodeURI(window.location.search.replace(new RegExp(
+    //         '^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') +
+    //         '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
+    // }
 
-        groupStack.getPath = function(){
-            var result = this.reduce(function(prevValue, group){
-                return prevValue + '/' + group.id;
-            }, '');
-            return result;
-        };
-
-        /**
-         * Returns true if there is no run time filter
-         * or if obj matches the run time filter.
-         * Returns false otherwise.
-         * @param {object} obj, either a Test or a Group.
-         */
-        function filter(obj){
-            var path = '',
-                s;
-            if(!runtimeFilter.group){
-                return true;
-            } else {
-                if(obj instanceof(Group)){
-                    path = obj.pathFromParentGroupLabels();
-                    s = path.substr(0, runtimeFilter.group.length);
-                    return s === runtimeFilter.group;
-                } else {
-                    path = obj.parentGroup.pathFromParentGroupLabels();
-                    s = path.substr(0, runtimeFilter.group.length);
-                    return s === runtimeFilter.group && runtimeFilter.test === '' ||
-                        s === runtimeFilter.group && runtimeFilter.test === obj.label;
-                }
-            }
-        }
-
-        /**
-         * Registers a group.
-         * @param {string} label, describes the group/suite.
-         * @param {function} callback,  called to run befores, test and afters.
-         */
-        runner.group = function(label, callback){
-            var grp,
-                id,
-                path;
-            if(arguments.length !== 2){
-                throwException('requires 2 arguments, found ' + arguments.length);
-            }
-            id = uniqueId();
-            path = groupStack.getPath() + '/' + id;
-            grp = new Group(groupStack, id, path, label, callback);
-            grp.bypass = !filter(grp);
-            queue.push(grp);
-            groupStack.push(grp);
-            grp.callback();
-            groupStack.pop();
-        };
-
-        /**
-         * Registers a before each test process.
-         * @param {function} callback,  called before running a test.
-         */
-        runner.beforeEachTest = function(callback){
-            var parentGroup = groupStack[groupStack.length - 1];
-            parentGroup.beforeEachTest = callback;
-        };
-
-        runner.afterEachTest = function(callback){
-            var parentGroup = groupStack[groupStack.length - 1];
-            parentGroup.afterEachTest = callback;
-        };
-
-        /**
-         * Registers a test.
-         * @param {string} label, describes the test/spec.
-         * @param {function} callback, called to run the test.
-         * @param {integer} timeoutInterval, optional, the amount of time
-         * the test is allowed to run before timing out the test.
-         */
-        runner.test = function(label, callback, timeoutInterval){
-            var tst,
-                parentGroup,
-                id,
-                path,
-                tl,
-                cb,
-                stackTrace;
-            if(arguments.length < 2){
-                throwException('requires at least 2 arguments, found ' + arguments.length);
-            }
-            tl = arguments.length === 3 && timeoutInterval || config.timeoutInterval;
-            cb = arguments.length === 3 && callback || arguments[1];
-            parentGroup = groupStack[groupStack.length - 1];
-            id = uniqueId();
-            path = groupStack.getPath() + '/' + id;
-            stackTrace = helpers.stackTraceFromError();
-            tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, config.windowGlobals);
-            tst.bypass = !filter(tst);
-            queue.push(tst);
-        };
-
-        //Return the module, exposing the runner.
-        return runner;
-    }(queue, helpers.throwException));
-
-    //Get URL query string param...thanks MDN.
-    function loadPageVar(sVar){
-        return decodeURI(window.location.search.replace(new RegExp(
-            '^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') +
-            '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
-    }
-
-    //Display caught errors to the browser.
-    function errorHandler(){
-        var html;
-        //isProcessAborted = true;
-        if(arguments.length === 3){
-            //window.onerror
-            html = '<p class="failed">' + arguments[0] + '</p><p>File: ' +
-                arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
-        } else {
-            //catch(e)
-            html = '<p class="failed">An error occurred,  "' + arguments[0] +
-                '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
-        }
-        document.getElementById('preamble-status-container').innerHTML = html;
-    }
+    // //Display caught errors to the browser.
+    // function errorHandler(){
+    //     var html;
+    //     //isProcessAborted = true;
+    //     if(arguments.length === 3){
+    //         //window.onerror
+    //         html = '<p class="failed">' + arguments[0] + '</p><p>File: ' +
+    //             arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
+    //     } else {
+    //         //catch(e)
+    //         html = '<p class="failed">An error occurred,  "' + arguments[0] +
+    //             '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+    //     }
+    //     document.getElementById('preamble-status-container').innerHTML = html;
+    // }
 
     /**
      * Makes words plural if their counts are 0 or greater than 1.
@@ -950,20 +952,20 @@
         return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
     }
 
-    function merge(){
-        var result = {},
-            target = arguments[0],
-            sources = [].slice.call(arguments, 1);
-        sources.forEach(function(source){
-            var prop;
-            for(prop in target){
-                if(target.hasOwnProperty(prop)){
-                    result[prop] = source.hasOwnProperty(prop) ? source[prop] : target[prop];
-                }
-            }
-        });
-        return result;
-    }
+    // function merge(){
+    //     var result = {},
+    //         target = arguments[0],
+    //         sources = [].slice.call(arguments, 1);
+    //     sources.forEach(function(source){
+    //         var prop;
+    //         for(prop in target){
+    //             if(target.hasOwnProperty(prop)){
+    //                 result[prop] = source.hasOwnProperty(prop) ? source[prop] : target[prop];
+    //             }
+    //         }
+    //     });
+    //     return result;
+    // }
 
     /**
      * Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
@@ -1050,7 +1052,7 @@
         if(evt.target.tagName === 'A'){
             evt.stopPropagation();
             checked = document.getElementById('hidePassedTests').checked;
-            if(config.hidePassedTests !== checked){
+            if(globals.config.hidePassedTests !== checked){
                 evt.preventDefault();
                 href = evt.target.getAttribute('href');
                 lastChar = href[href.length - 1];
@@ -1060,102 +1062,102 @@
         }
     }
 
-    //Configuration is called once internally but may be called again if test script
-    //employs in-line configuration.
-    function configure(){
-        /**
-         * Default configuration options - override these in your config file
-         * (e.g. var preambleConfig = {timeoutInterval: 10}) or in-line in your tests.
-         *
-         * windowGlobals: (default true) - set to false to not use window globals
-         * (i.e. non browser environment). *IMPORTANT - USING IN-LINE CONFIGURATION
-         * TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED*.
-         *
-         * timeoutInterval: (default 50 milliseconds) - set to some other number
-         * of milliseconds to wait before a test is timed out. This number is applied
-         * to all tests and can be selectively overridden by individual tests.
-         *
-         * name: (default 'Suite') - set to a meaningful name.
-         *
-         * uiTestContainerId (default id="ui-test-container") - set its id to something
-         * else if desired.
-         *
-         * hidePassedTests: (default: false) - set to true to hide passed tests.
-         *
-         * shortCircuit: (default: false) - set to true to short circuit when a test fails.
-         *
-         * testingShortCircuited: (default: false) - *IMPORTANT - FOR INTERNAL USE ONLY*
-         * When a test fails and shortCircuit is set to true then Preamble will set this
-         * to true.
-         *
-         * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY* Adapters
-         * for external processes, such as for Karma, initially set this to false to
-         * delay the execution of the tests and will eventually set it to true when
-         * appropriate.
-         */
-        var defaultConfig = {
-                windowGlobals: true,
-                timeoutInterval: 50,
-                name: 'Suite',
-                uiTestContainerId: 'ui-test-container',
-                hidePassedTests: false,
-                shortCircuit: false,
-                testingShortCircuited: false,
-                autoStart: true
-            },
-            configArg = arguments && arguments[0];
-        //Ignore configuration once testing has started.
-        if(configArg && queue.length){
-            return;
-        }
-        config = window.preambleConfig ? merge(defaultConfig, window.preambleConfig) :
-            defaultConfig;
-        config = configArg ? merge(config, configArg) : config;
-        //Capture run-time filters, if any.
-        runtimeFilter = {
-            group: loadPageVar('group'),
-            test: loadPageVar('test')
-        };
-        //Capture exception's stack trace property.
-        helpers.setStackTraceProperty();
-        //Handle global errors.
-        window.onerror = errorHandler;
-        //If the windowGlabals config option is false then window globals will
-        //not be used and the one Preamble name space will be used instead.
-        if(config.windowGlobals){
-            window.configure = configure;
-            window.describe = queueBuilder.group;
-            window.beforeEach = queueBuilder.beforeEachTest;
-            window.afterEach = queueBuilder.afterEachTest;
-            window.it = queueBuilder.test;
-            window.expect = notations.noteExpectation;
-            window.getUiTestContainerElement = getUiTestContainerElement;
-            window.getUiTestContainerElementId = getUiTestContainerElementId;
-            window.spyOn = spyOn;
-        } else {
-            window.Preamble = {
-                configure: configure,
-                describe: queueBuilder.group,
-                beforeEach: queueBuilder.beforeEachTest,
-                afterEach: queueBuilder.afterEachTest,
-                it: queueBuilder.test,
-                expect: notations.noteExpectation,
-                getUiTestContainerElement: getUiTestContainerElement,
-                getUiTestContainerElementId: getUiTestContainerElementId,
-                spyOn: spyOn,
-            };
-        }
-        globals.assert = new AssertApi();
-        window.Preamble = window.Preamble || {};
-        //For use by external processes.
-        window.Preamble.__ext__ = {};
-        //Expose config options to external processes.
-        window.Preamble.__ext__.config = config;
-        //publish config event.
-        emit('configchanged', {
-            name: config.name, uiTestContainerId: config.uiTestContainerId
-        });
-    }
+    // //Configuration is called once internally but may be called again if test script
+    // //employs in-line configuration.
+    // function configure(){
+    //     /**
+    //      * Default configuration options - override these in your config file
+    //      * (e.g. var preambleConfig = {timeoutInterval: 10}) or in-line in your tests.
+    //      *
+    //      * windowGlobals: (default true) - set to false to not use window globals
+    //      * (i.e. non browser environment). *IMPORTANT - USING IN-LINE CONFIGURATION
+    //      * TO OVERRIDE THE "windowGlobals" OPTION IS NOT SUPPORTED*.
+    //      *
+    //      * timeoutInterval: (default 50 milliseconds) - set to some other number
+    //      * of milliseconds to wait before a test is timed out. This number is applied
+    //      * to all tests and can be selectively overridden by individual tests.
+    //      *
+    //      * name: (default 'Suite') - set to a meaningful name.
+    //      *
+    //      * uiTestContainerId (default id="ui-test-container") - set its id to something
+    //      * else if desired.
+    //      *
+    //      * hidePassedTests: (default: false) - set to true to hide passed tests.
+    //      *
+    //      * shortCircuit: (default: false) - set to true to short circuit when a test fails.
+    //      *
+    //      * testingShortCircuited: (default: false) - *IMPORTANT - FOR INTERNAL USE ONLY*
+    //      * When a test fails and shortCircuit is set to true then Preamble will set this
+    //      * to true.
+    //      *
+    //      * autoStart: (default: true) - *IMPORTANT - FOR INTERNAL USE ONLY* Adapters
+    //      * for external processes, such as for Karma, initially set this to false to
+    //      * delay the execution of the tests and will eventually set it to true when
+    //      * appropriate.
+    //      */
+    //     var defaultConfig = {
+    //             windowGlobals: true,
+    //             timeoutInterval: 50,
+    //             name: 'Suite',
+    //             uiTestContainerId: 'ui-test-container',
+    //             hidePassedTests: false,
+    //             shortCircuit: false,
+    //             testingShortCircuited: false,
+    //             autoStart: true
+    //         },
+    //         configArg = arguments && arguments[0];
+    //     //Ignore configuration once testing has started.
+    //     if(configArg && globals.queue.length){
+    //         return;
+    //     }
+    //     globals.config = window.preambleConfig ? helpers.merge(defaultConfig, window.preambleConfig) :
+    //         defaultConfig;
+    //     globals.config = configArg ? helpers.merge(globals.config, configArg) : globals.config;
+    //     //Capture run-time filters, if any.
+    //     globals.runtimeFilter = {
+    //         group: helpers.loadPageVar('group'),
+    //         test: helpers.loadPageVar('test')
+    //     };
+    //     //Capture exception's stack trace property.
+    //     helpers.setStackTraceProperty();
+    //     //Handle global errors.
+    //     window.onerror = errorHandler;
+    //     //If the windowGlabals config option is false then window globals will
+    //     //not be used and the one Preamble name space will be used instead.
+    //     if(globals.config.windowGlobals){
+    //         window.configure = configure;
+    //         window.describe = queueBuilder.group;
+    //         window.beforeEach = queueBuilder.beforeEachTest;
+    //         window.afterEach = queueBuilder.afterEachTest;
+    //         window.it = queueBuilder.test;
+    //         window.expect = notations.noteExpectation;
+    //         window.getUiTestContainerElement = getUiTestContainerElement;
+    //         window.getUiTestContainerElementId = getUiTestContainerElementId;
+    //         window.spyOn = spyOn;
+    //     } else {
+    //         window.Preamble = {
+    //             configure: configure,
+    //             describe: queueBuilder.group,
+    //             beforeEach: queueBuilder.beforeEachTest,
+    //             afterEach: queueBuilder.afterEachTest,
+    //             it: queueBuilder.test,
+    //             expect: notations.noteExpectation,
+    //             getUiTestContainerElement: getUiTestContainerElement,
+    //             getUiTestContainerElementId: getUiTestContainerElementId,
+    //             spyOn: spyOn,
+    //         };
+    //     }
+    //     globals.assert = new AssertApi();
+    //     window.Preamble = window.Preamble || {};
+    //     //For use by external processes.
+    //     window.Preamble.__ext__ = {};
+    //     //Expose config options to external processes.
+    //     window.Preamble.__ext__.config = globals.config;
+    //     //publish config event.
+    //     emit('configchanged', {
+    //         name: globals.config.name, uiTestContainerId: globals.config.uiTestContainerId
+    //     });
+    // }
 
     //Returns the "line" in the stack trace that points to the failed assertion.
     function stackTrace(st){
@@ -1736,15 +1738,15 @@
     //     toHaveThrownWithMessage: noteToNotHaveThrownWithMessage
     // };
 
-    //Returns the ui test container element.
-    function getUiTestContainerElement(){
-        return document.getElementById(config.uiTestContainerId);
-    }
-
-    //Returns the id of the ui test container element.
-    function getUiTestContainerElementId(){
-        return config.uiTestContainerId;
-    }
+    // //Returns the ui test container element.
+    // function getUiTestContainerElement(){
+    //     return document.getElementById(globals.config.uiTestContainerId);
+    // }
+    //
+    // //Returns the id of the ui test container element.
+    // function getUiTestContainerElementId(){
+    //     return globals.config.uiTestContainerId;
+    // }
 
     // spy = (function(){
     //     function _spy(argObject, argProperty){
@@ -2115,7 +2117,7 @@
      */
 
     //Record the start time.
-    queue.start = Date.now();
+    globals.queue.start = Date.now();
 
     //Create a reporter.
     reporter = new HtmlReporter(showHidePassedTests);
@@ -2137,8 +2139,8 @@
         //external process (e.g. Karma adapter).
         //TODO(Jeff): handle a missing test script
         intervalId = setInterval(function(){
-            if(queue.length === prevQueueCount){
-                if(queueStableCount > 1 && config.autoStart){
+            if(globals.queue.length === prevQueueCount){
+                if(queueStableCount > 1 && globals.config.autoStart){
                     clearInterval(intervalId);
                     //Run!
                     emit('start');
@@ -2147,10 +2149,10 @@
                 }
             } else {
                 queueStableCount = 0;
-                prevQueueCount = queue.length;
+                prevQueueCount = globals.queue.length;
             }
         }, queueStableInterval);
     } catch (e){
-        errorHandler(e);
+        helpers.errorHandler(e);
     }
 }(window));

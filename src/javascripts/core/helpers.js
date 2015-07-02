@@ -119,6 +119,54 @@
         return stack;
     }
 
+    function merge(){
+        var result = {},
+            target = arguments[0],
+            sources = [].slice.call(arguments, 1);
+        sources.forEach(function(source){
+            var prop;
+            for(prop in target){
+                if(target.hasOwnProperty(prop)){
+                    result[prop] = source.hasOwnProperty(prop) ? source[prop] : target[prop];
+                }
+            }
+        });
+        return result;
+    }
+
+    //Get URL query string param...thanks MDN.
+    function loadPageVar(sVar){
+        return decodeURI(window.location.search.replace(new RegExp(
+            '^(?:.*[&\\?]' + encodeURI(sVar).replace(/[\.\+\*]/g, '\\$&') +
+            '(?:\\=([^&]*))?)?.*$', 'i'), '$1'));
+    }
+
+    //Display caught errors to the browser.
+    function errorHandler(){
+        var html;
+        //isProcessAborted = true;
+        if(arguments.length === 3){
+            //window.onerror
+            html = '<p class="failed">' + arguments[0] + '</p><p>File: ' +
+                arguments[1] + '</p><p>Line: ' + arguments[2] + '</p>';
+        } else {
+            //catch(e)
+            html = '<p class="failed">An error occurred,  "' + arguments[0] +
+                '" and all further processing has been terminated. Please check your browser console for additional details.</p>';
+        }
+        document.getElementById('preamble-status-container').innerHTML = html;
+    }
+
+    //Returns the ui test container element.
+    function getUiTestContainerElement(){
+        return document.getElementById(globals.config.uiTestContainerId);
+    }
+
+    //Returns the id of the ui test container element.
+    function getUiTestContainerElementId(){
+        return globals.config.uiTestContainerId;
+    }
+
     exports.argsToArray = argsToArray;
     exports.throwException = throwException;
     exports.compare = compare;
@@ -129,4 +177,9 @@
     exports.setStackTraceProperty = setStackTraceProperty;
     exports.stackTraceFromError = stackTraceFromError;
     exports.getStackTraceProperty = getStackTraceProperty;
+    exports.merge = merge;
+    exports.loadPageVar = loadPageVar;
+    exports.errorHandler = errorHandler;
+    exports.getUiTestContainerElement = getUiTestContainerElement;
+    exports.getUiTestContainerElementId = getUiTestContainerElementId;
 }());

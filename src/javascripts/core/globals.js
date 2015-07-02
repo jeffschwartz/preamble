@@ -7,6 +7,9 @@
     module.exports = {
         testsIterator: null,
         stackTraceProperty: null,
-        assert: null
+        assert: null,
+        runtimeFilter: null,
+        config: null,
+        queue: []
     };
 }());
