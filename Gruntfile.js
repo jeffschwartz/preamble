@@ -15,7 +15,7 @@ module.exports = function ( grunt ) {
                 jshintrc: true
             },
             files   : [
-                'src/javascripts/**.js',
+                'src/javascripts/**/*.js',
                 'javascripts/sample-suite.js'
             ]
         },
