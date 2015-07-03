@@ -167,6 +167,32 @@
         return globals.config.uiTestContainerId;
     }
 
+    //Returns the "line" in the stack trace that points to the failed assertion.
+    function stackTrace(st){
+        var reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
+        //Get all file references...
+            matches = st.match(reFileFromStackTrace);
+
+        //... and filter out all references to preamble.js.
+        return matches.reduce(function(previousValue, currentValue){
+            if(currentValue.search(/preamble.js/) === -1){
+                return previousValue + '<p class="stacktrace">' + currentValue + '</p>';
+            } else {
+                return previousValue;
+            }
+        }, '');
+    }
+
+    /**
+     * Makes words plural if their counts are 0 or greater than 1.
+     * @param {string} word A word to be pluralized.
+     * @param {integer} count An integer used to decide if word is to be pluralized.
+     */
+    function pluralize(word, count){
+        var pluralizer = arguments === 2 ? arguments[1] : 's';
+        return count === 0 ? word + pluralizer : count > 1 ? word + pluralizer : word;
+    }
+
     exports.argsToArray = argsToArray;
     exports.throwException = throwException;
     exports.compare = compare;
@@ -182,4 +208,6 @@
     exports.errorHandler = errorHandler;
     exports.getUiTestContainerElement = getUiTestContainerElement;
     exports.getUiTestContainerElementId = getUiTestContainerElementId;
+    exports.stackTrace = stackTrace;
+    exports.pluralize = pluralize;
 }());
