@@ -10,6 +10,7 @@
         assert: null,
         runtimeFilter: null,
         config: null,
-        queue: []
+        queue: [],
+        reporter: null
     };
 }());

@@ -89,6 +89,7 @@
                 testingShortCircuited: false,
                 autoStart: true
             },
+            HtmlReporter = require('../reporters/htmlreporter.js'),
             emit = require('./emit.js'),
             AssertApi = require('./assertapi.js'),
             configArg = arguments && arguments[0],
@@ -145,6 +146,10 @@
         window.Preamble.__ext__ = {};
         //Expose config options to external processes.
         window.Preamble.__ext__.config = globals.config;
+        //Record the start time.
+        globals.queue.start = Date.now();
+        //Create a reporter.
+        globals.reporter = new HtmlReporter();
         //publish config event.
         emit('configchanged', {
             name: globals.config.name, uiTestContainerId: globals.config.uiTestContainerId
@@ -152,7 +157,7 @@
     };
 }());
 
-},{"./assertapi.js":1,"./emit.js":3,"./expectations/notations.js":6,"./globals.js":7,"./helpers.js":9,"./queuebuilder.js":13,"./spy.js":14}],3:[function(require,module,exports){
+},{"../reporters/htmlreporter.js":19,"./assertapi.js":1,"./emit.js":3,"./expectations/notations.js":6,"./globals.js":7,"./helpers.js":9,"./queuebuilder.js":13,"./spy.js":15}],3:[function(require,module,exports){
 (function(){
     'use strict';
     var pubsub = require('./pubsub.js');
@@ -627,7 +632,7 @@
     };
 }());
 
-},{"../globals.js":7,"../helpers.js":9,"../spy.js":14,"./assertionrunners.js":4}],7:[function(require,module,exports){
+},{"../globals.js":7,"../helpers.js":9,"../spy.js":15,"./assertionrunners.js":4}],7:[function(require,module,exports){
 /**
  * Preamble's application global variables go here!
  */
@@ -640,7 +645,8 @@
         assert: null,
         runtimeFilter: null,
         config: null,
-        queue: []
+        queue: [],
+        reporter: null
     };
 }());
 
@@ -991,14 +997,17 @@
         var subscribers = {},
             totalSubscribers = 0,
             lastToken = 0;
+
         //Generates a unique token.
         function getToken(){
             return lastToken += 1;
         }
+
         //Returns a function bound to a context.
         function bindTo(fArg, context){
             return fArg.bind(context);
         }
+
         //Returns a function which wraps subscribers callback in a setTimeout callback.
         function makeAsync(topic, callback){
             return function(data){
@@ -1007,6 +1016,7 @@
                 }, 1);
             };
         }
+
         //Adds a subscriber for a topic with a callback
         //and returns a token to allow unsubscribing.
         function on(topic, handler, context){
@@ -1026,6 +1036,7 @@
             //Return the token to the caller so it can unsubscribe.
             return token;
         }
+
         //Removes a subscriber for a topic.
         function off(topic, token){
             if(subscribers.hasOwnProperty(topic)){
@@ -1035,6 +1046,7 @@
                 }
             }
         }
+
         //Publishes an event for a topic with optional data.
         function emit(topic, data){
             var token;
@@ -1050,10 +1062,12 @@
                 }
             }
         }
+
         //Returns the total subscribers count.
         function getCountOfSubscribers(){
             return totalSubscribers;
         }
+
         //Returns the subscriber count by topic.
         function getCountOfSubscribersByTopic(topic){
             var prop, count = 0;
@@ -1066,6 +1080,7 @@
             }
             return count;
         }
+
         //Returns the object that exposes the pubsub API.
         return {
             on: on,
@@ -1204,7 +1219,121 @@
     };
 }());
 
-},{"./globals.js":7,"./group.js":8,"./helpers.js":9,"./test.js":15}],14:[function(require,module,exports){
+},{"./globals.js":7,"./group.js":8,"./helpers.js":9,"./test.js":16}],14:[function(require,module,exports){
+/**
+ * Internal event handling.
+ */
+(function(){
+    'use strict';
+    module.exports.init = function(){
+        var on = require('./on.js'),
+            emit = require('./emit.js'),
+            globals = require('./globals.js'),
+            Iterator = require('./iterator.js'),
+            Group = require('./group.js'),
+            Test = require('./test.js'),
+            tests;
+
+        on('start', function(){
+            tests = globals.queue.filter(function(item){
+                return item instanceof Test;
+            });
+            tests.result = true;
+            tests.totTestsFailed = 0;
+            if(tests.length){
+                emit('runTests', function(){
+                    emit('end');
+                });
+            } else {
+                //TODO(Jeff): perhaps this should display a message that there are no tests to run.
+                emit('end');
+            }
+        });
+
+        on('runTests', function(topic, callback){
+            globals.testsIterator = new Iterator(tests);
+
+            function runTest(test, callback){
+                if(test.bypass){
+                    callback();
+                } else {
+                    test.run(function(){
+                        //Pass the totFailed value for the test
+                        //back so that it and shortCircuit can
+                        //be analyzed to determine if testing
+                        //needs to be aborted.
+                        callback(test.totFailed);
+                    });
+                }
+            }
+
+            function runTests(callback){
+                if(globals.testsIterator.hasNext()){
+                    runTest(globals.testsIterator.getNext(), function(totFailed){
+                        if(totFailed && globals.config.shortCircuit){
+                            //If totFailed and shortCircuit then abort
+                            //further testing!
+                            emit('testingShortCircuited');
+                            callback();
+                        } else {
+                            runTests(callback);
+                        }
+                    });
+                } else {
+                    callback();
+                }
+            }
+
+            runTests(function(){
+                callback();
+            });
+        });
+
+        on('testingShortCircuited', function(){
+            //Set the "bypass" property for all groups and
+            //tests that arent related to this test to true.
+            var queueIterator, queueObj;
+            queueIterator = new Iterator(globals.queue);
+            while (queueIterator.hasNext()){
+                queueObj = queueIterator.getNext();
+                //Groups that haven't run will have their passed property set to true.
+                if(queueObj instanceof Group && queueObj.passed){
+                    queueObj.bypass = true;
+                    //Tests that havent run do not have a totFailed property.
+                } else if(queueObj instanceof Test && !queueObj.hasOwnProperty(
+                        'totFailed')){
+                    queueObj.bypass = true;
+                }
+            }
+            //Set flag in config to indicate that testing has
+            //been aborted due to short circuit condition.
+            globals.config.testingShortCircuited = true;
+        });
+
+        on('end', function(){
+            //Record how many tests were bypassed.
+            tests.totBypassed = 0;
+            if(globals.runtimeFilter.group || globals.config.testingShortCircuited){
+                tests.totBypassed = tests.reduce(function(prevValue, t){
+                    return t.bypass ? prevValue + 1 : prevValue;
+                }, 0);
+            }
+            //Record how many tests failed.
+            tests.totTestsFailed = tests.reduce(function(prevValue, t){
+                return t.timedOut || t.totFailed ? prevValue +
+                    1 : prevValue;
+            }, 0);
+            tests.result = tests.totTestsFailed === 0;
+            globals.queue.end = Date.now();
+            tests.duration = globals.queue.end - globals.queue.start;
+            globals.reporter.coverage(tests);
+            globals.reporter.summary(tests);
+            globals.reporter.details(globals.queue);
+        });
+    };
+}());
+
+},{"./emit.js":3,"./globals.js":7,"./group.js":8,"./iterator.js":10,"./on.js":11,"./test.js":16}],15:[function(require,module,exports){
 (function(){
     'use strict';
     var argsToArray = require('./helpers.js').argsToArray,
@@ -1577,7 +1706,7 @@
     module.exports = spyOn;
 }());
 
-},{"./expectations/assertions.js":5,"./expectations/notations.js":6,"./helpers.js":9}],15:[function(require,module,exports){
+},{"./expectations/assertions.js":5,"./expectations/notations.js":6,"./helpers.js":9}],16:[function(require,module,exports){
 (function(){
     'use strict';
     var Iterator = require('./iterator.js'),
@@ -1818,13 +1947,13 @@
     module.exports = Test;
 }());
 
-},{"./emit.js":3,"./iterator.js":10}],16:[function(require,module,exports){
+},{"./emit.js":3,"./iterator.js":10}],17:[function(require,module,exports){
 (function(){
     'use strict';
     module.exports = 'v3.0.3';
 }());
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 //Preamble v3.0.3)
 //(c) 2013 - 2015 Jeffrey Schwartz
 //Preamble may be freely distributed under the MIT license.
@@ -1832,176 +1961,66 @@
     'use strict';
 
     //Version
-    var prevQueueCount = 0,
-        queueStableCount = 0,
-        queueStableInterval = 1,
-        // reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g,
-        reporter,
-        intervalId,
-        tests,
-        //TODO(JS): requires that eventually may not be needed to be declared here
-        Iterator = require('./core/iterator.js'),
-        Group = require('./core/group.js'),
-        Test = require('./core/test.js'),
-        HtmlReporter = require('./reporters/htmlreporter.js'),
-        emit = require('./core/emit.js'),
-        on = require('./core/on.js'),
+    var emit = require('./core/emit.js'),
+        runner = require('./core/runner.js'),
         configure = require('./core/configure.js'),
         globals = require('./core/globals.js'),
-        helpers = require('./core/helpers.js');
+        helpers = require('./core/helpers.js'),
+        prevQueueCount = 0,
+        queueStableCount = 0,
+        queueStableInterval = 1,
+        intervalId;
+
+    // /**
+    //  * Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+    //  * Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
+    //  * TODO(Jeff): remove polyfil once phantomjs supports bind!
+    //  */
+    // if(!Function.prototype.bind){
+    //     Function.prototype.bind = function(oThis){
+    //         if(typeof this !== 'function'){
+    //             // closest thing possible to the ECMAScript 5 internal IsCallable function
+    //             throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable'
+    //             );
+    //         }
+    //         var aArgs = Array.prototype.slice.call(arguments, 1),
+    //             fToBind = this,
+    //             FNOP = function(){},
+    //             fBound = function(){
+    //                 return fToBind.apply(this instanceof FNOP && oThis ? this :
+    //                     oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
+    //             };
+    //         FNOP.prototype = this.prototype;
+    //         fBound.prototype = new FNOP();
+    //         return fBound;
+    //     };
+    // }
 
     /**
-     * Polyfil for bind - see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-     * Required when using phantomjs - its javascript vm doesn't currently support Function.prototype.bind.
-     * TODO(Jeff): remove polyfil once phantomjs supports bind!
+     *                              It all starts here!
      */
-    if(!Function.prototype.bind){
-        Function.prototype.bind = function(oThis){
-            if(typeof this !== 'function'){
-                // closest thing possible to the ECMAScript 5 internal IsCallable function
-                throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable'
-                );
-            }
-            var aArgs = Array.prototype.slice.call(arguments, 1),
-                fToBind = this,
-                FNOP = function(){},
-                fBound = function(){
-                    return fToBind.apply(this instanceof FNOP && oThis ? this :
-                        oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
-                };
-            FNOP.prototype = this.prototype;
-            fBound.prototype = new FNOP();
-            return fBound;
-        };
-    }
 
     /**
-     * Internal event handling.
+     * Initialize internal events
      */
-
-    //Initialize.
-    on('start', function(){
-        tests = globals.queue.filter(function(item){
-            return item instanceof Test;
-        });
-        tests.result = true;
-        tests.totTestsFailed = 0;
-        if(tests.length){
-            emit('runTests', function(){
-                emit('end');
-            });
-        } else {
-            //TODO(Jeff): perhaps this should display a message that there are no tests to run.
-            emit('end');
-        }
-    });
-
-    on('runTests', function(topic, callback){
-        globals.testsIterator = new Iterator(tests);
-
-        function runTest(test, callback){
-            if(test.bypass){
-                callback();
-            } else {
-                test.run(function(){
-                    //Pass the totFailed value for the test
-                    //back so that it and shortCircuit can
-                    //be analyzed to determine if testing
-                    //needs to be aborted.
-                    callback(test.totFailed);
-                });
-            }
-        }
-
-        function runTests(callback){
-            if(globals.testsIterator.hasNext()){
-                runTest(globals.testsIterator.getNext(), function(totFailed){
-                    if(totFailed && globals.config.shortCircuit){
-                        //If totFailed and shortCircuit then abort
-                        //further testing!
-                        emit('testingShortCircuited');
-                        callback();
-                    } else {
-                        runTests(callback);
-                    }
-                });
-            } else {
-                callback();
-            }
-        }
-
-        runTests(function(){
-            callback();
-        });
-    });
-
-    on('testingShortCircuited', function(){
-        //Set the "bypass" property for all groups and
-        //tests that arent related to this test to true.
-        var queueIterator, queueObj;
-        queueIterator = new Iterator(globals.queue);
-        while (queueIterator.hasNext()){
-            queueObj = queueIterator.getNext();
-            //Groups that haven't run will have their passed property set to true.
-            if(queueObj instanceof Group && queueObj.passed){
-                queueObj.bypass = true;
-                //Tests that havent run do not have a totFailed property.
-            } else if(queueObj instanceof Test && !queueObj.hasOwnProperty(
-                    'totFailed')){
-                queueObj.bypass = true;
-            }
-        }
-        //Set flag in config to indicate that testing has
-        //been aborted due to short circuit condition.
-        globals.config.testingShortCircuited = true;
-    });
-
-    on('end', function(){
-        //Record how many tests were bypassed.
-        tests.totBypassed = 0;
-        if(globals.runtimeFilter.group || globals.config.testingShortCircuited){
-            tests.totBypassed = tests.reduce(function(prevValue, t){
-                return t.bypass ? prevValue + 1 : prevValue;
-            }, 0);
-        }
-        //Record how many tests failed.
-        tests.totTestsFailed = tests.reduce(function(prevValue, t){
-            return t.timedOut || t.totFailed ? prevValue +
-                1 : prevValue;
-        }, 0);
-        tests.result = tests.totTestsFailed === 0;
-        globals.queue.end = Date.now();
-        tests.duration = globals.queue.end - globals.queue.start;
-        reporter.coverage(tests);
-        reporter.summary(tests);
-        reporter.details(globals.queue);
-    });
+    runner.init();
 
     /**
-     * It all starts here!
+     * Configure the runtime environment.
      */
-
-    //Record the start time.
-    globals.queue.start = Date.now();
-
-    //Create a reporter.
-    reporter = new HtmlReporter();
-
-    //Configure the runtime environment.
     configure();
 
     /**
-     * Wait while the queue is loaded.
+     * Wait while the queue is built as scripts call group function.
+     * Keep checking the queue's length until it is 'stable'.
+     * Keep checking that config.autoStart is true.
+     * Stable is defined by a time interval during which the length
+     * of the queue remains constant, indicating that all groups
+     * have been loaded. Once stable, emit the 'start' event.
+     * ***Note: config.autoStart can only be false if it set by an
+     * external process (e.g. Karma adapter).
      */
     try {
-        //Wait while the queue is built as scripts call group function.
-        //Keep checking the queue's length until it is 'stable'.
-        //Keep checking that config.autoStart is true.
-        //Stable is defined by a time interval during which the length
-        //of the queue remains constant, indicating that all groups
-        //have been loaded. Once stable, emit the 'start' event.
-        //***Note: config.autoStart can only be false if it set by an
-        //external process (e.g. Karma adapter).
         //TODO(Jeff): handle a missing test script
         intervalId = setInterval(function(){
             if(globals.queue.length === prevQueueCount){
@@ -2022,7 +2041,7 @@
     }
 }(window));
 
-},{"./core/configure.js":2,"./core/emit.js":3,"./core/globals.js":7,"./core/group.js":8,"./core/helpers.js":9,"./core/iterator.js":10,"./core/on.js":11,"./core/test.js":15,"./reporters/htmlreporter.js":18}],18:[function(require,module,exports){
+},{"./core/configure.js":2,"./core/emit.js":3,"./core/globals.js":7,"./core/helpers.js":9,"./core/runner.js":14}],19:[function(require,module,exports){
 (function(){
     'use strict';
     var version = require('../core/version.js'),
@@ -2334,4 +2353,4 @@
     module.exports = HtmlReporter;
 }());
 
-},{"../core/globals.js":7,"../core/group.js":8,"../core/helpers.js":9,"../core/on.js":11,"../core/version.js":16}]},{},[17]);
+},{"../core/globals.js":7,"../core/group.js":8,"../core/helpers.js":9,"../core/on.js":11,"../core/version.js":17}]},{},[18]);

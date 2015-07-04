@@ -10,14 +10,17 @@
         var subscribers = {},
             totalSubscribers = 0,
             lastToken = 0;
+
         //Generates a unique token.
         function getToken(){
             return lastToken += 1;
         }
+
         //Returns a function bound to a context.
         function bindTo(fArg, context){
             return fArg.bind(context);
         }
+
         //Returns a function which wraps subscribers callback in a setTimeout callback.
         function makeAsync(topic, callback){
             return function(data){
@@ -26,6 +29,7 @@
                 }, 1);
             };
         }
+
         //Adds a subscriber for a topic with a callback
         //and returns a token to allow unsubscribing.
         function on(topic, handler, context){
@@ -45,6 +49,7 @@
             //Return the token to the caller so it can unsubscribe.
             return token;
         }
+
         //Removes a subscriber for a topic.
         function off(topic, token){
             if(subscribers.hasOwnProperty(topic)){
@@ -54,6 +59,7 @@
                 }
             }
         }
+
         //Publishes an event for a topic with optional data.
         function emit(topic, data){
             var token;
@@ -69,10 +75,12 @@
                 }
             }
         }
+
         //Returns the total subscribers count.
         function getCountOfSubscribers(){
             return totalSubscribers;
         }
+
         //Returns the subscriber count by topic.
         function getCountOfSubscribersByTopic(topic){
             var prop, count = 0;
@@ -85,6 +93,7 @@
             }
             return count;
         }
+
         //Returns the object that exposes the pubsub API.
         return {
             on: on,

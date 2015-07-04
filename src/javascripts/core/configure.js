@@ -46,6 +46,7 @@
                 testingShortCircuited: false,
                 autoStart: true
             },
+            HtmlReporter = require('../reporters/htmlreporter.js'),
             emit = require('./emit.js'),
             AssertApi = require('./assertapi.js'),
             configArg = arguments && arguments[0],
@@ -102,6 +103,10 @@
         window.Preamble.__ext__ = {};
         //Expose config options to external processes.
         window.Preamble.__ext__.config = globals.config;
+        //Record the start time.
+        globals.queue.start = Date.now();
+        //Create a reporter.
+        globals.reporter = new HtmlReporter();
         //publish config event.
         emit('configchanged', {
             name: globals.config.name, uiTestContainerId: globals.config.uiTestContainerId
