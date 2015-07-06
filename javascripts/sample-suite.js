@@ -9,7 +9,7 @@
 configure({
     name: 'Sample Suite',
     timeoutInterval: 50,
-    hidePassedTests: false
+    hidePassedTests: true
 });
 
 describe('"describe" is used to describe a suite which can contain one or more specs', function(){
