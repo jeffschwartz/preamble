@@ -48,7 +48,7 @@
             },
             HtmlReporter = require('../reporters/htmlreporter.js'),
             emit = require('./emit.js'),
-            AssertApi = require('./assertapi.js'),
+            ExpectationApi = require('./expectationapi.js'),
             configArg = arguments && arguments[0],
             notations = require('./expectations/notations.js'),
             spyOn = require('./spy.js'),
@@ -97,7 +97,7 @@
                 spyOn: spyOn,
             };
         }
-        globals.assert = new AssertApi();
+        globals.expectationApi = new ExpectationApi();
         window.Preamble = window.Preamble || {};
         //For use by external processes.
         window.Preamble.__ext__ = {};

@@ -7,7 +7,7 @@
     module.exports = {
         testsIterator: null,
         stackTraceProperty: null,
-        assert: null,
+        expectationApi: null,
         runtimeFilter: null,
         config: null,
         queue: [],

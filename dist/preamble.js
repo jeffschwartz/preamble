@@ -1,46 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function(){
-    'use strict';
-    var notations = require('./expectations/notations.js');
-
-    function Assert(){
-        this.not = new Not();
-    }
-
-    Assert.prototype = {
-        constructor: Assert,
-        toEqual: notations.noteToEqualAssertion,
-        toBeTrue: notations.noteToBeTrueAssertion,
-        toBeTruthy: notations.noteToBeTruthyAssertion,
-        toHaveBeenCalled: notations.noteToHaveBeenCalled,
-        toHaveBeenCalledWith: notations.noteToHaveBeenCalledWith,
-        toHaveBeenCalledWithContext: notations.noteToHaveBeenCalledWithContext,
-        toHaveReturned: notations.noteToHaveReturned,
-        toHaveThrown: notations.noteToHaveThrown,
-        toHaveThrownWithName: notations.noteToHaveThrownWithName,
-        toHaveThrownWithMessage: notations.noteToHaveThrownWithMessage
-    };
-
-    function Not(){}
-
-    Not.prototype = {
-        constructor: Not,
-        toEqual: notations.noteToNotEqualAssertion,
-        toBeTrue: notations.noteToBeFalseAssertion,
-        toBeTruthy: notations.noteToNotBeTruthyAssertion,
-        toHaveBeenCalled: notations.noteToNotHaveBeenCalled,
-        toHaveBeenCalledWith: notations.noteToNotHaveBeenCalledWith,
-        toHaveBeenCalledWithContext: notations.noteToNotHaveBeenCalledWithContext,
-        toHaveReturned: notations.noteToNotHaveReturned,
-        toHaveThrown: notations.noteToNotHaveThrown,
-        toHaveThrownWithName: notations.noteToNotHaveThrownWithName,
-        toHaveThrownWithMessage: notations.noteToNotHaveThrownWithMessage
-    };
-
-    module.exports = Assert;
-}());
-
-},{"./expectations/notations.js":6}],2:[function(require,module,exports){
 /**
  * Configuration is called once internally but may be called again if test script
  * employs in-line configuration.
@@ -91,7 +49,7 @@
             },
             HtmlReporter = require('../reporters/htmlreporter.js'),
             emit = require('./emit.js'),
-            AssertApi = require('./assertapi.js'),
+            ExpectationApi = require('./expectationapi.js'),
             configArg = arguments && arguments[0],
             notations = require('./expectations/notations.js'),
             spyOn = require('./spy.js'),
@@ -140,7 +98,7 @@
                 spyOn: spyOn,
             };
         }
-        globals.assert = new AssertApi();
+        globals.expectationApi = new ExpectationApi();
         window.Preamble = window.Preamble || {};
         //For use by external processes.
         window.Preamble.__ext__ = {};
@@ -157,7 +115,7 @@
     };
 }());
 
-},{"../reporters/htmlreporter.js":19,"./assertapi.js":1,"./emit.js":3,"./expectations/notations.js":6,"./globals.js":7,"./helpers.js":9,"./queuebuilder.js":13,"./spy.js":15}],3:[function(require,module,exports){
+},{"../reporters/htmlreporter.js":19,"./emit.js":2,"./expectationapi.js":3,"./expectations/notations.js":6,"./globals.js":7,"./helpers.js":9,"./queuebuilder.js":13,"./spy.js":15}],2:[function(require,module,exports){
 (function(){
     'use strict';
     var pubsub = require('./pubsub.js');
@@ -172,7 +130,49 @@
     };
 }());
 
-},{"./pubsub.js":12}],4:[function(require,module,exports){
+},{"./pubsub.js":12}],3:[function(require,module,exports){
+(function(){
+    'use strict';
+    var notations = require('./expectations/notations.js');
+
+    function ExpectationApi(){
+        this.not = new Not();
+    }
+
+    ExpectationApi.prototype = {
+        constructor: ExpectationApi,
+        toEqual: notations.noteToEqualAssertion,
+        toBeTrue: notations.noteToBeTrueAssertion,
+        toBeTruthy: notations.noteToBeTruthyAssertion,
+        toHaveBeenCalled: notations.noteToHaveBeenCalled,
+        toHaveBeenCalledWith: notations.noteToHaveBeenCalledWith,
+        toHaveBeenCalledWithContext: notations.noteToHaveBeenCalledWithContext,
+        toHaveReturned: notations.noteToHaveReturned,
+        toHaveThrown: notations.noteToHaveThrown,
+        toHaveThrownWithName: notations.noteToHaveThrownWithName,
+        toHaveThrownWithMessage: notations.noteToHaveThrownWithMessage
+    };
+
+    function Not(){}
+
+    Not.prototype = {
+        constructor: Not,
+        toEqual: notations.noteToNotEqualAssertion,
+        toBeTrue: notations.noteToBeFalseAssertion,
+        toBeTruthy: notations.noteToNotBeTruthyAssertion,
+        toHaveBeenCalled: notations.noteToNotHaveBeenCalled,
+        toHaveBeenCalledWith: notations.noteToNotHaveBeenCalledWith,
+        toHaveBeenCalledWithContext: notations.noteToNotHaveBeenCalledWithContext,
+        toHaveReturned: notations.noteToNotHaveReturned,
+        toHaveThrown: notations.noteToNotHaveThrown,
+        toHaveThrownWithName: notations.noteToNotHaveThrownWithName,
+        toHaveThrownWithMessage: notations.noteToNotHaveThrownWithMessage
+    };
+
+    module.exports = ExpectationApi;
+}());
+
+},{"./expectations/notations.js":6}],4:[function(require,module,exports){
 (function(){
     'use strict';
     var a_equals_true = require('./assertions.js').a_equals_true,
@@ -427,8 +427,8 @@
             }
             //push partial assertion (only the value) info onto the assertion table
             pushOntoAssertions(null, null, actual, null, null);
-            //return assert for chaining
-            return globals.assert;
+            //return the expectationApi for chaining
+            return globals.expectationApi;
         },
         //only used by mock.validate and not part of the public api
         noteMockHasExpectations: function (){
@@ -642,7 +642,7 @@
     module.exports = {
         testsIterator: null,
         stackTraceProperty: null,
-        assert: null,
+        expectationApi: null,
         runtimeFilter: null,
         config: null,
         queue: [],
@@ -1333,7 +1333,7 @@
     };
 }());
 
-},{"./emit.js":3,"./globals.js":7,"./group.js":8,"./iterator.js":10,"./on.js":11,"./test.js":16}],15:[function(require,module,exports){
+},{"./emit.js":2,"./globals.js":7,"./group.js":8,"./iterator.js":10,"./on.js":11,"./test.js":16}],15:[function(require,module,exports){
 (function(){
     'use strict';
     var argsToArray = require('./helpers.js').argsToArray,
@@ -1947,7 +1947,7 @@
     module.exports = Test;
 }());
 
-},{"./emit.js":3,"./iterator.js":10}],17:[function(require,module,exports){
+},{"./emit.js":2,"./iterator.js":10}],17:[function(require,module,exports){
 (function(){
     'use strict';
     module.exports = 'v3.0.3';
@@ -2016,7 +2016,7 @@
     }
 }());
 
-},{"./core/configure.js":2,"./core/emit.js":3,"./core/globals.js":7,"./core/helpers.js":9,"./core/runner.js":14}],19:[function(require,module,exports){
+},{"./core/configure.js":1,"./core/emit.js":2,"./core/globals.js":7,"./core/helpers.js":9,"./core/runner.js":14}],19:[function(require,module,exports){
 (function(){
     'use strict';
     var version = require('../core/version.js'),

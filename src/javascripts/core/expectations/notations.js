@@ -20,8 +20,8 @@
             }
             //push partial assertion (only the value) info onto the assertion table
             pushOntoAssertions(null, null, actual, null, null);
-            //return assert for chaining
-            return globals.assert;
+            //return the expectationApi for chaining
+            return globals.expectationApi;
         },
         //only used by mock.validate and not part of the public api
         noteMockHasExpectations: function (){
