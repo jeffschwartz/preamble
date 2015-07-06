@@ -2,12 +2,12 @@
     'use strict';
     var notations = require('./expectations/notations.js');
 
-    function Assert(){
+    function ExpectationApi(){
         this.not = new Not();
     }
 
-    Assert.prototype = {
-        constructor: Assert,
+    ExpectationApi.prototype = {
+        constructor: ExpectationApi,
         toEqual: notations.noteToEqualAssertion,
         toBeTrue: notations.noteToBeTrueAssertion,
         toBeTruthy: notations.noteToBeTruthyAssertion,
@@ -36,5 +36,5 @@
         toHaveThrownWithMessage: notations.noteToNotHaveThrownWithMessage
     };
 
-    module.exports = Assert;
+    module.exports = ExpectationApi;
 }());
