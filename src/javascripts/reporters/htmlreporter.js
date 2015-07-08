@@ -147,7 +147,7 @@
             '</div>' +
             '<div class="table">' +
             '<section id="preamble-status-container">' +
-            '<div class="summary">Building globals.queue. Please wait...</div>' +
+            '<div class="summary">Building queue. Please wait...</div>' +
             '</section>' +
             '</div>' +
             '</header>' +
@@ -201,9 +201,9 @@
         hpt = hpt === '' && globals.config.hidePassedTests || hpt === 'true' &&
             true || hpt === 'false' && false;
         coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
-        //Preserve error message that replaces 'Building globals.queue. Please wait...'.
+        //Preserve error message that replaces 'Building queue. Please wait...'.
         if(elStatusContainer.innerHTML ===
-            '<div class="summary">Building globals.queue. Please wait...</div>'){
+            '<div class="summary">Building queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
         } else {
             elStatusContainer.innerHTML += coverage;
