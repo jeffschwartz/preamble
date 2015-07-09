@@ -7,23 +7,12 @@ module.exports = function ( grunt ) {
             options: {
                 jshintrc: true
             },
-            files   : [
-                'src/javascripts/**/*.js',
-                'javascripts/sample-suite.js'
-            ]
+            files   : ['src/javascripts/**/*.js']
         },
         browserify : {
             js: {
                 src: 'src/javascripts/main.js',
                 dest: 'dist/preamble.js'
-            }
-        },
-        shell: {
-            phantomjs: {
-                command: 'phantomjs javascripts/phantom-runner.js index.html',
-                options: {
-                    stdout: true
-                }
             }
         },
         watch  : {
@@ -41,21 +30,12 @@ module.exports = function ( grunt ) {
                     interrupt : true
                 }
             }
-            // ,
-            // test : {
-            //     files   : ['javascripts/preamble.js', 'javascripts/sample-bdd-test.js'],
-            //     tasks   : ['shell:phantomjs'],
-            //     options : {
-            //         interrupt : true
-            //     }
-            // }
         }
     });
 
     // Load the plugins
     grunt.loadNpmTasks( 'grunt-contrib-watch' );
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-browserify');
 
     // Default task(s).
