@@ -13,6 +13,9 @@
 
 Because of the extent and nature of the features that have been added, _test scripts written for versions of Preamble prior to v3 will not work_. In addition, _numerous APIs have been added, changed or removed entirely_. This was unfortunate but absolutely necessary in order to move Preamble forward. Please read the documentation for complete details.
 
+To install the Preamble standalone spec runner, please see the instructions
+at https://github.com/jeffschwartz/preamble-standalone.
+
 Documentation lives here: http://jeffschwartz.github.io/preamble/
 
 Join the discussion here: https://groups.google.com/forum/#!forum/preamble-users/
