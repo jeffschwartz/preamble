@@ -1,17 +1,8 @@
-javascripts/preamble-test.js
-.tern-port
-preamble.sublime-workspace
-.idea
-**/*.swp
-**/*.swo
 temp.md
 node_modules
 **/*.log
-xyz.js
-NERD_tree_*
 Gemfile.lock
 *.gem
 .sass-cache
 _site/
 images/
-javascripts/test-doubles.js
