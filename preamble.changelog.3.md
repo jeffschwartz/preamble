@@ -6,6 +6,19 @@ permalink: /preamble/changelog/3/
 
 ## Changes
 
+### v3.1.0
+This release contains internal architectural/structural changes to the project
+only. These changes include the following:
+
+1. Preamble is no longer developed from a single .js file.
+2. Preamble is now built from numerous independent modules/files which are
+located in the src/ folder. These modules use the CommonJS module pattern.
+3. Browserify is now used to combine these modules into a single file named
+preamble.js. which is located in the dist/ folder.
+4. The spec runner including phantom-runner.js has been removed from the core
+Preamble repo (this repo) and are now housed in their own repo on Github @
+https://github.com/jeffschwartz/preamble-standalone.
+
 ### v3.0.3
 #### Enhancements
 * When calling **_expect(fn)_**, where _fn_ is a function but not a _spy_, _fn_
