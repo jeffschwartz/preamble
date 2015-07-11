@@ -3,49 +3,53 @@ module.exports = function ( grunt ) {
     // Project configuration.
     grunt.initConfig({
         pkg    : grunt.file.readJSON( 'package.json' ),
-        less   : {
-            production  : {
-                files : {
-                    'stylesheets/preamble.css' : 'stylesheets/preamble.less'
-                }
-            }
-        },
         jshint : {
             options: {
                 jshintrc: true
             },
-            files   : [
-                'javascripts/preamble.js',
-                'javascripts/sample-failures-test.js',
-                'javascripts/sample-suite.js',
-            ]
+            files   : ['src/javascripts/**/*.js']
         },
-        shell: {
-            phantomjs: {
-                command: 'phantomjs javascripts/phantom-runner.js index.html',
+        browserify : {
+            js: {
+                src: 'src/javascripts/main.js',
+                dest: 'dist/preamble.js'
+            }
+        },
+        usebanner: {
+            dist: {
                 options: {
-                    stdout: true
+                    position: 'top',
+                    banner: '/* <%= pkg.title %> v<%= pkg.version %>' +
+                    ' - released on <%= grunt.template.today("yyyy-mm-dd") %>' +
+                    ' at <%= grunt.template.today("longTime") %>\n' +
+                    ' * <%= pkg.preamble.copyright %>\n' +
+                    ' * <%= pkg.preamble.distrights%>\n' +
+                    '*/',
+                    linebreak: true
+                },
+                files: {
+                    src: [ 'dist/preamble.js', 'dist/preamble.js' ]
                 }
             }
         },
         watch  : {
-            less : {
-                files   : ['**/*.less'],
-                tasks   : ['less'],
-                options : {
-                    interrupt : true
-                }
-            },
             js : {
-                files   : ['javascripts/*.js'],
+                files   : ['src/javascripts/**/*.js'],
                 tasks   : ['jshint'],
                 options : {
                     interrupt : true
                 }
             },
-            test : {
-                files   : ['javascripts/preamble.js', 'javascripts/sample-bdd-test.js'],
-                tasks   : ['shell:phantomjs'],
+            browserify : {
+                files   : ['src/javascripts/**/*.js'],
+                tasks   : ['browserify'],
+                options : {
+                    interrupt : true
+                }
+            },
+            banner : {
+                files   : ['dist/preamble.js'],
+                tasks   : ['usebanner'],
                 options : {
                     interrupt : true
                 }
@@ -54,12 +58,13 @@ module.exports = function ( grunt ) {
     });
 
     // Load the plugins
-    grunt.loadNpmTasks( 'grunt-contrib-less' );
     grunt.loadNpmTasks( 'grunt-contrib-watch' );
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-banner');
 
     // Default task(s).
     grunt.registerTask( 'default', ['watch'] );
+    grunt.registerTask( 'dist', ['jshint', 'browserify', 'usebanner'] );
 
 };
