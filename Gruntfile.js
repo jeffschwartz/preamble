@@ -20,7 +20,8 @@ module.exports = function ( grunt ) {
                 options: {
                     position: 'top',
                     banner: '/* <%= pkg.title %> v<%= pkg.version %>' +
-                    ' - released on <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+                    ' - released on <%= grunt.template.today("yyyy-mm-dd") %>' +
+                    ' at <%= grunt.template.today("longTime") %>\n' +
                     ' * <%= pkg.preamble.copyright %>\n' +
                     ' * <%= pkg.preamble.distrights%>\n' +
                     '*/',
