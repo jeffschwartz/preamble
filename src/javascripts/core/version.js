@@ -1,4 +1,4 @@
 (function(){
     'use strict';
-    module.exports = 'v3.0.3';
+    module.exports = 'v3.1.0';
 }());

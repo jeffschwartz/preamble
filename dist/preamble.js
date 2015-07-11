@@ -1,3 +1,7 @@
+/* Preamble v3.1.0 - released on 2015-07-11 at 8:51:26 AM EDT
+ * (c) 2013 - 2015 Jeffrey Schwartz
+ * Preamble may be freely distributed under the MIT license.
+*/
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
  * Configuration is called once internally but may be called again if test script
@@ -1950,7 +1954,7 @@
 },{"./emit.js":2,"./iterator.js":10}],17:[function(require,module,exports){
 (function(){
     'use strict';
-    module.exports = 'v3.0.3';
+    module.exports = 'v3.1.0';
 }());
 
 },{}],18:[function(require,module,exports){
@@ -2166,7 +2170,7 @@
             '</div>' +
             '<div class="table">' +
             '<section id="preamble-status-container">' +
-            '<div class="summary">Building globals.queue. Please wait...</div>' +
+            '<div class="summary">Building queue. Please wait...</div>' +
             '</section>' +
             '</div>' +
             '</header>' +
@@ -2220,9 +2224,9 @@
         hpt = hpt === '' && globals.config.hidePassedTests || hpt === 'true' &&
             true || hpt === 'false' && false;
         coverage = coverage.replace(/{{checked}}/, hpt && 'checked' || '');
-        //Preserve error message that replaces 'Building globals.queue. Please wait...'.
+        //Preserve error message that replaces 'Building queue. Please wait...'.
         if(elStatusContainer.innerHTML ===
-            '<div class="summary">Building globals.queue. Please wait...</div>'){
+            '<div class="summary">Building queue. Please wait...</div>'){
             elStatusContainer.innerHTML = coverage;
         } else {
             elStatusContainer.innerHTML += coverage;
