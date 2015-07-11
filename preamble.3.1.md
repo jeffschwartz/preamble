@@ -1,7 +1,7 @@
 ---
 layout: devguide
-title: v3.0 API Developer Guide
-permalink: /preamble/api/3/0/
+title: v3.1 API Developer Guide
+permalink: /preamble/api/3/1/
 ---
 
 ## Introducing Preamble
@@ -35,10 +35,14 @@ describe('running a spec asynchronously', function(){
 ```
 
 ## Installing Preamble
-Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer and checkout the tagged version you are targeting (e.g. git checkout v1.3.0). That's it!
+To install the Preamble browser-based standalone spec runner on your computer (beginning with v3.1.0):
+
+1. From the [releases page](https://github.com/jeffschwartz/preamble/releases) download the standalone spec-runner for the version of Preamble that you are targeting.
+2. Create a new folder on your computer and copy the standalone distribution file that you just downloaded to that folder.
+3. Make the folder you just created the current folder and **_unzip_** the standalone distribution.
 
 ## Run The Sample Test
-After you have cloned the repo and checked out the tagged version you are targeting, you can then run the sample test suite, *javascripts/sample-suite.js*, by opening the *index.html* file in your browser. The index.html file is located in Preamble's root folder.
+After you have installed the standalone distro (see Installing Preamble above), you can then run the sample test suite, *spec/sample-suite.js*, by opening the *SpecRunner.html* file in your browser. The SpecRunner.html file is located in the standalone distro's root folder.
 
 Running a test suite in the browser produces a report showing the results of running the suite. All suites and specs are presented as *links* and when you click on them Preamble will run them again and display their details, respectively.
 
@@ -46,9 +50,9 @@ To repeat the test you can either refresh the browser or click on the _**run all
 
 If you want to filter out suites and specs that have passed, check the _**Hide passed** checkbox_ located near the top right corner of the page.
 
-After you have run the sample test suite and familiarized yourself with the generated report you can then open up the sample test suite file, *javascripts/sample-suite.js*, in your favorite editor and examine the code to gain insight on writing your own test suites.
+After you have run the sample test suite and familiarized yourself with the generated report you can then open up the sample test suite file, *spec/sample-suite.js*, in your favorite editor and examine the code to gain insight on writing your own test suites.
 
-## index.html
+## SpecRunner.html
 The only required HTML tags (other than the script tags) are **&lt;div id="preamble-test-container"&gt;&lt;/div&gt;** and **&lt;div id="preamble-ui-container"&gt;&lt;/div&gt;**.
 
 ```html
@@ -58,28 +62,28 @@ The only required HTML tags (other than the script tags) are **&lt;div id="pream
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preamble</title>
-    <link href='stylesheets/preamble.css' rel='stylesheet' type='text/css'>
+    <link href='lib/preamble.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <!-- These are required. Do not remove them or rename their ids -->
     <div id="preamble-test-container"></div>
     <div id="preamble-ui-container"></div>
 
-    <!-- JavaScripts Go Here -->
+    <!-- ** JavaScript Files Go Here ** -->
 
-    <!-- Place script tags that your tests depend on here -->
-
-    <!-- The preamble-config.js file has to be loaded before preamble.js is loaded!!! -->
-    <!-- Note: You don't need to include this if you are using in-line configuration!!! -->
+    <!-- Place configuration file here -->
     <!--
-    <script src="javascripts/preamble-config.js"></script>
+    <script src="lib/preamble-config.js"></script>
     -->
 
-    <!-- preamble.js -->
-    <script src="javascripts/preamble.js"></script>
+    <!-- Place preamble.js here -->
+    <script src="lib/preamble.js"></script>
 
-    <!-- Place your test script(s) here, immediately following preamble.js -->
-    <script src="javascripts/sample-suite.js"></script>
+    <!-- Place scripts that load code that your suite(s) depend on here -->
+    <!-- <script src="src/your.src.file(s).go.here.js"></script> -->
+
+    <!-- Place your suite(s) here -->
+    <script src="spec/sample-suite.js"></script>
 </body>
 </html>
 ```
@@ -245,7 +249,7 @@ describe('Using afterEach to asynchronously execute common code after each spec 
 
 Preamble will timeout both _synchronous_ and _asynchronout_ _specs_ if they fail to complete within the 50 milisecond _timeout interval_ that Preamble defaults to. To override Preamble's default _timeout interval_ you can:
 
-Set the _timeout interval_ for all _specs_ by modifying the _javascripts/preamble-config.js_ file
+Set the _timeout interval_ for all _specs_ by modifying the _lib/preamble-config.js_ file
 
 ```javascript
 var preambleConfig = {
@@ -1189,7 +1193,7 @@ var elUiTestContainerElement = document.getElementById(getUiTestContainerElement
 ```
 
 ## Configuration Using preamble-config.js
-The following configuration options can be overridden in the _**preamble-config.js**_ file located in the _javascripts_ folder:
+The following configuration options can be overridden in the _**preamble-config.js**_ file located in the _lib_ folder:
 
 ### **windowGlobals**
 Default value = true. Set to false if you don't want to pollute the global name space and instead want to use the one global variable 'Preamble'.
@@ -1237,6 +1241,6 @@ configure({
 <p class="warning">Please note that if you are installing the PhantomJS v2 <em>binary distribution</em> on a Mac you may need to follow the directions given <a href="https://github.com/ariya/phantomjs/issues/12900#issuecomment-74073057" target="_blank">here</a>.</p>
 You can run Preamble _headless_ using <a href="http://phantomjs.org" target="_blank">PhantomJS</a>. The following example assumes that you already have PhantomJS installed and that it can be found on the path.
 
-1. Open up a terminal and change to your test's root folder.
-2. From the command line enter _"path/to/phantomjs javascripts/phantom-runner.js index.html"_ which should produce output similar to the example below:
+1. Open up a terminal and change to your spec runner's root folder.
+2. From the command line enter _"path/to/phantomjs lib/phantom-runner.js SpecRunner.html"_ which should produce output similar to the example below:
 ![PhantomJS Output]({{site.baseurl}}/images/phantomjs-output.jpg)

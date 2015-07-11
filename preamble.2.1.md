@@ -39,10 +39,10 @@ describe('Running asynchronous tests', function(){
 ```
 
 ### Installing Preamble
-Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!
+Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer and checkout the tagged version you are targeting (e.g. git checkout v1.3.0). That's it!
 
 ### Run The Sample Test
-After you have cloned the repo you can then run the sample test script, *javascripts/sample-test.js*, by opening the *index.html* file in your browser. The index.html file is located in the repo's root folder.
+After you have cloned the repo and checked out the tagged version you are targeting, you can then run the sample test script, *javascripts/sample-test.js*, by opening the *index.html* file in your browser. The index.html file is located in the repo's root folder.
 
 Running a test script in the browser produces a report showing the results of the tests. All groups and tests are presented as *links* and when you click on them Preamble will run them again and display their details, respectively.
 

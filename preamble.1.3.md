@@ -40,10 +40,10 @@ group('asynchronous', function(){
 ```
 
 # Installing Preamble
-Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer. That's it!
+Whenever you want to create a new environment for creating and running tests just clone the repo into a folder on your computer and checkout the tagged version you are targeting (e.g. git checkout v1.3.0). That's it!
 
 # Run The Sample Test
-After you have cloned the repo you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. All groups, tests and assertions are links and if you click on them Preamble will "drill down" and display details for each, respectively. To repeat the test you can either refresh the browser or click on the **Rerun All Tests** link located near the top of the page. After you have run the sample you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.
+After you have cloned the repo and checked out the tagged version you are targeting, you can run the sample test script, javascripts/sample-test.js, by opening index.html, which is located in the repo's root folder, in your browser. All groups, tests and assertions are links and if you click on them Preamble will "drill down" and display details for each, respectively. To repeat the test you can either refresh the browser or click on the **Rerun All Tests** link located near the top of the page. After you have run the sample you can open up the script file in your editor and spy the code, which will give you a feel for how you can use Preamble's API to write your own scripts.
 
 # index.html
 The only required tag (other than the script tags) is &lt;div id="preamble-container"&gt;&lt;/div&gt;. The rendering of the results output uses a very nice serif font called Lora (thank you, [Cyreal](http://www.cyreal.org) and Google). If you don't like Lora (but who doesn't like Lora?) feel free to remove the link tag or to use a different web font.
