@@ -10,7 +10,7 @@
         // config = require('./globals.js').config,
         helpers = require('./helpers.js'),
         Group = require('./group.js'),
-        Test = require('./test.js'),
+        Spec = require('./test.js'),
         groupStack = [],
         uniqueId;
 
@@ -32,7 +32,7 @@
      * Returns true if there is no run time filter
      * or if obj matches the run time filter.
      * Returns false otherwise.
-     * @param {object} obj, either a Test or a Group.
+     * @param {object} obj, either a Spec or a Group.
      */
     function filter(obj){
         var runtimeFilter = require('./globals.js').runtimeFilter,
@@ -118,7 +118,7 @@
         id = uniqueId();
         path = groupStack.getPath() + '/' + id;
         stackTrace = helpers.stackTraceFromError();
-        tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, globals.config.windowGlobals);
+        tst = new Spec(groupStack, id, path, label, stackTrace, tl, cb, globals.config.windowGlobals);
         tst.bypass = !filter(tst);
         globals.queue.push(tst);
     };

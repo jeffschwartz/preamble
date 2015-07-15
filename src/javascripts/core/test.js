@@ -12,10 +12,10 @@
      * @param {integer} timeoutInterval
      * @param {function} callback
      */
-    function Test(parentGroups, id, path, label, stackTrace,
+    function Spec(parentGroups, id, path, label, stackTrace,
         timeoutInterval, callback, bWindowGlobals){
-        if(!(this instanceof Test)){
-            return new Test(parentGroups, id, path, label, stackTrace,
+        if(!(this instanceof Spec)){
+            return new Spec(parentGroups, id, path, label, stackTrace,
                 timeoutInterval, callback);
         }
         this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
@@ -49,17 +49,17 @@
     /**
      * Sets all parent groups' passed property to false.
      */
-    Test.prototype.markParentGroupsFailed = function(){
+    Spec.prototype.markParentGroupsFailed = function(){
         this.parentGroups.forEach(function(pg){
             pg.passed = false;
         });
     };
 
     /**
-     * Test runner.
+     * Spec runner.
      * @param {function} callback e.g. fn(err, value)
      */
-    Test.prototype.run = function(callback){
+    Spec.prototype.run = function(callback){
         var beforesIterator = new Iterator(this.befores),
             aftersIterator = new Iterator(this.afters),
             self = this,
@@ -206,7 +206,7 @@
     /**
      * Runs assertions.
      */
-    Test.prototype.runAssertions = function(){
+    Spec.prototype.runAssertions = function(){
         var i,
             len,
             item,
@@ -225,7 +225,7 @@
     /**
      * Returns an array of paths.
      */
-    Test.prototype.getPaths = function(){
+    Spec.prototype.getPaths = function(){
         var paths,
             ancestors;
         paths = this.path.split('/');
@@ -235,5 +235,5 @@
         return ancestors;
     };
 
-    module.exports = Test;
+    module.exports = Spec;
 }());

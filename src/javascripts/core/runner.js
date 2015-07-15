@@ -9,12 +9,12 @@
             globals = require('./globals.js'),
             Iterator = require('./iterator.js'),
             Group = require('./group.js'),
-            Test = require('./test.js'),
+            Spec = require('./test.js'),
             tests;
 
         on('start', function(){
             tests = globals.queue.filter(function(item){
-                return item instanceof Test;
+                return item instanceof Spec;
             });
             tests.result = true;
             tests.totTestsFailed = 0;
@@ -78,7 +78,7 @@
                 if(queueObj instanceof Group && queueObj.passed){
                     queueObj.bypass = true;
                     //Tests that havent run do not have a totFailed property.
-                } else if(queueObj instanceof Test && !queueObj.hasOwnProperty(
+                } else if(queueObj instanceof Spec && !queueObj.hasOwnProperty(
                         'totFailed')){
                     queueObj.bypass = true;
                 }
