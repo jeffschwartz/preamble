@@ -26,7 +26,7 @@
         this.stackTrace = stackTrace;
         this.timeoutInterval = timeoutInterval;
         this.callback = callback;
-        this.assertions = []; //contains assertions
+        this.expectations = []; //contains the spec's expectations
         this.duration = 0;
         this.befores = []; //the befores to call prior to running this spec
         this.afters = []; //the afters to call prior to running this spec
@@ -102,12 +102,12 @@
                                 arguments[0] === 'function')){
                             arguments[0].call(self.context);
                         }
-                        self.runAssertions();
+                        self.runExpectations();
                         callback();
                     });
                 } else {
                     self.callback.call(self.context);
-                    self.runAssertions();
+                    self.runExpectations();
                     callback();
                 }
             } else {
@@ -117,12 +117,12 @@
                         if(arguments.length && typeof(arguments[0] === 'function')){
                             arguments[0].call(self.context);
                         }
-                        self.runAssertions();
+                        self.runExpectations();
                         callback();
                     });
                 } else {
                     self.callback.call(self.context);
-                    self.runAssertions();
+                    self.runExpectations();
                     callback();
                 }
             }
@@ -201,16 +201,16 @@
     };
 
     /**
-     * Runs assertions.
+     * Runs expectations.
      */
-    Spec.prototype.runAssertions = function(){
+    Spec.prototype.runExpectations = function(){
         var i,
             len,
             item,
             result;
         this.totFailed = 0;
-        for(i = 0, len = this.assertions.length; i < len; i++){
-            item = this.assertions[i];
+        for(i = 0, len = this.expectations.length; i < len; i++){
+            item = this.expectations[i];
             result = item.assertion(item.value, item.expectation);
             item.result = result.result;
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
