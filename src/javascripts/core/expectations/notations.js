@@ -9,6 +9,11 @@
         argsToArray = require('../helpers.js').argsToArray,
         assertionRunners = require('./assertionrunners.js');
 
+    function getActualValue(){
+        var spec = globals.testsIterator.get();
+        return spec.assertions[spec.assertions.length - 1].value;
+    }
+
     module.exports = {
         noteExpectation: function (actual){
             if(arguments.length !== 1){
@@ -30,10 +35,8 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertMockHasExpectations, null,
-                stackTraceFromError(), a.value._hasExpectations);
+                stackTraceFromError(), getActualValue()._hasExpectations);
         },
         noteToHaveBeenCalled: function(){
             if(arguments.length){
@@ -41,10 +44,8 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToHaveBeenCalled, null, stackTraceFromError(),
-                a.value.calls.count() > 0);
+                getActualValue().calls.count() > 0);
         },
         noteToNotHaveBeenCalled: function (){
             if(arguments.length){
@@ -52,31 +53,24 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToNotHaveBeenCalled, null, stackTraceFromError(),
-                a.value.calls.count() > 0);
+                getActualValue().calls.count() > 0);
         },
         noteToHaveBeenCalledWith: function(){
             if(!arguments.length){
                 throwException('matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none');
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
-                a.value.calls.wasCalledWith.apply(null, arguments));
+            completeTheAssertion(assertionRunners.assertToHaveBeenCalledWith, argsToArray(arguments),
+                stackTraceFromError(), getActualValue().calls.wasCalledWith.apply(null, arguments));
         },
         noteToNotHaveBeenCalledWith: function (){
             if(!arguments.length){
                 throwException('matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none');
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get()
-                .assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
-                a.value.calls.wasCalledWith.apply(null, arguments));
+            completeTheAssertion(assertionRunners.assertToNotHaveBeenCalledWith, argsToArray(arguments),
+                stackTraceFromError(), getActualValue().calls.wasCalledWith.apply(null, arguments));
         },
         noteToHaveBeenCalledWithContext: function(context){
             if(arguments.length !== 1){
@@ -84,10 +78,8 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveBeenCalledWithContext, context, stackTraceFromError(),
-                a.value.calls.wasCalledWithContext(context));
+            completeTheAssertion(assertionRunners.assertToHaveBeenCalledWithContext, context,
+                stackTraceFromError(), getActualValue().calls.wasCalledWithContext(context));
         },
         noteToNotHaveBeenCalledWithContext: function(context){
             if(arguments.length !== 1){
@@ -95,78 +87,61 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveBeenCalledWithContext, context, stackTraceFromError(),
-                a.value.calls.wasCalledWithContext(context));
+            completeTheAssertion(assertionRunners.assertToNotHaveBeenCalledWithContext, context,
+                stackTraceFromError(), getActualValue().calls.wasCalledWithContext(context));
         },
         noteToHaveReturned: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveReturned" expects 1 arguments, found none');
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToHaveReturned, value, stackTraceFromError(),
-                a.value.calls.returned(value));
+                getActualValue().calls.returned(value));
         },
         noteToNotHaveReturned: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveReturned" expects 1 arguments, found none');
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get() .assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToNotHaveReturned, value, stackTraceFromError(),
-                a.value.calls.returned(value));
+                getActualValue().calls.returned(value));
         },
         noteToHaveThrown: function(){
             if(arguments.length){
-                throwException('matcher "toHaveThrown" expects no arguments, found ' +
-                    arguments.length);
+                throwException('matcher "toHaveThrown" expects no arguments, found ' + arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToHaveThrown, true, stackTraceFromError(),
-                a.value.calls.threw());
+                getActualValue().calls.threw());
         },
         noteToNotHaveThrown: function(){
             if(arguments.length){
                 throwException('matcher "toNotHaveThrown" expects no arguments, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToNotHaveThrown, true, stackTraceFromError(),
-                a.value.calls.threw());
+                getActualValue().calls.threw());
         },
         noteToHaveThrownWithName: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToHaveThrownWithName, value, stackTraceFromError(),
-                a.value.calls.threwWithName(value));
+                getActualValue().calls.threwWithName(value));
         },
         noteToNotHaveThrownWithName: function (value){
             if(arguments.length !== 1){
                 throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToNotHaveThrownWithName, value, stackTraceFromError(),
-                a.value.calls.threwWithName(value));
+                getActualValue().calls.threwWithName(value));
         },
         noteToHaveThrownWithMessage: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToHaveThrownWithMessage, value, stackTraceFromError(),
-                a.value.calls.threwWithMessage(value)
+                getActualValue().calls.threwWithMessage(value)
             );
         },
         noteToNotHaveThrownWithMessage: function (value){
@@ -174,10 +149,8 @@
                 throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
             completeTheAssertion(assertionRunners.assertToNotHaveThrownWithMessage, value, stackTraceFromError(),
-                a.value.calls.threwWithMessage(value)
+                getActualValue().calls.threwWithMessage(value)
             );
         },
         noteToEqualAssertion: function(value){
