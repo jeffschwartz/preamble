@@ -35,24 +35,27 @@ module.exports = function ( grunt ) {
         watch  : {
             js : {
                 files   : ['src/javascripts/**/*.js'],
-                tasks   : ['jshint'],
-                options : {
-                    interrupt : true
-                }
+                tasks   : ['jshint']
+                // ,
+                // options : {
+                //     interrupt : true
+                // }
             },
             browserify : {
                 files   : ['src/javascripts/**/*.js'],
-                tasks   : ['browserify'],
-                options : {
-                    interrupt : true
-                }
+                tasks   : ['browserify']
+                // ,
+                // options : {
+                //     interrupt : true
+                // }
             },
             banner : {
                 files   : ['dist/preamble.js'],
-                tasks   : ['usebanner'],
-                options : {
-                    interrupt : true
-                }
+                tasks   : ['usebanner']
+                // ,
+                // options : {
+                //     interrupt : true
+                // }
             }
         }
     });
