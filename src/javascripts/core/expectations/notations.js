@@ -11,7 +11,7 @@
 
     function getActualValue(){
         var spec = globals.testsIterator.get();
-        return spec.assertions[spec.assertions.length - 1].value;
+        return spec.expectations[spec.expectations.length - 1].value;
     }
 
     module.exports = {

@@ -254,7 +254,7 @@
                 '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
             failed = '',
-            parentGroup,
+            parentSuite,
             el;
 
         queue.forEach(function(item){
@@ -263,13 +263,13 @@
                 html = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed).replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.replace(/{{passed}}/,
                     item.bypass ? ' bypassed' : item.passed ? '' : ' failed').replace('{{grouphref}}',
-                    encodeURI(item.pathFromParentGroupLabels())).replace(/{{label}}/, item.label) + html.slice(- 5);
+                    encodeURI(item.pathFromAncestorSuiteLabels())).replace(/{{label}}/, item.label) + html.slice(- 5);
                 html = html;
-                if(!item.parentGroups.length){
+                if(!item.ancestorSuites.length){
                     rc.insertAdjacentHTML('beforeend', html);
                 } else {
-                    parentGroup = item.parentGroups[item.parentGroups.length - 1];
-                    el = document.getElementById(parentGroup.path);
+                    parentSuite = item.ancestorSuites[item.ancestorSuites.length - 1];
+                    el = document.getElementById(parentSuite.path);
                     el.insertAdjacentHTML('beforeend', html);
                 }
             } else {
@@ -277,11 +277,11 @@
                 html = '' + testContainerMarkup.replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.replace(/{{passed}}/, item.bypass ?
                     'test-bypassed' : item.totFailed ? 'failed' : 'passed').replace('{{grouphref}}',
-                    encodeURI(item.parentGroup.pathFromParentGroupLabels())).replace('{{testhref}}',
+                    encodeURI(item.parentSuite.pathFromAncestorSuiteLabels())).replace('{{testhref}}',
                     encodeURI(item.label)).replace(/{{label}}/, item.label) + html.slice(-5);
-                //Show failed assertions and their stacks.
+                //Show failed expectations and their stacks.
                 if(item.totFailed > 0){
-                    item.assertions.forEach(function(assertion){
+                    item.expectations.forEach(function(assertion){
                         if(!assertion.result){
                             failed = testFailureMarkup.replace(/{{explain}}/,
                                 assertion.explain).replace(/{{stacktrace}}/,
@@ -295,7 +295,7 @@
                         helpers.stackTrace(item.stackTrace));
                     html = html.slice(0, -5) + failed + html.slice(-5);
                 }
-                el = document.getElementById(item.parentGroup.path);
+                el = document.getElementById(item.parentSuite.path);
                 el.insertAdjacentHTML('beforeend', html);
             }
         });

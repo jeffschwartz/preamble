@@ -6,20 +6,20 @@
     /**
      * A Spec.
      * @constructor
-     * @param {[Group] parentGroups
+     * @param {[Suites] ancestorSuites
      * @param {string} path
      * @param {string} label
      * @param {integer} timeoutInterval
      * @param {function} callback
      */
-    function Spec(parentGroups, id, path, label, stackTrace,
+    function Spec(ancestorSuites, id, path, label, stackTrace,
         timeoutInterval, callback, bWindowGlobals){
         if(!(this instanceof Spec)){
-            return new Spec(parentGroups, id, path, label, stackTrace,
+            return new Spec(ancestorSuites, id, path, label, stackTrace,
                 timeoutInterval, callback);
         }
-        this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
-        this.parentGroup = parentGroups[parentGroups.length - 1];
+        this.ancestorSuites = ancestorSuites.slice(0); //IMPORTANT: make a "copy" of the array
+        this.parentSuite = ancestorSuites[ancestorSuites.length - 1];
         this.id = id;
         this.path = path;
         this.label = label;
@@ -34,23 +34,23 @@
         this.bWindowGlobals = bWindowGlobals;
 
         //gather befores and afters for easy traversal
-        this.parentGroups.forEach(function(g){
-            if(g.beforeEachTest){
+        this.ancestorSuites.forEach(function(g){
+            if(g.before){
                 //bind each before callback to this.context
-                this.befores.push(g.beforeEachTest.bind(this.context));
+                this.befores.push(g.before.bind(this.context));
             }
-            if(g.afterEachTest){
+            if(g.after){
                 //bind each after callback to this.context
-                this.afters.push(g.afterEachTest.bind(this.context));
+                this.afters.push(g.after.bind(this.context));
             }
         }, this);
     }
 
     /**
-     * Sets all parent groups' passed property to false.
+     * Sets all parent suite' passed property to false.
      */
-    Spec.prototype.markParentGroupsFailed = function(){
-        this.parentGroups.forEach(function(pg){
+    Spec.prototype.markAncestorSuitesFailed = function(){
+        this.ancestorSuites.forEach(function(pg){
             pg.passed = false;
         });
     };
@@ -183,13 +183,13 @@
                         runAfters(function(){
                             if(spec.timedOut){
                                 spec.totFailed = -1;
-                                spec.markParentGroupsFailed();
+                                spec.markAncestorSuitesFailed();
                             } else {
                                 spec.completed = true;
                                 d = Date .now() - start;
                                 spec.duration = d > 0 && d || 1;
                                 if(spec.totFailed){
-                                    spec.markParentGroupsFailed();
+                                    spec.markAncestorSuitesFailed();
                                 }
                             }
                             callback();

@@ -76,7 +76,7 @@
     }
 
     function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
-        globals.testsIterator.get().assertions.push({
+        globals.testsIterator.get().expectations.push({
             assertion: assertion,
             assertionLabel: assertionLabel,
             value: value,
@@ -87,7 +87,7 @@
 
     function completeTheAssertion(assertion, value, stackTrace, actual){
         var ti = globals.testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
+            a = ti.get().expectations[ti.get().expectations.length - 1];
         a.assertion = assertion;
         a.expectation = value;
         a.stackTrace = stackTrace;

@@ -42,11 +42,11 @@
             return true;
         } else {
             if(obj instanceof(Group)){
-                path = obj.pathFromParentGroupLabels();
+                path = obj.pathFromAncestorSuiteLabels();
                 s = path.substr(0, runtimeFilter.group.length);
                 return s === runtimeFilter.group;
             } else {
-                path = obj.parentGroup.pathFromParentGroupLabels();
+                path = obj.parentSuite.pathFromAncestorSuiteLabels();
                 s = path.substr(0, runtimeFilter.group.length);
                 return s === runtimeFilter.group && runtimeFilter.test === '' ||
                     s === runtimeFilter.group && runtimeFilter.test === obj.label;
@@ -81,14 +81,14 @@
      * Registers a before each test process.
      * @param {function} callback,  called before running a test.
      */
-    exports.beforeEachTest = function(callback){
-        var parentGroup = groupStack[groupStack.length - 1];
-        parentGroup.beforeEachTest = callback;
+    exports.beforeEachSpec = function(callback){
+        var parentSuite = groupStack[groupStack.length - 1];
+        parentSuite.before = callback;
     };
 
-    exports.afterEachTest = function(callback){
-        var parentGroup = groupStack[groupStack.length - 1];
-        parentGroup.afterEachTest = callback;
+    exports.afterEachSpec = function(callback){
+        var parentSuite = groupStack[groupStack.length - 1];
+        parentSuite.after = callback;
     };
 
     /**
@@ -103,7 +103,7 @@
         //     config = require('./globals.js').config,
         var globals = require('./globals.js'),
             tst,
-            parentGroup,
+            parentSuite,
             id,
             path,
             tl,
@@ -114,7 +114,7 @@
         }
         tl = arguments.length === 3 && timeoutInterval || globals.config.timeoutInterval;
         cb = arguments.length === 3 && callback || arguments[1];
-        parentGroup = groupStack[groupStack.length - 1];
+        parentSuite = groupStack[groupStack.length - 1];
         id = uniqueId();
         path = groupStack.getPath() + '/' + id;
         stackTrace = helpers.stackTraceFromError();

@@ -77,8 +77,8 @@
         if(globals.config.windowGlobals){
             window.configure = configure;
             window.describe = queueBuilder.group;
-            window.beforeEach = queueBuilder.beforeEachTest;
-            window.afterEach = queueBuilder.afterEachTest;
+            window.beforeEach = queueBuilder.beforeEachSpec;
+            window.afterEach = queueBuilder.afterEachSpec;
             window.it = queueBuilder.test;
             window.expect = notations.noteExpectation;
             window.getUiTestContainerElement = helpers.getUiTestContainerElement;
@@ -88,8 +88,8 @@
             window.Preamble = {
                 configure: configure,
                 describe: queueBuilder.group,
-                beforeEach: queueBuilder.beforeEachTest,
-                afterEach: queueBuilder.afterEachTest,
+                beforeEach: queueBuilder.beforeEachSpec,
+                afterEach: queueBuilder.afterEachSpec,
                 it: queueBuilder.test,
                 expect: notations.noteExpectation,
                 getUiTestContainerElement: helpers.getUiTestContainerElement,
