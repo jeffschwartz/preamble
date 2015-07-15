@@ -10,7 +10,7 @@
         // config = require('./globals.js').config,
         helpers = require('./helpers.js'),
         Group = require('./group.js'),
-        Spec = require('./test.js'),
+        Spec = require('./spec.js'),
         groupStack = [],
         uniqueId;
 

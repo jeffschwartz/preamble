@@ -9,7 +9,7 @@
             globals = require('./globals.js'),
             Iterator = require('./iterator.js'),
             Group = require('./group.js'),
-            Spec = require('./test.js'),
+            Spec = require('./spec.js'),
             tests;
 
         on('start', function(){
