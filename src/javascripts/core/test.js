@@ -4,7 +4,7 @@
         emit = require('./emit.js');
 
     /**
-     * A test.
+     * A Spec.
      * @constructor
      * @param {[Group] parentGroups
      * @param {string} path
@@ -28,8 +28,8 @@
         this.callback = callback;
         this.assertions = []; //contains assertions
         this.duration = 0;
-        this.befores = []; //the befores to call prior to running this test
-        this.afters = []; //the afters to call prior to running this test
+        this.befores = []; //the befores to call prior to running this spec
+        this.afters = []; //the afters to call prior to running this spec
         this.context = {}; //the context used to call befores and afters
         this.bWindowGlobals = bWindowGlobals;
 
@@ -92,8 +92,8 @@
             }
         }
 
-        //run the test
-        function runTest(callback){
+        //run the spec
+        function runSpec(callback){
             if(bWindowGlobals){
                 if(self.callback.length){
                     //Pass done callback as 1st param if configured to use window globals.
@@ -155,44 +155,41 @@
             }
         }
 
-        (function(test){
-            //Set a timer for the test and fail it if it isn't completed in time.
-            //Note to self: Since this can fire after the test it is timing has
+        (function(spec){
+            //Set a timer for the spec and fail it if it isn't completed in time.
+            //Note to self: Since this can fire after the spec it is timing has
             //completed it is possible that "self" no longer refers to the original
-            //test. To insure that when this fires it always refers to the test
-            //it was timing, the test is captured via closure uaing the module
+            //spec. To insure that when this fires it always refers to the spec
+            //it was timing, the spec is captured via closure uaing the module
             //pattern and passing "self" as an argument.
             setTimeout(function(){
-                if(!test.completed){
-                    //mark test failed
-                    test.timedOut = true;
-                    //test.totFailed = -1;
-                    //test.parentGroup.passed = false;
-                    //callback();
+                if(!spec.completed){
+                    //mark spec failed
+                    spec.timedOut = true;
                 }
-            }, test.timeoutInterval);
+            }, spec.timeoutInterval);
 
-            //Run the before callbacks, test callback and after callbacks.
-            //Note to self: Since this can fire after the test has already timed
+            //Run the before callbacks, spec callback and after callbacks.
+            //Note to self: Since this can fire after the spec has already timed
             //out and failed, it is possible that "self" no longer refers to the
-            //original test. To insure that when this fires it always refers to
-            //the test it was running, the test is captured via closure uaing the
+            //original spec. To insure that when this fires it always refers to
+            //the spec it was running, the spec is captured via closure uaing the
             //module pattern and passing "self" as an argument.
             setTimeout(function(){
                 var start = Date.now();
                 var d;
                 runBefores(function(){
-                    runTest(function(){
+                    runSpec(function(){
                         runAfters(function(){
-                            if(test.timedOut){
-                                test.totFailed = -1;
-                                test.markParentGroupsFailed();
+                            if(spec.timedOut){
+                                spec.totFailed = -1;
+                                spec.markParentGroupsFailed();
                             } else {
-                                test.completed = true;
+                                spec.completed = true;
                                 d = Date .now() - start;
-                                test .duration = d > 0 && d || 1;
-                                if(test .totFailed){
-                                    test.markParentGroupsFailed();
+                                spec.duration = d > 0 && d || 1;
+                                if(spec.totFailed){
+                                    spec.markParentGroupsFailed();
                                 }
                             }
                             callback();
