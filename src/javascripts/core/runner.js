@@ -1,35 +1,35 @@
 /**
- * Internal event handling.
+ * runner event handling.
  */
 (function(){
     'use strict';
-    exports.init = function(){
+    exports.registerEventHandlers = function(){
         var on = require('./on.js'),
             emit = require('./emit.js'),
             globals = require('./globals.js'),
             Iterator = require('./iterator.js'),
             Suite = require('./suite.js'),
             Spec = require('./spec.js'),
-            tests;
+            specs;
 
         on('start', function(){
-            tests = globals.queue.filter(function(item){
+            specs = globals.queue.filter(function(item){
                 return item instanceof Spec;
             });
-            tests.result = true;
-            tests.totTestsFailed = 0;
-            if(tests.length){
+            specs.result = true;
+            specs.totTestsFailed = 0;
+            if(specs.length){
                 emit('runTests', function(){
                     emit('end');
                 });
             } else {
-                //TODO(Jeff): perhaps this should display a message that there are no tests to run.
+                //TODO(Jeff): perhaps this should display a message that there are no specs to run.
                 emit('end');
             }
         });
 
         on('runTests', function(topic, callback){
-            globals.testsIterator = new Iterator(tests);
+            globals.testsIterator = new Iterator(specs);
 
             function runTest(test, callback){
                 if(test.bypass){
@@ -69,7 +69,7 @@
 
         on('testingShortCircuited', function(){
             //Set the "bypass" property for all groups and
-            //tests that arent related to this test to true.
+            //specs that arent related to this test to true.
             var queueIterator, queueObj;
             queueIterator = new Iterator(globals.queue);
             while (queueIterator.hasNext()){
@@ -89,23 +89,23 @@
         });
 
         on('end', function(){
-            //Record how many tests were bypassed.
-            tests.totBypassed = 0;
+            //Record how many specs were bypassed.
+            specs.totBypassed = 0;
             if(globals.runtimeFilter.suite || globals.config.testingShortCircuited){
-                tests.totBypassed = tests.reduce(function(prevValue, t){
+                specs.totBypassed = specs.reduce(function(prevValue, t){
                     return t.bypass ? prevValue + 1 : prevValue;
                 }, 0);
             }
-            //Record how many tests failed.
-            tests.totTestsFailed = tests.reduce(function(prevValue, t){
+            //Record how many specs failed.
+            specs.totTestsFailed = specs.reduce(function(prevValue, t){
                 return t.timedOut || t.totFailed ? prevValue +
                     1 : prevValue;
             }, 0);
-            tests.result = tests.totTestsFailed === 0;
+            specs.result = specs.totTestsFailed === 0;
             globals.queue.end = Date.now();
-            tests.duration = globals.queue.end - globals.queue.start;
-            globals.reporter.coverage(tests);
-            globals.reporter.summary(tests);
+            specs.duration = globals.queue.end - globals.queue.start;
+            globals.reporter.coverage(specs);
+            globals.reporter.summary(specs);
             globals.reporter.details(globals.queue);
         });
     };
