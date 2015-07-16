@@ -1,7 +1,6 @@
 (function(){
     'use strict';
-    var Iterator = require('./iterator.js'),
-        emit = require('./emit.js');
+    var Iterator = require('./iterator.js');
 
     /**
      * A Spec.
@@ -216,7 +215,6 @@
             this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
             item.explain = result.explain;
         }
-        emit('runAfters');
     };
 
     /**
