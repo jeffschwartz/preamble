@@ -8,7 +8,7 @@
             emit = require('./emit.js'),
             globals = require('./globals.js'),
             Iterator = require('./iterator.js'),
-            Suite = require('./group.js'),
+            Suite = require('./suite.js'),
             Spec = require('./spec.js'),
             tests;
 

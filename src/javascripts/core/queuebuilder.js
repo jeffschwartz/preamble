@@ -7,7 +7,7 @@
     'use strict';
     var
         helpers = require('./helpers.js'),
-        Suite = require('./group.js'),
+        Suite = require('./suite.js'),
         Spec = require('./spec.js'),
         groupStack = [],
         uniqueId;

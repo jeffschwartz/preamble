@@ -3,7 +3,7 @@
     var version = require('../core/version.js'),
         globals = require('../core/globals.js'),
         helpers = require('../core/helpers.js'),
-        Suite = require('../core/group.js');
+        Suite = require('../core/suite.js');
 
     /**
      * Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
