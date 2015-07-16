@@ -75,7 +75,7 @@
         return false;
     }
 
-    function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
+    function pushOntoExpectations(assertion, assertionLabel, value, expectation, stackTrace){
         globals.testsIterator.get().expectations.push({
             assertion: assertion,
             assertionLabel: assertionLabel,
@@ -85,7 +85,7 @@
         });
     }
 
-    function completeTheAssertion(assertion, value, stackTrace, actual){
+    function completeTheExpectation(assertion, value, stackTrace, actual){
         var ti = globals.testsIterator,
             a = ti.get().expectations[ti.get().expectations.length - 1];
         a.assertion = assertion;
@@ -198,8 +198,8 @@
     exports.compare = compare;
     exports.compareArrays = compareArrays;
     exports.compareObjects = compareObjects;
-    exports.pushOntoAssertions = pushOntoAssertions;
-    exports.completeTheAssertion = completeTheAssertion;
+    exports.pushOntoExpectations = pushOntoExpectations;
+    exports.completeTheExpectation = completeTheExpectation;
     exports.setStackTraceProperty = setStackTraceProperty;
     exports.stackTraceFromError = stackTraceFromError;
     exports.getStackTraceProperty = getStackTraceProperty;
