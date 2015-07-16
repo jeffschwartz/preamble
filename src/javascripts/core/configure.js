@@ -76,10 +76,10 @@
         //not be used and the one Preamble name space will be used instead.
         if(globals.config.windowGlobals){
             window.configure = configure;
-            window.describe = queueBuilder.group;
+            window.describe = queueBuilder.suite;
             window.beforeEach = queueBuilder.beforeEachSpec;
             window.afterEach = queueBuilder.afterEachSpec;
-            window.it = queueBuilder.test;
+            window.it = queueBuilder.spec;
             window.expect = notations.noteExpectation;
             window.getUiTestContainerElement = helpers.getUiTestContainerElement;
             window.getUiTestContainerElementId = helpers.getUiTestContainerElementId;
@@ -87,10 +87,10 @@
         } else {
             window.Preamble = {
                 configure: configure,
-                describe: queueBuilder.group,
+                describe: queueBuilder.suite,
                 beforeEach: queueBuilder.beforeEachSpec,
                 afterEach: queueBuilder.afterEachSpec,
-                it: queueBuilder.test,
+                it: queueBuilder.spec,
                 expect: notations.noteExpectation,
                 getUiTestContainerElement: helpers.getUiTestContainerElement,
                 getUiTestContainerElementId: helpers.getUiTestContainerElementId,

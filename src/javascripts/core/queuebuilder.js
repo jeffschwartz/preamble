@@ -1,15 +1,13 @@
-(function(){
-    /**
+(function(){ /**
      * Process for building the queue.
-     * @param {array} - queue, filled with Suites and Tests.
+     * @param {array} - queue, filled with Suites and Specs.
      * @param {function} - trhowException, a function called to throw an exception.
      */
     'use strict';
-    var
-        helpers = require('./helpers.js'),
+    var helpers = require('./helpers.js'),
         Suite = require('./suite.js'),
         Spec = require('./spec.js'),
-        groupStack = [],
+        suiteStack = [],
         uniqueId;
 
     uniqueId = (function(){
@@ -19,9 +17,9 @@
         };
     }());
 
-    groupStack.getPath = function(){
-        var result = this.reduce(function(prevValue, group){
-            return prevValue + '/' + group.id;
+    suiteStack.getPath = function(){
+        var result = this.reduce(function(prevValue, suite){
+            return prevValue + '/' + suite.id;
         }, '');
         return result;
     };
@@ -53,11 +51,11 @@
     }
 
     /**
-     * Registers a group.
-     * @param {string} label, describes the group/suite.
+     * Registers a suite.
+     * @param {string} label, describes the suite.
      * @param {function} callback,  called to run befores, spec and afters.
      */
-    exports.group = function(label, callback){
+    exports.suite = function(label, callback){
         var queue = require('./globals.js').queue,
             suite,
             id,
@@ -66,58 +64,56 @@
             helpers.throwException('requires 2 arguments, found ' + arguments.length);
         }
         id = uniqueId();
-        path = groupStack.getPath() + '/' + id;
-        suite = new Suite(groupStack, id, path, label, callback);
+        path = suiteStack.getPath() + '/' + id;
+        suite = new Suite(suiteStack, id, path, label, callback);
         suite.bypass = !filter(suite);
         queue.push(suite);
-        groupStack.push(suite);
+        suiteStack.push(suite);
         suite.callback();
-        groupStack.pop();
+        suiteStack.pop();
     };
 
     /**
-     * Registers a before each test process.
-     * @param {function} callback,  called before running a test.
+     * Registers a before each spec process.
+     * @param {function} callback,  called before running a spec.
      */
     exports.beforeEachSpec = function(callback){
-        var parentSuite = groupStack[groupStack.length - 1];
+        var parentSuite = suiteStack[suiteStack.length - 1];
         parentSuite.before = callback;
     };
 
     exports.afterEachSpec = function(callback){
-        var parentSuite = groupStack[groupStack.length - 1];
+        var parentSuite = suiteStack[suiteStack.length - 1];
         parentSuite.after = callback;
     };
 
     /**
-     * Registers a test.
-     * @param {string} label, describes the test/spec.
-     * @param {function} callback, called to run the test.
+     * Registers a spec.
+     * @param {string} label, describes the spec.
+     * @param {function} callback, called to run the spec.
      * @param {integer} timeoutInterval, optional, the amount of time
-     * the test is allowed to run before timing out the test.
+     * the spec is allowed to run before timing out.
      */
-    exports.test = function(label, callback, timeoutInterval){
-        // var queue = require('./globals.js').queue,
-        //     config = require('./globals.js').config,
+    exports.spec = function(label, callback, timeoutInterval){
         var globals = require('./globals.js'),
-            tst,
+            spec,
             parentSuite,
             id,
             path,
-            tl,
+            toi,
             cb,
             stackTrace;
         if(arguments.length < 2){
             helpers.throwException('requires at least 2 arguments, found ' + arguments.length);
         }
-        tl = arguments.length === 3 && timeoutInterval || globals.config.timeoutInterval;
+        toi = arguments.length === 3 && timeoutInterval || globals.config.timeoutInterval;
         cb = arguments.length === 3 && callback || arguments[1];
-        parentSuite = groupStack[groupStack.length - 1];
+        parentSuite = suiteStack[suiteStack.length - 1];
         id = uniqueId();
-        path = groupStack.getPath() + '/' + id;
+        path = suiteStack.getPath() + '/' + id;
         stackTrace = helpers.stackTraceFromError();
-        tst = new Spec(groupStack, id, path, label, stackTrace, tl, cb, globals.config.windowGlobals);
-        tst.bypass = !filter(tst);
-        globals.queue.push(tst);
+        spec = new Spec(suiteStack, id, path, label, stackTrace, toi, cb, globals.config.windowGlobals);
+        spec.bypass = !filter(spec);
+        globals.queue.push(spec);
     };
 }());
