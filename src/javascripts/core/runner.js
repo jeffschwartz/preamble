@@ -3,7 +3,7 @@
  */
 (function(){
     'use strict';
-    module.exports.init = function(){
+    exports.init = function(){
         var on = require('./on.js'),
             emit = require('./emit.js'),
             globals = require('./globals.js'),
