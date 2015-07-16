@@ -41,7 +41,7 @@
                 timeoutInterval: 50,
                 name: 'Suite',
                 uiTestContainerId: 'ui-test-container',
-                hidePassedTests: false,
+                hidePassedTests: false, //TODO(J.S.): rename this to hidePassed
                 shortCircuit: false,
                 testingShortCircuited: false,
                 autoStart: true
@@ -65,8 +65,8 @@
         globals.config = configArg ? helpers.merge(globals.config, configArg) : globals.config;
         //Capture run-time filters, if any.
         globals.runtimeFilter = {
-            group: helpers.loadPageVar('group'),
-            test: helpers.loadPageVar('test')
+            suite: helpers.loadPageVar('suite'),
+            spec: helpers.loadPageVar('spec')
         };
         //Capture exception's stack trace property.
         helpers.setStackTraceProperty();

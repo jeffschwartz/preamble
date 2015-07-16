@@ -1,15 +1,13 @@
 (function(){
     /**
      * Process for building the queue.
-     * @param {array} - queue, filled with Groups and Tests.
+     * @param {array} - queue, filled with Suites and Tests.
      * @param {function} - trhowException, a function called to throw an exception.
      */
     'use strict';
     var
-        // queue = require('./globals.js').queue,
-        // config = require('./globals.js').config,
         helpers = require('./helpers.js'),
-        Group = require('./group.js'),
+        Suite = require('./group.js'),
         Spec = require('./spec.js'),
         groupStack = [],
         uniqueId;
@@ -32,24 +30,24 @@
      * Returns true if there is no run time filter
      * or if obj matches the run time filter.
      * Returns false otherwise.
-     * @param {object} obj, either a Spec or a Group.
+     * @param {object} obj, either a Spec or a Suite.
      */
     function filter(obj){
         var runtimeFilter = require('./globals.js').runtimeFilter,
             s,
             path = '';
-        if(!runtimeFilter.group){
+        if(!runtimeFilter.suite){
             return true;
         } else {
-            if(obj instanceof(Group)){
+            if(obj instanceof(Suite)){
                 path = obj.pathFromAncestorSuiteLabels();
-                s = path.substr(0, runtimeFilter.group.length);
-                return s === runtimeFilter.group;
+                s = path.substr(0, runtimeFilter.suite.length);
+                return s === runtimeFilter.suite;
             } else {
                 path = obj.parentSuite.pathFromAncestorSuiteLabels();
-                s = path.substr(0, runtimeFilter.group.length);
-                return s === runtimeFilter.group && runtimeFilter.test === '' ||
-                    s === runtimeFilter.group && runtimeFilter.test === obj.label;
+                s = path.substr(0, runtimeFilter.suite.length);
+                return s === runtimeFilter.suite && runtimeFilter.spec === '' ||
+                    s === runtimeFilter.suite && runtimeFilter.spec === obj.label;
             }
         }
     }
@@ -57,11 +55,11 @@
     /**
      * Registers a group.
      * @param {string} label, describes the group/suite.
-     * @param {function} callback,  called to run befores, test and afters.
+     * @param {function} callback,  called to run befores, spec and afters.
      */
     exports.group = function(label, callback){
         var queue = require('./globals.js').queue,
-            grp,
+            suite,
             id,
             path;
         if(arguments.length !== 2){
@@ -69,11 +67,11 @@
         }
         id = uniqueId();
         path = groupStack.getPath() + '/' + id;
-        grp = new Group(groupStack, id, path, label, callback);
-        grp.bypass = !filter(grp);
-        queue.push(grp);
-        groupStack.push(grp);
-        grp.callback();
+        suite = new Suite(groupStack, id, path, label, callback);
+        suite.bypass = !filter(suite);
+        queue.push(suite);
+        groupStack.push(suite);
+        suite.callback();
         groupStack.pop();
     };
 

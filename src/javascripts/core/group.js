@@ -4,14 +4,14 @@
     /**
      * A group.
      * @constructor
-     * @param {[Group]} ancestorSuites
+     * @param {[Suite]} ancestorSuites
      * @param {string} path
      * @param {string} label
      * @param {function} callback
      */
-    function Group(ancestorSuites, id, path, label, callback){
-        if(!(this instanceof Group)){
-            return new Group(ancestorSuites, id, path, label, callback);
+    function Suite(ancestorSuites, id, path, label, callback){
+        if(!(this instanceof Suite)){
+            return new Suite(ancestorSuites, id, path, label, callback);
         }
         this.ancestorSuites = ancestorSuites.slice(0); //IMPORTANT: make a "copy" of the array
         this.id = id;
@@ -26,7 +26,7 @@
      * Returns the concatenated labels from all parent groups.
      * @param {array} parents An array of parent groups.
      */
-    Group.prototype.pathFromAncestorSuiteLabels = function pathFromAncestorSuiteLabels(){
+    Suite.prototype.pathFromAncestorSuiteLabels = function pathFromAncestorSuiteLabels(){
         /* jshint validthis: true */
         var path;
         if(!this.ancestorSuites.length){
@@ -40,5 +40,5 @@
         }
     };
 
-    module.exports = Group;
+    module.exports = Suite;
 }());

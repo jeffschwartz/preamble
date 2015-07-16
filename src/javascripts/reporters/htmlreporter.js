@@ -3,7 +3,7 @@
     var version = require('../core/version.js'),
         globals = require('../core/globals.js'),
         helpers = require('../core/helpers.js'),
-        Group = require('../core/group.js');
+        Suite = require('../core/group.js');
 
     /**
      * Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
@@ -187,8 +187,8 @@
         if(globals.config.testingShortCircuited){
             show += (tests.length - tests.totBypassed) && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
-        } else if(globals.runtimeFilter.group){
-            show += globals.runtimeFilter.group && ' of {{tbpt}}';
+        } else if(globals.runtimeFilter.suite){
+            show += globals.runtimeFilter.suite && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         }
         show += helpers.pluralize(' spec', tests.length);
@@ -245,11 +245,11 @@
             groupContainerMarkup =
                 '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup =
-                '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
+                '<li><a class="group{{passed}}" href="?suite={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup =
                 '<ul class="tests-container" data-passed="{{passed}}"></ul>',
             testAnchorMarkup =
-                '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
+                '<li><a class="{{passed}}" href="?suite={{grouphref}}&spec={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
             testFailureMarkup =
                 '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
@@ -258,7 +258,7 @@
             el;
 
         queue.forEach(function(item){
-            if(item instanceof(Group)){
+            if(item instanceof(Suite)){
                 //Add groups to the DOM.
                 html = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed).replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.replace(/{{passed}}/,

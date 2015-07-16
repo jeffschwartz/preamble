@@ -8,7 +8,7 @@
             emit = require('./emit.js'),
             globals = require('./globals.js'),
             Iterator = require('./iterator.js'),
-            Group = require('./group.js'),
+            Suite = require('./group.js'),
             Spec = require('./spec.js'),
             tests;
 
@@ -74,8 +74,8 @@
             queueIterator = new Iterator(globals.queue);
             while (queueIterator.hasNext()){
                 queueObj = queueIterator.getNext();
-                //Groups that haven't run will have their passed property set to true.
-                if(queueObj instanceof Group && queueObj.passed){
+                //Suites that haven't run will have their passed property set to true.
+                if(queueObj instanceof Suite && queueObj.passed){
                     queueObj.bypass = true;
                     //Tests that havent run do not have a totFailed property.
                 } else if(queueObj instanceof Spec && !queueObj.hasOwnProperty(
@@ -91,7 +91,7 @@
         on('end', function(){
             //Record how many tests were bypassed.
             tests.totBypassed = 0;
-            if(globals.runtimeFilter.group || globals.config.testingShortCircuited){
+            if(globals.runtimeFilter.suite || globals.config.testingShortCircuited){
                 tests.totBypassed = tests.reduce(function(prevValue, t){
                     return t.bypass ? prevValue + 1 : prevValue;
                 }, 0);
