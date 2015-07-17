@@ -1,4 +1,4 @@
-/* Preamble v3.1.0 - released on 2015-07-11 at 8:51:26 AM EDT
+/* Preamble v3.1.0 - released on 2015-07-17 at 8:31:40 AM EDT
  * (c) 2013 - 2015 Jeffrey Schwartz
  * Preamble may be freely distributed under the MIT license.
 */
@@ -46,7 +46,7 @@
                 timeoutInterval: 50,
                 name: 'Suite',
                 uiTestContainerId: 'ui-test-container',
-                hidePassedTests: false,
+                hidePassedTests: false, //TODO(J.S.): rename this to hidePassed
                 shortCircuit: false,
                 testingShortCircuited: false,
                 autoStart: true
@@ -70,8 +70,8 @@
         globals.config = configArg ? helpers.merge(globals.config, configArg) : globals.config;
         //Capture run-time filters, if any.
         globals.runtimeFilter = {
-            group: helpers.loadPageVar('group'),
-            test: helpers.loadPageVar('test')
+            suite: helpers.loadPageVar('suite'),
+            spec: helpers.loadPageVar('spec')
         };
         //Capture exception's stack trace property.
         helpers.setStackTraceProperty();
@@ -81,10 +81,10 @@
         //not be used and the one Preamble name space will be used instead.
         if(globals.config.windowGlobals){
             window.configure = configure;
-            window.describe = queueBuilder.group;
-            window.beforeEach = queueBuilder.beforeEachTest;
-            window.afterEach = queueBuilder.afterEachTest;
-            window.it = queueBuilder.test;
+            window.describe = queueBuilder.suite;
+            window.beforeEach = queueBuilder.beforeEachSpec;
+            window.afterEach = queueBuilder.afterEachSpec;
+            window.it = queueBuilder.spec;
             window.expect = notations.noteExpectation;
             window.getUiTestContainerElement = helpers.getUiTestContainerElement;
             window.getUiTestContainerElementId = helpers.getUiTestContainerElementId;
@@ -92,10 +92,10 @@
         } else {
             window.Preamble = {
                 configure: configure,
-                describe: queueBuilder.group,
-                beforeEach: queueBuilder.beforeEachTest,
-                afterEach: queueBuilder.afterEachTest,
-                it: queueBuilder.test,
+                describe: queueBuilder.suite,
+                beforeEach: queueBuilder.beforeEachSpec,
+                afterEach: queueBuilder.afterEachSpec,
+                it: queueBuilder.spec,
                 expect: notations.noteExpectation,
                 getUiTestContainerElement: helpers.getUiTestContainerElement,
                 getUiTestContainerElementId: helpers.getUiTestContainerElementId,
@@ -119,7 +119,7 @@
     };
 }());
 
-},{"../reporters/htmlreporter.js":19,"./emit.js":2,"./expectationapi.js":3,"./expectations/notations.js":6,"./globals.js":7,"./helpers.js":9,"./queuebuilder.js":13,"./spy.js":15}],2:[function(require,module,exports){
+},{"../reporters/htmlreporter.js":19,"./emit.js":2,"./expectationapi.js":3,"./expectations/notations.js":6,"./globals.js":7,"./helpers.js":8,"./queuebuilder.js":12,"./spy.js":15}],2:[function(require,module,exports){
 (function(){
     'use strict';
     var pubsub = require('./pubsub.js');
@@ -134,7 +134,7 @@
     };
 }());
 
-},{"./pubsub.js":12}],3:[function(require,module,exports){
+},{"./pubsub.js":11}],3:[function(require,module,exports){
 (function(){
     'use strict';
     var notations = require('./expectations/notations.js');
@@ -408,17 +408,22 @@
     exports.a_is_not_truthy = a_is_not_truthy;
 }());
 
-},{"../helpers.js":9}],6:[function(require,module,exports){
+},{"../helpers.js":8}],6:[function(require,module,exports){
 (function(){
     'use strict';
     var throwException = require('../helpers.js').throwException,
         spy = require('../spy.js'),
         globals = require('../globals.js'),
-        pushOntoAssertions = require('../helpers.js').pushOntoAssertions,
-        completeTheAssertion = require('../helpers.js').completeTheAssertion,
+        pushOntoExpectations = require('../helpers.js').pushOntoExpectations,
+        completeTheExpectation = require('../helpers.js').completeTheExpectation,
         stackTraceFromError = require('../helpers.js').stackTraceFromError,
         argsToArray = require('../helpers.js').argsToArray,
         assertionRunners = require('./assertionrunners.js');
+
+    function getActualValue(){
+        var spec = globals.testsIterator.get();
+        return spec.expectations[spec.expectations.length - 1].value;
+    }
 
     module.exports = {
         noteExpectation: function (actual){
@@ -430,7 +435,7 @@
                 actual();
             }
             //push partial assertion (only the value) info onto the assertion table
-            pushOntoAssertions(null, null, actual, null, null);
+            pushOntoExpectations(null, null, actual, null, null);
             //return the expectationApi for chaining
             return globals.expectationApi;
         },
@@ -441,10 +446,8 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertMockHasExpectations, null,
-                stackTraceFromError(), a.value._hasExpectations);
+            completeTheExpectation(assertionRunners.assertMockHasExpectations, null,
+                stackTraceFromError(), getActualValue()._hasExpectations);
         },
         noteToHaveBeenCalled: function(){
             if(arguments.length){
@@ -452,10 +455,8 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveBeenCalled, null, stackTraceFromError(),
-                a.value.calls.count() > 0);
+            completeTheExpectation(assertionRunners.assertToHaveBeenCalled, null, stackTraceFromError(),
+                getActualValue().calls.count() > 0);
         },
         noteToNotHaveBeenCalled: function (){
             if(arguments.length){
@@ -463,31 +464,24 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveBeenCalled, null, stackTraceFromError(),
-                a.value.calls.count() > 0);
+            completeTheExpectation(assertionRunners.assertToNotHaveBeenCalled, null, stackTraceFromError(),
+                getActualValue().calls.count() > 0);
         },
         noteToHaveBeenCalledWith: function(){
             if(!arguments.length){
                 throwException('matcher "toHaveBeenCalledWith" expects 1 or more arguments, found none');
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
-                a.value.calls.wasCalledWith.apply(null, arguments));
+            completeTheExpectation(assertionRunners.assertToHaveBeenCalledWith, argsToArray(arguments),
+                stackTraceFromError(), getActualValue().calls.wasCalledWith.apply(null, arguments));
         },
         noteToNotHaveBeenCalledWith: function (){
             if(!arguments.length){
                 throwException('matcher "toNotHaveBeenCalledWith" expects 1 or more arguments, found none');
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get()
-                .assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveBeenCalledWith, argsToArray(arguments), stackTraceFromError(),
-                a.value.calls.wasCalledWith.apply(null, arguments));
+            completeTheExpectation(assertionRunners.assertToNotHaveBeenCalledWith, argsToArray(arguments),
+                stackTraceFromError(), getActualValue().calls.wasCalledWith.apply(null, arguments));
         },
         noteToHaveBeenCalledWithContext: function(context){
             if(arguments.length !== 1){
@@ -495,10 +489,8 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveBeenCalledWithContext, context, stackTraceFromError(),
-                a.value.calls.wasCalledWithContext(context));
+            completeTheExpectation(assertionRunners.assertToHaveBeenCalledWithContext, context,
+                stackTraceFromError(), getActualValue().calls.wasCalledWithContext(context));
         },
         noteToNotHaveBeenCalledWithContext: function(context){
             if(arguments.length !== 1){
@@ -506,78 +498,61 @@
                     arguments.length);
             }
 
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveBeenCalledWithContext, context, stackTraceFromError(),
-                a.value.calls.wasCalledWithContext(context));
+            completeTheExpectation(assertionRunners.assertToNotHaveBeenCalledWithContext, context,
+                stackTraceFromError(), getActualValue().calls.wasCalledWithContext(context));
         },
         noteToHaveReturned: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveReturned" expects 1 arguments, found none');
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveReturned, value, stackTraceFromError(),
-                a.value.calls.returned(value));
+            completeTheExpectation(assertionRunners.assertToHaveReturned, value, stackTraceFromError(),
+                getActualValue().calls.returned(value));
         },
         noteToNotHaveReturned: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveReturned" expects 1 arguments, found none');
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get() .assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveReturned, value, stackTraceFromError(),
-                a.value.calls.returned(value));
+            completeTheExpectation(assertionRunners.assertToNotHaveReturned, value, stackTraceFromError(),
+                getActualValue().calls.returned(value));
         },
         noteToHaveThrown: function(){
             if(arguments.length){
-                throwException('matcher "toHaveThrown" expects no arguments, found ' +
-                    arguments.length);
+                throwException('matcher "toHaveThrown" expects no arguments, found ' + arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveThrown, true, stackTraceFromError(),
-                a.value.calls.threw());
+            completeTheExpectation(assertionRunners.assertToHaveThrown, true, stackTraceFromError(),
+                getActualValue().calls.threw());
         },
         noteToNotHaveThrown: function(){
             if(arguments.length){
                 throwException('matcher "toNotHaveThrown" expects no arguments, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveThrown, true, stackTraceFromError(),
-                a.value.calls.threw());
+            completeTheExpectation(assertionRunners.assertToNotHaveThrown, true, stackTraceFromError(),
+                getActualValue().calls.threw());
         },
         noteToHaveThrownWithName: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveThrownWithName" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveThrownWithName, value, stackTraceFromError(),
-                a.value.calls.threwWithName(value));
+            completeTheExpectation(assertionRunners.assertToHaveThrownWithName, value, stackTraceFromError(),
+                getActualValue().calls.threwWithName(value));
         },
         noteToNotHaveThrownWithName: function (value){
             if(arguments.length !== 1){
                 throwException('matcher "toNotHaveThrownWithName" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveThrownWithName, value, stackTraceFromError(),
-                a.value.calls.threwWithName(value));
+            completeTheExpectation(assertionRunners.assertToNotHaveThrownWithName, value, stackTraceFromError(),
+                getActualValue().calls.threwWithName(value));
         },
         noteToHaveThrownWithMessage: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toHaveThrownWithMessage" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToHaveThrownWithMessage, value, stackTraceFromError(),
-                a.value.calls.threwWithMessage(value)
+            completeTheExpectation(assertionRunners.assertToHaveThrownWithMessage, value, stackTraceFromError(),
+                getActualValue().calls.threwWithMessage(value)
             );
         },
         noteToNotHaveThrownWithMessage: function (value){
@@ -585,10 +560,8 @@
                 throwException('matcher "toNotHaveThrownWithMessage" requires 1 argument, found ' +
                     arguments.length);
             }
-            var ti = globals.testsIterator,
-                a = ti.get().assertions[ti.get().assertions.length - 1];
-            completeTheAssertion(assertionRunners.assertToNotHaveThrownWithMessage, value, stackTraceFromError(),
-                a.value.calls.threwWithMessage(value)
+            completeTheExpectation(assertionRunners.assertToNotHaveThrownWithMessage, value, stackTraceFromError(),
+                getActualValue().calls.threwWithMessage(value)
             );
         },
         noteToEqualAssertion: function(value){
@@ -596,47 +569,47 @@
                 throwException('matcher "toEqual" requires 1 argument, found ' +
                     arguments.length);
             }
-            completeTheAssertion(assertionRunners.assertEqual, value, stackTraceFromError());
+            completeTheExpectation(assertionRunners.assertEqual, value, stackTraceFromError());
         },
         noteToNotEqualAssertion: function(value){
             if(arguments.length !== 1){
                 throwException('matcher "toNotEqual" requires 1 argument, found ' +
                     arguments.length);
             }
-            completeTheAssertion(assertionRunners.assertNotEqual, value, stackTraceFromError());
+            completeTheExpectation(assertionRunners.assertNotEqual, value, stackTraceFromError());
         },
         noteToBeTrueAssertion: function (){
             if(arguments.length){
                 throwException('matcher "toBeTrue;" expects no arguments, found ' +
                     arguments.length);
             }
-            completeTheAssertion(assertionRunners.assertIsTrue, true, stackTraceFromError());
+            completeTheExpectation(assertionRunners.assertIsTrue, true, stackTraceFromError());
         },
         noteToBeFalseAssertion: function(){
             if(arguments.length){
                 throwException('matcher "toBeFalse;" expects no arguments, found ' +
                     arguments.length);
             }
-            completeTheAssertion(assertionRunners.assertIsFalse, true, stackTraceFromError());
+            completeTheExpectation(assertionRunners.assertIsFalse, true, stackTraceFromError());
         },
         noteToBeTruthyAssertion: function(){
             if(arguments.length){
                 throwException('matcher "toBeTruthy" expects no arguments, found ' +
                     arguments.length);
             }
-            completeTheAssertion(assertionRunners.assertIsTruthy, true, stackTraceFromError());
+            completeTheExpectation(assertionRunners.assertIsTruthy, true, stackTraceFromError());
         },
         noteToNotBeTruthyAssertion: function(){
             if(arguments.length){
                 throwException('matcher "toNotBeTruthy" expects no arguments, found ' +
                     arguments.length);
             }
-            completeTheAssertion(assertionRunners.assertIsNotTruthy, true, stackTraceFromError());
+            completeTheExpectation(assertionRunners.assertIsNotTruthy, true, stackTraceFromError());
         },
     };
 }());
 
-},{"../globals.js":7,"../helpers.js":9,"../spy.js":15,"./assertionrunners.js":4}],7:[function(require,module,exports){
+},{"../globals.js":7,"../helpers.js":8,"../spy.js":15,"./assertionrunners.js":4}],7:[function(require,module,exports){
 /**
  * Preamble's application global variables go here!
  */
@@ -655,52 +628,6 @@
 }());
 
 },{}],8:[function(require,module,exports){
-(function(){
-    'use strict';
-
-    /**
-     * A group.
-     * @constructor
-     * @param {[Group]} parentGroups
-     * @param {string} path
-     * @param {string} label
-     * @param {function} callback
-     */
-    function Group(parentGroups, id, path, label, callback){
-        if(!(this instanceof Group)){
-            return new Group(parentGroups, id, path, label, callback);
-        }
-        this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
-        this.id = id;
-        this.path = path;
-        this.label = label;
-        this.callback = callback;
-        this.duration = 0;
-        this.passed = true;
-    }
-
-    /**
-     * Returns the concatenated labels from all parent groups.
-     * @param {array} parents An array of parent groups.
-     */
-    Group.prototype.pathFromParentGroupLabels = function pathFromParentGroupLabels(){
-        /* jshint validthis: true */
-        var path;
-        if(!this.parentGroups.length){
-            return this.label;
-        } else {
-            path = this.parentGroups.reduce(function(prev, current){
-                return prev === '' && current.label || prev +
-                    ' ' + current.label;
-            }, '');
-            return path + ' ' + this.label;
-        }
-    };
-
-    module.exports = Group;
-}());
-
-},{}],9:[function(require,module,exports){
 (function(){
     'use strict';
     var globals = require('./globals.js');
@@ -778,8 +705,8 @@
         return false;
     }
 
-    function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
-        globals.testsIterator.get().assertions.push({
+    function pushOntoExpectations(assertion, assertionLabel, value, expectation, stackTrace){
+        globals.testsIterator.get().expectations.push({
             assertion: assertion,
             assertionLabel: assertionLabel,
             value: value,
@@ -788,9 +715,9 @@
         });
     }
 
-    function completeTheAssertion(assertion, value, stackTrace, actual){
+    function completeTheExpectation(assertion, value, stackTrace, actual){
         var ti = globals.testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
+            a = ti.get().expectations[ti.get().expectations.length - 1];
         a.assertion = assertion;
         a.expectation = value;
         a.stackTrace = stackTrace;
@@ -801,13 +728,13 @@
         try {
             throw new Error('woops');
         } catch (error){
-            require('./globals.js').stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
+            globals.stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
                 'stacktrace' : undefined;
         }
     }
 
     function getStackTraceProperty(){
-        return require('./globals.js').stackTraceProperty;
+        return globals.stackTraceProperty;
     }
 
     function stackTraceFromError(){
@@ -901,8 +828,8 @@
     exports.compare = compare;
     exports.compareArrays = compareArrays;
     exports.compareObjects = compareObjects;
-    exports.pushOntoAssertions = pushOntoAssertions;
-    exports.completeTheAssertion = completeTheAssertion;
+    exports.pushOntoExpectations = pushOntoExpectations;
+    exports.completeTheExpectation = completeTheExpectation;
     exports.setStackTraceProperty = setStackTraceProperty;
     exports.stackTraceFromError = stackTraceFromError;
     exports.getStackTraceProperty = getStackTraceProperty;
@@ -915,7 +842,7 @@
     exports.pluralize = pluralize;
 }());
 
-},{"./globals.js":7}],10:[function(require,module,exports){
+},{"./globals.js":7}],9:[function(require,module,exports){
 (function(){
     'use strict';
 
@@ -977,7 +904,7 @@
     module.exports = Iterator;
 }());
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function(){
     'use strict';
     var pubsub = require('./pubsub.js');
@@ -988,7 +915,7 @@
     };
 }());
 
-},{"./pubsub.js":12}],12:[function(require,module,exports){
+},{"./pubsub.js":11}],11:[function(require,module,exports){
 (function(){
     'use strict';
 
@@ -1096,21 +1023,17 @@
     }());
 }());
 
-},{}],13:[function(require,module,exports){
-(function(){
-    /**
+},{}],12:[function(require,module,exports){
+(function(){ /**
      * Process for building the queue.
-     * @param {array} - queue, filled with Groups and Tests.
+     * @param {array} - queue, filled with Suites and Specs.
      * @param {function} - trhowException, a function called to throw an exception.
      */
     'use strict';
-    var
-        // queue = require('./globals.js').queue,
-        // config = require('./globals.js').config,
-        helpers = require('./helpers.js'),
-        Group = require('./group.js'),
-        Test = require('./test.js'),
-        groupStack = [],
+    var helpers = require('./helpers.js'),
+        Suite = require('./suite.js'),
+        Spec = require('./spec.js'),
+        suiteStack = [],
         uniqueId;
 
     uniqueId = (function(){
@@ -1120,9 +1043,9 @@
         };
     }());
 
-    groupStack.getPath = function(){
-        var result = this.reduce(function(prevValue, group){
-            return prevValue + '/' + group.id;
+    suiteStack.getPath = function(){
+        var result = this.reduce(function(prevValue, suite){
+            return prevValue + '/' + suite.id;
         }, '');
         return result;
     };
@@ -1131,131 +1054,129 @@
      * Returns true if there is no run time filter
      * or if obj matches the run time filter.
      * Returns false otherwise.
-     * @param {object} obj, either a Test or a Group.
+     * @param {object} obj, either a Spec or a Suite.
      */
     function filter(obj){
         var runtimeFilter = require('./globals.js').runtimeFilter,
             s,
             path = '';
-        if(!runtimeFilter.group){
+        if(!runtimeFilter.suite){
             return true;
         } else {
-            if(obj instanceof(Group)){
-                path = obj.pathFromParentGroupLabels();
-                s = path.substr(0, runtimeFilter.group.length);
-                return s === runtimeFilter.group;
+            if(obj instanceof(Suite)){
+                path = obj.pathFromAncestorSuiteLabels();
+                s = path.substr(0, runtimeFilter.suite.length);
+                return s === runtimeFilter.suite;
             } else {
-                path = obj.parentGroup.pathFromParentGroupLabels();
-                s = path.substr(0, runtimeFilter.group.length);
-                return s === runtimeFilter.group && runtimeFilter.test === '' ||
-                    s === runtimeFilter.group && runtimeFilter.test === obj.label;
+                path = obj.parentSuite.pathFromAncestorSuiteLabels();
+                s = path.substr(0, runtimeFilter.suite.length);
+                return s === runtimeFilter.suite && runtimeFilter.spec === '' ||
+                    s === runtimeFilter.suite && runtimeFilter.spec === obj.label;
             }
         }
     }
 
     /**
-     * Registers a group.
-     * @param {string} label, describes the group/suite.
-     * @param {function} callback,  called to run befores, test and afters.
+     * Registers a suite.
+     * @param {string} label, describes the suite.
+     * @param {function} callback,  called to run befores, spec and afters.
      */
-    exports.group = function(label, callback){
+    exports.suite = function(label, callback){
         var queue = require('./globals.js').queue,
-            grp,
+            suite,
             id,
             path;
         if(arguments.length !== 2){
             helpers.throwException('requires 2 arguments, found ' + arguments.length);
         }
         id = uniqueId();
-        path = groupStack.getPath() + '/' + id;
-        grp = new Group(groupStack, id, path, label, callback);
-        grp.bypass = !filter(grp);
-        queue.push(grp);
-        groupStack.push(grp);
-        grp.callback();
-        groupStack.pop();
+        path = suiteStack.getPath() + '/' + id;
+        suite = new Suite(suiteStack, id, path, label, callback);
+        suite.bypass = !filter(suite);
+        queue.push(suite);
+        suiteStack.push(suite);
+        suite.callback();
+        suiteStack.pop();
     };
 
     /**
-     * Registers a before each test process.
-     * @param {function} callback,  called before running a test.
+     * Registers a before each spec process.
+     * @param {function} callback,  called before running a spec.
      */
-    exports.beforeEachTest = function(callback){
-        var parentGroup = groupStack[groupStack.length - 1];
-        parentGroup.beforeEachTest = callback;
+    exports.beforeEachSpec = function(callback){
+        var parentSuite = suiteStack[suiteStack.length - 1];
+        parentSuite.before = callback;
     };
 
-    exports.afterEachTest = function(callback){
-        var parentGroup = groupStack[groupStack.length - 1];
-        parentGroup.afterEachTest = callback;
+    exports.afterEachSpec = function(callback){
+        var parentSuite = suiteStack[suiteStack.length - 1];
+        parentSuite.after = callback;
     };
 
     /**
-     * Registers a test.
-     * @param {string} label, describes the test/spec.
-     * @param {function} callback, called to run the test.
+     * Registers a spec.
+     * @param {string} label, describes the spec.
+     * @param {function} callback, called to run the spec.
      * @param {integer} timeoutInterval, optional, the amount of time
-     * the test is allowed to run before timing out the test.
+     * the spec is allowed to run before timing out.
      */
-    exports.test = function(label, callback, timeoutInterval){
-        // var queue = require('./globals.js').queue,
-        //     config = require('./globals.js').config,
+    exports.spec = function(label, callback, timeoutInterval){
         var globals = require('./globals.js'),
-            tst,
-            parentGroup,
+            spec,
+            parentSuite,
             id,
             path,
-            tl,
+            toi,
             cb,
             stackTrace;
         if(arguments.length < 2){
             helpers.throwException('requires at least 2 arguments, found ' + arguments.length);
         }
-        tl = arguments.length === 3 && timeoutInterval || globals.config.timeoutInterval;
+        toi = arguments.length === 3 && timeoutInterval || globals.config.timeoutInterval;
         cb = arguments.length === 3 && callback || arguments[1];
-        parentGroup = groupStack[groupStack.length - 1];
+        parentSuite = suiteStack[suiteStack.length - 1];
         id = uniqueId();
-        path = groupStack.getPath() + '/' + id;
+        path = suiteStack.getPath() + '/' + id;
         stackTrace = helpers.stackTraceFromError();
-        tst = new Test(groupStack, id, path, label, stackTrace, tl, cb, globals.config.windowGlobals);
-        tst.bypass = !filter(tst);
-        globals.queue.push(tst);
+        spec = new Spec(suiteStack, id, path, label, stackTrace, toi, cb, globals.config.windowGlobals);
+        spec.bypass = !filter(spec);
+        globals.queue.push(spec);
     };
 }());
 
-},{"./globals.js":7,"./group.js":8,"./helpers.js":9,"./test.js":16}],14:[function(require,module,exports){
+},{"./globals.js":7,"./helpers.js":8,"./spec.js":14,"./suite.js":16}],13:[function(require,module,exports){
 /**
- * Internal event handling.
+ * runner event handling.
  */
 (function(){
     'use strict';
-    module.exports.init = function(){
+    exports.registerEventHandlers = function(){
         var on = require('./on.js'),
             emit = require('./emit.js'),
             globals = require('./globals.js'),
             Iterator = require('./iterator.js'),
-            Group = require('./group.js'),
-            Test = require('./test.js'),
-            tests;
+            Suite = require('./suite.js'),
+            Spec = require('./spec.js'),
+            specs;
 
         on('start', function(){
-            tests = globals.queue.filter(function(item){
-                return item instanceof Test;
+            specs = globals.queue.filter(function(item){
+                return item instanceof Spec;
             });
-            tests.result = true;
-            tests.totTestsFailed = 0;
-            if(tests.length){
+            specs.result = true;
+            specs.totTestsFailed = 0;
+            if(specs.length){
                 emit('runTests', function(){
                     emit('end');
                 });
             } else {
-                //TODO(Jeff): perhaps this should display a message that there are no tests to run.
+                //TODO(Jeff): perhaps this should display a message that there are no specs to run.
                 emit('end');
             }
         });
 
         on('runTests', function(topic, callback){
-            globals.testsIterator = new Iterator(tests);
+            globals.testsIterator = new Iterator(specs);
 
             function runTest(test, callback){
                 if(test.bypass){
@@ -1295,16 +1216,16 @@
 
         on('testingShortCircuited', function(){
             //Set the "bypass" property for all groups and
-            //tests that arent related to this test to true.
+            //specs that arent related to this test to true.
             var queueIterator, queueObj;
             queueIterator = new Iterator(globals.queue);
             while (queueIterator.hasNext()){
                 queueObj = queueIterator.getNext();
-                //Groups that haven't run will have their passed property set to true.
-                if(queueObj instanceof Group && queueObj.passed){
+                //Suites that haven't run will have their passed property set to true.
+                if(queueObj instanceof Suite && queueObj.passed){
                     queueObj.bypass = true;
                     //Tests that havent run do not have a totFailed property.
-                } else if(queueObj instanceof Test && !queueObj.hasOwnProperty(
+                } else if(queueObj instanceof Spec && !queueObj.hasOwnProperty(
                         'totFailed')){
                     queueObj.bypass = true;
                 }
@@ -1315,29 +1236,265 @@
         });
 
         on('end', function(){
-            //Record how many tests were bypassed.
-            tests.totBypassed = 0;
-            if(globals.runtimeFilter.group || globals.config.testingShortCircuited){
-                tests.totBypassed = tests.reduce(function(prevValue, t){
+            //Record how many specs were bypassed.
+            specs.totBypassed = 0;
+            if(globals.runtimeFilter.suite || globals.config.testingShortCircuited){
+                specs.totBypassed = specs.reduce(function(prevValue, t){
                     return t.bypass ? prevValue + 1 : prevValue;
                 }, 0);
             }
-            //Record how many tests failed.
-            tests.totTestsFailed = tests.reduce(function(prevValue, t){
+            //Record how many specs failed.
+            specs.totTestsFailed = specs.reduce(function(prevValue, t){
                 return t.timedOut || t.totFailed ? prevValue +
                     1 : prevValue;
             }, 0);
-            tests.result = tests.totTestsFailed === 0;
+            specs.result = specs.totTestsFailed === 0;
             globals.queue.end = Date.now();
-            tests.duration = globals.queue.end - globals.queue.start;
-            globals.reporter.coverage(tests);
-            globals.reporter.summary(tests);
+            specs.duration = globals.queue.end - globals.queue.start;
+            globals.reporter.coverage(specs);
+            globals.reporter.summary(specs);
             globals.reporter.details(globals.queue);
         });
     };
 }());
 
-},{"./emit.js":2,"./globals.js":7,"./group.js":8,"./iterator.js":10,"./on.js":11,"./test.js":16}],15:[function(require,module,exports){
+},{"./emit.js":2,"./globals.js":7,"./iterator.js":9,"./on.js":10,"./spec.js":14,"./suite.js":16}],14:[function(require,module,exports){
+(function(){
+    'use strict';
+    var Iterator = require('./iterator.js');
+
+    /**
+     * A Spec.
+     * @constructor
+     * @param {[Suites] ancestorSuites
+     * @param {string} path
+     * @param {string} label
+     * @param {integer} timeoutInterval
+     * @param {function} callback
+     */
+    function Spec(ancestorSuites, id, path, label, stackTrace,
+        timeoutInterval, callback, bWindowGlobals){
+        if(!(this instanceof Spec)){
+            return new Spec(ancestorSuites, id, path, label, stackTrace,
+                timeoutInterval, callback);
+        }
+        this.ancestorSuites = ancestorSuites.slice(0); //IMPORTANT: make a "copy" of the array
+        this.parentSuite = ancestorSuites[ancestorSuites.length - 1];
+        this.id = id;
+        this.path = path;
+        this.label = label;
+        this.stackTrace = stackTrace;
+        this.timeoutInterval = timeoutInterval;
+        this.callback = callback;
+        this.expectations = []; //contains the spec's expectations
+        this.duration = 0;
+        this.befores = []; //the befores to call prior to running this spec
+        this.afters = []; //the afters to call prior to running this spec
+        this.context = {}; //the context used to call befores and afters
+        this.bWindowGlobals = bWindowGlobals;
+
+        //gather befores and afters for easy traversal
+        this.ancestorSuites.forEach(function(g){
+            if(g.before){
+                //bind each before callback to this.context
+                this.befores.push(g.before.bind(this.context));
+            }
+            if(g.after){
+                //bind each after callback to this.context
+                this.afters.push(g.after.bind(this.context));
+            }
+        }, this);
+    }
+
+    /**
+     * Sets all parent suite' passed property to false.
+     */
+    Spec.prototype.markAncestorSuitesFailed = function(){
+        this.ancestorSuites.forEach(function(pg){
+            pg.passed = false;
+        });
+    };
+
+    /**
+     * Spec runner.
+     * @param {function} callback e.g. fn(err, value)
+     */
+    Spec.prototype.run = function(callback){
+        var beforesIterator = new Iterator(this.befores),
+            aftersIterator = new Iterator(this.afters),
+            self = this,
+            bWindowGlobals = this.bWindowGlobals;
+
+        //run a before
+        function runBefore(callback){
+            var before = beforesIterator.getNext();
+            if(before.length){
+                //call it asynchronously.
+                before(function(){
+                    callback();
+                });
+            } else {
+                setTimeout(function(){
+                    before();
+                    callback();
+                }, 0);
+            }
+        }
+
+        //run befores
+        function runBefores(callback){
+            if(beforesIterator.hasNext()){
+                runBefore(function(){
+                    runBefores(callback);
+                });
+            } else {
+                callback();
+            }
+        }
+
+        //run the spec
+        function runSpec(callback){
+            if(bWindowGlobals){
+                if(self.callback.length){
+                    //Pass done callback as 1st param if configured to use window globals.
+                    self.callback.call(self.context, function(){
+                        if(arguments.length && typeof(
+                                arguments[0] === 'function')){
+                            arguments[0].call(self.context);
+                        }
+                        self.runExpectations();
+                        callback();
+                    });
+                } else {
+                    self.callback.call(self.context);
+                    self.runExpectations();
+                    callback();
+                }
+            } else {
+                if(self.callback.length === 1){
+                    //Pass done callback as 1st param if configured to use window globals.
+                    self.callback.call(self.context, function(){
+                        if(arguments.length && typeof(arguments[0] === 'function')){
+                            arguments[0].call(self.context);
+                        }
+                        self.runExpectations();
+                        callback();
+                    });
+                } else {
+                    self.callback.call(self.context);
+                    self.runExpectations();
+                    callback();
+                }
+            }
+        }
+
+        //run an after
+        function runAfter(callback){
+            var after = aftersIterator.getNext();
+            if(after.length){
+                //call it asynchronously.
+                after(function(){
+                    callback();
+                });
+            } else {
+                setTimeout(function(){
+                    after();
+                    callback();
+                }, 0);
+            }
+        }
+
+        //run the afters
+        function runAfters(callback){
+            if(aftersIterator.hasNext()){
+                runAfter(function(){
+                    runAfters(callback);
+                });
+            } else {
+                callback();
+            }
+        }
+
+        (function(spec){
+            //Set a timer for the spec and fail it if it isn't completed in time.
+            //Note to self: Since this can fire after the spec it is timing has
+            //completed it is possible that "self" no longer refers to the original
+            //spec. To insure that when this fires it always refers to the spec
+            //it was timing, the spec is captured via closure uaing the module
+            //pattern and passing "self" as an argument.
+            setTimeout(function(){
+                if(!spec.completed){
+                    //mark spec failed
+                    spec.timedOut = true;
+                }
+            }, spec.timeoutInterval);
+
+            //Run the before callbacks, spec callback and after callbacks.
+            //Note to self: Since this can fire after the spec has already timed
+            //out and failed, it is possible that "self" no longer refers to the
+            //original spec. To insure that when this fires it always refers to
+            //the spec it was running, the spec is captured via closure uaing the
+            //module pattern and passing "self" as an argument.
+            setTimeout(function(){
+                var start = Date.now();
+                var d;
+                runBefores(function(){
+                    runSpec(function(){
+                        runAfters(function(){
+                            if(spec.timedOut){
+                                spec.totFailed = -1;
+                                spec.markAncestorSuitesFailed();
+                            } else {
+                                spec.completed = true;
+                                d = Date .now() - start;
+                                spec.duration = d > 0 && d || 1;
+                                if(spec.totFailed){
+                                    spec.markAncestorSuitesFailed();
+                                }
+                            }
+                            callback();
+                        });
+                    });
+                });
+            }, 0);
+        }(self));
+    };
+
+    /**
+     * Runs expectations.
+     */
+    Spec.prototype.runExpectations = function(){
+        var i,
+            len,
+            item,
+            result;
+        this.totFailed = 0;
+        for(i = 0, len = this.expectations.length; i < len; i++){
+            item = this.expectations[i];
+            result = item.assertion(item.value, item.expectation);
+            item.result = result.result;
+            this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
+            item.explain = result.explain;
+        }
+    };
+
+    /**
+     * Returns an array of paths.
+     */
+    Spec.prototype.getPaths = function(){
+        var paths,
+            ancestors;
+        paths = this.path.split('/');
+        ancestors = paths.filter(function(v, i, a){
+            return i !== 0 && i !== a.length - 1;
+        });
+        return ancestors;
+    };
+
+    module.exports = Spec;
+}());
+
+},{"./iterator.js":9}],15:[function(require,module,exports){
 (function(){
     'use strict';
     var argsToArray = require('./helpers.js').argsToArray,
@@ -1710,248 +1867,53 @@
     module.exports = spyOn;
 }());
 
-},{"./expectations/assertions.js":5,"./expectations/notations.js":6,"./helpers.js":9}],16:[function(require,module,exports){
+},{"./expectations/assertions.js":5,"./expectations/notations.js":6,"./helpers.js":8}],16:[function(require,module,exports){
 (function(){
     'use strict';
-    var Iterator = require('./iterator.js'),
-        emit = require('./emit.js');
 
     /**
-     * A test.
+     * A group.
      * @constructor
-     * @param {[Group] parentGroups
+     * @param {[Suite]} ancestorSuites
      * @param {string} path
      * @param {string} label
-     * @param {integer} timeoutInterval
      * @param {function} callback
      */
-    function Test(parentGroups, id, path, label, stackTrace,
-        timeoutInterval, callback, bWindowGlobals){
-        if(!(this instanceof Test)){
-            return new Test(parentGroups, id, path, label, stackTrace,
-                timeoutInterval, callback);
+    function Suite(ancestorSuites, id, path, label, callback){
+        if(!(this instanceof Suite)){
+            return new Suite(ancestorSuites, id, path, label, callback);
         }
-        this.parentGroups = parentGroups.slice(0); //IMPORTANT: make a "copy" of the array
-        this.parentGroup = parentGroups[parentGroups.length - 1];
+        this.ancestorSuites = ancestorSuites.slice(0); //IMPORTANT: make a "copy" of the array
         this.id = id;
         this.path = path;
         this.label = label;
-        this.stackTrace = stackTrace;
-        this.timeoutInterval = timeoutInterval;
         this.callback = callback;
-        this.assertions = []; //contains assertions
         this.duration = 0;
-        this.befores = []; //the befores to call prior to running this test
-        this.afters = []; //the afters to call prior to running this test
-        this.context = {}; //the context used to call befores and afters
-        this.bWindowGlobals = bWindowGlobals;
-
-        //gather befores and afters for easy traversal
-        this.parentGroups.forEach(function(g){
-            if(g.beforeEachTest){
-                //bind each before callback to this.context
-                this.befores.push(g.beforeEachTest.bind(this.context));
-            }
-            if(g.afterEachTest){
-                //bind each after callback to this.context
-                this.afters.push(g.afterEachTest.bind(this.context));
-            }
-        }, this);
+        this.passed = true;
     }
 
     /**
-     * Sets all parent groups' passed property to false.
+     * Returns the concatenated labels from all parent groups.
+     * @param {array} parents An array of parent groups.
      */
-    Test.prototype.markParentGroupsFailed = function(){
-        this.parentGroups.forEach(function(pg){
-            pg.passed = false;
-        });
+    Suite.prototype.pathFromAncestorSuiteLabels = function pathFromAncestorSuiteLabels(){
+        /* jshint validthis: true */
+        var path;
+        if(!this.ancestorSuites.length){
+            return this.label;
+        } else {
+            path = this.ancestorSuites.reduce(function(prev, current){
+                return prev === '' && current.label || prev +
+                    ' ' + current.label;
+            }, '');
+            return path + ' ' + this.label;
+        }
     };
 
-    /**
-     * Test runner.
-     * @param {function} callback e.g. fn(err, value)
-     */
-    Test.prototype.run = function(callback){
-        var beforesIterator = new Iterator(this.befores),
-            aftersIterator = new Iterator(this.afters),
-            self = this,
-            bWindowGlobals = this.bWindowGlobals;
-
-        //run a before
-        function runBefore(callback){
-            var before = beforesIterator.getNext();
-            if(before.length){
-                //call it asynchronously.
-                before(function(){
-                    callback();
-                });
-            } else {
-                setTimeout(function(){
-                    before();
-                    callback();
-                }, 0);
-            }
-        }
-
-        //run befores
-        function runBefores(callback){
-            if(beforesIterator.hasNext()){
-                runBefore(function(){
-                    runBefores(callback);
-                });
-            } else {
-                callback();
-            }
-        }
-
-        //run the test
-        function runTest(callback){
-            if(bWindowGlobals){
-                if(self.callback.length){
-                    //Pass done callback as 1st param if configured to use window globals.
-                    self.callback.call(self.context, function(){
-                        if(arguments.length && typeof(
-                                arguments[0] === 'function')){
-                            arguments[0].call(self.context);
-                        }
-                        self.runAssertions();
-                        callback();
-                    });
-                } else {
-                    self.callback.call(self.context);
-                    self.runAssertions();
-                    callback();
-                }
-            } else {
-                if(self.callback.length === 1){
-                    //Pass done callback as 1st param if configured to use window globals.
-                    self.callback.call(self.context, function(){
-                        if(arguments.length && typeof(arguments[0] === 'function')){
-                            arguments[0].call(self.context);
-                        }
-                        self.runAssertions();
-                        callback();
-                    });
-                } else {
-                    self.callback.call(self.context);
-                    self.runAssertions();
-                    callback();
-                }
-            }
-        }
-
-        //run an after
-        function runAfter(callback){
-            var after = aftersIterator.getNext();
-            if(after.length){
-                //call it asynchronously.
-                after(function(){
-                    callback();
-                });
-            } else {
-                setTimeout(function(){
-                    after();
-                    callback();
-                }, 0);
-            }
-        }
-
-        //run the afters
-        function runAfters(callback){
-            if(aftersIterator.hasNext()){
-                runAfter(function(){
-                    runAfters(callback);
-                });
-            } else {
-                callback();
-            }
-        }
-
-        (function(test){
-            //Set a timer for the test and fail it if it isn't completed in time.
-            //Note to self: Since this can fire after the test it is timing has
-            //completed it is possible that "self" no longer refers to the original
-            //test. To insure that when this fires it always refers to the test
-            //it was timing, the test is captured via closure uaing the module
-            //pattern and passing "self" as an argument.
-            setTimeout(function(){
-                if(!test.completed){
-                    //mark test failed
-                    test.timedOut = true;
-                    //test.totFailed = -1;
-                    //test.parentGroup.passed = false;
-                    //callback();
-                }
-            }, test.timeoutInterval);
-
-            //Run the before callbacks, test callback and after callbacks.
-            //Note to self: Since this can fire after the test has already timed
-            //out and failed, it is possible that "self" no longer refers to the
-            //original test. To insure that when this fires it always refers to
-            //the test it was running, the test is captured via closure uaing the
-            //module pattern and passing "self" as an argument.
-            setTimeout(function(){
-                var start = Date.now();
-                var d;
-                runBefores(function(){
-                    runTest(function(){
-                        runAfters(function(){
-                            if(test.timedOut){
-                                test.totFailed = -1;
-                                test.markParentGroupsFailed();
-                            } else {
-                                test.completed = true;
-                                d = Date .now() - start;
-                                test .duration = d > 0 && d || 1;
-                                if(test .totFailed){
-                                    test.markParentGroupsFailed();
-                                }
-                            }
-                            callback();
-                        });
-                    });
-                });
-            }, 0);
-        }(self));
-    };
-
-    /**
-     * Runs assertions.
-     */
-    Test.prototype.runAssertions = function(){
-        var i,
-            len,
-            item,
-            result;
-        this.totFailed = 0;
-        for(i = 0, len = this.assertions.length; i < len; i++){
-            item = this.assertions[i];
-            result = item.assertion(item.value, item.expectation);
-            item.result = result.result;
-            this.totFailed = item.result ? this.totFailed : this.totFailed += 1;
-            item.explain = result.explain;
-        }
-        emit('runAfters');
-    };
-
-    /**
-     * Returns an array of paths.
-     */
-    Test.prototype.getPaths = function(){
-        var paths,
-            ancestors;
-        paths = this.path.split('/');
-        ancestors = paths.filter(function(v, i, a){
-            return i !== 0 && i !== a.length - 1;
-        });
-        return ancestors;
-    };
-
-    module.exports = Test;
+    module.exports = Suite;
 }());
 
-},{"./emit.js":2,"./iterator.js":10}],17:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function(){
     'use strict';
     module.exports = 'v3.1.0';
@@ -1980,9 +1942,9 @@
      */
 
     /**
-     * Initialize internal events
+     * Call runner's registerEventHandlers.
      */
-    runner.init();
+    runner.registerEventHandlers();
 
     /**
      * Configure the runtime environment.
@@ -2020,13 +1982,13 @@
     }
 }());
 
-},{"./core/configure.js":1,"./core/emit.js":2,"./core/globals.js":7,"./core/helpers.js":9,"./core/runner.js":14}],19:[function(require,module,exports){
+},{"./core/configure.js":1,"./core/emit.js":2,"./core/globals.js":7,"./core/helpers.js":8,"./core/runner.js":13}],19:[function(require,module,exports){
 (function(){
     'use strict';
     var version = require('../core/version.js'),
         globals = require('../core/globals.js'),
         helpers = require('../core/helpers.js'),
-        Group = require('../core/group.js');
+        Suite = require('../core/suite.js');
 
     /**
      * Adds an event handle to a DOM element for an event in a cross-browser compliant manner.
@@ -2210,8 +2172,8 @@
         if(globals.config.testingShortCircuited){
             show += (tests.length - tests.totBypassed) && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
-        } else if(globals.runtimeFilter.group){
-            show += globals.runtimeFilter.group && ' of {{tbpt}}';
+        } else if(globals.runtimeFilter.suite){
+            show += globals.runtimeFilter.suite && ' of {{tbpt}}';
             show = show.replace(/{{tbpt}}/, tests.length);
         }
         show += helpers.pluralize(' spec', tests.length);
@@ -2268,31 +2230,31 @@
             groupContainerMarkup =
                 '<ul class="group-container" data-passed="{{passed}}" id="{{id}}"></ul>',
             groupAnchorMarkup =
-                '<li><a class="group{{passed}}" href="?group={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
+                '<li><a class="group{{passed}}" href="?suite={{grouphref}}" title="Click here to filter by this group.">{{label}}</a></li>',
             testContainerMarkup =
                 '<ul class="tests-container" data-passed="{{passed}}"></ul>',
             testAnchorMarkup =
-                '<li><a class="{{passed}}" href="?group={{grouphref}}&test={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
+                '<li><a class="{{passed}}" href="?suite={{grouphref}}&spec={{testhref}}" title="Click here to filter by this test.">{{label}}</a></li>',
             testFailureMarkup =
                 '<ul class="stacktrace-container failed bold"><li class="failed bold">Error: "{{explain}}" and failed at</li><li class="failed bold">{{stacktrace}}</li></ul>',
             html = '',
             failed = '',
-            parentGroup,
+            parentSuite,
             el;
 
         queue.forEach(function(item){
-            if(item instanceof(Group)){
+            if(item instanceof(Suite)){
                 //Add groups to the DOM.
                 html = '' + groupContainerMarkup.replace(/{{passed}}/, item.passed).replace(/{{id}}/, item.path);
                 html = html.slice(0, -5) + groupAnchorMarkup.replace(/{{passed}}/,
                     item.bypass ? ' bypassed' : item.passed ? '' : ' failed').replace('{{grouphref}}',
-                    encodeURI(item.pathFromParentGroupLabels())).replace(/{{label}}/, item.label) + html.slice(- 5);
+                    encodeURI(item.pathFromAncestorSuiteLabels())).replace(/{{label}}/, item.label) + html.slice(- 5);
                 html = html;
-                if(!item.parentGroups.length){
+                if(!item.ancestorSuites.length){
                     rc.insertAdjacentHTML('beforeend', html);
                 } else {
-                    parentGroup = item.parentGroups[item.parentGroups.length - 1];
-                    el = document.getElementById(parentGroup.path);
+                    parentSuite = item.ancestorSuites[item.ancestorSuites.length - 1];
+                    el = document.getElementById(parentSuite.path);
                     el.insertAdjacentHTML('beforeend', html);
                 }
             } else {
@@ -2300,11 +2262,11 @@
                 html = '' + testContainerMarkup.replace(/{{passed}}/, item.totFailed ? 'false' : 'true');
                 html = html.slice(0, -5) + testAnchorMarkup.replace(/{{passed}}/, item.bypass ?
                     'test-bypassed' : item.totFailed ? 'failed' : 'passed').replace('{{grouphref}}',
-                    encodeURI(item.parentGroup.pathFromParentGroupLabels())).replace('{{testhref}}',
+                    encodeURI(item.parentSuite.pathFromAncestorSuiteLabels())).replace('{{testhref}}',
                     encodeURI(item.label)).replace(/{{label}}/, item.label) + html.slice(-5);
-                //Show failed assertions and their stacks.
+                //Show failed expectations and their stacks.
                 if(item.totFailed > 0){
-                    item.assertions.forEach(function(assertion){
+                    item.expectations.forEach(function(assertion){
                         if(!assertion.result){
                             failed = testFailureMarkup.replace(/{{explain}}/,
                                 assertion.explain).replace(/{{stacktrace}}/,
@@ -2318,7 +2280,7 @@
                         helpers.stackTrace(item.stackTrace));
                     html = html.slice(0, -5) + failed + html.slice(-5);
                 }
-                el = document.getElementById(item.parentGroup.path);
+                el = document.getElementById(item.parentSuite.path);
                 el.insertAdjacentHTML('beforeend', html);
             }
         });
@@ -2332,4 +2294,4 @@
     module.exports = HtmlReporter;
 }());
 
-},{"../core/globals.js":7,"../core/group.js":8,"../core/helpers.js":9,"../core/on.js":11,"../core/version.js":17}]},{},[18]);
+},{"../core/globals.js":7,"../core/helpers.js":8,"../core/on.js":10,"../core/suite.js":16,"../core/version.js":17}]},{},[18]);
