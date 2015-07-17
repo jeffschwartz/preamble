@@ -98,13 +98,13 @@
         try {
             throw new Error('woops');
         } catch (error){
-            require('./globals.js').stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
+            globals.stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
                 'stacktrace' : undefined;
         }
     }
 
     function getStackTraceProperty(){
-        return require('./globals.js').stackTraceProperty;
+        return globals.stackTraceProperty;
     }
 
     function stackTraceFromError(){
