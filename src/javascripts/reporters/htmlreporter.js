@@ -19,8 +19,10 @@
     /**
      * HtmlReporter.
      * @constructor
+     * @param options object A hash of options.
+     * @param options.version string Preamble's version.
      */
-    function HtmlReporter(){
+    function HtmlReporter(options){
         var on = require('../core/on.js');
 
         this.hptClickHandler = this.hptClickHandler.bind(this);
@@ -306,5 +308,6 @@
         domAddEventHandler(document.getElementById('preamble-test-container'), 'click', this.runClickHandler);
     };
 
-    module.exports = HtmlReporter;
+    // module.exports = HtmlReporter;
+    window.Preamble.Reporter = HtmlReporter;
 }());
