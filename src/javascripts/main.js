@@ -20,9 +20,9 @@
      */
 
     /**
-     * Initialize internal events
+     * Call runner's registerEventHandlers.
      */
-    runner.init();
+    runner.registerEventHandlers();
 
     /**
      * Configure the runtime environment.

@@ -41,7 +41,7 @@
                 timeoutInterval: 50,
                 name: 'Suite',
                 uiTestContainerId: 'ui-test-container',
-                hidePassedTests: false,
+                hidePassedTests: false, //TODO(J.S.): rename this to hidePassed
                 shortCircuit: false,
                 testingShortCircuited: false,
                 autoStart: true
@@ -65,8 +65,8 @@
         globals.config = configArg ? helpers.merge(globals.config, configArg) : globals.config;
         //Capture run-time filters, if any.
         globals.runtimeFilter = {
-            group: helpers.loadPageVar('group'),
-            test: helpers.loadPageVar('test')
+            suite: helpers.loadPageVar('suite'),
+            spec: helpers.loadPageVar('spec')
         };
         //Capture exception's stack trace property.
         helpers.setStackTraceProperty();
@@ -76,10 +76,10 @@
         //not be used and the one Preamble name space will be used instead.
         if(globals.config.windowGlobals){
             window.configure = configure;
-            window.describe = queueBuilder.group;
-            window.beforeEach = queueBuilder.beforeEachTest;
-            window.afterEach = queueBuilder.afterEachTest;
-            window.it = queueBuilder.test;
+            window.describe = queueBuilder.suite;
+            window.beforeEach = queueBuilder.beforeEachSpec;
+            window.afterEach = queueBuilder.afterEachSpec;
+            window.it = queueBuilder.spec;
             window.expect = notations.noteExpectation;
             window.getUiTestContainerElement = helpers.getUiTestContainerElement;
             window.getUiTestContainerElementId = helpers.getUiTestContainerElementId;
@@ -87,10 +87,10 @@
         } else {
             window.Preamble = {
                 configure: configure,
-                describe: queueBuilder.group,
-                beforeEach: queueBuilder.beforeEachTest,
-                afterEach: queueBuilder.afterEachTest,
-                it: queueBuilder.test,
+                describe: queueBuilder.suite,
+                beforeEach: queueBuilder.beforeEachSpec,
+                afterEach: queueBuilder.afterEachSpec,
+                it: queueBuilder.spec,
                 expect: notations.noteExpectation,
                 getUiTestContainerElement: helpers.getUiTestContainerElement,
                 getUiTestContainerElementId: helpers.getUiTestContainerElementId,

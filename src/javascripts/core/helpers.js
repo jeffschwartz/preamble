@@ -75,8 +75,8 @@
         return false;
     }
 
-    function pushOntoAssertions(assertion, assertionLabel, value, expectation, stackTrace){
-        globals.testsIterator.get().assertions.push({
+    function pushOntoExpectations(assertion, assertionLabel, value, expectation, stackTrace){
+        globals.testsIterator.get().expectations.push({
             assertion: assertion,
             assertionLabel: assertionLabel,
             value: value,
@@ -85,9 +85,9 @@
         });
     }
 
-    function completeTheAssertion(assertion, value, stackTrace, actual){
+    function completeTheExpectation(assertion, value, stackTrace, actual){
         var ti = globals.testsIterator,
-            a = ti.get().assertions[ti.get().assertions.length - 1];
+            a = ti.get().expectations[ti.get().expectations.length - 1];
         a.assertion = assertion;
         a.expectation = value;
         a.stackTrace = stackTrace;
@@ -98,13 +98,13 @@
         try {
             throw new Error('woops');
         } catch (error){
-            require('./globals.js').stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
+            globals.stackTraceProperty = error.stack ? 'stack' : error.stacktrace ?
                 'stacktrace' : undefined;
         }
     }
 
     function getStackTraceProperty(){
-        return require('./globals.js').stackTraceProperty;
+        return globals.stackTraceProperty;
     }
 
     function stackTraceFromError(){
@@ -198,8 +198,8 @@
     exports.compare = compare;
     exports.compareArrays = compareArrays;
     exports.compareObjects = compareObjects;
-    exports.pushOntoAssertions = pushOntoAssertions;
-    exports.completeTheAssertion = completeTheAssertion;
+    exports.pushOntoExpectations = pushOntoExpectations;
+    exports.completeTheExpectation = completeTheExpectation;
     exports.setStackTraceProperty = setStackTraceProperty;
     exports.stackTraceFromError = stackTraceFromError;
     exports.getStackTraceProperty = getStackTraceProperty;
